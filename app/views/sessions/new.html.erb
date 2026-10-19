@@ -1,0 +1,36 @@
+<div class="mx-auto mt-16 max-w-sm">
+  <h1 class="text-2xl font-semibold mb-6">Sign in</h1>
+
+  <% if signed_in? %>
+    <% if flash[:notice] %>
+      <p class="mb-4 rounded bg-green-100 text-green-800 px-3 py-2 text-sm"><%= flash[:notice] %></p>
+    <% end %>
+    <p class="mb-4 text-sm" data-role="signed-in">
+      Signed in as <%= current_user.email %> — <%= current_church.name %>.
+    </p>
+    <%= button_to "Sign out", logout_path, method: :delete, class: "text-sm underline" %>
+  <% else %>
+    <% if flash[:alert] %>
+      <p class="mb-4 rounded bg-red-100 text-red-800 px-3 py-2 text-sm"><%= flash[:alert] %></p>
+    <% end %>
+    <% if flash[:notice] %>
+      <p class="mb-4 rounded bg-green-100 text-green-800 px-3 py-2 text-sm"><%= flash[:notice] %></p>
+    <% end %>
+
+    <%= form_with url: login_path, method: :post do |f| %>
+      <div class="mb-4">
+        <%= f.label :church_id, "Church", class: "block text-sm mb-1" %>
+        <%= f.collection_select :church_id, @churches, :id, :name, {}, class: "w-full border rounded px-2 py-1" %>
+      </div>
+      <div class="mb-4">
+        <%= f.label :email, class: "block text-sm mb-1" %>
+        <%= f.email_field :email, autocomplete: "email", class: "w-full border rounded px-2 py-1" %>
+      </div>
+      <div class="mb-6">
+        <%= f.label :password, class: "block text-sm mb-1" %>
+        <%= f.password_field :password, autocomplete: "current-password", class: "w-full border rounded px-2 py-1" %>
+      </div>
+      <%= f.submit "Sign in", class: "w-full rounded bg-slate-800 text-white px-3 py-2" %>
+    <% end %>
+  <% end %>
+</div>
