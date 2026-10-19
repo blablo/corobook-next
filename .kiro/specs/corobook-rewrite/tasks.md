@@ -154,39 +154,39 @@ implements; `_Design:_` cites the design section.
 
 ## 7. Live sync
 
-- [ ] 7.1 Generate `LiveSession` (`set_id`, `status` check, `current_set_item_id`,
+- [x] 7.1 Generate `LiveSession` (`set_id`, `status` check, `current_set_item_id`,
   `current_section_index`, `position_version bigint`, `lock_version`, `blanked`, `font_scale`,
   unique nullable tokens, timestamps). `POST sets/:id/launch` creates it, seeds position at the
   first `set_item`, generates tokens. Tests: launch seeds position; tokens unique.
   _Requirements: 6.1, 7.5_ _Design: §2.1, §6.1_
-- [ ] 7.2 Operator view + advance/back/goto actions: walk sections (arrangement-aware,
+- [x] 7.2 Operator view + advance/back/goto actions: walk sections (arrangement-aware,
   resolving replays) across items; each move bumps `position_version` and checks `lock_version`
   in one transaction; **broadcast inline** via `turbo_stream_from [session, role]`, frame
   carries version. Add a one-line capture **seam** in the position-change transaction for 8.1
   to hook (so usage capture is purely additive later). Tests: advance moves section then item;
   `position_version` monotonic; concurrent-operator `lock_version` conflict surfaces.
   _Requirements: 6.2, 6.5_ _Design: §6.1, §6.2_ _Depends: 4.4 (musician partial), 3.5 (transpose helper)_
-- [ ] 7.3 Projector + musician public views via token-gated actions (`p/:token`, `m/:token`),
+- [x] 7.3 Projector + musician public views via token-gated actions (`p/:token`, `m/:token`),
   subscribing with signed `turbo_stream_from`; bad/ended token → 404. Musician re-renders
   server-side at its own stored key/capo on each frame (independent per follower). System
   test: operator advance updates both followers; two musicians on different keys each see their
   own.
   _Requirements: 5.6, 6.3, 6.4, 6.6_ _Design: §3.2.4, §6.1, §6.3_ _Depends: 4.3 (projector partial), 4.4 (musician partial)_
-- [ ] 7.4 Follower version guard (Stimulus): store last applied `position_version`, drop frames
+- [x] 7.4 Follower version guard (Stimulus): store last applied `position_version`, drop frames
   `<=` it; projector freezes on disconnect (no error/spinner) and re-syncs on reconnect; re-fit
   font on each stream render. System test: rapid advance never flashes backward; simulated
   disconnect holds last frame.
   _Requirements: 6.2, 6.7_ _Design: §6.2, §6.4_ _Depends: 4.3 (fit controller)_
-- [ ] 7.5 Blank toggle + font ± actions: update `blanked`/`font_scale` on the session and
+- [x] 7.5 Blank toggle + font ± actions: update `blanked`/`font_scale` on the session and
   broadcast to the projector (reusing the 4.3 `fit` controller). System test: blank blacks the
   projector; font ± rescales live.
   _Requirements: 6.8_ _Design: §6.1, §5_ _Depends: 4.3 (fit controller)_
-- [ ] 7.6 Late-join / reload recovery: `operator#show` and the follower token GET both render
+- [x] 7.6 Late-join / reload recovery: `operator#show` and the follower token GET both render
   the current item/section at the current `position_version` from the `LiveSession` row. System
   tests: a follower joining mid-service lands on the current slide; operator browser reload
   lands on current position.
   _Requirements: 6.4, 6.9, 6.11_ _Design: §6.4_
-- [ ] 7.7 End session: status→ended, tokens nulled; follower streams render a neutral
+- [x] 7.7 End session: status→ended, tokens nulled; follower streams render a neutral
   "service ended" state; tokens 404 thereafter. System test: ending revokes both tokens and
   shows the neutral state.
   _Requirements: 6.7 (end)_ _Design: §6.4_
