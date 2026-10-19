@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_19_151627) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_19_155413) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -47,6 +47,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_151627) do
     t.check_constraint "copyright_status::text = ANY (ARRAY['copyrighted'::character varying, 'public_domain'::character varying, 'unknown'::character varying]::text[])", name: "songs_copyright_status_check"
   end
 
+  create_table "text_slides", force: :cascade do |t|
+    t.bigint "church_id", null: false
+    t.string "title", null: false
+    t.string "subtype", default: "statement", null: false
+    t.text "body_markdown"
+    t.boolean "reusable", default: true, null: false
+    t.bigint "set_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["church_id", "title"], name: "index_text_slides_on_church_id_and_title"
+    t.index ["set_id"], name: "index_text_slides_on_set_id"
+    t.check_constraint "subtype::text = ANY (ARRAY['statement'::character varying, 'blessing'::character varying, 'statement_of_faith'::character varying, 'question'::character varying, 'sermon_point'::character varying, 'scripture'::character varying, 'announcement'::character varying]::text[])", name: "text_slides_subtype_check"
+  end
+
   create_table "users", force: :cascade do |t|
     t.bigint "church_id", null: false
     t.citext "email", null: false
@@ -59,5 +73,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_151627) do
   end
 
   add_foreign_key "songs", "churches"
+  add_foreign_key "text_slides", "churches"
   add_foreign_key "users", "churches"
 end
