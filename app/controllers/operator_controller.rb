@@ -18,6 +18,15 @@ class OperatorController < ApplicationController
     move { |pos| pos.first_stop_of(params[:set_item_id].to_i) }
   end
 
+  def blank
+    update_projector_state { @session.blanked = !@session.blanked }
+  end
+
+  def font
+    delta = params[:dir] == "down" ? -10 : 10
+    update_projector_state { @session.font_scale = @session.font_scale.clamp(50, 400) + delta }
+  end
+
   private
 
   def set_session
@@ -50,6 +59,18 @@ class OperatorController < ApplicationController
 
   # Seam for CCLI usage capture (Phase 8). No-op until 8.1 implements it.
   def capture_usage(_session); end
+
+  # Apply a projector-state change (blank/font), clamp font, bump version, broadcast inline.
+  def update_projector_state
+    @session.with_lock do
+      yield
+      @session.font_scale = @session.font_scale.clamp(50, 400)
+      @session.position_version += 1
+      @session.save!
+    end
+    Corobook::LiveBroadcast.position(@session)
+    redirect_to operator_path(@session)
+  end
 
   # Inline broadcast to both follower streams (never via Solid Queue; church is held explicitly).
   def broadcast_position(session)
