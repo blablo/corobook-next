@@ -17,6 +17,7 @@ Rails.application.routes.draw do
       post "items", to: "service_sets#add_item", as: :add_item
       patch "reorder"
       delete "items/:item_id", to: "service_sets#remove_item", as: :remove_item
+      post "launch", to: "live_sessions#create", as: :launch
     end
   end
 
