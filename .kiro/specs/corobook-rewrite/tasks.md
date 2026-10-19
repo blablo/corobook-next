@@ -127,11 +127,11 @@ implements; `_Design:_` cites the design section.
 
 ## 5. Text slides
 
-- [ ] 5.1 Generate `TextSlide` (`church_id`, `title`, `subtype`, `body_markdown`, `reusable`,
+- [x] 5.1 Generate `TextSlide` (`church_id`, `title`, `subtype`, `body_markdown`, `reusable`,
   `set_id` null). Render markdown on read via a safe renderer with HTML escaping. Tests:
   reusable vs inline shape; markdown rendered + escaped.
   _Requirements: 7.1, 7.2_ _Design: §2.1, §5_
-- [ ] 5.2 Text-slide CRUD (reusable library) + subtype-driven styling classes on projector and
+- [x] 5.2 Text-slide CRUD (reusable library) + subtype-driven styling classes on projector and
   musician views. System test: create a "statement of faith" slide, see it styled.
   _Requirements: 3.5, 7.1_ _Design: §5_
 
