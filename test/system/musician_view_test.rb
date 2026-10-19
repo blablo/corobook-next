@@ -31,4 +31,19 @@ class MusicianViewTest < ApplicationSystemTestCase
       assert_no_selector "[data-role=chord]", text: "G"
     end
   end
+
+  test "a song whose arrangement labels don't match its sections still shows the sections" do
+    # Legacy data: arrangement references English labels but sections are labelled in Spanish.
+    song = @church.songs.create!(
+      title: "Legado", song_key: "C",
+      chordpro_source: "{key: C}\n{sov: Verso 1}\n[C]Gloria a [G]Dios\n{eov}",
+      arrangement: [ "Verse 1", "Verse 2" ]
+    )
+    visit song_path(song)
+    within "[data-role=musician-preview]" do
+      assert_selector "[data-role=chord]", text: "C"
+      assert_selector "[data-role=chord]", text: "G"
+    end
+    assert_selector "[data-role=section-label]", text: "VERSO 1"
+  end
 end
