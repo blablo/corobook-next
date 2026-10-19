@@ -65,6 +65,15 @@ class SongEditorTest < ApplicationSystemTestCase
     source = find("input[data-song-editor-target=source]", visible: false).value
     assert_match(/\[[A-G][^\]]*\]/, source) # a chord bracket now present
 
+    # Remove a wrongly-placed chord by clicking its pill.
+    find(".chord-pill").click
+    assert_no_match(/\[[A-G][^\]]*\]/, find("input[data-song-editor-target=source]", visible: false).value)
+
+    # Re-place one so the saved song carries a chord.
+    find(".lyric-edit").click
+    within(".song-picker") { first(".chip").click }
+    assert_match(/\[[A-G][^\]]*\]/, find("input[data-song-editor-target=source]", visible: false).value)
+
     click_on "Create song"
     assert_text "Song created."
 
