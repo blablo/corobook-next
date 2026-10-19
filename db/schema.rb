@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_19_135211) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_19_135245) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -22,4 +22,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_135211) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
+
+  create_table "users", force: :cascade do |t|
+    t.bigint "church_id", null: false
+    t.citext "email", null: false
+    t.string "password_digest", null: false
+    t.string "role", default: "editor", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["church_id", "email"], name: "index_users_on_church_id_and_email", unique: true
+    t.check_constraint "role::text = ANY (ARRAY['admin'::character varying, 'editor'::character varying]::text[])", name: "users_role_check"
+  end
+
+  add_foreign_key "users", "churches"
 end
