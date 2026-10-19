@@ -45,10 +45,7 @@ class OperatorController < ApplicationController
     end
 
     broadcast_position(@session)
-    respond_to do |format|
-      format.html { redirect_to operator_path(@session) }
-      format.turbo_stream { head :ok }
-    end
+    redirect_to operator_path(@session)
   end
 
   # Seam for CCLI usage capture (Phase 8). No-op until 8.1 implements it.
