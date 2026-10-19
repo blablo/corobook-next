@@ -23,6 +23,36 @@ class HomePageTest < ActionDispatch::IntegrationTest
     assert_redirected_to root_path
   end
 
+  test "an admin sees the usage-report tile" do
+    sign_in
+    get root_path
+    assert_select "[data-role=usage-report]"
+  end
+
+  test "an editor does not see the usage-report tile" do
+    editor = User.create!(church: @church, email: "ed@example.com", password: "secret123", role: "editor")
+    post login_path, params: { church_id: @church.id, email: editor.email, password: "secret123" }
+    get root_path
+    assert_select "[data-role=usage-report]", false
+  end
+
+  test "library counts reflect church data and exclude inline slides and other churches" do
+    @church.songs.create!(title: "A", chordpro_source: "x")
+    @church.songs.create!(title: "B", chordpro_source: "y")
+    @church.text_slides.create!(title: "Reusable", reusable: true)
+    set = @church.service_sets.create!(name: "S")
+    @church.text_slides.create!(title: "Inline", reusable: false, set_id: set.id) # excluded from count
+    other = Church.create!(name: "Norte")
+    other.songs.create!(title: "Foreign", chordpro_source: "z") # must not leak into counts
+
+    sign_in
+    get root_path
+    assert_select "[data-role=library-stats]" do
+      assert_select ".stat-value", text: "2"  # songs (church-scoped, not 3)
+      assert_select ".stat-value", text: "1"  # reusable slides only (not 2)
+    end
+  end
+
   private
 
   def sign_in

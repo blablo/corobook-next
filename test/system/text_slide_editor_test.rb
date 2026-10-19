@@ -9,7 +9,7 @@ class TextSlideEditorTest < ApplicationSystemTestCase
     fill_in "Email", with: @editor.email
     fill_in "Password", with: "secret123"
     click_on "Sign in"
-    assert_text "Signed in as #{@editor.email}"
+    assert_selector "[data-role=home]" # landed on home after login
   end
 
   test "creating a statement-of-faith slide renders it with subtype styling" do

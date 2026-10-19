@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-theme="light">
   <head>
     <title><%= content_for(:title) || "Corobook Next" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -23,14 +23,17 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <main class="container mx-auto mt-28 px-5 flex flex-col">
-      <% if flash[:notice] %>
-        <p class="mb-4 rounded bg-green-100 text-green-800 px-3 py-2 text-sm" data-role="flash-notice"><%= flash[:notice] %></p>
-      <% end %>
-      <% if flash[:alert] %>
-        <p class="mb-4 rounded bg-red-100 text-red-800 px-3 py-2 text-sm" data-role="flash-alert"><%= flash[:alert] %></p>
-      <% end %>
+  <body class="min-h-screen bg-base-200">
+    <%= yield :chrome %>
+    <main>
+      <div class="container mx-auto px-4">
+        <% if flash[:notice] %>
+          <div class="alert alert-success my-3" data-role="flash-notice"><%= flash[:notice] %></div>
+        <% end %>
+        <% if flash[:alert] %>
+          <div class="alert alert-error my-3" data-role="flash-alert"><%= flash[:alert] %></div>
+        <% end %>
+      </div>
       <%= yield %>
     </main>
   </body>

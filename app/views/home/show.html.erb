@@ -1,5 +1,111 @@
-<div class="mx-auto mt-8 max-w-3xl" data-role="home">
-  <h1 class="text-2xl font-semibold"><%= current_church.name %></h1>
-  <p class="text-sm text-slate-500">Signed in as <%= current_user.email %> (<%= current_user.role %>)</p>
-  <%# Full DaisyUI launchpad lands in task 4.1 %>
+<% content_for :title, "Corobook" %>
+
+<%# ── Navbar ─────────────────────────────────────────────────────────── %>
+<div class="navbar bg-base-100 shadow-sm" data-role="home">
+  <div class="container mx-auto px-4">
+    <div class="flex-1">
+      <span class="text-xl font-semibold">Corobook</span>
+      <span class="badge badge-ghost ml-3" data-role="church-name"><%= current_church.name %></span>
+    </div>
+    <div class="flex-none flex items-center gap-3">
+      <span class="text-sm text-base-content/70"><%= current_user.email %> · <%= current_user.role %></span>
+      <%= button_to "Sign out", logout_path, method: :delete, class: "btn btn-ghost btn-sm" %>
+    </div>
+  </div>
+</div>
+
+<div class="container mx-auto px-4 py-6 flex flex-col gap-6">
+
+  <%# ── Hero: next service ──────────────────────────────────────────── %>
+  <section class="card bg-base-100 shadow-md" data-role="hero">
+    <div class="card-body">
+      <% if @hero_set.nil? %>
+        <h2 class="card-title">No sets yet</h2>
+        <p class="text-base-content/70">Create your first set to start building a service.</p>
+        <div class="card-actions mt-2">
+          <%= link_to "New set", new_service_set_path, class: "btn btn-primary", data: { role: "new-set" } %>
+        </div>
+      <% else %>
+        <% item_count = @hero_set.set_items.count %>
+        <% past = @hero_set.service_date.present? && @hero_set.service_date < Date.current %>
+        <p class="text-sm uppercase tracking-wide text-base-content/60">Next service</p>
+        <h2 class="card-title text-2xl">
+          <%= @hero_set.name %>
+          <% if past %><span class="badge badge-warning" data-role="past-badge">Past service</span><% end %>
+        </h2>
+        <p class="text-base-content/70">
+          <%= @hero_set.service_date&.strftime("%A, %B %-d") || "No date set" %> · <%= pluralize(item_count, "item") %>
+        </p>
+
+        <div class="card-actions mt-3">
+          <% if @active_session %>
+            <%= link_to "Resume service", operator_path(@active_session),
+                  class: "btn btn-primary btn-lg", data: { role: "resume" } %>
+          <% elsif item_count.zero? %>
+            <p class="text-base-content/70" data-role="empty-set-hint">This set has no items yet.</p>
+            <%= link_to "Add items", service_set_path(@hero_set), class: "btn btn-outline", data: { role: "add-items" } %>
+          <% else %>
+            <%= button_to "Go live", launch_service_set_path(@hero_set), method: :post,
+                  class: "btn btn-primary btn-lg", data: { role: "go-live" } %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </section>
+
+  <%# ── Quick actions ───────────────────────────────────────────────── %>
+  <section class="grid grid-cols-2 md:grid-cols-4 gap-3" data-role="quick-actions">
+    <%= link_to "New set",   new_service_set_path, class: "btn btn-outline h-auto py-4" %>
+    <%= link_to "New song",  new_song_path,        class: "btn btn-outline h-auto py-4" %>
+    <%= link_to "New slide", new_text_slide_path,  class: "btn btn-outline h-auto py-4" %>
+    <%= link_to "Browse songs", songs_path,        class: "btn btn-outline h-auto py-4" %>
+    <% if current_user.admin? %>
+      <%= link_to "Usage report", usage_report_path, class: "btn btn-outline h-auto py-4", data: { role: "usage-report" } %>
+    <% end %>
+  </section>
+
+  <%# ── Recent sets ─────────────────────────────────────────────────── %>
+  <section class="card bg-base-100 shadow-sm">
+    <div class="card-body">
+      <h3 class="card-title text-base">Recent sets</h3>
+      <% if @recent_sets.any? %>
+        <ul class="divide-y divide-base-200" data-role="recent-sets">
+          <% @recent_sets.each do |set| %>
+            <li class="py-2 flex items-center justify-between">
+              <%= link_to set.name, service_set_path(set), class: "link link-hover" %>
+              <span class="text-sm text-base-content/60">
+                <%= set.service_date&.strftime("%b %-d") %> · <%= pluralize(set.set_items.count, "item") %>
+              </span>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="text-base-content/60">No sets yet.</p>
+      <% end %>
+    </div>
+  </section>
+
+  <%# ── Library at a glance ─────────────────────────────────────────── %>
+  <section class="flex flex-col gap-3">
+    <div class="stats shadow bg-base-100" data-role="library-stats">
+      <%= link_to songs_path, class: "stat hover:bg-base-200" do %>
+        <div class="stat-title">Songs</div>
+        <div class="stat-value text-2xl"><%= @counts[:songs] %></div>
+      <% end %>
+      <%= link_to text_slides_path, class: "stat hover:bg-base-200" do %>
+        <div class="stat-title">Slides</div>
+        <div class="stat-value text-2xl"><%= @counts[:slides] %></div>
+      <% end %>
+      <%= link_to service_sets_path, class: "stat hover:bg-base-200" do %>
+        <div class="stat-title">Sets</div>
+        <div class="stat-value text-2xl"><%= @counts[:sets] %></div>
+      <% end %>
+    </div>
+
+    <%= form_with url: songs_path, method: :get, class: "join w-full" do %>
+      <%= search_field_tag :q, nil, placeholder: "Search songs…", class: "input input-bordered join-item w-full" %>
+      <%= submit_tag "Search", class: "btn btn-neutral join-item" %>
+    <% end %>
+  </section>
+
 </div>

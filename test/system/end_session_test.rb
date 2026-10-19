@@ -15,7 +15,7 @@ class EndSessionTest < ApplicationSystemTestCase
     fill_in "Email", with: @editor.email
     fill_in "Password", with: "secret123"
     click_on "Sign in"
-    assert_text "Signed in as #{@editor.email}"
+    assert_selector "[data-role=home]" # landed on home after login
   end
 
   test "ending the service revokes both tokens and the followers can no longer connect" do
