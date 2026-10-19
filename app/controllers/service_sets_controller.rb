@@ -1,4 +1,5 @@
 class ServiceSetsController < ApplicationController
+  layout "shell"
   before_action :require_sign_in
   before_action :require_editor, except: %i[index show]
   before_action :set_service_set, only: %i[show edit update destroy add_item reorder remove_item]

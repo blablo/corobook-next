@@ -15,9 +15,10 @@ class LoginTest < ApplicationSystemTestCase
     fill_in "Password", with: "secret123"
     click_on "Sign in"
 
-    # Lands on the home launchpad for the chosen church.
-    assert_text "Signed in to Norte"              # flash notice (global layout)
-    assert_selector "[data-role=home]", text: "Norte"
+    # Lands on the home launchpad for the chosen church (church name shown in the shell header).
+    assert_text "Signed in to Norte"              # flash notice
+    assert_selector "[data-role=home]"            # landed on the home page
+    assert_selector "[data-role=church-name]", text: "Norte"
     assert_text "pastor@example.com"
   end
 

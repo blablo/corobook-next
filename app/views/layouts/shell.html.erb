@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html data-theme="light">
+  <head>
+    <title><%= content_for(:title) || "Corobook" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= yield :head %>
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="bg-base-200">
+    <div class="drawer lg:drawer-open">
+      <input id="app-drawer" type="checkbox" class="drawer-toggle" />
+
+      <div class="drawer-content flex flex-col min-h-screen">
+        <%# ── Top header ───────────────────────────────────────────── %>
+        <header class="navbar bg-base-100 shadow-sm sticky top-0 z-30">
+          <div class="flex-none lg:hidden">
+            <label for="app-drawer" class="btn btn-square btn-ghost" aria-label="Open menu">☰</label>
+          </div>
+          <div class="flex-1">
+            <span class="text-lg font-semibold">Corobook</span>
+            <% if respond_to?(:current_church) && current_church %>
+              <span class="badge badge-ghost ml-3" data-role="church-name"><%= current_church.name %></span>
+            <% end %>
+          </div>
+          <div class="flex-none flex items-center gap-3">
+            <% if respond_to?(:current_user) && current_user %>
+              <span class="text-sm text-base-content/70 hidden sm:inline"><%= current_user.email %> · <%= current_user.role %></span>
+              <%= button_to "Sign out", logout_path, method: :delete, class: "btn btn-ghost btn-sm" %>
+            <% end %>
+          </div>
+        </header>
+
+        <main class="p-4 flex-1">
+          <% if flash[:notice] %><div class="alert alert-success mb-3" data-role="flash-notice"><%= flash[:notice] %></div><% end %>
+          <% if flash[:alert] %><div class="alert alert-error mb-3" data-role="flash-alert"><%= flash[:alert] %></div><% end %>
+          <%= yield %>
+        </main>
+      </div>
+
+      <%# ── Left sidebar ───────────────────────────────────────────── %>
+      <div class="drawer-side z-40">
+        <label for="app-drawer" class="drawer-overlay" aria-label="Close menu"></label>
+        <%= render "shared/sidebar" %>
+      </div>
+    </div>
+  </body>
+</html>

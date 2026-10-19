@@ -1,6 +1,7 @@
 require "csv"
 
 class ReportsController < ApplicationController
+  layout "shell"
   before_action :require_sign_in
   before_action :require_admin
 
