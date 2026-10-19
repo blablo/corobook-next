@@ -137,17 +137,17 @@ implements; `_Design:_` cites the design section.
 
 ## 6. Sets and search
 
-- [ ] 6.1 Generate `Set` and `SetItem` (`position >=0 check`, `item_type` string+check,
+- [x] 6.1 Generate `Set` and `SetItem` (`position >=0 check`, `item_type` string+check,
   nullable `song_id`/`text_slide_id` with exactly-one CHECK + FKs, unique `(set_id, position)`).
   A Set `has_many` inline text slides (`reusable=false`) with `dependent: :destroy` so deleting
   a Set reaps its one-off slides. Model tests: exactly-one-FK enforced; cross-church item
   rejected; ordering; deleting a Set destroys its inline slides but not reusable ones.
   _Requirements: 7.3, 7.4, 9.1_ _Design: §2.1, §2.2_
-- [ ] 6.2 Set CRUD + item add/reorder/remove (drag or position param), inline one-off text
+- [x] 6.2 Set CRUD + item add/reorder/remove (drag or position param), inline one-off text
   slides (`reusable=false, set_id=set`). System test: build a mixed Set (song + sermon slide),
   reorder, persist.
   _Requirements: 7.2, 7.3_ _Design: §5, §9_
-- [ ] 6.3 Song search (`ILIKE`/`pg_trgm` over title/author/plain_text, church-scoped) +
+- [x] 6.3 Song search (`ILIKE`/`pg_trgm` over title/author/plain_text, church-scoped) +
   paginated alphabetical browse; text-slide search over title/subtype/body. System test:
   search by a lyric word returns the song.
   _Requirements: 8.1, 8.2, 8.3_ _Design: §8_
