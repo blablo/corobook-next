@@ -40,10 +40,15 @@ class SongEditorTest < ApplicationSystemTestCase
     assert_text "New song"
     fill_in "Title", with: "Canto visual"
 
-    # Visual mode is the default. Add a chorus section (prompts for the first line).
-    accept_prompt(with: "Santo es el Señor") do
-      click_on "+ Chorus"
-    end
+    # Visual mode is the default. Add a chorus section — it creates an editable line.
+    click_on "+ Chorus"
+
+    # Type lyrics directly into the inline contenteditable lyric line (no prompt).
+    line = find(".lyric-edit")
+    line.click
+    line.send_keys("Santo es el Señor")
+    # blur to flush the input handler
+    find("body").click
 
     # The hidden canonical field now holds serialized ChordPro with section directives.
     source = find("input[data-song-editor-target=source]", visible: false).value
