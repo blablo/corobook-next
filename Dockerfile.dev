@@ -1,0 +1,30 @@
+# syntax=docker/dockerfile:1
+# Development image — runs the app in RAILS_ENV=development with the source bind-mounted for
+# live reload. The production image is the separate top-level Dockerfile (used by Kamal).
+
+ARG RUBY_VERSION=3.3.12
+FROM docker.io/library/ruby:$RUBY_VERSION-slim
+
+WORKDIR /rails
+
+# Build + runtime packages: pg client/headers, libvips (Active Storage), node/yarn not needed
+# (importmap). build-essential/libpq-dev to compile the pg gem.
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y \
+      build-essential git curl libpq-dev libvips libyaml-dev pkg-config postgresql-client && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+ENV RAILS_ENV="development" \
+    BUNDLE_PATH="/usr/local/bundle"
+
+# Install gems first for layer caching; the Gemfile is bind-mounted over this at runtime but the
+# baked layer means a cold `up` still boots without a host `bundle install`.
+COPY Gemfile Gemfile.lock ./
+RUN bundle install
+
+COPY . .
+
+EXPOSE 3000
+
+# Prepare the database, then boot the dev server bound to all interfaces inside the container.
+CMD ["bin/rails", "server", "-b", "0.0.0.0", "-p", "3000"]
