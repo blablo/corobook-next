@@ -37,23 +37,23 @@ implements; `_Design:_` cites the design section.
 
 ## 2. Tenancy and authentication
 
-- [ ] 2.1 Generate `Church` (`name`, `ccli_license_number`) and seed two churches. Model test:
+- [x] 2.1 Generate `Church` (`name`, `ccli_license_number`) and seed two churches. Model test:
   valid church persists; `ccli_license_number` optional.
   _Requirements: 9.1, 9.3_ _Design: §2.1_
-- [ ] 2.2 Generate `User` (`church_id`, `email citext`, `password_digest`, `role` string+check
+- [x] 2.2 Generate `User` (`church_id`, `email citext`, `password_digest`, `role` string+check
   `admin|editor`) with `has_secure_password`, `belongs_to :church`, unique index
   `(church_id, email)`, Rails `enum :role`. Tests: same email in two churches both valid;
   password auth works; role enum values constrained by DB check.
   _Requirements: 5.1, 5.2, 9.1_ _Design: §2.1, §3.1_
-- [ ] 2.3 Add `Current` (`ActiveSupport::CurrentAttributes` with `church`, `user`) and an
+- [x] 2.3 Add `Current` (`ActiveSupport::CurrentAttributes` with `church`, `user`) and an
   `ApplicationController` `before_action` that sets them from the session. Integration test:
   two sequential requests as different-church users do not leak `Current.church` between them.
   _Requirements: 5.4_ _Design: §3.2_
-- [ ] 2.4 Build sessions controller + church-picker login view (`GET/POST /login`,
+- [x] 2.4 Build sessions controller + church-picker login view (`GET/POST /login`,
   `DELETE /logout`): choose church, then email+password resolve against that church's users.
   System test: same email in both churches logs into the chosen one.
   _Requirements: 5.1, 5.4_ _Design: §3.1, §9_
-- [ ] 2.5 Add role authorization helpers (`require_admin`, `require_editor`) and a
+- [x] 2.5 Add role authorization helpers (`require_admin`, `require_editor`) and a
   `TenantScoped` convention (all queries via `Current.church.<assoc>`). Add a model concern
   validating a child's `church_id` matches its parent. Add the **off-request tenancy test**:
   a code path invoked with `Current` unset (simulating a job/cable) that is passed a
