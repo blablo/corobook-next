@@ -24,8 +24,8 @@ class SessionsController < ApplicationController
 
   private
 
-  # No authenticated home exists until a later phase; land somewhere stable for now.
+  # Land on the home launchpad after sign-in.
   def after_sign_in_path
-    login_path
+    root_path
   end
 end
