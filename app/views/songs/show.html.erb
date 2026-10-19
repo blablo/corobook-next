@@ -23,4 +23,17 @@
   <% end %>
 
   <pre class="bg-slate-100 text-slate-900 rounded p-3 text-sm overflow-auto"><%= @song.chordpro_source %></pre>
+
+  <% sections = @song.parsed_lyric&.dig("sections") || [] %>
+  <% if sections.any? %>
+    <section class="mt-6" data-role="projector-preview">
+      <h2 class="text-sm text-slate-500 mb-2">Projector preview — final section</h2>
+      <%= render "projector_section",
+            song: @song,
+            section: sections.last,
+            is_final_section: true,
+            church_license: current_church.ccli_license_number,
+            show_editor_warnings: can_edit? %>
+    </section>
+  <% end %>
 </div>

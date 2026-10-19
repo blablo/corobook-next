@@ -1,0 +1,24 @@
+<%#
+  Projector rendering of ONE section of a song (Req 3.1, 3.2, 9.4).
+  Locals: song, section, is_final_section, church_license, show_editor_warnings (default false).
+%>
+<% show_editor_warnings = local_assigns.fetch(:show_editor_warnings, false) %>
+<% notice = Corobook::CopyrightNotice.for(song, church_license: church_license) %>
+
+<div class="projector-section" data-controller="fit">
+  <div data-fit-target="content" class="projector-lyrics" data-role="projector-lyrics">
+    <% Corobook::ChordPro::Transform.section_plain_lines(section).each do |line| %>
+      <div class="projector-line"><%= line.presence || raw("&nbsp;") %></div>
+    <% end %>
+  </div>
+
+  <% if is_final_section && notice.show? %>
+    <p class="projector-copyright" data-role="copyright-notice"><%= notice.text %></p>
+  <% end %>
+</div>
+
+<% if show_editor_warnings && notice.warn? %>
+  <p class="rounded bg-amber-100 text-amber-900 px-3 py-2 text-sm mt-2" data-role="copyright-warning">
+    <%= notice.warning %>
+  </p>
+<% end %>

@@ -49,6 +49,17 @@ module Corobook
       def deep_dup(obj)
         Corobook::DeepDup.call(obj)
       end
+
+      # Lyric-only lines for ONE section: chords dropped, ChordPro `//` repeat marks stripped.
+      # Used by the projector, which shows words only (Req 3.1).
+      def section_plain_lines(section)
+        (section["lines"] || []).filter_map do |line|
+          next unless line["segments"]
+
+          text = line["segments"].map { |seg| seg["text"] }.join
+          text.gsub("//", "").rstrip
+        end
+      end
     end
   end
 end
