@@ -58,7 +58,7 @@ class SongEditorTest < ApplicationSystemTestCase
     # The hidden canonical field now holds serialized ChordPro with section directives.
     source = find("input[data-song-editor-target=source]", visible: false).value
     assert_includes source, "Digno de gloria"
-    assert_includes source, "{soc}"
+    assert_includes source, "{soc: Chorus 1}"
     assert_includes source, "Santo es el Señor"
     assert_includes source, "{eoc}"
 
@@ -94,6 +94,26 @@ class SongEditorTest < ApplicationSystemTestCase
     assert_equal "chorus", song.parsed.sections.first["kind"]
   end
 
+  test "added sections get unique sequential numbered labels for ordering" do
+    visit new_song_path
+    assert_text "New song"
+    fill_in "Title", with: "Numeración"
+
+    click_on "+ Verse"
+    click_on "+ Verse"
+    click_on "+ Chorus"
+
+    # Each badge carries a unique, order-referenceable label.
+    assert_selector "[data-role=sections] .badge", text: "Verse 1"
+    assert_selector "[data-role=sections] .badge", text: "Verse 2"
+    assert_selector "[data-role=sections] .badge", text: "Chorus 1"
+
+    source = find("input[data-song-editor-target=source]", visible: false).value
+    assert_includes source, "{sov: Verse 1}"
+    assert_includes source, "{sov: Verse 2}"
+    assert_includes source, "{soc: Chorus 1}"
+  end
+
   test "importing pasted chords-over-lyrics builds sections with chords anchored" do
     visit new_song_path
     assert_text "New song"
@@ -107,8 +127,8 @@ class SongEditorTest < ApplicationSystemTestCase
     # Two sections now rendered with chords placed from the pasted columns.
     assert_selector "[data-role=sections] .chord-pill", minimum: 2
     source = find("input[data-song-editor-target=source]", visible: false).value
-    assert_includes source, "{sov"
-    assert_includes source, "{soc}"
+    assert_includes source, "{sov: Verse 1}"
+    assert_includes source, "{soc: Chorus 1}"
     assert_includes source, "Al mundo paz"
     assert_match(/\[C\]/, source)
 

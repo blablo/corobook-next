@@ -115,8 +115,6 @@ export default class extends Controller {
       if (hm) {
         const num = hm[2] ? ` ${hm[2]}` : ""
         current = { kind: kindOf(hm[1]), label: (hm[1][0].toUpperCase() + hm[1].slice(1).toLowerCase() + num).trim(), lines: [] }
-        // only keep a label when it adds info beyond the kind
-        if (current.label.toLowerCase() === current.kind) current.label = null
         sections.push(current)
         continue
       }
@@ -132,6 +130,26 @@ export default class extends Controller {
         }
       } else {
         current.lines.push({ text: line, chords: [] })
+      }
+    }
+    this.numberSections(sections)
+    return sections
+  }
+
+  // Ensure every section carries a unique numbered label per kind
+  // ("Verse 1", "Verse 2", "Chorus 1"...) so the arrangement can reference it.
+  // Preserves an existing valid number, renumbers conflicts/blanks in order.
+  numberSections(sections) {
+    const used = {}
+    const take = (kind, n) => { (used[kind] = used[kind] || new Set()).add(n) }
+    const free = (kind) => { let n = 1; const s = used[kind] || new Set(); while (s.has(n)) n++; return n }
+    for (const s of sections) {
+      const prefix = this.kindName(s.kind)
+      const m = s.label && s.label.match(new RegExp(`^${prefix}\\s+(\\d+)$`, "i"))
+      if (m && !(used[s.kind] && used[s.kind].has(+m[1]))) {
+        s.label = `${prefix} ${+m[1]}`; take(s.kind, +m[1])
+      } else {
+        const n = free(s.kind); s.label = `${prefix} ${n}`; take(s.kind, n)
       }
     }
     return sections
@@ -158,6 +176,7 @@ export default class extends Controller {
       if (line.trim() === "") { if (current && current.lines.length) current = null; continue }
       ensure(); current.lines.push(this.parseLine(line))
     }
+    this.numberSections(sections)
     return sections
   }
 
@@ -224,7 +243,7 @@ export default class extends Controller {
     const key = this.hasKeyFieldTarget ? this.keyFieldTarget.value : "G"
     this._palette = this.paletteFor(key)
     const sec = (s, si) => {
-      const label = s.label ? `${this.kindName(s.kind)} · ${this.esc(s.label)}` : this.kindName(s.kind)
+      const label = this.esc(s.label || this.kindName(s.kind))
       const lines = s.lines.map((ln, li) => this.renderLine(si, ln, li)).join("")
       return `
         <div class="rounded-lg ring-1 ring-base-200 bg-base-100 mb-3" data-si="${si}">
@@ -472,9 +491,25 @@ export default class extends Controller {
   // ======================= structure actions =======================
   addSection(e) {
     const kind = e.currentTarget.dataset.kind
-    this.model.push({ kind, label: null, lines: [{ text: "", chords: [] }] })
+    this.model.push({ kind, label: this.nextLabel(kind), lines: [{ text: "", chords: [] }] })
     this.commit()
     this.focusLine(this.model.length - 1, 0)
+  }
+
+  // Next unique numbered label for a kind, e.g. "Verse 1", "Verse 2".
+  // Numbers the kind sequentially, skipping any numbers already in use so a
+  // label is always unique and stable for arrangement ordering.
+  nextLabel(kind) {
+    const prefix = this.kindName(kind)
+    const used = new Set()
+    for (const s of this.model) {
+      if (s.kind !== kind || !s.label) continue
+      const m = s.label.match(new RegExp(`^${prefix}\\s+(\\d+)$`, "i"))
+      if (m) used.add(+m[1])
+    }
+    let n = 1
+    while (used.has(n)) n++
+    return `${prefix} ${n}`
   }
   addLine(e) {
     const si = +e.currentTarget.dataset.si
