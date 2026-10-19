@@ -13,19 +13,19 @@ implements; `_Design:_` cites the design section.
 
 ## 1. Foundation
 
-- [ ] 1.1 Add a `docker-compose.yml` with a Postgres 16 service (localhost-bound), and a
+- [x] 1.1 Add a `docker-compose.yml` with a Postgres 16 service (localhost-bound), and a
   `.env`/`config/database.yml` wiring for dev/test. Verify `bin/rails db:prepare` creates
   `corobook_next_development` and `_test`.
   _Requirements: 10.2_ _Design: §1, §11.1_
-- [ ] 1.2 Create the initial migration enabling Postgres extensions `citext` and `pg_trgm`
+- [x] 1.2 Create the initial migration enabling Postgres extensions `citext` and `pg_trgm`
   via `enable_extension`. Verify locally (`db:migrate` + `SELECT extname`) AND that both
   survive a `schema.rb` dump/load — i.e. `bin/rails db:test:prepare` in CI leaves them
   enabled (so `citext` columns and `pg_trgm` indexes in later tasks don't fail on a fresh CI DB).
   _Design: §2.1, §8_
-- [ ] 1.3 Uncomment `bcrypt` in the Gemfile and add a markdown gem (`commonmarker`, pinned);
+- [x] 1.3 Uncomment `bcrypt` in the Gemfile and add a markdown gem (`commonmarker`, pinned);
   `bundle install`. Confirm `has_secure_password` is available and `commonmarker` renders.
   _Design: §4 (Rails 8 specifics), §5_
-- [ ] 1.4 **Adapt** the existing `.github/workflows/ci.yml` (do NOT add a new one — `test` and
+- [x] 1.4 **Adapt** the existing `.github/workflows/ci.yml` (do NOT add a new one — `test` and
   `system-test` jobs already exist): confirm both run against a Postgres service; **add a
   headless-Chrome/Chromedriver setup step to the `system-test` job** (`ruby/setup-ruby` does
   not provide a browser, so Selenium would otherwise fail); confirm the extension migration
