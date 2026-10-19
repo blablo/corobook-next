@@ -1,0 +1,7 @@
+<%#
+  Musician rendering of a text slide (Req 3.5): same content as the projector, no chord staff.
+  Locals: slide.
+%>
+<div class="musician-slide <%= slide.subtype_class %>" data-role="musician-slide" data-subtype="<%= slide.subtype %>">
+  <%= raw slide.rendered_html %>
+</div>

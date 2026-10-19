@@ -1,0 +1,20 @@
+<div class="mx-auto mt-8 max-w-3xl">
+  <div class="flex items-center justify-between mb-4">
+    <h1 class="text-2xl font-semibold"><%= @text_slide.title %></h1>
+    <% if can_edit? %>
+      <%= link_to "Edit", edit_text_slide_path(@text_slide), class: "underline text-sm" %>
+    <% end %>
+  </div>
+
+  <p class="text-sm text-slate-500 mb-4"><%= @text_slide.subtype.humanize %></p>
+
+  <section class="mt-4" data-role="projector-preview">
+    <h2 class="text-sm text-slate-500 mb-2">Projector preview</h2>
+    <%= render "projector_slide", slide: @text_slide %>
+  </section>
+
+  <section class="mt-6" data-role="musician-preview">
+    <h2 class="text-sm text-slate-500 mb-2">Musician view</h2>
+    <%= render "musician_slide", slide: @text_slide %>
+  </section>
+</div>
