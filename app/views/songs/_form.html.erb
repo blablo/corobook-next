@@ -1,65 +1,117 @@
-<%= form_with model: song do |f| %>
+<%= form_with model: song, data: { controller: "song-editor" } do |f| %>
   <% if song.errors.any? %>
-    <div class="mb-4 rounded bg-red-100 text-red-800 px-3 py-2 text-sm">
-      <%= song.errors.full_messages.to_sentence %>
+    <div class="alert alert-error mb-4" data-role="song-errors">
+      <span><%= song.errors.full_messages.to_sentence %></span>
     </div>
   <% end %>
 
-  <div class="grid grid-cols-2 gap-4">
-    <div>
-      <%= f.label :title, "Title", class: "block text-sm mb-1" %>
-      <%= f.text_field :title, class: "w-full border rounded px-2 py-1" %>
-    </div>
-    <div>
-      <%= f.label :author, "Author", class: "block text-sm mb-1" %>
-      <%= f.text_field :author, class: "w-full border rounded px-2 py-1" %>
-    </div>
-    <div>
-      <%= f.label :song_key, "Key", class: "block text-sm mb-1" %>
-      <%= f.text_field :song_key, class: "w-full border rounded px-2 py-1" %>
-    </div>
-    <div>
-      <%= f.label :capo, "Capo", class: "block text-sm mb-1" %>
-      <%= f.number_field :capo, in: 0..11, class: "w-full border rounded px-2 py-1" %>
-    </div>
-  </div>
-
-  <div class="mt-4">
-    <%= f.label :chordpro_source, "ChordPro source", class: "block text-sm mb-1" %>
-    <%= f.text_area :chordpro_source, rows: 14, class: "w-full border rounded px-2 py-1 font-mono text-sm" %>
-  </div>
-
-  <% warnings = parse_warnings(song) %>
-  <% if warnings.any? %>
-    <div class="mt-2 rounded bg-amber-100 text-amber-900 px-3 py-2 text-sm" data-role="parse-warning">
-      <% warnings.each { |w| %><div><%= w %></div><% } %>
-    </div>
-  <% end %>
-
-  <fieldset class="mt-4 border rounded p-3">
-    <legend class="text-sm">Copyright</legend>
-    <%= f.label :copyright_line, "Copyright line", class: "block text-sm mb-1" %>
-    <%= f.text_field :copyright_line, class: "w-full border rounded px-2 py-1" %>
-    <div class="grid grid-cols-2 gap-4 mt-2">
-      <div>
-        <%= f.label :ccli_song_number, "CCLI song number", class: "block text-sm mb-1" %>
-        <%= f.number_field :ccli_song_number, class: "w-full border rounded px-2 py-1" %>
-      </div>
-      <div>
-        <%= f.label :copyright_status, "Status", class: "block text-sm mb-1" %>
-        <%= f.select :copyright_status, Song.copyright_statuses.keys, {}, class: "w-full border rounded px-2 py-1" %>
+  <%# ── Song details ─────────────────────────────────────────────── %>
+  <div class="card bg-base-100 ring-1 ring-base-200 mb-6">
+    <div class="card-body gap-4">
+      <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50">Song details</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <label class="form-control">
+          <span class="label-text text-sm mb-1 block">Title</span>
+          <%= f.text_field :title, class: "input input-bordered w-full", placeholder: "Song title" %>
+        </label>
+        <label class="form-control">
+          <span class="label-text text-sm mb-1 block">Author</span>
+          <%= f.text_field :author, class: "input input-bordered w-full", placeholder: "Author" %>
+        </label>
+        <label class="form-control">
+          <span class="label-text text-sm mb-1 block">Key</span>
+          <%= f.select :song_key,
+                options_for_select(%w[C C# D Eb E F F# G Ab A Bb B Am Bm Cm C#m Dm Em Fm F#m Gm G#m], song.song_key),
+                { include_blank: "—" },
+                class: "select select-bordered w-full", data: { "song-editor-target": "keyField" } %>
+        </label>
+        <label class="form-control">
+          <span class="label-text text-sm mb-1 block">Capo</span>
+          <%= f.number_field :capo, in: 0..11, class: "input input-bordered w-full" %>
+        </label>
       </div>
     </div>
-  </fieldset>
-
-  <div class="mt-4">
-    <%= label_tag "song_arrangement_text", "Arrangement (section labels, one per line — empty = section order)", class: "block text-sm mb-1" %>
-    <%= text_area_tag "song[arrangement_text]", (song.arrangement || []).join("\n"),
-          id: "song_arrangement_text", rows: 4,
-          class: "w-full border rounded px-2 py-1 font-mono text-sm", data: { role: "arrangement" } %>
   </div>
 
-  <div class="mt-4">
-    <%= f.submit class: "rounded bg-slate-800 text-white px-3 py-2" %>
+  <%# ── Lyrics & chords (the editor) ─────────────────────────────── %>
+  <div class="card bg-base-100 ring-1 ring-base-200 mb-6">
+    <div class="card-body gap-4">
+      <div class="flex flex-wrap items-center gap-2">
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50 flex-1">Lyrics &amp; chords</h2>
+        <%# mode toggle %>
+        <div class="join">
+          <button type="button" class="btn btn-sm join-item btn-active" data-song-editor-target="visualBtn"
+                  data-action="song-editor#showVisual">Visual</button>
+          <button type="button" class="btn btn-sm join-item" data-song-editor-target="advancedBtn"
+                  data-action="song-editor#showAdvanced">Advanced (ChordPro)</button>
+        </div>
+      </div>
+
+      <%# add-section buttons %>
+      <div class="flex flex-wrap gap-2" data-song-editor-target="visual">
+        <div class="flex flex-wrap gap-2 mb-1">
+          <span class="text-sm text-base-content/60 self-center mr-1">Add section:</span>
+          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="verse">+ Verse</button>
+          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="chorus">+ Chorus</button>
+          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="bridge">+ Bridge</button>
+        </div>
+        <p class="text-xs text-base-content/50 w-full">Click any word to add a chord above it. Click a chord to remove it.</p>
+        <div class="w-full mt-1" data-role="sections"></div>
+      </div>
+
+      <%# advanced raw ChordPro — nameless; mirrors into the canonical hidden field via the controller %>
+      <label for="advanced_chordpro" class="sr-only">ChordPro source</label>
+      <textarea id="advanced_chordpro" rows="16" class="textarea textarea-bordered w-full font-mono text-sm hidden"
+                data-song-editor-target="advanced"><%= song.chordpro_source %></textarea>
+
+      <%# canonical source — the ONLY field named song[chordpro_source]; what the server parses %>
+      <%= f.hidden_field :chordpro_source, data: { "song-editor-target": "source" } %>
+
+      <% warnings = parse_warnings(song) %>
+      <% if warnings.any? %>
+        <div class="alert alert-warning" data-role="parse-warning">
+          <div><% warnings.each { |w| %><div><%= w %></div><% } %></div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <%# ── Copyright & CCLI ─────────────────────────────────────────── %>
+  <div class="card bg-base-100 ring-1 ring-base-200 mb-6">
+    <div class="card-body gap-4">
+      <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50">Copyright &amp; CCLI</h2>
+      <label class="form-control">
+        <span class="label-text text-sm mb-1 block">Copyright line</span>
+        <%= f.text_field :copyright_line, class: "input input-bordered w-full", placeholder: "© 2001 Author / Publisher" %>
+      </label>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <label class="form-control">
+          <span class="label-text text-sm mb-1 block">CCLI song number</span>
+          <%= f.number_field :ccli_song_number, class: "input input-bordered w-full" %>
+        </label>
+        <label class="form-control">
+          <span class="label-text text-sm mb-1 block">Status</span>
+          <%= f.select :copyright_status, Song.copyright_statuses.keys.map { |k| [k.humanize, k] },
+                {}, class: "select select-bordered w-full" %>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <%# ── Arrangement (advanced, collapsed) ────────────────────────── %>
+  <div class="collapse collapse-arrow bg-base-100 ring-1 ring-base-200 mb-6">
+    <input type="checkbox" />
+    <div class="collapse-title text-sm font-semibold text-base-content/70">Arrangement order (optional)</div>
+    <div class="collapse-content">
+      <p class="text-xs text-base-content/50 mb-2">Section labels, one per line — controls play order. Leave empty to use the order above.</p>
+      <%= text_area_tag "song[arrangement_text]", (song.arrangement || []).join("\n"),
+            id: "song_arrangement_text", rows: 4,
+            class: "textarea textarea-bordered w-full font-mono text-sm", data: { role: "arrangement" } %>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <%= f.submit (song.persisted? ? "Save changes" : "Create song"), class: "btn btn-primary" %>
+    <%= link_to "Cancel", (song.persisted? ? song_path(song) : songs_path), class: "btn btn-ghost" %>
   </div>
 <% end %>
