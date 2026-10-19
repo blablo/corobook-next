@@ -47,18 +47,24 @@ class SongEditorTest < ApplicationSystemTestCase
     line = find(".lyric-edit")
     line.click
     line.send_keys("Santo es el Señor")
+    # Enter adds a new line below and moves the caret there.
+    line.send_keys(:enter)
+    assert_selector ".lyric-edit", count: 2
+    find(:css, ".lyric-edit", match: :first) # ensure rendered
+    page.driver.browser.switch_to.active_element.send_keys("Digno de gloria")
     # blur to flush the input handler
     find("body").click
 
     # The hidden canonical field now holds serialized ChordPro with section directives.
     source = find("input[data-song-editor-target=source]", visible: false).value
+    assert_includes source, "Digno de gloria"
     assert_includes source, "{soc}"
     assert_includes source, "Santo es el Señor"
     assert_includes source, "{eoc}"
 
     # After typing, clicking the line opens the chord picker; picking a chord places it
     # (regression: dynamically-injected picker chips must be clickable without a Stimulus race).
-    find(".lyric-edit").click
+    find(".lyric-edit", match: :first).click
     assert_selector ".song-picker"
     within(".song-picker") { first(".chip").click }
     assert_no_selector ".song-picker"
@@ -70,7 +76,7 @@ class SongEditorTest < ApplicationSystemTestCase
     assert_no_match(/\[[A-G][^\]]*\]/, find("input[data-song-editor-target=source]", visible: false).value)
 
     # Re-place one so the saved song carries a chord.
-    find(".lyric-edit").click
+    find(".lyric-edit", match: :first).click
     within(".song-picker") { first(".chip").click }
     assert_match(/\[[A-G][^\]]*\]/, find("input[data-song-editor-target=source]", visible: false).value)
 
