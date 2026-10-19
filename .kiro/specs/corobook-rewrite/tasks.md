@@ -193,16 +193,16 @@ implements; `_Design:_` cites the design section.
 
 ## 8. CCLI compliance
 
-- [ ] 8.1 Generate `UsageEvent` (church, live_session, song, snapshot ccli#/title/author/
+- [x] 8.1 Generate `UsageEvent` (church, live_session, song, snapshot ccli#/title/author/
   copyright_status, shown_at) with unique `(live_session_id, song_id)`. Hook the idempotent
   capture into the **7.2 position-change seam** (skip public-domain), passing `church`/
   `live_session` explicitly (never `Current` off-request). Tests: one event per song per
   session; public-domain skipped; snapshot immune to later song edit.
   _Requirements: 9.5_ _Design: §3.2.3, §7_ _Depends: 7.2 (capture seam)_
-- [ ] 8.2 Usage report CSV export (`GET reports/usage`, admin/editor, church-scoped, date
+- [x] 8.2 Usage report CSV export (`GET reports/usage`, admin/editor, church-scoped, date
   range, group by ccli#/title/author count, exclude public-domain). Test: CSV shape + scoping.
   _Requirements: 9.6_ _Design: §7, §9_
-- [ ] 8.3 Confirm end-to-end that the copyright notice (built with full suppression in 4.3)
+- [x] 8.3 Confirm end-to-end that the copyright notice (built with full suppression in 4.3)
   composes the church `ccli_license_number` correctly in a live projection context. (Suppression
   logic and its "no wrong notice" test already live in 4.3.) Test: live projector shows the
   correct notice for a licensed copyrighted song.
