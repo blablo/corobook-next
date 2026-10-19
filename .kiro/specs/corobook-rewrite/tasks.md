@@ -99,19 +99,19 @@ implements; `_Design:_` cites the design section.
 
 ## 4. Songs: model, editor, three renderings (static)
 
-- [ ] 4.1 Generate `Song` (all fields incl. `song_key`, `capo 0..11 check`, `copyright_line`,
+- [x] 4.1 Generate `Song` (all fields incl. `song_key`, `capo 0..11 check`, `copyright_line`,
   `ccli_song_number`, `copyright_status` string+check default `unknown`, `chordpro_source`,
   `parsed_lyric jsonb`, `plain_text`, `arrangement jsonb`). `before_save` parses source →
   `parsed_lyric` + `plain_text`; `pg_trgm` index on `plain_text`. Tests: save derives JSONB;
   malformed chord doesn't block save; title required.
   _Requirements: 1.1, 1.2, 1.7, 1.8, 1.9, 2 (tolerance)_ _Design: §2.1, §4.1_
-- [ ] 4.2 Song CRUD controller + ChordPro editor view (textarea source + key/capo/copyright
+- [x] 4.2 Song CRUD controller + ChordPro editor view (textarea source + key/capo/copyright
   fields + **arrangement editor**: order the song's section labels, empty = section order),
   church-scoped, editor-gated. System test: create a song with a malformed chord — it
   persists, the editor shows the inline `x_corobook_parse_warning`, and the save is not
   blocked; set an arrangement and see it stored.
   _Requirements: 1.1, 1.6, 5.3, 4 (arrangement)_ _Design: §5, §9, §2.1_
-- [ ] 4.3 Projector rendering partial (lyrics only, chords+`//` stripped, auto-fit Stimulus
+- [x] 4.3 Projector rendering partial (lyrics only, chords+`//` stripped, auto-fit Stimulus
   `fit` controller) + copyright notice, **including the full suppression rule**: render the
   notice (composed from `copyright_line` + church `ccli_license_number`) on the final section
   only for `copyright_status=copyrighted` with a license present; suppress it for
@@ -119,7 +119,7 @@ implements; `_Design:_` cites the design section.
   never a wrong notice. System tests: notice appears for copyrighted+licensed; absent for
   public-domain; suppressed + warning for unknown/missing-license.
   _Requirements: 3.1, 3.2, 3.7, 9.4_ _Design: §5, §7_
-- [ ] 4.4 Musician rendering partial (chords above syllables, server-side transpose/capo to a
+- [x] 4.4 Musician rendering partial (chords above syllables, server-side transpose/capo to a
   chosen key via param, current-key badge, repeat sections distinguished). Tests: chords
   render; transpose changes displayed chords; unknown source key → semitone-only; **follower
   capo vs song `{capo}` precedence pinned** (follower choice overrides, documented).
