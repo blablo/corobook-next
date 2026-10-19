@@ -38,12 +38,36 @@
     <div class="card-body gap-4">
       <div class="flex flex-wrap items-center gap-2">
         <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50 flex-1">Lyrics &amp; chords</h2>
+        <button type="button" class="btn btn-sm btn-outline gap-1" data-action="song-editor#openImport">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/></svg>
+          Import
+        </button>
         <%# mode toggle %>
         <div class="join">
           <button type="button" class="btn btn-sm join-item btn-active" data-song-editor-target="visualBtn"
                   data-action="song-editor#showVisual">Visual</button>
           <button type="button" class="btn btn-sm join-item" data-song-editor-target="advancedBtn"
                   data-action="song-editor#showAdvanced">Advanced (ChordPro)</button>
+        </div>
+      </div>
+
+      <%# Import modal: paste chords-over-lyrics text %>
+      <div class="hidden fixed inset-0 z-50 items-center justify-center bg-black/40 p-4" data-song-editor-target="importModal">
+        <div class="card bg-base-100 w-full max-w-2xl shadow-xl">
+          <div class="card-body gap-3">
+            <h3 class="text-lg font-bold">Import song</h3>
+            <p class="text-sm text-base-content/60">Paste chords-over-lyrics text (chord lines above lyric lines, with section headers like <code>VERSE 1</code> / <code>CHORUS</code>). We'll convert it automatically.</p>
+            <textarea rows="12" class="textarea textarea-bordered w-full font-mono text-sm" data-song-editor-target="importText"
+                      placeholder="VERSE 1&#10;C               F  G  C&#10;¡Al mundo paz, nació Jesús!&#10;..."></textarea>
+            <label class="flex items-center gap-2 text-sm">
+              <input type="checkbox" class="checkbox checkbox-sm" data-song-editor-target="importReplace" checked>
+              Replace existing sections
+            </label>
+            <div class="flex justify-end gap-2">
+              <button type="button" class="btn btn-ghost btn-sm" data-action="song-editor#closeImport">Cancel</button>
+              <button type="button" class="btn btn-primary btn-sm" data-action="song-editor#runImport">Import</button>
+            </div>
+          </div>
         </div>
       </div>
 

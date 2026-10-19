@@ -16,7 +16,7 @@ import { Controller } from "@hotwired/stimulus"
 // stable caret. Serialized back to the canonical field to match the Ruby
 // Serializer ({sov/soc/sob}+{eov/eoc/eob}, [Chord] prefix, {comment:}).
 export default class extends Controller {
-  static targets = ["source", "visual", "advanced", "visualBtn", "advancedBtn", "keyField"]
+  static targets = ["source", "visual", "advanced", "visualBtn", "advancedBtn", "keyField", "importModal", "importText", "importReplace"]
 
   connect() {
     this.model = this.parse(this.sourceTarget.value)
@@ -47,6 +47,94 @@ export default class extends Controller {
     this.visualTarget.classList.add("hidden")
     this.advancedBtnTarget.classList.add("btn-active")
     this.visualBtnTarget.classList.remove("btn-active")
+  }
+
+  // ======================= IMPORT (chords-over-lyrics -> model) =======================
+  openImport() {
+    this.importModalTarget.classList.remove("hidden")
+    this.importModalTarget.classList.add("flex")
+    this.importTextTarget.focus()
+  }
+  closeImport() {
+    this.importModalTarget.classList.add("hidden")
+    this.importModalTarget.classList.remove("flex")
+  }
+  runImport() {
+    const sections = this.parseChordsOverLyrics(this.importTextTarget.value)
+    if (!sections.length) { this.closeImport(); return }
+    if (this.hasImportReplaceTarget && this.importReplaceTarget.checked) this.model = sections
+    else this.model = [...this.model, ...sections]
+    this.importTextTarget.value = ""
+    this.closeImport()
+    // Serialize the imported model into the canonical field FIRST, then show visual mode
+    // (showVisual re-parses the source field, so the field must already hold the import).
+    this.serialize()
+    this.visualTarget.classList.remove("hidden")
+    this.advancedTarget.classList.add("hidden")
+    this.visualBtnTarget.classList.add("btn-active")
+    this.advancedBtnTarget.classList.remove("btn-active")
+    this.renderVisual()
+  }
+
+  // Parse pasted "chords over lyrics" text into our section/line model.
+  // Recognizes section headers (VERSE 1 / CHORUS / BRIDGE / ...), chord lines
+  // (all tokens look like chords) paired with the following lyric line, and
+  // chord-only lines (a chord line not followed by lyrics).
+  parseChordsOverLyrics(text) {
+    const rawLines = (text || "").replace(/\r/g, "").split("\n")
+    const headerRe = /^\s*(verse|chorus|coro|estrofa|bridge|puente|pre[-\s]?chorus|intro|outro|interlude|instrumental|tag|ending|vamp|refrain|verso)\s*([0-9]+|[a-z])?\s*:?\s*$/i
+    const kindOf = (h) => {
+      const l = h.toLowerCase()
+      if (l.includes("chorus") || l.includes("coro") || l.includes("refrain")) return "chorus"
+      if (l.includes("bridge") || l.includes("puente")) return "bridge"
+      return "verse"
+    }
+    const isChordToken = (t) => /^\(?[A-G][#b]?(?:maj|min|m|M|dim|aug|sus|add|º|°|\+)?[0-9]*(?:sus[0-9])?(?:add[0-9]+)?(?:\/[A-G][#b]?)?\)?$/.test(t)
+    const isChordLine = (line) => {
+      const toks = line.trim().split(/\s+/).filter(Boolean)
+      return toks.length > 0 && toks.every(isChordToken)
+    }
+    const chordsFromLine = (chordLine, lyric) => {
+      const chords = []
+      const re = /\S+/g; let m
+      while ((m = re.exec(chordLine)) !== null) {
+        const at = Math.min(m.index, lyric.length)
+        chords.push({ at, chord: m[0].replace(/[()]/g, "") })
+      }
+      return chords
+    }
+
+    const sections = []
+    let current = null
+    const ensure = () => { if (!current) { current = { kind: "verse", label: null, lines: [] }; sections.push(current) } }
+    const lines = rawLines
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]
+      if (line.trim() === "") continue
+      const hm = line.match(headerRe)
+      if (hm) {
+        const num = hm[2] ? ` ${hm[2]}` : ""
+        current = { kind: kindOf(hm[1]), label: (hm[1][0].toUpperCase() + hm[1].slice(1).toLowerCase() + num).trim(), lines: [] }
+        // only keep a label when it adds info beyond the kind
+        if (current.label.toLowerCase() === current.kind) current.label = null
+        sections.push(current)
+        continue
+      }
+      ensure()
+      if (isChordLine(line)) {
+        const next = lines[i + 1]
+        if (next !== undefined && next.trim() !== "" && !isChordLine(next) && !next.match(headerRe)) {
+          current.lines.push({ text: next, chords: chordsFromLine(line, next) })
+          i++ // consume the lyric line
+        } else {
+          // chord-only line (e.g. a lone repeat): anchor chords on empty text
+          current.lines.push({ text: "", chords: chordsFromLine(line, "") })
+        }
+      } else {
+        current.lines.push({ text: line, chords: [] })
+      }
+    }
+    return sections
   }
 
   // ======================= PARSE (ChordPro -> model) =======================
