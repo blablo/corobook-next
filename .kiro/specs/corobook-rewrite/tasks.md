@@ -66,31 +66,31 @@ implements; `_Design:_` cites the design section.
 
 > The riskiest piece. Fully unit-tested before any UI touches it.
 
-- [ ] 3.1 Implement `Corobook::Chord` value object: parse a chord string into
+- [x] 3.1 Implement `Corobook::Chord` value object: parse a chord string into
   `{root, accidental, quality, extension, bass}`; `unparsed` flag on regex miss. Tests: parses
   `G`, `Em7`, `F#`, `C°`, `Dm/F`, `Cmaj7/G`; marks `Fm#`/garbage as unparsed.
   _Requirements: 2 (malformed tolerance), 4.4_ _Design: §4.4_
-- [ ] 3.2 Implement transpose + capo as pure functions on `Chord`: `transpose(semitones)`
+- [x] 3.2 Implement transpose + capo as pure functions on `Chord`: `transpose(semitones)`
   preserving quality/extension and choosing enharmonic spelling by target key;
   `capo(n)` display mapping; unparsed chords pass through unchanged. Tests: quality preserved,
   enharmonic spelling correct per key, unparsed unchanged, capo bounds 0..11.
   _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_ _Design: §4.4_
-- [ ] 3.3 Implement `Corobook::ChordPro::Parser` → `ParsedLyric` JSONB: CRLF normalize;
+- [x] 3.3 Implement `Corobook::ChordPro::Parser` → `ParsedLyric` JSONB: CRLF normalize;
   inline `[chord]` binding to following text (incl. mid-word); `{title}/{subtitle}/{key}/
   {capo}/{transpose}/{comment}` meta; `{sov|soc|sob}`(+`eo*`) sections with labels;
   blank-line fallback; unknown directives ignored; never raises. Tests cover each rule +
   empty/chord-only sections + `{transpose}` captured in meta.
   _Requirements: 1.2, 2.1, 2.2, 2.3, 2.5, 2.6, 2.7, 1.4, 1.5, 1.6_ _Design: §4.2, §4.3_
-- [ ] 3.3b Add `{chorus}` replay materialization to the parser: copy the most recently defined
+- [x] 3.3b Add `{chorus}` replay materialization to the parser: copy the most recently defined
   chorus's lines into a section carrying `replay_of`; empty + `x_corobook_parse_warning` if no
   prior chorus. Tests: replay materializes concrete lines; missing-prior-chorus warns.
   _Requirements: 2.4_ _Design: §4.3_
-- [ ] 3.4 Implement ParsedLyric → ChordPro **serializer** and a round-trip assertion helper,
+- [x] 3.4 Implement ParsedLyric → ChordPro **serializer** and a round-trip assertion helper,
   honoring the whitespace contract (consecutive chords, chord-only lines, load-bearing
   spaces). Tests: round-trip a corpus of hand-written ChordPro fixtures byte-for-byte on
   lyric/chord content.
   _Requirements: 1.3, 11.2_ _Design: §4.3a_
-- [ ] 3.5 Implement `ParsedLyric` transform helpers: `transpose(parsed, semitones, capo)`
+- [x] 3.5 Implement `ParsedLyric` transform helpers: `transpose(parsed, semitones, capo)`
   (applying any meta `{transpose}` baseline FIRST, then the requested shift) and
   `plain_text(parsed)` (lyric text only, chords/directives stripped). Tests: baseline transpose
   applied before per-follower shift; transpose whole song; plain_text strips chords incl.
