@@ -66,3 +66,6 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
+
+# CSV moved out of Ruby default gems in 3.4; pin it for the usage report export.
+gem "csv"
