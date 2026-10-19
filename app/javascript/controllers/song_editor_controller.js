@@ -16,12 +16,14 @@ import { Controller } from "@hotwired/stimulus"
 // stable caret. Serialized back to the canonical field to match the Ruby
 // Serializer ({sov/soc/sob}+{eov/eoc/eob}, [Chord] prefix, {comment:}).
 export default class extends Controller {
-  static targets = ["source", "visual", "advanced", "visualBtn", "advancedBtn", "keyField", "importModal", "importText", "importReplace"]
+  static targets = ["source", "visual", "advanced", "visualBtn", "advancedBtn", "keyField", "importModal", "importText", "importReplace", "arrangeWrap", "arrangeAvail", "arrangeOrder", "arrangeField"]
 
   connect() {
     this.model = this.parse(this.sourceTarget.value)
     this.openPicker = null
+    this.order = this.parseOrder(this.hasArrangeFieldTarget ? this.arrangeFieldTarget.value : "")
     this.renderVisual()
+    this.renderArrange()
     this.showVisual()
     if (this.hasKeyFieldTarget) {
       this.keyFieldTarget.addEventListener("change", () => this.renderVisual())
@@ -541,7 +543,79 @@ export default class extends Controller {
     this.commit()
   }
 
-  commit() { this.serialize(); this.renderVisual() }
+  commit() { this.serialize(); this.renderVisual(); this.renderArrange() }
+
+  // ======================= ARRANGEMENT (play order) =======================
+  // The order is a list of section labels (repeats allowed). It serializes to the
+  // hidden arrangeField as newline-separated labels, which the server already parses.
+  parseOrder(text) {
+    return (text || "").split(/[\n,]/).map(s => s.trim()).filter(Boolean)
+  }
+  sectionLabels() {
+    return this.model.map(s => s.label || this.kindName(s.kind))
+  }
+  renderArrange() {
+    if (!this.hasArrangeAvailTarget) return
+    const labels = this.sectionLabels()
+    // Drop order entries whose section no longer exists (e.g. a deleted section).
+    this.order = this.order.filter(l => labels.includes(l))
+
+    this.arrangeAvailTarget.innerHTML = labels.length
+      ? labels.map(l => `<button type="button" class="btn btn-sm btn-outline arrange-add" data-label="${this.esc(l)}">+ ${this.esc(l)}</button>`).join("")
+      : `<span class="text-sm text-base-content/40">Add sections above first.</span>`
+    this.arrangeAvailTarget.querySelectorAll(".arrange-add").forEach(b =>
+      b.addEventListener("click", () => this.addToOrder(b.dataset.label)))
+
+    this.arrangeOrderTarget.innerHTML = this.order.length
+      ? this.order.map((l, i) => this.orderRow(l, i)).join("")
+      : `<span class="text-sm text-base-content/40 px-1">Empty — plays in section order.</span>`
+    this.wireOrderRows()
+    this.syncOrderField()
+  }
+  orderRow(label, i) {
+    return `
+      <div class="flex items-center gap-2 rounded bg-base-100 ring-1 ring-base-200 px-2 py-1 arrange-row" draggable="true" data-i="${i}">
+        <span class="cursor-grab select-none text-base-content/30" data-drag-handle>⠿</span>
+        <span class="text-base-content/40 text-xs w-5 text-right">${i + 1}.</span>
+        <span class="flex-1 text-sm">${this.esc(label)}</span>
+        <button type="button" class="btn btn-ghost btn-xs px-1 arrange-up" title="Move up" data-i="${i}">↑</button>
+        <button type="button" class="btn btn-ghost btn-xs px-1 arrange-down" title="Move down" data-i="${i}">↓</button>
+        <button type="button" class="btn btn-ghost btn-xs px-1 text-error arrange-del" title="Remove" data-i="${i}">✕</button>
+      </div>`
+  }
+  wireOrderRows() {
+    const rows = this.arrangeOrderTarget.querySelectorAll(".arrange-row")
+    rows.forEach(row => {
+      const i = +row.dataset.i
+      row.querySelector(".arrange-up").addEventListener("click", () => this.moveOrder(i, -1))
+      row.querySelector(".arrange-down").addEventListener("click", () => this.moveOrder(i, +1))
+      row.querySelector(".arrange-del").addEventListener("click", () => this.removeFromOrder(i))
+      row.addEventListener("dragstart", (e) => { this._dragFrom = i; e.dataTransfer.effectAllowed = "move"; row.classList.add("opacity-50") })
+      row.addEventListener("dragend", () => row.classList.remove("opacity-50"))
+      row.addEventListener("dragover", (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move" })
+      row.addEventListener("drop", (e) => { e.preventDefault(); this.dropOrder(i) })
+    })
+  }
+  addToOrder(label) { this.order.push(label); this.renderArrange() }
+  removeFromOrder(i) { this.order.splice(i, 1); this.renderArrange() }
+  moveOrder(i, delta) {
+    const j = i + delta
+    if (j < 0 || j >= this.order.length) return
+    const [item] = this.order.splice(i, 1)
+    this.order.splice(j, 0, item)
+    this.renderArrange()
+  }
+  dropOrder(to) {
+    const from = this._dragFrom
+    if (from == null || from === to) return
+    const [item] = this.order.splice(from, 1)
+    this.order.splice(to, 0, item)
+    this._dragFrom = null
+    this.renderArrange()
+  }
+  syncOrderField() {
+    if (this.hasArrangeFieldTarget) this.arrangeFieldTarget.value = this.order.join("\n")
+  }
   closePicker() { if (this.openPicker) { this.openPicker.remove(); this.openPicker = null } }
 
   focusLine(si, li, sel = ".lyric-edit") {

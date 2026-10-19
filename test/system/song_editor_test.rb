@@ -21,18 +21,13 @@ class SongEditorTest < ApplicationSystemTestCase
     click_on "Advanced (ChordPro)"
     fill_in "ChordPro source", with: "[Fm#]Hola mundo\n{chorus}"
 
-    # Arrangement lives in a collapsed advanced section — open it via its toggle.
-    find(".collapse", text: "Arrangement order").find("input[type=checkbox]", visible: :all).click
-    fill_in "song[arrangement_text]", with: "Verso\nCoro"
     click_on "Create song"
 
     assert_text "Song created."
     assert_selector "[data-role=parse-warning]", text: "x_corobook_parse_warning"
-    assert_selector "[data-role=arrangement]", text: "Verso → Coro"
 
     song = @church.songs.find_by(title: "Canto con error")
     assert_includes song.chordpro_source, "[Fm#]"
-    assert_equal %w[Verso Coro], song.arrangement
   end
 
   test "the visual editor builds ChordPro without the user typing syntax" do
@@ -112,6 +107,40 @@ class SongEditorTest < ApplicationSystemTestCase
     assert_includes source, "{sov: Verse 1}"
     assert_includes source, "{sov: Verse 2}"
     assert_includes source, "{soc: Chorus 1}"
+  end
+
+  test "the arrangement builder composes a play order from section chips" do
+    visit new_song_path
+    assert_text "New song"
+    fill_in "Title", with: "Orden visual"
+
+    click_on "+ Verse"
+    click_on "+ Chorus"
+
+    # Open the arrangement section.
+    find(".collapse", text: "Arrangement order").find("input[type=checkbox]", visible: :all).click
+
+    within("[data-song-editor-target=arrangeWrap]") do
+      # Build: Verse 1 -> Chorus 1 -> Verse 1 (chorus reused + verse repeated)
+      click_on "+ Verse 1"
+      click_on "+ Chorus 1"
+      click_on "+ Verse 1"
+      assert_selector ".arrange-row", count: 3
+
+      # Reorder: move the last row up one (Verse1, Chorus1, Verse1 -> Verse1, Verse1, Chorus1)
+      all(".arrange-row .arrange-up").last.click
+      # Remove the middle row.
+      all(".arrange-row .arrange-del")[1].click
+      assert_selector ".arrange-row", count: 2
+    end
+
+    field = find("input[data-song-editor-target=arrangeField]", visible: false).value
+    assert_equal "Verse 1\nChorus 1", field
+
+    click_on "Create song"
+    assert_text "Song created."
+    song = @church.songs.find_by(title: "Orden visual")
+    assert_equal ["Verse 1", "Chorus 1"], song.arrangement
   end
 
   test "importing pasted chords-over-lyrics builds sections with chords anchored" do
