@@ -187,7 +187,7 @@ export default class extends Controller {
         <div class="flex items-center gap-2">
           <div contenteditable="true" spellcheck="false"
                class="lyric-edit font-mono text-[15px] leading-tight whitespace-pre-wrap outline-none focus:bg-primary/5 rounded px-1 flex-1 min-h-[1.5em]"
-               data-chordstop data-action="input->song-editor#lyricInput click->song-editor#lyricClick"
+               data-chordstop data-action="input->song-editor#lyricInput click->song-editor#lyricClick keydown->song-editor#lyricKeydown"
                data-si="${si}" data-li="${li}">${this.esc(ln.text)}</div>
           <button type="button" class="link link-error text-xs opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
                   data-action="song-editor#removeLine" data-si="${si}" data-li="${li}">remove</button>
@@ -210,6 +210,42 @@ export default class extends Controller {
     })
     old.text = newText
     this.serialize() // no re-render: preserve caret
+  }
+
+  lyricKeydown(e) {
+    const el = e.currentTarget
+    const si = +el.dataset.si, li = +el.dataset.li
+    if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
+      e.preventDefault()
+      // sync current DOM text into the model first (input may not have fired yet)
+      const ln = this.model[si].lines[li]
+      ln.text = el.textContent
+      const caret = this.caretOffset(el)
+      const before = ln.text.slice(0, caret)
+      const after = ln.text.slice(caret)
+      // chords before the caret stay; chords at/after move to the new line (offset rebased)
+      const keep = (ln.chords || []).filter(c => c.at <= caret).map(c => ({ ...c }))
+      const moved = (ln.chords || []).filter(c => c.at > caret).map(c => ({ chord: c.chord, at: c.at - caret }))
+      ln.text = before; ln.chords = keep
+      this.model[si].lines.splice(li + 1, 0, { text: after, chords: moved })
+      this.commit()
+      this.focusLineAt(si, li + 1, 0) // caret at start of the new line
+      return
+    }
+    if (e.key === "Backspace" && this.caretOffset(el) === 0 && li > 0) {
+      // merge this line up into the previous lyric line
+      const prev = this.model[si].lines[li - 1]
+      const cur = this.model[si].lines[li]
+      if (!("comment" in prev) && !("comment" in cur)) {
+        e.preventDefault()
+        const joinAt = prev.text.length
+        prev.text = prev.text + cur.text
+        prev.chords = [...(prev.chords || []), ...(cur.chords || []).map(c => ({ chord: c.chord, at: c.at + joinAt }))]
+        this.model[si].lines.splice(li, 1)
+        this.commit()
+        this.focusLineAt(si, li - 1, joinAt)
+      }
+    }
   }
   commentInput(e) {
     const { si, li } = e.currentTarget.dataset
@@ -317,6 +353,19 @@ export default class extends Controller {
     requestAnimationFrame(() => {
       const el = this.visualTarget.querySelector(`[data-si="${si}"] [data-li="${li}"] ${sel}`)
       if (el) { el.focus(); this.placeCaretEnd(el) }
+    })
+  }
+  focusLineAt(si, li, offset) {
+    requestAnimationFrame(() => {
+      const el = this.visualTarget.querySelector(`[data-si="${si}"] [data-li="${li}"] .lyric-edit`)
+      if (!el) return
+      el.focus()
+      const node = el.firstChild || el
+      const pos = Math.max(0, Math.min(offset, (node.textContent || "").length))
+      const range = document.createRange()
+      try { range.setStart(node.nodeType === 3 ? node : el, node.nodeType === 3 ? pos : 0) } catch (_) { range.selectNodeContents(el) }
+      range.collapse(true)
+      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range)
     })
   }
   placeCaretEnd(el) {
