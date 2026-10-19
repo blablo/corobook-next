@@ -1,0 +1,26 @@
+<div class="mx-auto mt-8 max-w-3xl">
+  <div class="flex items-center justify-between mb-4">
+    <h1 class="text-2xl font-semibold"><%= @song.title %></h1>
+    <% if can_edit? %>
+      <%= link_to "Edit", edit_song_path(@song), class: "underline text-sm" %>
+    <% end %>
+  </div>
+
+  <p class="text-sm text-slate-500 mb-2">
+    <%= @song.author %> <%= "· Key #{@song.song_key}" if @song.song_key.present? %>
+    <%= "· Capo #{@song.capo}" if @song.capo.to_i.positive? %>
+  </p>
+
+  <% warnings = parse_warnings(@song) %>
+  <% if warnings.any? %>
+    <div class="mb-4 rounded bg-amber-100 text-amber-900 px-3 py-2 text-sm" data-role="parse-warning">
+      <% warnings.each { |w| %><div><%= w %></div><% } %>
+    </div>
+  <% end %>
+
+  <% if @song.arrangement.present? %>
+    <p class="text-sm mb-4" data-role="arrangement">Arrangement: <%= @song.arrangement.join(" → ") %></p>
+  <% end %>
+
+  <pre class="bg-slate-100 text-slate-900 rounded p-3 text-sm overflow-auto"><%= @song.chordpro_source %></pre>
+</div>
