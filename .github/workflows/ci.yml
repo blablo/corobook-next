@@ -136,17 +136,23 @@ jobs:
           bundler-cache: true
 
       - name: Set up Chrome
+        id: setup-chrome
         uses: browser-actions/setup-chrome@v1
         with:
+          chrome-version: stable
           install-chromedriver: true
 
       - name: Run System Tests
         env:
           RAILS_ENV: test
           DATABASE_URL: postgres://postgres:postgres@localhost:5432
+          # Pin Selenium to the exact browser setup-chrome installed, so its chromedriver matches.
+          CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
           # RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
           # REDIS_URL: redis://localhost:6379/0
-        run: bin/rails db:test:prepare test:system
+        run: |
+          export PATH="$(dirname '${{ steps.setup-chrome.outputs.chromedriver-path }}'):$PATH"
+          bin/rails db:test:prepare test:system
 
       - name: Keep screenshots from failed system tests
         uses: actions/upload-artifact@v4

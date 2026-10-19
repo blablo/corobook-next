@@ -47,7 +47,7 @@ module Corobook
       end
 
       def deep_dup(obj)
-        Marshal.load(Marshal.dump(obj))
+        Corobook::DeepDup.call(obj)
       end
     end
   end
