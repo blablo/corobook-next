@@ -3,6 +3,7 @@ class Church < ApplicationRecord
   has_many :songs, dependent: :destroy
   has_many :text_slides, dependent: :destroy
   has_many :service_sets, dependent: :destroy
+  has_many :live_sessions, dependent: :destroy
 
   validates :name, presence: true
 end

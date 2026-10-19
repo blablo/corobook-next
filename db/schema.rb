@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_19_161500) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_19_164146) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -21,6 +21,32 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_161500) do
     t.string "ccli_license_number"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "live_sessions", force: :cascade do |t|
+    t.bigint "church_id", null: false
+    t.bigint "service_set_id", null: false
+    t.string "status", default: "active", null: false
+    t.bigint "current_set_item_id"
+    t.integer "current_section_index", default: 0, null: false
+    t.bigint "position_version", default: 0, null: false
+    t.integer "lock_version", default: 0, null: false
+    t.boolean "blanked", default: false, null: false
+    t.integer "font_scale", default: 100, null: false
+    t.string "projector_token"
+    t.string "musician_token"
+    t.datetime "started_at"
+    t.datetime "ended_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["church_id"], name: "index_live_sessions_on_church_id"
+    t.index ["current_set_item_id"], name: "index_live_sessions_on_current_set_item_id"
+    t.index ["musician_token"], name: "index_live_sessions_on_musician_token", unique: true
+    t.index ["projector_token"], name: "index_live_sessions_on_projector_token", unique: true
+    t.index ["service_set_id"], name: "index_live_sessions_on_service_set_id"
+    t.check_constraint "current_section_index >= 0", name: "live_sessions_section_index_check"
+    t.check_constraint "font_scale >= 50 AND font_scale <= 400", name: "live_sessions_font_scale_check"
+    t.check_constraint "status::text = ANY (ARRAY['active'::character varying, 'ended'::character varying]::text[])", name: "live_sessions_status_check"
   end
 
   create_table "service_sets", force: :cascade do |t|
@@ -98,6 +124,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_161500) do
     t.check_constraint "role::text = ANY (ARRAY['admin'::character varying, 'editor'::character varying]::text[])", name: "users_role_check"
   end
 
+  add_foreign_key "live_sessions", "churches"
+  add_foreign_key "live_sessions", "service_sets"
+  add_foreign_key "live_sessions", "set_items", column: "current_set_item_id"
   add_foreign_key "service_sets", "churches"
   add_foreign_key "set_items", "service_sets"
   add_foreign_key "set_items", "songs"
