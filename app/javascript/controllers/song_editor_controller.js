@@ -27,7 +27,7 @@ export default class extends Controller {
       this.keyFieldTarget.addEventListener("change", () => this.renderVisual())
     }
     this.advancedTarget.addEventListener("input", () => { this.sourceTarget.value = this.advancedTarget.value })
-    this._closeOnOutside = (e) => { if (!e.target.closest(".song-picker") && !e.target.closest("[data-chordstop]")) this.closePicker() }
+    this._closeOnOutside = (e) => { if (!e.target.closest(".song-picker") && !e.target.closest("[data-chordstop]") && !e.target.closest(".chordrow")) this.closePicker() }
     document.addEventListener("click", this._closeOnOutside)
   }
   disconnect() { document.removeEventListener("click", this._closeOnOutside) }
@@ -249,6 +249,14 @@ export default class extends Controller {
         this.removeChordAt(si, li, +at)
       })
     })
+    // Clicking the chord row (not a pill) opens the picker at the clicked column.
+    this.visualTarget.querySelectorAll(".chordrow").forEach(row => {
+      row.addEventListener("mousedown", (ev) => {
+        if (ev.target.closest(".chord-pill")) return // pill handles its own removal
+        ev.preventDefault(); ev.stopPropagation()
+        this.chordRowClickAt(row, ev.clientX)
+      })
+    })
   }
 
   renderLine(si, ln, li) {
@@ -271,11 +279,16 @@ export default class extends Controller {
     }).join("")
     return `
       <div class="mb-2 group" data-li="${li}">
-        <div class="chordrow relative font-mono text-[13px] leading-[1.1] h-[1.35em] whitespace-pre text-primary select-none">${chordPills}</div>
+        <div class="chordrow relative font-mono text-[13px] leading-[1.35] h-[1.6em] whitespace-pre text-primary cursor-pointer rounded hover:bg-primary/5 select-none"
+             data-si="${si}" data-li="${li}"
+             title="Click here to add a chord above the lyrics">
+          ${chordPills}
+          ${chords.length === 0 ? '<span class="chord-hint absolute inset-0 flex items-center text-base-content/30 text-[11px] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none px-1">+ click to add a chord</span>' : ''}
+        </div>
         <div class="flex items-center gap-2">
           <div contenteditable="true" spellcheck="false"
                class="lyric-edit font-mono text-[15px] leading-tight whitespace-pre-wrap outline-none focus:bg-primary/5 rounded px-1 flex-1 min-h-[1.5em]"
-               data-chordstop data-action="input->song-editor#lyricInput click->song-editor#lyricClick keydown->song-editor#lyricKeydown"
+               data-chordstop data-action="input->song-editor#lyricInput keydown->song-editor#lyricKeydown"
                data-si="${si}" data-li="${li}">${this.esc(ln.text)}</div>
           <button type="button" class="link link-error text-xs opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
                   data-action="song-editor#removeLine" data-si="${si}" data-li="${li}">remove</button>
@@ -340,14 +353,25 @@ export default class extends Controller {
     this.model[si].lines[li].comment = e.currentTarget.textContent
     this.serialize()
   }
-  lyricClick(e) {
-    // place a chord at the clicked character offset
-    e.stopPropagation()
+  chordRowClickAt(row, clientX) {
     this.closePicker()
-    const el = e.currentTarget
-    const { si, li } = el.dataset
-    const at = this.caretOffset(el)
-    this.openChordPicker(el, si, li, at)
+    const { si, li } = row.dataset
+    const lyric = row.parentElement.querySelector(".lyric-edit")
+    const text = (this.model[si].lines[li].text) || ""
+    const chWidth = this.charWidth(lyric)
+    const x = clientX - lyric.getBoundingClientRect().left
+    let at = chWidth > 0 ? Math.round(x / chWidth) : 0
+    at = Math.max(0, Math.min(at, text.length))
+    this.openChordPicker(row, si, li, at)
+  }
+  charWidth(lyricEl) {
+    const probe = document.createElement("span")
+    probe.style.cssText = "position:absolute;visibility:hidden;white-space:pre;font-family:ui-monospace,Menlo,monospace;font-size:15px"
+    probe.textContent = "0000000000"
+    lyricEl.appendChild(probe)
+    const w = probe.getBoundingClientRect().width / 10
+    probe.remove()
+    return w
   }
 
   openChordPicker(anchorEl, si, li, at) {
