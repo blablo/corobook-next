@@ -266,17 +266,65 @@ export default class extends Controller {
     const pal = this._palette
     const ln = this.model[si].lines[li]
     const existing = (ln.chords || []).find(c => c.at === +at)
-    const chip = (c, rare) => `<span class="chip cursor-pointer text-[12px] font-semibold px-2 py-0.5 rounded border border-base-300 hover:border-primary hover:text-primary ${rare ? "opacity-60" : ""}" data-chord="${c}">${c}</span>`
+
+    const ALL_ROOTS = ["C","C#","Db","D","D#","Eb","E","F","F#","Gb","G","G#","Ab","A","A#","Bb","B"]
+    const SUFFIXES = ["", "m", "7", "maj7", "m7", "sus2", "sus4", "add9", "9", "6", "m6", "dim", "aug", "5"]
+
+    const quick = (c) => `<span class="chip cursor-pointer text-[12px] font-semibold px-2 py-0.5 rounded border border-base-300 hover:border-primary hover:text-primary" data-pick="${c}">${c}</span>`
+    const rootBtn = (r) => `<span class="rootbtn cursor-pointer text-[12px] font-semibold px-1.5 py-0.5 rounded border border-base-300 hover:border-primary hover:text-primary" data-root="${r}">${r}</span>`
+    const sufBtn = (s) => `<span class="sufbtn cursor-pointer text-[12px] px-1.5 py-0.5 rounded border border-base-300 hover:border-primary hover:text-primary opacity-50" data-suf="${s}">${s === "" ? "maj" : s}</span>`
+
     const pop = document.createElement("div")
-    pop.className = "song-picker absolute z-30 bg-base-100 ring-1 ring-base-300 shadow-lg rounded-lg p-2 flex flex-wrap gap-1 w-60 mt-1"
+    pop.className = "song-picker absolute z-30 bg-base-100 ring-1 ring-base-300 shadow-lg rounded-lg p-2 w-72 mt-1"
     const header = existing
-      ? `<div class="w-full flex items-center gap-2 mb-1 px-0.5"><span class="text-[11px] text-base-content/50 flex-1">Change chord <b>${this.esc(existing.chord)}</b> (or)</span><span class="remove-chord cursor-pointer text-[12px] font-semibold text-error hover:underline">✕ Remove</span></div>`
-      : `<div class="w-full text-[11px] text-base-content/50 mb-1 px-0.5">Chord at this position</div>`
-    pop.innerHTML = header + pal.common.map(c => chip(c, false)).join("") + pal.extras.map(c => chip(c, true)).join("")
-    // Direct listeners — dynamically-injected nodes are not reliably bound by Stimulus actions in time.
-    pop.querySelectorAll(".chip").forEach(ch => {
-      ch.addEventListener("mousedown", (ev) => { ev.preventDefault(); ev.stopPropagation(); this.placeChord(si, li, at, ch.dataset.chord) })
-    })
+      ? `<div class="flex items-center gap-2 mb-1.5 px-0.5"><span class="text-[11px] text-base-content/50 flex-1">Change <b>${this.esc(existing.chord)}</b></span><span class="remove-chord cursor-pointer text-[12px] font-semibold text-error hover:underline">✕ Remove</span></div>`
+      : `<div class="text-[11px] text-base-content/50 mb-1.5 px-0.5">Add a chord here</div>`
+
+    pop.innerHTML = header +
+      `<div class="text-[10px] uppercase tracking-wide text-base-content/40 mb-1">Key of ${this.esc((this.hasKeyFieldTarget ? this.keyFieldTarget.value : "G") || "G")}</div>
+       <div class="flex flex-wrap gap-1 mb-2">${pal.common.map(quick).join("")}</div>
+       <div class="text-[10px] uppercase tracking-wide text-base-content/40 mb-1">Build any chord</div>
+       <div class="flex flex-wrap gap-1 mb-1.5" data-role="roots">${ALL_ROOTS.map(rootBtn).join("")}</div>
+       <div class="flex flex-wrap gap-1 mb-2" data-role="sufs">${SUFFIXES.map(sufBtn).join("")}</div>
+       <div class="flex items-center gap-1">
+         <input type="text" class="chord-free input input-bordered input-xs flex-1 font-mono" placeholder="type any chord (e.g. F#m7/A)" value="${existing ? this.esc(existing.chord) : ""}">
+         <button type="button" class="chord-free-add btn btn-primary btn-xs">Set</button>
+       </div>`
+
+    // key quick-chips: one-tap place
+    pop.querySelectorAll(".chip[data-pick]").forEach(ch =>
+      ch.addEventListener("mousedown", (ev) => { ev.preventDefault(); ev.stopPropagation(); this.placeChord(si, li, at, ch.dataset.pick) }))
+
+    // builder: tap root → suffixes enable; tap suffix → place root+suffix; tap root alone places major triad on second tap
+    let chosenRoot = null
+    const sufEls = pop.querySelectorAll(".sufbtn")
+    const setRoot = (r) => {
+      chosenRoot = r
+      pop.querySelectorAll(".rootbtn").forEach(b => b.classList.toggle("border-primary", b.dataset.root === r))
+      pop.querySelectorAll(".rootbtn").forEach(b => b.classList.toggle("text-primary", b.dataset.root === r))
+      sufEls.forEach(b => b.classList.remove("opacity-50"))
+    }
+    pop.querySelectorAll(".rootbtn").forEach(b =>
+      b.addEventListener("mousedown", (ev) => {
+        ev.preventDefault(); ev.stopPropagation()
+        if (chosenRoot === b.dataset.root) { this.placeChord(si, li, at, chosenRoot) } // second tap = major triad
+        else setRoot(b.dataset.root)
+      }))
+    sufEls.forEach(b =>
+      b.addEventListener("mousedown", (ev) => {
+        ev.preventDefault(); ev.stopPropagation()
+        const root = chosenRoot || (this.hasKeyFieldTarget ? (this.keyFieldTarget.value || "G").replace(/m$/, "") : "G")
+        this.placeChord(si, li, at, root + b.dataset.suf)
+      }))
+
+    // free text: the ultimate escape hatch — any chord string
+    const free = pop.querySelector(".chord-free")
+    const commitFree = () => { const v = free.value.trim(); if (v) this.placeChord(si, li, at, v) }
+    pop.querySelector(".chord-free-add").addEventListener("mousedown", (ev) => { ev.preventDefault(); ev.stopPropagation(); commitFree() })
+    free.addEventListener("keydown", (ev) => { if (ev.key === "Enter") { ev.preventDefault(); commitFree() } })
+    free.addEventListener("mousedown", (ev) => ev.stopPropagation())
+    free.addEventListener("click", (ev) => ev.stopPropagation())
+
     const rm = pop.querySelector(".remove-chord")
     if (rm) rm.addEventListener("mousedown", (ev) => { ev.preventDefault(); ev.stopPropagation(); this.removeChordAt(si, li, +at) })
     anchorEl.parentElement.style.position = "relative"

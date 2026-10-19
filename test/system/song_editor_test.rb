@@ -66,10 +66,14 @@ class SongEditorTest < ApplicationSystemTestCase
     # (regression: dynamically-injected picker chips must be clickable without a Stimulus race).
     find(".lyric-edit", match: :first).click
     assert_selector ".song-picker"
-    within(".song-picker") { first(".chip").click }
+    # The builder can reach ANY chord, not just key chords — build F#m7 via root + suffix.
+    within(".song-picker") do
+      find(".rootbtn[data-root='F#']").click
+      find(".sufbtn[data-suf='m7']").click
+    end
     assert_no_selector ".song-picker"
     source = find("input[data-song-editor-target=source]", visible: false).value
-    assert_match(/\[[A-G][^\]]*\]/, source) # a chord bracket now present
+    assert_includes source, "[F#m7]"
 
     # Remove a wrongly-placed chord by clicking its pill.
     find(".chord-pill").click
