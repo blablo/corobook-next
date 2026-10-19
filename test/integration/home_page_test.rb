@@ -24,17 +24,17 @@ class HomePageTest < ActionDispatch::IntegrationTest
     assert_redirected_to root_path
   end
 
-  test "an admin sees the usage-report tile" do
+  test "an admin sees the usage-report nav entry" do
     sign_in
     get root_path
-    assert_select "[data-role=usage-report]"
+    assert_select "[data-role=nav-usage]"
   end
 
-  test "an editor does not see the usage-report tile" do
+  test "an editor does not see the usage-report nav entry" do
     editor = User.create!(church: @church, email: "ed@example.com", password: "secret123", role: "editor")
     post login_path, params: { church_id: @church.id, email: editor.email, password: "secret123" }
     get root_path
-    assert_select "[data-role=usage-report]", false
+    assert_select "[data-role=nav-usage]", false
   end
 
   test "library counts reflect church data and exclude inline slides and other churches" do
@@ -49,8 +49,8 @@ class HomePageTest < ActionDispatch::IntegrationTest
     sign_in
     get root_path
     assert_select "[data-role=library-stats]" do
-      assert_select ".stat-value", text: "2"  # songs (church-scoped, not 3)
-      assert_select ".stat-value", text: "1"  # reusable slides only (not 2)
+      assert_select ".text-3xl", text: "2"  # songs (church-scoped, not 3)
+      assert_select ".text-3xl", text: "1"  # reusable slides only (not 2)
     end
   end
 
