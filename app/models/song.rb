@@ -10,6 +10,15 @@ class Song < ApplicationRecord
 
   before_save :derive_parsed_lyric
 
+  # Case-insensitive search over title, author, and derived lyric text. Backed by the pg_trgm
+  # GIN index on plain_text (§8); ILIKE lets the trigram index serve partial matches.
+  scope :search, ->(q) {
+    next all if q.blank?
+
+    pattern = "%#{sanitize_sql_like(q.to_s.strip)}%"
+    where("title ILIKE :p OR author ILIKE :p OR plain_text ILIKE :p", p: pattern)
+  }
+
   # The ParsedLyric for views, built lazily from the stored JSONB.
   def parsed
     Corobook::ChordPro::ParsedLyric.from_hash(parsed_lyric || {})

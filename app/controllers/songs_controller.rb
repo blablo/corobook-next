@@ -4,7 +4,11 @@ class SongsController < ApplicationController
   before_action :set_song, only: %i[show edit update destroy]
 
   def index
-    @songs = church_scope(:songs).order(:title)
+    @query = params[:q]
+    @page = [ params[:page].to_i, 1 ].max
+    per = 25
+    @songs = church_scope(:songs).search(@query).order(:title).limit(per).offset((@page - 1) * per)
+    @has_more = church_scope(:songs).search(@query).count > @page * per
   end
 
   def show

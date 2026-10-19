@@ -7,6 +7,13 @@ class TextSlide < ApplicationRecord
 
   enum :subtype, SUBTYPES.index_with(&:itself), validate: true
 
+  scope :search, ->(q) {
+    next all if q.blank?
+
+    pattern = "%#{sanitize_sql_like(q.to_s.strip)}%"
+    where("title ILIKE :p OR subtype ILIKE :p OR body_markdown ILIKE :p", p: pattern)
+  }
+
   validates :title, presence: true
   # Reusable library slide has no owning set; an inline one-off slide must have one.
   validates :set_id, absence: true, if: :reusable?
