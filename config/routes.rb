@@ -17,6 +17,9 @@ Rails.application.routes.draw do
   patch "operator/:id/back"    => "operator#back",    as: :operator_back
   patch "operator/:id/goto"    => "operator#goto",    as: :operator_goto
 
+  get "p/:token" => "projector#show", as: :projector
+  get "m/:token" => "musician#show",  as: :musician
+
   resources :service_sets, path: "sets", as: :service_sets do
     member do
       post "items", to: "service_sets#add_item", as: :add_item

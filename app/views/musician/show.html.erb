@@ -1,0 +1,16 @@
+<%= turbo_stream_from [ @session, :musician ] %>
+<div class="musician-root" data-role="musician-root"
+     data-controller="musician-key" data-musician-key-token-value="<%= @session.musician_token %>">
+  <form class="musician-key-chooser mb-3" data-action="change->musician-key#choose">
+    <label class="text-sm mr-2">Key
+      <input type="text" name="key" value="<%= @target_key %>" data-role="key-input"
+             class="border rounded px-2 py-1 w-20" />
+    </label>
+    <label class="text-sm">Capo
+      <input type="number" name="capo" value="<%= @capo %>" min="0" max="11"
+             data-role="capo-input" class="border rounded px-2 py-1 w-16" />
+    </label>
+  </form>
+
+  <%= render "live/musician_frame", session: @session, target_key: @target_key, semitones: @semitones, capo: @capo %>
+</div>
