@@ -1,54 +1,46 @@
-<div class="mx-auto mt-8 max-w-3xl">
-  <div class="flex items-center justify-between mb-4">
-    <h1 class="text-2xl font-semibold"><%= @song.title %></h1>
+<div class="mx-auto mt-8 max-w-3xl px-4 sm:px-6" data-role="song-sheet">
+  <%# ── Header ──────────────────────────────────────────────────── %>
+  <div class="flex items-start justify-between gap-4 mb-1">
+    <h1 class="text-3xl sm:text-4xl font-bold leading-tight"><%= @song.title %></h1>
     <% if can_edit? %>
-      <%= link_to "Edit", edit_song_path(@song), class: "underline text-sm" %>
+      <%= link_to "Edit", edit_song_path(@song), class: "btn btn-ghost btn-sm shrink-0" %>
     <% end %>
   </div>
 
-  <p class="text-sm text-slate-500 mb-2">
-    <%= @song.author %> <%= "· Key #{@song.song_key}" if @song.song_key.present? %>
-    <%= "· Capo #{@song.capo}" if @song.capo.to_i.positive? %>
-  </p>
-
-  <% warnings = parse_warnings(@song) %>
-  <% if warnings.any? %>
-    <div class="mb-4 rounded bg-amber-100 text-amber-900 px-3 py-2 text-sm" data-role="parse-warning">
-      <% warnings.each { |w| %><div><%= w %></div><% } %>
-    </div>
+  <% if @song.author.present? %>
+    <p class="text-base-content/70 mb-1"><span class="font-semibold">Grupo:</span> <%= @song.author %></p>
   <% end %>
 
   <% if @song.arrangement.present? %>
-    <p class="text-sm mb-4" data-role="arrangement">Arrangement: <%= @song.arrangement.join(" → ") %></p>
+    <p class="text-sm mb-5" data-role="arrangement">
+      <span class="font-semibold">Order:</span> <%= @song.arrangement.join(", ") %>
+    </p>
   <% end %>
 
-  <pre class="bg-slate-100 text-slate-900 rounded p-3 text-sm overflow-auto"><%= @song.chordpro_source %></pre>
-
-  <section class="mt-6" data-role="musician-preview">
-    <div class="flex items-center gap-3 mb-2">
-      <h2 class="text-sm text-slate-500">Musician view</h2>
-      <% if @displayed_key.present? %>
-        <span class="text-xs rounded bg-slate-200 text-slate-900 px-2 py-0.5" data-role="key-badge">Key <%= @displayed_key %></span>
-      <% end %>
-      <% if @musician_capo.to_i.positive? %>
-        <span class="text-xs rounded bg-slate-200 text-slate-900 px-2 py-0.5" data-role="capo-badge">Capo <%= @musician_capo %></span>
-      <% end %>
+  <% warnings = parse_warnings(@song) %>
+  <% if warnings.any? && can_edit? %>
+    <div class="alert alert-warning mb-4 text-sm" data-role="parse-warning">
+      <div><% warnings.each { |w| %><div><%= w %></div><% } %></div>
     </div>
-    <% @musician_sections.each do |section| %>
-      <%= render "musician_section", section: section, displayed_key: @displayed_key %>
-    <% end %>
-  </section>
+  <% end %>
 
-  <% sections = @song.parsed_lyric&.dig("sections") || [] %>
-  <% if sections.any? %>
-    <section class="mt-6" data-role="projector-preview">
-      <h2 class="text-sm text-slate-500 mb-2">Projector preview — final section</h2>
-      <%= render "projector_section",
-            song: @song,
-            section: sections.last,
-            is_final_section: true,
-            church_license: current_church.ccli_license_number,
-            show_editor_warnings: can_edit? %>
-    </section>
+  <%# ── Chord sheet, in play order ──────────────────────────────── %>
+  <div class="flex flex-col gap-5" data-role="musician-preview">
+    <p class="text-sm text-base-content/60 flex flex-wrap gap-x-3 gap-y-0.5 -mb-1">
+      <% if @displayed_key.present? %><span class="badge badge-ghost badge-sm" data-role="key-badge">Key <%= @displayed_key %></span><% end %>
+      <% if @musician_capo.to_i.positive? %><span class="badge badge-ghost badge-sm" data-role="capo-badge">Capo <%= @musician_capo %></span><% end %>
+      <% if @song.ccli_song_number.present? %><span class="badge badge-ghost badge-sm">CCLI #<%= @song.ccli_song_number %></span><% end %>
+    </p>
+    <% @ordered_sections.each do |section| %>
+      <%= render "sheet_section", section: section %>
+    <% end %>
+  </div>
+
+  <% notice = Corobook::CopyrightNotice.for(@song, church_license: current_church.ccli_license_number) %>
+  <% if notice.show? %>
+    <p class="text-xs text-base-content/50 mt-6" data-role="copyright-notice"><%= notice.text %></p>
+  <% end %>
+  <% if can_edit? && notice.warn? %>
+    <p class="alert alert-warning text-sm mt-4" data-role="copyright-warning"><%= notice.warning %></p>
   <% end %>
 </div>
