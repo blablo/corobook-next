@@ -22,6 +22,7 @@ class SongsController < ApplicationController
     transposed, @musician_capo = render.call
     @musician_sections = transposed.sections
     @displayed_key = render.displayed_key
+    @ordered_sections = order_sections(@musician_sections, @song.arrangement)
   end
 
   def new
@@ -73,5 +74,14 @@ class SongsController < ApplicationController
   def parse_arrangement(text)
     labels = text.to_s.split(/[\n,]/).map(&:strip).reject(&:empty?)
     labels.empty? ? nil : labels
+  end
+
+  # Sections laid out in play order: each arrangement label resolves to its section (repeats
+  # allowed — a chorus reused three times renders three times). No arrangement = section order.
+  def order_sections(sections, arrangement)
+    return sections if arrangement.blank?
+
+    by_label = sections.index_by { |s| s["label"] }
+    arrangement.filter_map { |label| by_label[label] }
   end
 end

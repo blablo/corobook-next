@@ -1,0 +1,26 @@
+<%#
+  One section of the read-only chord sheet. Local: section (a transposed section hash with
+  "label" and "lines"[]"segments"[]{chord,text}). Chords sit on their own row above the lyric,
+  aligned per-segment (chord stacked over its text run), matching a printed chord sheet.
+%>
+<section data-role="sheet-section">
+  <h2 class="text-sm font-bold uppercase tracking-wide text-base-content/70 mb-1" data-role="section-label">
+    <%= section["label"].presence || section["kind"]&.capitalize %>
+  </h2>
+  <div class="rounded-lg ring-1 ring-base-200 bg-base-100 p-4 overflow-x-auto">
+    <% (section["lines"] || []).each do |line| %>
+      <% if line["annotation"].present? %>
+        <div class="italic text-base-content/50 text-sm font-mono"><%= line["annotation"] %></div>
+      <% else %>
+        <div class="font-mono text-[15px] leading-snug whitespace-nowrap" data-role="sheet-line">
+          <% (line["segments"] || []).each do |seg| %>
+            <span class="inline-flex flex-col align-bottom">
+              <span class="text-error font-semibold min-h-[1.2em] leading-none whitespace-pre" data-role="chord"><%= seg["chord"] %></span>
+              <span class="whitespace-pre"><%= seg["text"].presence || raw("&nbsp;") %></span>
+            </span>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</section>
