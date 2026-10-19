@@ -151,7 +151,7 @@ module Corobook
             label: label || @last_chorus[:label],
             kind: :chorus,
             replay_of: @last_chorus[:label],
-            lines: Marshal.load(Marshal.dump(@last_chorus[:lines]))
+            lines: Corobook::DeepDup.call(@last_chorus[:lines])
           }
         else
           @sections << {
