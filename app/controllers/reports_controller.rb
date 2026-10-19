@@ -2,7 +2,7 @@ require "csv"
 
 class ReportsController < ApplicationController
   before_action :require_sign_in
-  before_action :require_editor
+  before_action :require_admin
 
   # CCLI usage report (§7, Req 9.6): one row per distinct song over a date range, with a play
   # count, church-scoped, excluding public-domain songs (nothing to report for those).
