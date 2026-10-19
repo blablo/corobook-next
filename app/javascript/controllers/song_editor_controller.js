@@ -153,6 +153,14 @@ export default class extends Controller {
     }
     this.visualTarget.querySelector("[data-role=sections]").innerHTML =
       this.model.length ? this.model.map(sec).join("") : `<p class="text-base-content/50 text-sm mb-3">No sections yet. Add a verse or chorus to begin.</p>`
+    // Direct listeners for chord pills — dynamic nodes aren't reliably bound by Stimulus actions.
+    this.visualTarget.querySelectorAll(".chord-pill").forEach(pill => {
+      pill.addEventListener("mousedown", (ev) => {
+        ev.preventDefault(); ev.stopPropagation()
+        const { si, li, at } = pill.dataset
+        this.removeChordAt(si, li, +at)
+      })
+    })
   }
 
   renderLine(si, ln, li) {
@@ -164,19 +172,18 @@ export default class extends Controller {
         <button type="button" class="link link-error text-xs" data-action="song-editor#removeLine" data-si="${si}" data-li="${li}">remove</button>
       </div>`
     }
-    // chord row (monospace, 1ch per column) above an editable monospace lyric row
+    // chord row (monospace, 1ch per column) above an editable monospace lyric row.
+    // Each chord is a clickable pill, absolutely positioned at its character column
+    // (ch units) so it never disturbs lyric spacing but is a real click target.
     const chords = [...(ln.chords || [])].sort((a, b) => a.at - b.at)
-    let chordRow = "", col = 0
-    for (const c of chords) {
+    const chordPills = chords.map((c) => {
       const at = Math.max(0, Math.min(c.at, ln.text.length))
-      if (at > col) chordRow += " ".repeat(at - col)
-      chordRow += `<span class="chord inline-block text-primary font-bold cursor-pointer align-bottom" style="width:0;white-space:nowrap"
-                      data-action="song-editor#removeChord" data-si="${si}" data-li="${li}" data-at="${c.at}" title="Remove ${this.esc(c.chord)}">${this.esc(c.chord)}</span>`
-      col = at
-    }
+      return `<span class="chord-pill absolute top-0 inline-flex items-center gap-0.5 text-primary font-bold cursor-pointer leading-none hover:bg-primary/10 rounded px-0.5"
+                 style="left:${at}ch" data-si="${si}" data-li="${li}" data-at="${c.at}" title="Click to remove ${this.esc(c.chord)}">${this.esc(c.chord)}<span class="text-error text-[10px] opacity-0 group-hover:opacity-70">✕</span></span>`
+    }).join("")
     return `
       <div class="mb-2 group" data-li="${li}">
-        <div class="chordrow font-mono text-[13px] leading-[1.1] h-[1.25em] whitespace-pre text-primary select-none">${chordRow}</div>
+        <div class="chordrow relative font-mono text-[13px] leading-[1.1] h-[1.35em] whitespace-pre text-primary select-none">${chordPills}</div>
         <div class="flex items-center gap-2">
           <div contenteditable="true" spellcheck="false"
                class="lyric-edit font-mono text-[15px] leading-tight whitespace-pre-wrap outline-none focus:bg-primary/5 rounded px-1 flex-1 min-h-[1.5em]"
@@ -221,20 +228,21 @@ export default class extends Controller {
 
   openChordPicker(anchorEl, si, li, at) {
     const pal = this._palette
+    const ln = this.model[si].lines[li]
+    const existing = (ln.chords || []).find(c => c.at === +at)
     const chip = (c, rare) => `<span class="chip cursor-pointer text-[12px] font-semibold px-2 py-0.5 rounded border border-base-300 hover:border-primary hover:text-primary ${rare ? "opacity-60" : ""}" data-chord="${c}">${c}</span>`
     const pop = document.createElement("div")
     pop.className = "song-picker absolute z-30 bg-base-100 ring-1 ring-base-300 shadow-lg rounded-lg p-2 flex flex-wrap gap-1 w-60 mt-1"
-    pop.innerHTML =
-      `<div class="w-full text-[11px] text-base-content/50 mb-1 px-0.5">Chord at this position</div>` +
-      pal.common.map(c => chip(c, false)).join("") + pal.extras.map(c => chip(c, true)).join("")
-    // Direct listeners — dynamically-injected nodes are not reliably bound by Stimulus
-    // actions in time, so wire the clicks ourselves.
+    const header = existing
+      ? `<div class="w-full flex items-center gap-2 mb-1 px-0.5"><span class="text-[11px] text-base-content/50 flex-1">Change chord <b>${this.esc(existing.chord)}</b> (or)</span><span class="remove-chord cursor-pointer text-[12px] font-semibold text-error hover:underline">✕ Remove</span></div>`
+      : `<div class="w-full text-[11px] text-base-content/50 mb-1 px-0.5">Chord at this position</div>`
+    pop.innerHTML = header + pal.common.map(c => chip(c, false)).join("") + pal.extras.map(c => chip(c, true)).join("")
+    // Direct listeners — dynamically-injected nodes are not reliably bound by Stimulus actions in time.
     pop.querySelectorAll(".chip").forEach(ch => {
-      ch.addEventListener("mousedown", (ev) => {
-        ev.preventDefault(); ev.stopPropagation()
-        this.placeChord(si, li, at, ch.dataset.chord)
-      })
+      ch.addEventListener("mousedown", (ev) => { ev.preventDefault(); ev.stopPropagation(); this.placeChord(si, li, at, ch.dataset.chord) })
     })
+    const rm = pop.querySelector(".remove-chord")
+    if (rm) rm.addEventListener("mousedown", (ev) => { ev.preventDefault(); ev.stopPropagation(); this.removeChordAt(si, li, +at) })
     anchorEl.parentElement.style.position = "relative"
     anchorEl.parentElement.appendChild(pop)
     this.openPicker = pop
@@ -248,11 +256,10 @@ export default class extends Controller {
     this.closePicker()
     this.commit()
   }
-  removeChord(e) {
-    e.stopPropagation()
-    const { si, li, at } = e.currentTarget.dataset
+  removeChordAt(si, li, at) {
     const ln = this.model[si].lines[li]
     ln.chords = (ln.chords || []).filter(c => c.at !== +at)
+    this.closePicker()
     this.commit()
   }
 
