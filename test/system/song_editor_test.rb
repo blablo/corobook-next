@@ -64,7 +64,7 @@ class SongEditorTest < ApplicationSystemTestCase
 
     # After typing, clicking the line opens the chord picker; picking a chord places it
     # (regression: dynamically-injected picker chips must be clickable without a Stimulus race).
-    find(".lyric-edit", match: :first).click
+    find(".chordrow", match: :first).click
     assert_selector ".song-picker"
     # The builder can reach ANY chord, not just key chords — build F#m7 via root + suffix.
     within(".song-picker") do
@@ -80,7 +80,7 @@ class SongEditorTest < ApplicationSystemTestCase
     assert_no_match(/\[[A-G][^\]]*\]/, find("input[data-song-editor-target=source]", visible: false).value)
 
     # Re-place one so the saved song carries a chord.
-    find(".lyric-edit", match: :first).click
+    find(".chordrow", match: :first).click
     within(".song-picker") { first(".chip").click }
     assert_match(/\[[A-G][^\]]*\]/, find("input[data-song-editor-target=source]", visible: false).value)
 
