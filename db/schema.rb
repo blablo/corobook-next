@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_19_164146) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_19_173034) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -113,6 +113,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_164146) do
     t.check_constraint "subtype::text = ANY (ARRAY['statement'::character varying, 'blessing'::character varying, 'statement_of_faith'::character varying, 'question'::character varying, 'sermon_point'::character varying, 'scripture'::character varying, 'announcement'::character varying]::text[])", name: "text_slides_subtype_check"
   end
 
+  create_table "usage_events", force: :cascade do |t|
+    t.bigint "church_id", null: false
+    t.bigint "live_session_id", null: false
+    t.bigint "song_id", null: false
+    t.integer "ccli_song_number"
+    t.string "title"
+    t.string "author"
+    t.string "copyright_status"
+    t.datetime "shown_at", null: false
+    t.datetime "created_at", null: false
+    t.index ["church_id", "shown_at"], name: "index_usage_events_on_church_id_and_shown_at"
+    t.index ["live_session_id", "song_id"], name: "index_usage_events_on_live_session_id_and_song_id", unique: true
+    t.index ["song_id"], name: "index_usage_events_on_song_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.bigint "church_id", null: false
     t.citext "email", null: false
@@ -134,5 +149,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_164146) do
   add_foreign_key "songs", "churches"
   add_foreign_key "text_slides", "churches"
   add_foreign_key "text_slides", "service_sets", column: "set_id", on_delete: :cascade
+  add_foreign_key "usage_events", "churches"
+  add_foreign_key "usage_events", "live_sessions"
+  add_foreign_key "usage_events", "songs"
   add_foreign_key "users", "churches"
 end

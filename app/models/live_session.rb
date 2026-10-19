@@ -11,7 +11,7 @@ class LiveSession < ApplicationRecord
   # authoritative live state (design §6.1); Cable is only transport.
   def self.launch(service_set)
     first_item = service_set.set_items.order(:position).first
-    create!(
+    session = create!(
       church: service_set.church,
       service_set: service_set,
       status: "active",
@@ -22,6 +22,8 @@ class LiveSession < ApplicationRecord
       musician_token: SecureRandom.urlsafe_base64(24),
       started_at: Time.current
     )
+    UsageEvent.capture(live_session: session, song: first_item.song) if first_item&.item_type == "song"
+    session
   end
 
   def end!

@@ -63,8 +63,14 @@ class OperatorController < ApplicationController
     redirect_to operator_path(@session)
   end
 
-  # Seam for CCLI usage capture (Phase 8). No-op until 8.1 implements it.
-  def capture_usage(_session); end
+  # CCLI usage capture (§7): when a song becomes current, record one idempotent usage event.
+  # Runs inside the position transaction; live_session is passed explicitly (never Current).
+  def capture_usage(session)
+    item = session.current_set_item
+    return unless item&.item_type == "song"
+
+    UsageEvent.capture(live_session: session, song: item.song)
+  end
 
   # Apply a projector-state change (blank/font), clamp font, bump version, broadcast inline.
   def update_projector_state
