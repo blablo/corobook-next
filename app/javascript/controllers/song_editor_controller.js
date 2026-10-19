@@ -221,24 +221,27 @@ export default class extends Controller {
 
   openChordPicker(anchorEl, si, li, at) {
     const pal = this._palette
-    const chip = (c, rare) => `<span class="chip cursor-pointer text-[12px] font-semibold px-2 py-0.5 rounded border border-base-300 hover:border-primary hover:text-primary ${rare ? "opacity-60" : ""}"
-        data-action="song-editor#pickChord" data-si="${si}" data-li="${li}" data-at="${at}" data-chord="${c}">${c}</span>`
+    const chip = (c, rare) => `<span class="chip cursor-pointer text-[12px] font-semibold px-2 py-0.5 rounded border border-base-300 hover:border-primary hover:text-primary ${rare ? "opacity-60" : ""}" data-chord="${c}">${c}</span>`
     const pop = document.createElement("div")
     pop.className = "song-picker absolute z-30 bg-base-100 ring-1 ring-base-300 shadow-lg rounded-lg p-2 flex flex-wrap gap-1 w-60 mt-1"
     pop.innerHTML =
       `<div class="w-full text-[11px] text-base-content/50 mb-1 px-0.5">Chord at this position</div>` +
       pal.common.map(c => chip(c, false)).join("") + pal.extras.map(c => chip(c, true)).join("")
-    // position under the editable line
+    // Direct listeners — dynamically-injected nodes are not reliably bound by Stimulus
+    // actions in time, so wire the clicks ourselves.
+    pop.querySelectorAll(".chip").forEach(ch => {
+      ch.addEventListener("mousedown", (ev) => {
+        ev.preventDefault(); ev.stopPropagation()
+        this.placeChord(si, li, at, ch.dataset.chord)
+      })
+    })
     anchorEl.parentElement.style.position = "relative"
     anchorEl.parentElement.appendChild(pop)
     this.openPicker = pop
   }
-  pickChord(e) {
-    e.stopPropagation()
-    const { si, li, at, chord } = e.currentTarget.dataset
+  placeChord(si, li, at, chord) {
     const ln = this.model[si].lines[li]
     const offset = +at
-    // replace any chord already at this offset, else add
     const existing = (ln.chords || []).find(c => c.at === offset)
     if (existing) existing.chord = chord
     else (ln.chords = ln.chords || []).push({ at: offset, chord })

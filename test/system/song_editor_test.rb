@@ -56,11 +56,21 @@ class SongEditorTest < ApplicationSystemTestCase
     assert_includes source, "Santo es el Señor"
     assert_includes source, "{eoc}"
 
+    # After typing, clicking the line opens the chord picker; picking a chord places it
+    # (regression: dynamically-injected picker chips must be clickable without a Stimulus race).
+    find(".lyric-edit").click
+    assert_selector ".song-picker"
+    within(".song-picker") { first(".chip").click }
+    assert_no_selector ".song-picker"
+    source = find("input[data-song-editor-target=source]", visible: false).value
+    assert_match(/\[[A-G][^\]]*\]/, source) # a chord bracket now present
+
     click_on "Create song"
     assert_text "Song created."
 
     song = @church.songs.find_by(title: "Canto visual")
     assert_includes song.chordpro_source, "Santo es el Señor"
+    assert_match(/\[[A-G][^\]]*\]/, song.chordpro_source)
     # round-trips through the server parser into a chorus section
     assert_equal "chorus", song.parsed.sections.first["kind"]
   end
