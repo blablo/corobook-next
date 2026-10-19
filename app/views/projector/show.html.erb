@@ -1,0 +1,4 @@
+<%= turbo_stream_from [ @session, :projector ] %>
+<div class="projector-root" data-role="projector-root">
+  <%= render "live/projector_frame", session: @session %>
+</div>
