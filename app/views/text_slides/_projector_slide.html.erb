@@ -1,0 +1,10 @@
+<%#
+  Projector rendering of a text slide (Req 3.5). Locals: slide.
+  Subtype drives a CSS class only; no copyright notice on text slides.
+%>
+<div class="projector-slide <%= slide.subtype_class %>" data-controller="fit"
+     data-role="projector-slide" data-subtype="<%= slide.subtype %>">
+  <div data-fit-target="content" class="projector-slide-body">
+    <%= raw slide.rendered_html %>
+  </div>
+</div>
