@@ -210,21 +210,25 @@ implements; `_Design:_` cites the design section.
 
 ## 9. Data migration (LAST)
 
-- [ ] 9.1 Implement `Corobook::Legacy::ChordProConverter`: legacy column-aligned blob →
+> **9.2–9.4 DEFERRED** (per owner, 2026-10-19): the dump reader, round-trip gate, and actual
+> import are postponed to a later session. 9.1 (the pure converter) is done and tested; it
+> writes no data. Resume here with the real dump at `/Users/blablo/Development/corobook/songs.sql`.
+
+- [x] 9.1 Implement `Corobook::Legacy::ChordProConverter`: legacy column-aligned blob →
   ChordPro. Tab expansion, Unicode grapheme-column mapping, `//`→repeat/chorus directive,
   `[LABEL]`→section label, legacy `order`→`arrangement`, malformed-token tolerance. Unit tests
   on representative legacy snippets (tabs, accented caps, combining-ring `C°`).
   _Requirements: 2.8_ _Design: §4.5_
-- [ ] 9.2 Implement an idempotent, re-runnable reader for the dump at
+- [ ] (deferred) 9.2 Implement an idempotent, re-runnable reader for the dump at
   `/Users/blablo/Development/corobook/songs.sql` → in-memory legacy song/user records. Unit
   test on a small fixture subset of the dump.
   _Requirements: 11.1, 11.5_ _Design: §4.5_
-- [ ] 9.3 Round-trip **gate** over the full dump: for each song convert → parse → assert
+- [ ] (deferred) 9.3 Round-trip **gate** over the full dump: for each song convert → parse → assert
   round-trip; emit a per-song pass/fail report; **write ZERO rows if any song fails**. Run
   against the real dump and confirm the report. This is the migration's safety gate and must
   be green before 9.4.
   _Requirements: 11.2_ _Design: §4.3a, §4.5_
-- [ ] 9.4 Actual import (only after 9.3 is green): import songs into the designated church with
+- [ ] (deferred) 9.4 Actual import (only after 9.3 is green): import songs into the designated church with
   `copyright_status=unknown`; map legacy users to a church with admin/editor roles; idempotent
   re-run. Verify counts against the dump; report per-song outcome.
   _Requirements: 11.1, 11.3, 11.4, 11.6_ _Design: §4.5, §7_ _Depends: 9.3 (round-trip gate)_
