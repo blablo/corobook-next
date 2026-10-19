@@ -24,6 +24,21 @@
 
   <pre class="bg-slate-100 text-slate-900 rounded p-3 text-sm overflow-auto"><%= @song.chordpro_source %></pre>
 
+  <section class="mt-6" data-role="musician-preview">
+    <div class="flex items-center gap-3 mb-2">
+      <h2 class="text-sm text-slate-500">Musician view</h2>
+      <% if @displayed_key.present? %>
+        <span class="text-xs rounded bg-slate-200 text-slate-900 px-2 py-0.5" data-role="key-badge">Key <%= @displayed_key %></span>
+      <% end %>
+      <% if @musician_capo.to_i.positive? %>
+        <span class="text-xs rounded bg-slate-200 text-slate-900 px-2 py-0.5" data-role="capo-badge">Capo <%= @musician_capo %></span>
+      <% end %>
+    </div>
+    <% @musician_sections.each do |section| %>
+      <%= render "musician_section", section: section, displayed_key: @displayed_key %>
+    <% end %>
+  </section>
+
   <% sections = @song.parsed_lyric&.dig("sections") || [] %>
   <% if sections.any? %>
     <section class="mt-6" data-role="projector-preview">
