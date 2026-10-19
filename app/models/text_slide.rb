@@ -22,7 +22,7 @@ class TextSlide < ApplicationRecord
   # Rendered HTML is produced on read, never stored (design §2.1). commonmarker escapes raw HTML
   # by default, so user markdown cannot inject markup.
   def rendered_html
-    Commonmarker.to_html(body_markdown.to_s)
+    Commonmarker.to_html(body_markdown.to_s.encode("UTF-8"))
   end
 
   # CSS class driving subtype-specific styling on projector/musician (design §5).
