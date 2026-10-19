@@ -27,15 +27,6 @@
         <span class="inline-flex items-center gap-1 rounded-md bg-base-200 text-base-content/70 px-2.5 py-1 text-xs font-semibold">CCLI #<%= @song.ccli_song_number %></span>
       <% end %>
     </div>
-
-    <% if @song.arrangement.present? %>
-      <div class="mt-3 flex flex-wrap items-center gap-1.5" data-role="arrangement">
-        <span class="text-xs font-semibold uppercase tracking-wide text-base-content/40 mr-1">Order</span>
-        <% @song.arrangement.each do |label| %>
-          <span class="rounded bg-base-200 text-base-content/70 px-2 py-0.5 text-xs"><%= label %></span>
-        <% end %>
-      </div>
-    <% end %>
   </header>
 
   <% warnings = parse_warnings(@song) %>

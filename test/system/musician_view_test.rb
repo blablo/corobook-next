@@ -46,4 +46,15 @@ class MusicianViewTest < ApplicationSystemTestCase
     end
     assert_selector "[data-role=section-label]", text: "VERSO 1"
   end
+
+  test "sections are printed in arrangement order, repeating a reused section" do
+    song = @church.songs.create!(
+      title: "Orden", song_key: "C",
+      chordpro_source: "{key: C}\n{sov: Verse 1}\n[C]uno\n{eov}\n{soc: Chorus 1}\n[G]coro\n{eoc}",
+      arrangement: [ "Verse 1", "Chorus 1", "Chorus 1" ]
+    )
+    visit song_path(song)
+    labels = all("[data-role=section-label]").map(&:text)
+    assert_equal [ "VERSE 1", "CHORUS 1", "CHORUS 1" ], labels
+  end
 end
