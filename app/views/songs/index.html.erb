@@ -4,15 +4,29 @@
     <%= link_to "New song", new_song_path, class: "rounded bg-slate-800 text-white px-3 py-2 text-sm" %>
   </div>
 
-  <ul class="divide-y">
+  <%= form_with url: songs_path, method: :get, class: "mb-4" do %>
+    <%= search_field_tag :q, @query, placeholder: "Search title, author, or lyrics…",
+          class: "w-full border rounded px-2 py-1", data: { role: "song-search" } %>
+  <% end %>
+
+  <ul class="divide-y" data-role="song-results">
     <% @songs.each do |song| %>
       <li class="py-2 flex items-center justify-between">
         <%= link_to song.title, song, class: "underline" %>
-        <span class="text-sm text-slate-500"><%= song.song_key %></span>
+        <span class="text-sm text-slate-500"><%= song.author %></span>
       </li>
     <% end %>
     <% if @songs.empty? %>
-      <li class="py-2 text-sm text-slate-500">No songs yet.</li>
+      <li class="py-2 text-sm text-slate-500">No songs found.</li>
     <% end %>
   </ul>
+
+  <div class="flex justify-between mt-4 text-sm">
+    <% if @page > 1 %>
+      <%= link_to "← Previous", songs_path(q: @query, page: @page - 1), class: "underline" %>
+    <% else %><span></span><% end %>
+    <% if @has_more %>
+      <%= link_to "Next →", songs_path(q: @query, page: @page + 1), class: "underline" %>
+    <% end %>
+  </div>
 </div>

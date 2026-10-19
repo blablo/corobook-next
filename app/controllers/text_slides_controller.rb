@@ -4,7 +4,8 @@ class TextSlidesController < ApplicationController
   before_action :set_slide, only: %i[show edit update destroy]
 
   def index
-    @text_slides = church_scope(:text_slides).where(reusable: true).order(:title)
+    @query = params[:q]
+    @text_slides = church_scope(:text_slides).where(reusable: true).search(@query).order(:title)
   end
 
   def show; end

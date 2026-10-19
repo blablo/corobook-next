@@ -4,6 +4,11 @@
     <%= link_to "New slide", new_text_slide_path, class: "rounded bg-slate-800 text-white px-3 py-2 text-sm" %>
   </div>
 
+  <%= form_with url: text_slides_path, method: :get, class: "mb-4" do %>
+    <%= search_field_tag :q, @query, placeholder: "Search title, type, or body…",
+          class: "w-full border rounded px-2 py-1", data: { role: "slide-search" } %>
+  <% end %>
+
   <ul class="divide-y">
     <% @text_slides.each do |slide| %>
       <li class="py-2 flex items-center justify-between">
