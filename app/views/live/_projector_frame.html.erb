@@ -4,7 +4,8 @@
 %>
 <% frame = Corobook::LiveFrame.new(session) %>
 <div id="live-frame" data-controller="follower" data-follower-version-value="<%= session.position_version %>"
-     data-role="projector-frame" class="<%= 'is-blanked' if session.blanked %>">
+     data-role="projector-frame" data-font-scale="<%= session.font_scale %>"
+     style="--font-scale: <%= session.font_scale %>;" class="<%= 'is-blanked' if session.blanked %>">
   <% if session.blanked %>
     <div class="projector-blank" data-role="blank"></div>
   <% elsif frame.song? && frame.current_section %>

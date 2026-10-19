@@ -34,5 +34,12 @@ export default class extends Controller {
       if (fits) lo = mid; else hi = mid
     }
     content.style.fontSize = `${lo}px`
+
+    // Apply the operator's font-scale override (percent) from the frame, if present.
+    const scaleEl = this.element.closest("[data-font-scale]") || this.element.querySelector("[data-font-scale]")
+    const scale = scaleEl ? Number(scaleEl.dataset.fontScale) : 100
+    if (scale && scale !== 100) {
+      content.style.fontSize = `${Math.round(lo * scale / 100)}px`
+    }
   }
 }

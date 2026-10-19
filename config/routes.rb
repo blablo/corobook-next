@@ -16,6 +16,8 @@ Rails.application.routes.draw do
   patch "operator/:id/advance" => "operator#advance", as: :operator_advance
   patch "operator/:id/back"    => "operator#back",    as: :operator_back
   patch "operator/:id/goto"    => "operator#goto",    as: :operator_goto
+  patch "operator/:id/blank"   => "operator#blank",   as: :operator_blank
+  patch "operator/:id/font"    => "operator#font",    as: :operator_font
 
   get "p/:token" => "projector#show", as: :projector
   get "m/:token" => "musician#show",  as: :musician

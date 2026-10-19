@@ -10,6 +10,13 @@
           form: { data: { turbo: false } }, class: "rounded border px-3 py-2" %>
     <%= button_to "Next →", operator_advance_path(@session), method: :patch,
           form: { data: { turbo: false } }, class: "rounded bg-slate-800 text-white px-3 py-2" %>
+    <%= button_to (@session.blanked ? "Unblank" : "Blank"), operator_blank_path(@session), method: :patch,
+          form: { data: { turbo: false } }, class: "rounded border px-3 py-2", data: { role: "blank-toggle" } %>
+    <%= button_to "A-", operator_font_path(@session, dir: "down"), method: :patch,
+          form: { data: { turbo: false } }, class: "rounded border px-3 py-2" %>
+    <%= button_to "A+", operator_font_path(@session, dir: "up"), method: :patch,
+          form: { data: { turbo: false } }, class: "rounded border px-3 py-2" %>
+    <span class="text-sm text-slate-500 self-center" data-role="font-scale"><%= @session.font_scale %>%</span>
   </div>
 
   <div class="border rounded p-4 mb-6" data-role="operator-frame">
