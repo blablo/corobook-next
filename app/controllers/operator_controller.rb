@@ -27,6 +27,12 @@ class OperatorController < ApplicationController
     update_projector_state { @session.font_scale = @session.font_scale.clamp(50, 400) + delta }
   end
 
+  def end_session
+    @session.end!
+    Corobook::LiveBroadcast.ended(@session)
+    redirect_to service_set_path(@session.service_set), notice: "Service ended."
+  end
+
   private
 
   def set_session

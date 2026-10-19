@@ -18,6 +18,7 @@ Rails.application.routes.draw do
   patch "operator/:id/goto"    => "operator#goto",    as: :operator_goto
   patch "operator/:id/blank"   => "operator#blank",   as: :operator_blank
   patch "operator/:id/font"    => "operator#font",    as: :operator_font
+  delete "operator/:id"        => "operator#end_session", as: :operator_end
 
   get "p/:token" => "projector#show", as: :projector
   get "m/:token" => "musician#show",  as: :musician
