@@ -1,20 +1,6 @@
 <% content_for :title, "Corobook" %>
 
-<%# ── Navbar ─────────────────────────────────────────────────────────── %>
-<div class="navbar bg-base-100 shadow-sm" data-role="home">
-  <div class="container mx-auto px-4">
-    <div class="flex-1">
-      <span class="text-xl font-semibold">Corobook</span>
-      <span class="badge badge-ghost ml-3" data-role="church-name"><%= current_church.name %></span>
-    </div>
-    <div class="flex-none flex items-center gap-3">
-      <span class="text-sm text-base-content/70"><%= current_user.email %> · <%= current_user.role %></span>
-      <%= button_to "Sign out", logout_path, method: :delete, class: "btn btn-ghost btn-sm" %>
-    </div>
-  </div>
-</div>
-
-<div class="container mx-auto px-4 py-6 flex flex-col gap-6">
+<div class="container mx-auto px-4 py-6 flex flex-col gap-6" data-role="home">
 
   <%# ── Hero: next service ──────────────────────────────────────────── %>
   <section class="card bg-base-100 shadow-md" data-role="hero">

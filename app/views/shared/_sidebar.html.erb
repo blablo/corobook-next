@@ -1,0 +1,12 @@
+<aside class="w-64 min-h-full bg-base-100 border-r border-base-200 flex flex-col" data-role="sidebar">
+  <div class="px-4 py-4 text-lg font-semibold border-b border-base-200">Corobook</div>
+  <ul class="menu w-full gap-1 p-2 flex-1">
+    <li><%= link_to "Home",   root_path,          class: nav_active_class("/") %></li>
+    <li><%= link_to "Songs",  songs_path,         class: nav_active_class("/songs") %></li>
+    <li><%= link_to "Slides", text_slides_path,   class: nav_active_class("/text_slides") %></li>
+    <li><%= link_to "Sets",   service_sets_path,  class: nav_active_class("/sets") %></li>
+    <% if respond_to?(:current_user) && current_user&.admin? %>
+      <li><%= link_to "Usage report", usage_report_path, class: nav_active_class("/reports"), data: { role: "nav-usage" } %></li>
+    <% end %>
+  </ul>
+</aside>

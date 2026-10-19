@@ -15,7 +15,8 @@ class HomePageTest < ActionDispatch::IntegrationTest
     sign_in
     get root_path
     assert_response :success
-    assert_select "[data-role=home]", /Iglesia Central/
+    assert_select "[data-role=home]"
+    assert_select "[data-role=church-name]", /Iglesia Central/
   end
 
   test "signing in lands on the home page, not back on login" do

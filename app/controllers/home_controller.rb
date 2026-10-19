@@ -1,4 +1,5 @@
 class HomeController < ApplicationController
+  layout "shell"
   before_action :require_sign_in
 
   def show
