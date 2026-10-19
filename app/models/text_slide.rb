@@ -1,6 +1,8 @@
 class TextSlide < ApplicationRecord
   include ChurchChild
 
+  belongs_to :service_set, foreign_key: :set_id, optional: true, inverse_of: :inline_text_slides
+
   SUBTYPES = %w[statement blessing statement_of_faith question sermon_point scripture announcement].freeze
 
   enum :subtype, SUBTYPES.index_with(&:itself), validate: true

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_19_155413) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_19_161500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -21,6 +21,32 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_155413) do
     t.string "ccli_license_number"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "service_sets", force: :cascade do |t|
+    t.bigint "church_id", null: false
+    t.string "name", null: false
+    t.date "service_date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["church_id", "service_date"], name: "index_service_sets_on_church_id_and_service_date"
+  end
+
+  create_table "set_items", force: :cascade do |t|
+    t.bigint "service_set_id", null: false
+    t.integer "position", null: false
+    t.string "item_type", null: false
+    t.bigint "song_id"
+    t.bigint "text_slide_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["service_set_id", "position"], name: "index_set_items_on_service_set_id_and_position", unique: true
+    t.index ["service_set_id"], name: "index_set_items_on_service_set_id"
+    t.index ["song_id"], name: "index_set_items_on_song_id"
+    t.index ["text_slide_id"], name: "index_set_items_on_text_slide_id"
+    t.check_constraint "((song_id IS NOT NULL)::integer + (text_slide_id IS NOT NULL)::integer) = 1", name: "set_items_exactly_one_item_check"
+    t.check_constraint "\"position\" >= 0", name: "set_items_position_check"
+    t.check_constraint "item_type::text = ANY (ARRAY['song'::character varying, 'text_slide'::character varying]::text[])", name: "set_items_item_type_check"
   end
 
   create_table "songs", force: :cascade do |t|
@@ -72,7 +98,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_155413) do
     t.check_constraint "role::text = ANY (ARRAY['admin'::character varying, 'editor'::character varying]::text[])", name: "users_role_check"
   end
 
+  add_foreign_key "service_sets", "churches"
+  add_foreign_key "set_items", "service_sets"
+  add_foreign_key "set_items", "songs"
+  add_foreign_key "set_items", "text_slides"
   add_foreign_key "songs", "churches"
   add_foreign_key "text_slides", "churches"
+  add_foreign_key "text_slides", "service_sets", column: "set_id", on_delete: :cascade
   add_foreign_key "users", "churches"
 end
