@@ -13,7 +13,7 @@ class ProjectorControlsTest < ApplicationSystemTestCase
     fill_in "Email", with: @editor.email
     fill_in "Password", with: "secret123"
     click_on "Sign in"
-    assert_text "Signed in as #{@editor.email}"
+    assert_selector "[data-role=home]" # landed on home after login
   end
 
   test "blanking blacks the projector" do

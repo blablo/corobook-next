@@ -9,7 +9,7 @@ class SongEditorTest < ApplicationSystemTestCase
     fill_in "Email", with: @editor.email
     fill_in "Password", with: "secret123"
     click_on "Sign in"
-    assert_text "Signed in as editor@example.com"
+    assert_selector "[data-role=home]" # landed on home after login
   end
 
   test "a song with a malformed chord persists and shows an inline parse warning" do

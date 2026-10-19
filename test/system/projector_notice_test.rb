@@ -13,7 +13,7 @@ class ProjectorNoticeTest < ApplicationSystemTestCase
     fill_in "Email", with: @editor.email
     fill_in "Password", with: "secret123"
     click_on "Sign in"
-    assert_text "Signed in as #{@editor.email}" # block until the session is established
+    assert_selector "[data-role=home]" # landed on home after login
   end
 
   def make_song(status, **attrs)
