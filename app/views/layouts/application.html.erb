@@ -24,7 +24,13 @@
   </head>
 
   <body>
-    <main class="container mx-auto mt-28 px-5 flex">
+    <main class="container mx-auto mt-28 px-5 flex flex-col">
+      <% if flash[:notice] %>
+        <p class="mb-4 rounded bg-green-100 text-green-800 px-3 py-2 text-sm" data-role="flash-notice"><%= flash[:notice] %></p>
+      <% end %>
+      <% if flash[:alert] %>
+        <p class="mb-4 rounded bg-red-100 text-red-800 px-3 py-2 text-sm" data-role="flash-alert"><%= flash[:alert] %></p>
+      <% end %>
       <%= yield %>
     </main>
   </body>
