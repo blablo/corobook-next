@@ -140,7 +140,7 @@ class SongEditorTest < ApplicationSystemTestCase
     click_on "Create song"
     assert_text "Song created."
     song = @church.songs.find_by(title: "Orden visual")
-    assert_equal ["Verse 1", "Chorus 1"], song.arrangement
+    assert_equal [ "Verse 1", "Chorus 1" ], song.arrangement
   end
 
   test "importing pasted chords-over-lyrics builds sections with chords anchored" do
