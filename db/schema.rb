@@ -10,10 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_19_012208) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_19_135211) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
 
+  create_table "churches", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "ccli_license_number"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 end

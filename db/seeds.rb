@@ -7,3 +7,7 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
+
+# The two churches that share this installation (fully isolated tenants, D2).
+Church.find_or_create_by!(name: "Iglesia Central")
+Church.find_or_create_by!(name: "Iglesia Norte")
