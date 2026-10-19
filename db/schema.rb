@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_19_173034) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_19_193014) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -40,6 +40,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_173034) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["church_id"], name: "index_live_sessions_on_church_id"
+    t.index ["church_id"], name: "index_one_active_live_session_per_church", unique: true, where: "((status)::text = 'active'::text)"
     t.index ["current_set_item_id"], name: "index_live_sessions_on_current_set_item_id"
     t.index ["musician_token"], name: "index_live_sessions_on_musician_token", unique: true
     t.index ["projector_token"], name: "index_live_sessions_on_projector_token", unique: true
