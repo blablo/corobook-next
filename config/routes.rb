@@ -12,6 +12,11 @@ Rails.application.routes.draw do
   resources :songs
   resources :text_slides
 
+  get   "operator/:id"         => "operator#show",    as: :operator
+  patch "operator/:id/advance" => "operator#advance", as: :operator_advance
+  patch "operator/:id/back"    => "operator#back",    as: :operator_back
+  patch "operator/:id/goto"    => "operator#goto",    as: :operator_goto
+
   resources :service_sets, path: "sets", as: :service_sets do
     member do
       post "items", to: "service_sets#add_item", as: :add_item

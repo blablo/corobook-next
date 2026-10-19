@@ -1,0 +1,19 @@
+<%#
+  Musician live frame. Locals: session, target_key, semitones, capo. Renders the current item at
+  THIS follower's chosen key (server-side, §6.3). Carries position_version for the guard.
+%>
+<% frame = Corobook::LiveFrame.new(session) %>
+<div id="live-frame" data-controller="follower" data-follower-version-value="<%= session.position_version %>"
+     data-role="musician-frame">
+  <% if frame.song? && frame.current_section %>
+    <% renderer = Corobook::MusicianRender.new(frame.item, target_key: target_key, semitones: semitones.to_i, follower_capo: capo) %>
+    <% transposed, _capo = renderer.call %>
+    <% section = transposed.sections[session.current_section_index] %>
+    <% if renderer.displayed_key %>
+      <span class="text-xs rounded bg-slate-200 text-slate-900 px-2 py-0.5" data-role="key-badge">Key <%= renderer.displayed_key %></span>
+    <% end %>
+    <%= render "songs/musician_section", section: section, displayed_key: renderer.displayed_key if section %>
+  <% elsif frame.text_slide? %>
+    <%= render "text_slides/musician_slide", slide: frame.item %>
+  <% end %>
+</div>
