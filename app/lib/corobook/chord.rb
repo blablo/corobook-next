@@ -78,6 +78,26 @@ module Corobook
       FLAT_KEYS.include?(key.to_s.strip) ? :flats : :sharps
     end
 
+    # Semitone distance from one key to another, e.g. interval("G", "A") => 2. Returns nil when
+    # either key is blank or unrecognized — the caller then offers only a raw semitone shift
+    # (Req 4.1: a "target key" needs a known source key).
+    def self.interval(from_key, to_key)
+      from = key_pitch_class(from_key)
+      to = key_pitch_class(to_key)
+      return nil if from.nil? || to.nil?
+
+      (to - from) % 12
+    end
+
+    def self.key_pitch_class(key)
+      return nil if key.nil?
+
+      m = /\A([A-G])(\#|b|♭|♯)?/.match(key.to_s.strip)
+      return nil unless m
+
+      new("#{m[1]}#{m[2]}").send(:pitch_class, m[1], (m[2] == "♯" ? "#" : m[2] == "♭" ? "b" : m[2]))
+    end
+
     private
 
     def pitch_class(note, accidental)

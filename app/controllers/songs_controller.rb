@@ -7,7 +7,17 @@ class SongsController < ApplicationController
     @songs = church_scope(:songs).order(:title)
   end
 
-  def show; end
+  def show
+    render = Corobook::MusicianRender.new(
+      @song,
+      target_key: params[:key],
+      semitones: params[:semitones].to_i,
+      follower_capo: params[:capo].presence
+    )
+    transposed, @musician_capo = render.call
+    @musician_sections = transposed.sections
+    @displayed_key = render.displayed_key
+  end
 
   def new
     @song = church_scope(:songs).build(copyright_status: "unknown")
