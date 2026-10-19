@@ -93,4 +93,29 @@ class SongEditorTest < ApplicationSystemTestCase
     # round-trips through the server parser into a chorus section
     assert_equal "chorus", song.parsed.sections.first["kind"]
   end
+
+  test "importing pasted chords-over-lyrics builds sections with chords anchored" do
+    visit new_song_path
+    assert_text "New song"
+    fill_in "Title", with: "Al mundo paz"
+
+    click_on "Import"
+    paste = "VERSE 1\nC               F  G  C\n¡Al mundo paz, nació Jesús!\nCHORUS\nC     F          G      C\nY paz, y paz su Santa Grey"
+    find("[data-song-editor-target=importText]").set(paste)
+    find("[data-action='song-editor#runImport']").click
+
+    # Two sections now rendered with chords placed from the pasted columns.
+    assert_selector "[data-role=sections] .chord-pill", minimum: 2
+    source = find("input[data-song-editor-target=source]", visible: false).value
+    assert_includes source, "{sov"
+    assert_includes source, "{soc}"
+    assert_includes source, "Al mundo paz"
+    assert_match(/\[C\]/, source)
+
+    click_on "Create song"
+    assert_text "Song created."
+    song = @church.songs.find_by(title: "Al mundo paz")
+    assert_equal 2, song.parsed.sections.size
+    assert_equal %w[verse chorus], song.parsed.sections.map { |s| s["kind"] }
+  end
 end
