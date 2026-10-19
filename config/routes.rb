@@ -23,6 +23,8 @@ Rails.application.routes.draw do
   get "p/:token" => "projector#show", as: :projector
   get "m/:token" => "musician#show",  as: :musician
 
+  get "reports/usage" => "reports#usage", as: :usage_report
+
   resources :service_sets, path: "sets", as: :service_sets do
     member do
       post "items", to: "service_sets#add_item", as: :add_item
