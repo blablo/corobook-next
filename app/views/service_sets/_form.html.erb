@@ -1,0 +1,18 @@
+<%= form_with model: service_set, url: (service_set.persisted? ? service_set_path(service_set) : service_sets_path) do |f| %>
+  <% if service_set.errors.any? %>
+    <div class="mb-4 rounded bg-red-100 text-red-800 px-3 py-2 text-sm">
+      <%= service_set.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <div class="mb-4">
+    <%= f.label :name, "Name", class: "block text-sm mb-1" %>
+    <%= f.text_field :name, class: "w-full border rounded px-2 py-1" %>
+  </div>
+  <div class="mb-4">
+    <%= f.label :service_date, "Service date", class: "block text-sm mb-1" %>
+    <%= f.date_field :service_date, class: "w-full border rounded px-2 py-1" %>
+  </div>
+
+  <%= f.submit class: "rounded bg-slate-800 text-white px-3 py-2" %>
+<% end %>

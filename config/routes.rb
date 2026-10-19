@@ -12,6 +12,14 @@ Rails.application.routes.draw do
   resources :songs
   resources :text_slides
 
+  resources :service_sets, path: "sets", as: :service_sets do
+    member do
+      post "items", to: "service_sets#add_item", as: :add_item
+      patch "reorder"
+      delete "items/:item_id", to: "service_sets#remove_item", as: :remove_item
+    end
+  end
+
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker

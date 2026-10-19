@@ -1,0 +1,76 @@
+<div class="mx-auto mt-8 max-w-3xl">
+  <div class="flex items-center justify-between mb-4">
+    <h1 class="text-2xl font-semibold"><%= @service_set.name %></h1>
+    <% if can_edit? %>
+      <%= link_to "Edit", edit_service_set_path(@service_set), class: "underline text-sm" %>
+    <% end %>
+  </div>
+
+  <% items = @service_set.ordered_items.to_a %>
+  <ol class="divide-y border rounded" data-role="set-items">
+    <% items.each_with_index do |item, i| %>
+      <li class="py-2 px-3 flex items-center justify-between" data-role="set-item" data-item-id="<%= item.id %>">
+        <span>
+          <span class="text-xs text-slate-500 mr-2"><%= item.item_type == "song" ? "♪" : "▤" %></span>
+          <%= item.item.title %>
+        </span>
+        <% if can_edit? %>
+          <span class="flex gap-2 text-sm">
+            <% if i.positive? %>
+              <%= button_to "↑", reorder_service_set_path(@service_set), method: :patch,
+                    params: { ordered_ids: items.map(&:id).tap { |a| a[i - 1], a[i] = a[i], a[i - 1] } },
+                    form: { data: { turbo: false } }, class: "underline" %>
+            <% end %>
+            <% if i < items.length - 1 %>
+              <%= button_to "↓", reorder_service_set_path(@service_set), method: :patch,
+                    params: { ordered_ids: items.map(&:id).tap { |a| a[i + 1], a[i] = a[i], a[i + 1] } },
+                    form: { data: { turbo: false } }, class: "underline" %>
+            <% end %>
+            <%= button_to "Remove", remove_item_service_set_path(@service_set, item_id: item.id),
+                  method: :delete, class: "underline text-red-700" %>
+          </span>
+        <% end %>
+      </li>
+    <% end %>
+    <% if items.empty? %>
+      <li class="py-2 px-3 text-sm text-slate-500">No items yet.</li>
+    <% end %>
+  </ol>
+
+  <% if can_edit? %>
+    <div class="mt-6 grid gap-6">
+      <section>
+        <h2 class="text-sm font-semibold mb-2">Add a song</h2>
+        <%= form_with url: add_item_service_set_path(@service_set), method: :post do |f| %>
+          <%= hidden_field_tag :kind, "song" %>
+          <%= select_tag :song_id, options_from_collection_for_select(@songs, :id, :title),
+                class: "border rounded px-2 py-1", data: { role: "song-select" } %>
+          <%= submit_tag "Add song", class: "rounded bg-slate-800 text-white px-3 py-1 text-sm" %>
+        <% end %>
+      </section>
+
+      <section>
+        <h2 class="text-sm font-semibold mb-2">Add a reusable slide</h2>
+        <%= form_with url: add_item_service_set_path(@service_set), method: :post do |f| %>
+          <%= hidden_field_tag :kind, "text_slide" %>
+          <%= select_tag :text_slide_id, options_from_collection_for_select(@reusable_slides, :id, :title),
+                class: "border rounded px-2 py-1" %>
+          <%= submit_tag "Add slide", class: "rounded bg-slate-800 text-white px-3 py-1 text-sm" %>
+        <% end %>
+      </section>
+
+      <section>
+        <h2 class="text-sm font-semibold mb-2">Add an inline one-off slide</h2>
+        <%= form_with url: add_item_service_set_path(@service_set), method: :post do |f| %>
+          <%= hidden_field_tag :kind, "inline_slide" %>
+          <%= text_field_tag :title, nil, placeholder: "Title", class: "border rounded px-2 py-1 mb-2 block" %>
+          <%= select_tag :subtype, options_for_select(TextSlide.subtypes.keys.map { |s| [ s.humanize, s ] }, "sermon_point"),
+                class: "border rounded px-2 py-1 mb-2 block" %>
+          <%= text_area_tag :body_markdown, nil, rows: 3, placeholder: "Markdown…",
+                class: "border rounded px-2 py-1 mb-2 block w-full font-mono text-sm" %>
+          <%= submit_tag "Add inline slide", class: "rounded bg-slate-800 text-white px-3 py-1 text-sm" %>
+        <% end %>
+      </section>
+    </div>
+  <% end %>
+</div>
