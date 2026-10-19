@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_19_135245) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_19_151627) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -21,6 +21,30 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_135245) do
     t.string "ccli_license_number"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "songs", force: :cascade do |t|
+    t.bigint "church_id", null: false
+    t.string "title", null: false
+    t.string "author"
+    t.string "subtitle"
+    t.string "reference"
+    t.string "link"
+    t.string "song_key"
+    t.integer "capo", default: 0, null: false
+    t.string "copyright_line"
+    t.integer "ccli_song_number"
+    t.string "copyright_status", default: "unknown", null: false
+    t.text "chordpro_source"
+    t.jsonb "parsed_lyric"
+    t.text "plain_text"
+    t.jsonb "arrangement"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["church_id", "title"], name: "index_songs_on_church_id_and_title"
+    t.index ["plain_text"], name: "index_songs_on_plain_text_trgm", opclass: :gin_trgm_ops, using: :gin
+    t.check_constraint "capo >= 0 AND capo <= 11", name: "songs_capo_check"
+    t.check_constraint "copyright_status::text = ANY (ARRAY['copyrighted'::character varying, 'public_domain'::character varying, 'unknown'::character varying]::text[])", name: "songs_copyright_status_check"
   end
 
   create_table "users", force: :cascade do |t|
@@ -34,5 +58,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_135245) do
     t.check_constraint "role::text = ANY (ARRAY['admin'::character varying, 'editor'::character varying]::text[])", name: "users_role_check"
   end
 
+  add_foreign_key "songs", "churches"
   add_foreign_key "users", "churches"
 end
