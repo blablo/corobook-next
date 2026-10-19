@@ -4,19 +4,22 @@
   aligned per-segment (chord stacked over its text run), matching a printed chord sheet.
 %>
 <section data-role="sheet-section">
-  <h2 class="text-sm font-bold uppercase tracking-wide text-base-content/70 mb-1" data-role="section-label">
-    <%= section["label"].presence || section["kind"]&.capitalize %>
-  </h2>
-  <div class="rounded-lg ring-1 ring-base-200 bg-base-100 p-4 overflow-x-auto">
+  <div class="flex items-center gap-2 mb-2">
+    <span class="h-4 w-1 rounded-full bg-primary/70"></span>
+    <h2 class="text-xs font-bold uppercase tracking-[0.12em] text-base-content/60" data-role="section-label">
+      <%= section["label"].presence || section["kind"]&.capitalize %>
+    </h2>
+  </div>
+  <div class="rounded-xl bg-base-200/40 px-5 py-4 overflow-x-auto">
     <% (section["lines"] || []).each do |line| %>
       <% if line["annotation"].present? %>
-        <div class="italic text-base-content/50 text-sm font-mono"><%= line["annotation"] %></div>
+        <div class="italic text-base-content/50 text-sm font-mono py-1"><%= line["annotation"] %></div>
       <% else %>
-        <div class="font-mono text-[15px] leading-snug whitespace-nowrap" data-role="sheet-line">
+        <div class="font-mono text-[15px] leading-[1.35] whitespace-nowrap py-0.5" data-role="sheet-line">
           <% (line["segments"] || []).each do |seg| %>
             <span class="inline-flex flex-col align-bottom">
-              <span class="text-error font-semibold min-h-[1.2em] leading-none whitespace-pre" data-role="chord"><%= seg["chord"] %></span>
-              <span class="whitespace-pre"><%= seg["text"].presence || raw("&nbsp;") %></span>
+              <span class="text-primary font-bold text-[13px] tracking-tight min-h-[1.25em] leading-none whitespace-pre" data-role="chord"><%= seg["chord"] %></span>
+              <span class="text-base-content/90 whitespace-pre"><%= seg["text"].presence || raw("&nbsp;") %></span>
             </span>
           <% end %>
         </div>

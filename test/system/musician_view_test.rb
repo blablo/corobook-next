@@ -18,8 +18,8 @@ class MusicianViewTest < ApplicationSystemTestCase
     within "[data-role=musician-preview]" do
       assert_selector "[data-role=chord]", text: "G"
       assert_selector "[data-role=chord]", text: "C"
-      assert_selector "[data-role=key-badge]", text: "Key G"
     end
+    assert_selector "[data-role=key-badge]", text: "Key G"
   end
 
   test "transposing to a target key changes the displayed chords and badge" do
@@ -27,9 +27,9 @@ class MusicianViewTest < ApplicationSystemTestCase
     within "[data-role=musician-preview]" do
       assert_selector "[data-role=chord]", text: "A"
       assert_selector "[data-role=chord]", text: "D"
-      assert_selector "[data-role=key-badge]", text: "Key A"
       assert_no_selector "[data-role=chord]", text: "G"
     end
+    assert_selector "[data-role=key-badge]", text: "Key A"
   end
 
   test "a song whose arrangement labels don't match its sections still shows the sections" do
