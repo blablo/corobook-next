@@ -31,6 +31,7 @@ module Corobook
         @sections = []
         @current = nil
         @explicit_section = false
+        @last_chorus = nil
       end
 
       def parse
@@ -102,6 +103,7 @@ module Corobook
       def finalize_open_section
         return if @current.nil?
 
+        @last_chorus = @current if @current[:kind] == :chorus && !@current[:replay_of]
         @sections << @current
         @current = nil
       end
@@ -139,8 +141,27 @@ module Corobook
         segments = [ { "text" => "", "chord" => nil } ] if segments.empty?
         { "segments" => segments }
       end
-      def replay_chorus(_label)
-        # Implemented in task 3.3b.
+      # {chorus} replays the most recently defined chorus. Materialize its lines into a concrete
+      # section (deep-copied) so views and §6.2 navigation never resolve references at render
+      # time (design §4.3). With no prior chorus, emit an empty, warned section.
+      def replay_chorus(label)
+        finalize_open_section
+        if @last_chorus
+          @sections << {
+            label: label || @last_chorus[:label],
+            kind: :chorus,
+            replay_of: @last_chorus[:label],
+            lines: Marshal.load(Marshal.dump(@last_chorus[:lines]))
+          }
+        else
+          @sections << {
+            label: label,
+            kind: :chorus,
+            replay_of: nil,
+            lines: [],
+            warning: "x_corobook_parse_warning: {chorus} with no prior chorus"
+          }
+        end
       end
 
       def build
@@ -148,12 +169,15 @@ module Corobook
           "version" => ParsedLyric::VERSION,
           "meta" => @meta,
           "sections" => @sections.map { |s|
-            {
+            section = {
               "label" => s[:label],
               "kind" => s[:kind].to_s,
               "is_chorus" => s[:kind] == :chorus,
               "lines" => s[:lines]
             }
+            section["replay_of"] = s[:replay_of] if s.key?(:replay_of)
+            section["x_corobook_parse_warning"] = s[:warning] if s[:warning]
+            section
           }
         }
       end
