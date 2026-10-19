@@ -37,6 +37,7 @@ class UsageEventTest < ActiveSupport::TestCase
   end
 
   test "a second session of the same set captures its own event" do
+    @session.end!
     s2 = LiveSession.launch(@set)
     assert_equal 1, UsageEvent.where(live_session: s2, song: @song).count
     assert_equal 2, UsageEvent.where(song: @song).count

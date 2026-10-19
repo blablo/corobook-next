@@ -13,6 +13,7 @@ class UsageReportTest < ActionDispatch::IntegrationTest
 
     # Two sessions that both showed the song → two uses.
     @s1 = LiveSession.launch(set)
+    @s1.end!
     @s2 = LiveSession.launch(set)
 
     # A public-domain song shown → must NOT appear.
