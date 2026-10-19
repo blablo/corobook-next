@@ -4,7 +4,7 @@ class UsageReportTest < ActionDispatch::IntegrationTest
   setup do
     @church = Church.create!(name: "Central")
     @other = Church.create!(name: "Norte")
-    User.create!(church: @church, email: "ed@example.com", password: "secret123", role: "editor")
+    User.create!(church: @church, email: "ed@example.com", password: "secret123", role: "admin")
 
     @song = @church.songs.create!(title: "Cuan grande", author: "Hine", ccli_song_number: 111,
                                   copyright_status: "copyrighted", chordpro_source: "x")
@@ -47,5 +47,13 @@ class UsageReportTest < ActionDispatch::IntegrationTest
     cuan = data.find { |r| r[1] == "Cuan grande" }
     assert_equal "111", cuan[0]
     assert_equal "2", cuan[3], "two sessions showed the song"
+  end
+
+  test "an editor is denied the usage report (admin-only, server-side)" do
+    editor = User.create!(church: @church, email: "editor2@example.com", password: "secret123", role: "editor")
+    post login_path, params: { church_id: @church.id, email: editor.email, password: "secret123" }
+    get usage_report_path
+    assert_response :redirect # require_admin bounces non-admins; not a 200 CSV
+    assert_not_equal "text/csv", response.media_type
   end
 end
