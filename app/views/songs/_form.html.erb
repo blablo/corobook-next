@@ -1,0 +1,65 @@
+<%= form_with model: song do |f| %>
+  <% if song.errors.any? %>
+    <div class="mb-4 rounded bg-red-100 text-red-800 px-3 py-2 text-sm">
+      <%= song.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <%= f.label :title, "Title", class: "block text-sm mb-1" %>
+      <%= f.text_field :title, class: "w-full border rounded px-2 py-1" %>
+    </div>
+    <div>
+      <%= f.label :author, "Author", class: "block text-sm mb-1" %>
+      <%= f.text_field :author, class: "w-full border rounded px-2 py-1" %>
+    </div>
+    <div>
+      <%= f.label :song_key, "Key", class: "block text-sm mb-1" %>
+      <%= f.text_field :song_key, class: "w-full border rounded px-2 py-1" %>
+    </div>
+    <div>
+      <%= f.label :capo, "Capo", class: "block text-sm mb-1" %>
+      <%= f.number_field :capo, in: 0..11, class: "w-full border rounded px-2 py-1" %>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <%= f.label :chordpro_source, "ChordPro source", class: "block text-sm mb-1" %>
+    <%= f.text_area :chordpro_source, rows: 14, class: "w-full border rounded px-2 py-1 font-mono text-sm" %>
+  </div>
+
+  <% warnings = parse_warnings(song) %>
+  <% if warnings.any? %>
+    <div class="mt-2 rounded bg-amber-100 text-amber-900 px-3 py-2 text-sm" data-role="parse-warning">
+      <% warnings.each { |w| %><div><%= w %></div><% } %>
+    </div>
+  <% end %>
+
+  <fieldset class="mt-4 border rounded p-3">
+    <legend class="text-sm">Copyright</legend>
+    <%= f.label :copyright_line, "Copyright line", class: "block text-sm mb-1" %>
+    <%= f.text_field :copyright_line, class: "w-full border rounded px-2 py-1" %>
+    <div class="grid grid-cols-2 gap-4 mt-2">
+      <div>
+        <%= f.label :ccli_song_number, "CCLI song number", class: "block text-sm mb-1" %>
+        <%= f.number_field :ccli_song_number, class: "w-full border rounded px-2 py-1" %>
+      </div>
+      <div>
+        <%= f.label :copyright_status, "Status", class: "block text-sm mb-1" %>
+        <%= f.select :copyright_status, Song.copyright_statuses.keys, {}, class: "w-full border rounded px-2 py-1" %>
+      </div>
+    </div>
+  </fieldset>
+
+  <div class="mt-4">
+    <%= label_tag "song_arrangement_text", "Arrangement (section labels, one per line — empty = section order)", class: "block text-sm mb-1" %>
+    <%= text_area_tag "song[arrangement_text]", (song.arrangement || []).join("\n"),
+          id: "song_arrangement_text", rows: 4,
+          class: "w-full border rounded px-2 py-1 font-mono text-sm", data: { role: "arrangement" } %>
+  </div>
+
+  <div class="mt-4">
+    <%= f.submit class: "rounded bg-slate-800 text-white px-3 py-2" %>
+  </div>
+<% end %>
