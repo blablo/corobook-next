@@ -15,8 +15,10 @@ class LoginTest < ApplicationSystemTestCase
     fill_in "Password", with: "secret123"
     click_on "Sign in"
 
-    assert_text "Signed in to Norte"
-    assert_text "pastor@example.com — Norte"
+    # Lands on the home launchpad for the chosen church.
+    assert_text "Signed in to Norte"              # flash notice (global layout)
+    assert_selector "[data-role=home]", text: "Norte"
+    assert_text "pastor@example.com"
   end
 
   test "wrong password is rejected" do
