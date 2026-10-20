@@ -1,0 +1,16 @@
+<p>Hi,</p>
+
+<p>
+  <%= @inviter.email %> has invited you to join
+  <strong><%= @church.name %></strong> on Corobook as
+  <strong><%= @role %></strong>.
+</p>
+
+<p>
+  <a href="<%= @url %>">Accept the invitation and set your password</a>
+</p>
+
+<p>Or paste this link into your browser:</p>
+<p><%= @url %></p>
+
+<p>This invitation expires in 14 days.</p>
