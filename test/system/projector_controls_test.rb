@@ -37,4 +37,25 @@ class ProjectorControlsTest < ApplicationSystemTestCase
     visit projector_path(@session.projector_token)
     assert_equal "110", find("[data-role=projector-frame]")["data-font-scale"]
   end
+
+  test "a clicker / keyboard arrows advance and go back" do
+    # A second, multi-section song so there are several advance stops to move through.
+    multi = @church.songs.create!(title: "Dos", chordpro_source: "{sov: Verse 1}\nUno\n{soc: Chorus}\nDos")
+    @set.set_items.create!(position: 1, item_type: "song", song: multi)
+
+    pos = -> { s = @session.reload; [ s.current_set_item_id, s.current_section_index ] }
+
+    visit operator_path(@session)
+    start = pos.call
+
+    # Right arrow (what most presentation clickers send to advance).
+    find("body").send_keys(:right)
+    assert_selector "[data-role=operator-frame]"
+    assert_not_equal start, pos.call, "expected Right arrow to advance the session"
+
+    # Left arrow goes back to where we started.
+    find("body").send_keys(:left)
+    assert_selector "[data-role=operator-frame]"
+    assert_equal start, pos.call, "expected Left arrow to go back"
+  end
 end
