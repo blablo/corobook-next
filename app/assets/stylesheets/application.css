@@ -76,10 +76,3 @@
 .musician-line { font-family: ui-monospace, monospace; white-space: pre-wrap; padding-top: 1.2em; }
 .musician-seg { position: relative; display: inline-block; white-space: pre; vertical-align: bottom; }
 .musician-chord { position: absolute; bottom: 100%; left: 0; font-weight: 700; line-height: 1; white-space: pre; padding-right: 0.5rem; }
-
-/* Sidebar nav full width. DaisyUI's menu component is used as-is (ul.menu w-full); this only
-   forces the anchor's grid to let the label column stretch, so the active pill fills the item.
-   DaisyUI's tailwind.css loads after this file, so !important keeps the override winning. */
-[data-role="sidebar"] .menu :where(li) > a {
-  grid-auto-columns: max-content 1fr max-content !important;
-}
