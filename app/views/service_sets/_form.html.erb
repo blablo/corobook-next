@@ -1,18 +1,50 @@
-<%= form_with model: service_set, url: (service_set.persisted? ? service_set_path(service_set) : service_sets_path) do |f| %>
+<%= form_with model: service_set, url: (service_set.persisted? ? service_set_path(service_set) : service_sets_path),
+      class: "max-w-lg" do |f| %>
   <% if service_set.errors.any? %>
-    <div class="mb-4 rounded bg-red-100 text-red-800 px-3 py-2 text-sm">
-      <%= service_set.errors.full_messages.to_sentence %>
+    <div class="alert alert-error mb-4 text-sm">
+      <span><%= service_set.errors.full_messages.to_sentence %></span>
     </div>
   <% end %>
 
-  <div class="mb-4">
-    <%= f.label :name, "Name", class: "block text-sm mb-1" %>
-    <%= f.text_field :name, class: "w-full border rounded px-2 py-1" %>
-  </div>
-  <div class="mb-4">
-    <%= f.label :service_date, "Service date", class: "block text-sm mb-1" %>
-    <%= f.date_field :service_date, class: "w-full border rounded px-2 py-1" %>
+  <div class="card bg-base-100 ring-1 ring-base-200">
+    <div class="card-body gap-4">
+      <label class="form-control">
+        <span class="label-text text-sm mb-1 block">Service date</span>
+        <%= f.date_field :service_date, class: "input input-bordered w-full",
+              data: { role: "set-date" } %>
+        <span class="label-text-alt text-xs text-base-content/50 mt-1 block">Defaults to the next Sunday.</span>
+      </label>
+
+      <label class="form-control">
+        <span class="label-text text-sm mb-1 block">Name</span>
+        <%= f.text_field :name, class: "input input-bordered w-full",
+              data: { role: "set-name" } %>
+        <span class="label-text-alt text-xs text-base-content/50 mt-1 block">Defaults to the date — change it if you like.</span>
+      </label>
+
+      <div class="flex items-center gap-3">
+        <%= f.submit (service_set.persisted? ? "Save changes" : "Create set"), class: "btn btn-primary" %>
+        <%= link_to "Cancel", (service_set.persisted? ? service_set_path(service_set) : service_sets_path), class: "btn btn-ghost" %>
+      </div>
+    </div>
   </div>
 
-  <%= f.submit class: "rounded bg-slate-800 text-white px-3 py-2" %>
+  <% unless service_set.persisted? %>
+    <%# On a NEW set, keep the name mirroring the date until the user edits the name themselves. %>
+    <script>
+      (function () {
+        const dateEl = document.querySelector("[data-role=set-date]")
+        const nameEl = document.querySelector("[data-role=set-name]")
+        if (!dateEl || !nameEl) return
+        const fmt = (iso) => {
+          if (!iso) return ""
+          const d = new Date(iso + "T00:00:00")
+          return d.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" })
+        }
+        let autoName = nameEl.value === fmt(dateEl.value) || nameEl.value === ""
+        nameEl.addEventListener("input", () => { autoName = false })
+        dateEl.addEventListener("change", () => { if (autoName) nameEl.value = fmt(dateEl.value) })
+      })()
+    </script>
+  <% end %>
 <% end %>
