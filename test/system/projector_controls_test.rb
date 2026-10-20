@@ -54,8 +54,21 @@ class ProjectorControlsTest < ApplicationSystemTestCase
     assert_not_equal start, pos.call, "expected Right arrow to advance the session"
 
     # Left arrow goes back to where we started.
+  test "a clicker / keyboard on the projector page itself advances and goes back" do
+    multi = @church.songs.create!(title: "Dos", chordpro_source: "{sov: Verse 1}\nUno\n{soc: Chorus}\nDos")
+    @set.set_items.create!(position: 1, item_type: "song", song: multi)
+    pos = -> { s = @session.reload; [ s.current_set_item_id, s.current_section_index ] }
+
+    # No sign-in: the projector page is reached by token alone.
+    visit projector_path(@session.projector_token)
+    assert_selector "[data-role=projector-root]"
+    start = pos.call
+
+    find("body").send_keys(:right)
+    assert_selector "[data-role=projector-root]"
+    assert_not_equal start, pos.call, "expected Right arrow on the projector page to advance"
+
     find("body").send_keys(:left)
-    assert_selector "[data-role=operator-frame]"
-    assert_equal start, pos.call, "expected Left arrow to go back"
+    assert_equal start, pos.call, "expected Left arrow on the projector page to go back"
   end
 end

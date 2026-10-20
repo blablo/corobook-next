@@ -1,4 +1,7 @@
 <%= turbo_stream_from [ @session, :projector ] %>
-<div class="projector-root" data-role="projector-root">
+<div class="projector-root" data-role="projector-root"
+     data-controller="projector-clicker"
+     data-projector-clicker-advance-url-value="<%= projector_advance_path(@session.projector_token) %>"
+     data-projector-clicker-back-url-value="<%= projector_back_path(@session.projector_token) %>">
   <%= render "live/projector_frame", session: @session %>
 </div>

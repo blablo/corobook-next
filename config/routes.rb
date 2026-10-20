@@ -24,7 +24,9 @@ Rails.application.routes.draw do
   patch "operator/:id/font"    => "operator#font",    as: :operator_font
   delete "operator/:id"        => "operator#end_session", as: :operator_end
 
-  get "p/:token" => "projector#show", as: :projector
+  get   "p/:token"         => "projector#show",    as: :projector
+  patch "p/:token/advance" => "projector#advance", as: :projector_advance
+  patch "p/:token/back"    => "projector#back",    as: :projector_back
   get "m/:token" => "musician#show",  as: :musician
 
   get "reports/usage" => "reports#usage", as: :usage_report
