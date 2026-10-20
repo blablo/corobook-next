@@ -18,12 +18,11 @@ class TextSlideEditorTest < ApplicationSystemTestCase
     select "Statement of faith", from: "Type"
 
     # WYSIWYG body: type into the contenteditable, then bold a word via the toolbar.
-    rich = find("[data-slide-editor-target=rich]")
-    rich.click
-    rich.send_keys("Creo en un solo Dios")
-    # Select the first word ("Creo") and bold it, finding the first text node robustly.
-    page.execute_script(<<~JS, rich.native)
-      const el = arguments[0]
+    find("[data-slide-editor-target=rich]").click
+    find("[data-slide-editor-target=rich]").send_keys("Creo en un solo Dios")
+    # Select the first word ("Creo") — query the live node inside the script (no stale handle).
+    page.execute_script(<<~JS)
+      const el = document.querySelector("[data-slide-editor-target=rich]")
       const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT)
       const textNode = walker.nextNode()
       const r = document.createRange()
