@@ -1,3 +1,5 @@
+require "rqrcode"
+
 module ApplicationHelper
   # Inline SVG QR code for a URL (no external request — scannable offline on the projector).
   # `size` is the rendered pixel size; the SVG scales crisply to it.
