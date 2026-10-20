@@ -1,0 +1,40 @@
+<%#
+  One program row. Locals: item (SetItem), set (ServiceSet), index (0-based), count, can_edit.
+  Server-rendered; the Stimulus controller enhances drag/reorder/remove on top of this.
+%>
+<li class="flex items-center gap-2 rounded-lg bg-base-100 ring-1 ring-base-200 px-3 py-2 <%= 'opacity-70' if item.missing? %>"
+    data-role="set-item" data-item-id="<%= item.id %>" data-missing="<%= item.missing? %>"
+    <%= "draggable=true" if can_edit %>>
+  <% if can_edit %>
+    <span class="cursor-grab select-none text-base-content/30 shrink-0" data-drag-handle title="Drag to reorder">⠿</span>
+  <% end %>
+  <span class="text-xs text-base-content/40 w-6 text-right shrink-0" data-role="pos"><%= index + 1 %>.</span>
+  <span class="shrink-0 text-base-content/40" title="<%= item.item_type == 'song' ? 'Song' : 'Slide' %>">
+    <%= item.item_type == "song" ? "♪" : "▤" %>
+  </span>
+  <span class="flex-1 min-w-0 truncate">
+    <% if item.missing? %>
+      <span class="italic text-error">Missing item (removed from library)</span>
+    <% else %>
+      <%= item.resolved_title %>
+    <% end %>
+  </span>
+  <% if item.item_type == "song" && item.song&.song_key.present? %>
+    <span class="badge badge-ghost badge-sm shrink-0"><%= item.song.song_key %></span>
+  <% end %>
+  <% if can_edit %>
+    <span class="flex items-center gap-0.5 shrink-0">
+      <%= button_to "↑", reorder_service_set_path(set), method: :patch,
+            params: { ordered_ids: @items.map(&:id).tap { |a| a[index - 1], a[index] = a[index], a[index - 1] if index.positive? } },
+            form: { data: { turbo: false }, class: index.positive? ? "" : "invisible" },
+            class: "btn btn-ghost btn-xs px-1 arrange-up", "aria-label": "Move up" %>
+      <%= button_to "↓", reorder_service_set_path(set), method: :patch,
+            params: { ordered_ids: @items.map(&:id).tap { |a| a[index + 1], a[index] = a[index], a[index + 1] if index < count - 1 } },
+            form: { data: { turbo: false }, class: index < count - 1 ? "" : "invisible" },
+            class: "btn btn-ghost btn-xs px-1 arrange-down", "aria-label": "Move down" %>
+      <%= button_to "✕", remove_item_service_set_path(set, item_id: item.id), method: :delete,
+            form: { data: { turbo: false } },
+            class: "btn btn-ghost btn-xs px-1 text-error arrange-del", "aria-label": "Remove" %>
+    </span>
+  <% end %>
+</li>
