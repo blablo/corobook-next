@@ -4,6 +4,7 @@ class ServiceSet < ApplicationRecord
   include ChurchChild
 
   has_many :set_items, -> { order(:position) }, dependent: :destroy
+  has_many :live_sessions, dependent: :destroy
   # Inline one-off slides owned by this set; reusable library slides are NOT reaped.
   has_many :inline_text_slides,
     -> { where(reusable: false) },

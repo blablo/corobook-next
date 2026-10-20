@@ -10,7 +10,7 @@ class ServiceSetsController < ApplicationController
 
   def show
     @items = @service_set.ordered_items.to_a
-    @active_session = church_scope(:live_sessions).find_by(status: "active")
+    @active_session = @service_set.live_sessions.find_by(status: "active")
     @songs = church_scope(:songs).order(:title)
     @reusable_slides = church_scope(:text_slides).where(reusable: true).order(:title)
     # For the "New slide" modal, which renders the full text_slides/_form editor.
