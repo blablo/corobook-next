@@ -18,15 +18,17 @@
         <%# ── Tags ───────────────────────────────────────────────── %>
         <div class="form-control">
           <span class="label-text text-sm mb-1 block">Tags</span>
-          <div class="flex flex-wrap items-center gap-1.5 rounded-lg border border-base-300 px-2 py-2"
-               data-slide-editor-target="tagChips" data-action="click->slide-editor#focusTag"></div>
-          <input type="text" list="church-tags" placeholder="Type a tag and press Enter…"
-                 class="input input-bordered input-sm w-full mt-1"
-                 data-slide-editor-target="tagInput" data-action="keydown->slide-editor#onTagKey">
+          <div class="flex flex-wrap items-center gap-1.5 rounded-lg border border-base-300 px-2 py-1.5 min-h-10 focus-within:border-primary cursor-text"
+               data-action="click->slide-editor#focusTag">
+            <span class="contents" data-slide-editor-target="tagChips"></span>
+            <input type="text" list="church-tags" placeholder="Add a tag…"
+                   class="flex-1 min-w-32 bg-transparent border-0 focus:outline-none text-sm py-0.5"
+                   data-slide-editor-target="tagInput" data-action="keydown->slide-editor#onTagKey">
+          </div>
           <datalist id="church-tags">
             <% (local_assigns[:church_tags] || []).each do |t| %><option value="<%= t %>"><% end %>
           </datalist>
-          <span class="label-text-alt text-xs text-base-content/50 mt-1 block">Used to organize and search slides. Type to create or pick an existing one.</span>
+          <span class="label-text-alt text-xs text-base-content/50 mt-1 block">Type a tag and press Enter. Used to organize and search slides.</span>
           <%# hidden tag inputs are injected here by the controller %>
           <div data-slide-editor-target="tagFields"></div>
         </div>
