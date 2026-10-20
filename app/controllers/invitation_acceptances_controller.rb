@@ -7,7 +7,7 @@ class InvitationAcceptancesController < ApplicationController
 
   def show
     @invitation = Invitation.find_acceptable_by_token(params[:token])
-    return render_invalid unless @invitation
+    render_invalid unless @invitation
   end
 
   def create
