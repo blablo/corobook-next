@@ -14,6 +14,7 @@ class LiveCopyrightNoticeTest < ApplicationSystemTestCase
   end
 
   test "the live projector shows the composed CCLI notice for a licensed copyrighted song" do
+    @session.update!(current_section_index: 1) # past the title slide, onto the lyric section
     visit projector_path(@session.projector_token)
     notice = find("[data-role=copyright-notice]")
     assert_match "© 1953 Stuart K. Hine", notice.text
