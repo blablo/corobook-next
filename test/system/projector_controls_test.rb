@@ -38,42 +38,55 @@ class ProjectorControlsTest < ApplicationSystemTestCase
     assert_equal "110", find("[data-role=projector-frame]")["data-font-scale"]
   end
 
+  # Wait for the async key -> POST -> broadcast round-trip to land the expected position.
+  def assert_position(expected, msg)
+    ok = false
+    20.times do
+      s = @session.reload
+      if [ s.current_set_item_id, s.current_section_index ] == expected
+        ok = true
+        break
+      end
+      sleep 0.1
+    end
+    assert ok, "#{msg} (position was #{[ @session.current_set_item_id, @session.current_section_index ].inspect})"
+  end
+
   test "a clicker / keyboard arrows advance and go back" do
-    # A second, multi-section song so there are several advance stops to move through.
     multi = @church.songs.create!(title: "Dos", chordpro_source: "{sov: Verse 1}\nUno\n{soc: Chorus}\nDos")
     @set.set_items.create!(position: 1, item_type: "song", song: multi)
 
-    pos = -> { s = @session.reload; [ s.current_set_item_id, s.current_section_index ] }
-
     visit operator_path(@session)
-    start = pos.call
+    s = @session.reload
+    start = [ s.current_set_item_id, s.current_section_index ]
 
-    # Right arrow (what most presentation clickers send to advance).
+    # Right arrow advances; wait for the position to actually change.
     find("body").send_keys(:right)
-    assert_selector "[data-role=operator-frame]"
-    assert_not_equal start, pos.call, "expected Right arrow to advance the session"
+    advanced = nil
+    20.times { advanced = ([ @session.reload.current_set_item_id, @session.current_section_index ] != start) ? true : nil; break if advanced; sleep 0.1 }
+    assert advanced, "expected Right arrow to advance the session"
 
-    # Left arrow goes back to where we started.
+    # Left arrow returns to the start.
     find("body").send_keys(:left)
-    assert_selector "[data-role=operator-frame]"
-    assert_equal start, pos.call, "expected Left arrow to go back"
+    assert_position start, "expected Left arrow to go back"
   end
 
   test "a clicker / keyboard on the projector page itself advances and goes back" do
     multi = @church.songs.create!(title: "Dos", chordpro_source: "{sov: Verse 1}\nUno\n{soc: Chorus}\nDos")
     @set.set_items.create!(position: 1, item_type: "song", song: multi)
-    pos = -> { s = @session.reload; [ s.current_set_item_id, s.current_section_index ] }
 
     # No sign-in: the projector page is reached by token alone.
     visit projector_path(@session.projector_token)
     assert_selector "[data-role=projector-root]"
-    start = pos.call
+    s = @session.reload
+    start = [ s.current_set_item_id, s.current_section_index ]
 
     find("body").send_keys(:right)
-    assert_selector "[data-role=projector-root]"
-    assert_not_equal start, pos.call, "expected Right arrow on the projector page to advance"
+    advanced = nil
+    20.times { advanced = ([ @session.reload.current_set_item_id, @session.current_section_index ] != start) ? true : nil; break if advanced; sleep 0.1 }
+    assert advanced, "expected Right arrow on the projector page to advance"
 
     find("body").send_keys(:left)
-    assert_equal start, pos.call, "expected Left arrow on the projector page to go back"
+    assert_position start, "expected Left arrow on the projector page to go back"
   end
 end
