@@ -15,10 +15,12 @@
       <% if line["annotation"].present? %>
         <div class="italic text-base-content/50 text-sm font-mono py-1"><%= line["annotation"] %></div>
       <% else %>
-        <div class="font-mono text-[15px] leading-[1.35] whitespace-nowrap py-0.5" data-role="sheet-line">
+        <div class="font-mono text-[15px] leading-[1.35] whitespace-nowrap py-0.5 pt-5" data-role="sheet-line">
           <% (line["segments"] || []).each do |seg| %>
-            <span class="inline-flex flex-col align-bottom">
-              <span class="text-primary font-bold text-[13px] tracking-tight min-h-[1.25em] leading-none whitespace-pre" data-role="chord"><%= seg["chord"] %></span>
+            <span class="relative inline-block whitespace-pre align-bottom">
+              <% if seg["chord"].present? %>
+                <span class="absolute bottom-full left-0 text-primary font-bold text-[13px] tracking-tight leading-none whitespace-pre pr-2" data-role="chord"><%= seg["chord"] %></span>
+              <% end %>
               <span class="text-base-content/90 whitespace-pre"><%= seg["text"].presence || raw("&nbsp;") %></span>
             </span>
           <% end %>
