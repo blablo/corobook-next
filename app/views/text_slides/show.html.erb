@@ -1,20 +1,36 @@
-<div class="mx-auto mt-8 max-w-3xl">
-  <div class="flex items-center justify-between mb-4">
-    <h1 class="text-2xl font-semibold"><%= @text_slide.title %></h1>
+<div class="mx-auto my-8 max-w-3xl px-4 sm:px-6">
+  <div class="flex items-center justify-between mb-2">
+    <h1 class="text-2xl font-bold"><%= @text_slide.title %></h1>
     <% if can_edit? %>
-      <%= link_to "Edit", edit_text_slide_path(@text_slide), class: "underline text-sm" %>
+      <%= link_to "Edit", edit_text_slide_path(@text_slide), class: "btn btn-ghost btn-sm" %>
     <% end %>
   </div>
 
-  <p class="text-sm text-slate-500 mb-4"><%= @text_slide.subtype.humanize %></p>
+  <% if @text_slide.tags.present? %>
+    <div class="flex flex-wrap gap-1.5 mb-4">
+      <% @text_slide.tags.each do |tag| %>
+        <%= link_to tag, text_slides_path(tag: tag), class: "badge badge-ghost" %>
+      <% end %>
+    </div>
+  <% end %>
 
   <section class="mt-4" data-role="projector-preview">
-    <h2 class="text-sm text-slate-500 mb-2">Projector preview</h2>
-    <%= render "projector_slide", slide: @text_slide %>
+    <h2 class="text-sm text-base-content/50 mb-2">
+      Projector preview<%= " — #{@text_slide.page_count} pages" if @text_slide.page_count > 1 %>
+    </h2>
+    <div class="flex flex-col gap-3">
+      <% @text_slide.page_count.times do |i| %>
+        <%= render "projector_slide", slide: @text_slide, page: i %>
+      <% end %>
+    </div>
   </section>
 
   <section class="mt-6" data-role="musician-preview">
-    <h2 class="text-sm text-slate-500 mb-2">Musician view</h2>
-    <%= render "musician_slide", slide: @text_slide %>
+    <h2 class="text-sm text-base-content/50 mb-2">Musician view</h2>
+    <div class="flex flex-col gap-3">
+      <% @text_slide.page_count.times do |i| %>
+        <%= render "musician_slide", slide: @text_slide, page: i %>
+      <% end %>
+    </div>
   </section>
 </div>

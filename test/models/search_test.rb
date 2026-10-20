@@ -32,8 +32,8 @@ class SearchTest < ActiveSupport::TestCase
     assert_equal 2, @central.songs.search(nil).count
   end
 
-  test "text slide search matches body and subtype" do
-    @central.text_slides.create!(title: "Credo", subtype: "statement_of_faith", body_markdown: "Creo en Dios", reusable: true)
+  test "text slide search matches body and tags" do
+    @central.text_slides.create!(title: "Credo", tags: [ "statement_of_faith" ], pages: [ { "body_markdown" => "Creo en Dios" } ], reusable: true)
     assert_equal 1, @central.text_slides.search("creo").count
     assert_equal 1, @central.text_slides.search("faith").count
   end

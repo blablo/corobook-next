@@ -14,6 +14,6 @@
           is_final_section: frame.final_section?,
           church_license: session.church.ccli_license_number %>
   <% elsif frame.text_slide? %>
-    <%= render "text_slides/projector_slide", slide: frame.item %>
+    <%= render "text_slides/projector_slide", slide: frame.item, page: session.current_section_index %>
   <% end %>
 </div>

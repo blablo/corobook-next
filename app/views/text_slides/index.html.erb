@@ -1,23 +1,44 @@
-<div class="mx-auto mt-8 max-w-3xl">
+<div class="mx-auto my-8 max-w-3xl px-4 sm:px-6">
   <div class="flex items-center justify-between mb-4">
-    <h1 class="text-2xl font-semibold">Slides — <%= current_church.name %></h1>
-    <%= link_to "New slide", new_text_slide_path, class: "rounded bg-slate-800 text-white px-3 py-2 text-sm" %>
+    <h1 class="text-2xl font-bold">Slides — <%= current_church.name %></h1>
+    <%= link_to "New slide", new_text_slide_path, class: "btn btn-primary btn-sm" %>
   </div>
 
-  <%= form_with url: text_slides_path, method: :get, class: "mb-4" do %>
-    <%= search_field_tag :q, @query, placeholder: "Search title, type, or body…",
-          class: "w-full border rounded px-2 py-1", data: { role: "slide-search" } %>
+  <%= form_with url: text_slides_path, method: :get, class: "mb-3" do %>
+    <%= hidden_field_tag :tag, @tag if @tag %>
+    <%= search_field_tag :q, @query, placeholder: "Search title, tags, or body…",
+          class: "input input-bordered input-sm w-full", data: { role: "slide-search" } %>
   <% end %>
 
-  <ul class="divide-y">
+  <% if @church_tags.present? %>
+    <div class="flex flex-wrap items-center gap-1.5 mb-4" data-role="tag-filter">
+      <span class="text-xs font-semibold uppercase tracking-wide text-base-content/40 mr-1">Tags</span>
+      <% if @tag %>
+        <%= link_to "✕ #{@tag}", text_slides_path(q: @query), class: "badge badge-primary gap-1" %>
+      <% end %>
+      <% @church_tags.each do |tag| %>
+        <% next if tag == @tag %>
+        <%= link_to tag, text_slides_path(tag: tag, q: @query), class: "badge badge-ghost hover:badge-neutral" %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <ul class="divide-y divide-base-200">
     <% @text_slides.each do |slide| %>
-      <li class="py-2 flex items-center justify-between">
-        <%= link_to slide.title, slide, class: "underline" %>
-        <span class="text-sm text-slate-500"><%= slide.subtype.humanize %></span>
+      <li class="py-2 flex items-center justify-between gap-3">
+        <%= link_to slide.title, slide, class: "link link-hover font-medium" %>
+        <span class="flex items-center gap-1.5 shrink-0">
+          <% if slide.page_count > 1 %>
+            <span class="badge badge-sm badge-outline"><%= slide.page_count %> pages</span>
+          <% end %>
+          <% slide.tags.each do |tag| %>
+            <span class="badge badge-sm badge-ghost"><%= tag %></span>
+          <% end %>
+        </span>
       </li>
     <% end %>
     <% if @text_slides.empty? %>
-      <li class="py-2 text-sm text-slate-500">No slides yet.</li>
+      <li class="py-2 text-sm text-base-content/50">No slides<%= " for ##{@tag}" if @tag %> yet.</li>
     <% end %>
   </ul>
 </div>
