@@ -2,7 +2,7 @@ class ServiceSetsController < ApplicationController
   layout "shell"
   before_action :require_sign_in
   before_action :require_editor, except: %i[index show]
-  before_action :set_service_set, only: %i[show edit update destroy add_item reorder remove_item]
+  before_action :set_service_set, only: %i[show edit update destroy add_item reorder remove_item library]
 
   def index
     @service_sets = church_scope(:service_sets).order(service_date: :desc, name: :asc)
@@ -42,48 +42,106 @@ class ServiceSetsController < ApplicationController
   end
 
   # Append a song, a reusable slide, or a new inline one-off slide at the end of the set.
+  # Answers JSON (the builder's optimistic path) or redirects (the no-JS fallback).
   def add_item
     position = (@service_set.set_items.maximum(:position) || -1) + 1
-    case params[:kind]
-    when "song"
-      song = find_in_church(:songs, params[:song_id])
-      @service_set.set_items.create!(position:, item_type: "song", song:)
-    when "text_slide"
-      slide = find_in_church(:text_slides, params[:text_slide_id])
-      @service_set.set_items.create!(position:, item_type: "text_slide", text_slide: slide)
-    when "inline_slide"
-      slide = church_scope(:text_slides).create!(
-        title: params[:title].presence || "Slide", subtype: params[:subtype].presence || "sermon_point",
-        body_markdown: params[:body_markdown], reusable: false, set_id: @service_set.id
-      )
-      @service_set.set_items.create!(position:, item_type: "text_slide", text_slide: slide)
+    item = @service_set.set_items.create!(position:, **item_attributes)
+    respond_to do |format|
+      format.json { render json: item_json(item), status: :created }
+      format.html { redirect_to @service_set }
     end
-    redirect_to @service_set
+  rescue ActiveRecord::RecordInvalid => e
+    respond_to do |format|
+      format.json { render json: { error: e.record.errors.full_messages }, status: :unprocessable_entity }
+      format.html { redirect_to @service_set, alert: e.record.errors.full_messages.to_sentence }
+    end
   end
 
   # Reorder from an ordered list of set_item ids. Two passes so the unique (set, position) index
   # is never transiently violated: park everyone at high positions, then assign finals.
+  #
+  # Rejects a STALE list (ids != current membership — an item was added/removed since load) with
+  # 409 so the client re-syncs rather than applying an order built against gone/missing items.
   def reorder
     ids = Array(params[:ordered_ids]).map(&:to_i)
-    offset = (@service_set.set_items.maximum(:position) || 0) + 1000
-    SetItem.transaction do
-      ids.each_with_index do |id, index|
-        @service_set.set_items.where(id:).update_all(position: offset + index)
-      end
-      ids.each_with_index do |id, index|
-        @service_set.set_items.where(id:).update_all(position: index)
+    current = @service_set.set_items.pluck(:id)
+    if ids.sort != current.sort
+      return respond_to do |format|
+        format.json { render json: { error: "stale", items: ordered_items_json }, status: :conflict }
+        format.html { redirect_to @service_set, alert: "The set changed — reloaded." }
       end
     end
-    redirect_to @service_set
+
+    offset = (@service_set.set_items.maximum(:position) || 0) + 1000
+    SetItem.transaction do
+      ids.each_with_index { |id, i| @service_set.set_items.where(id:).update_all(position: offset + i) }
+      ids.each_with_index { |id, i| @service_set.set_items.where(id:).update_all(position: i) }
+    end
+    respond_to do |format|
+      format.json { head :no_content }
+      format.html { redirect_to @service_set }
+    end
   end
 
   def remove_item
     item = @service_set.set_items.find(params[:item_id])
+    # An inline one-off slide is owned by this set; reap it with its item. A reusable library
+    # slide is only detached (never deleted from the library).
+    inline_slide = item.text_slide if item.text_slide && !item.text_slide.reusable?
     item.destroy
-    redirect_to @service_set
+    inline_slide&.destroy
+    respond_to do |format|
+      format.json { head :no_content }
+      format.html { redirect_to @service_set }
+    end
+  end
+
+  # Picker search (editors only): church-scoped songs or reusable slides, capped at 20.
+  def library
+    render json: library_rows
   end
 
   private
+
+  # Attributes for a new set item from the add_item params; church-scoped lookups keep tenancy.
+  def item_attributes
+    case params[:kind]
+    when "text_slide"
+      { item_type: "text_slide", text_slide: find_in_church(:text_slides, params[:text_slide_id]) }
+    when "inline_slide"
+      slide = church_scope(:text_slides).create!(
+        title: params[:title], subtype: params[:subtype].presence || "sermon_point",
+        body_markdown: params[:body_markdown], reusable: false, set_id: @service_set.id
+      )
+      { item_type: "text_slide", text_slide: slide }
+    else
+      { item_type: "song", song: find_in_church(:songs, params[:song_id]) }
+    end
+  end
+
+  def item_json(item)
+    {
+      id: item.id, kind: item.item_type, title: item.resolved_title,
+      key: (item.song&.song_key if item.item_type == "song"), missing: item.missing?
+    }
+  end
+
+  def ordered_items_json
+    @service_set.ordered_items.map { |i| item_json(i) }
+  end
+
+  # ≤20 church-scoped matches for the picker; song search covers title/author, slides by title.
+  def library_rows
+    if params[:kind] == "slide"
+      pattern = "%#{TextSlide.sanitize_sql_like(params[:q].to_s.strip)}%"
+      church_scope(:text_slides).where(reusable: true).where("title ILIKE ?", pattern)
+        .order(:title).limit(20)
+        .map { |s| { id: s.id, kind: "text_slide", title: s.title } }
+    else
+      church_scope(:songs).search(params[:q]).order(:title).limit(20)
+        .map { |s| { id: s.id, kind: "song", title: s.title, key: s.song_key } }
+    end
+  end
 
   def set_service_set
     @service_set = find_in_church(:service_sets, params[:id])

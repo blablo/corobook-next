@@ -33,6 +33,7 @@ Rails.application.routes.draw do
       patch "reorder"
       delete "items/:item_id", to: "service_sets#remove_item", as: :remove_item
       post "launch", to: "live_sessions#create", as: :launch
+      get "library", to: "service_sets#library", as: :library
     end
   end
 
