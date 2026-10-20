@@ -18,8 +18,8 @@ class LiveRecoveryTest < ApplicationSystemTestCase
   end
 
   test "a projector joining mid-service lands on the current section" do
-    # Operator advances to the second section before the projector connects.
-    @session.update!(current_section_index: 1, position_version: 2)
+    # Section 0 = title, 1 = V1 (Uno), 2 = V2 (Dos). Advance to V2 before the projector connects.
+    @session.update!(current_section_index: 2, position_version: 2)
 
     visit projector_path(@session.projector_token)
     assert_text "Dos"
@@ -28,7 +28,8 @@ class LiveRecoveryTest < ApplicationSystemTestCase
 
   test "an operator reload lands on the current position" do
     visit operator_path(@session)
-    click_on "Next →"
+    click_on "Next →" # title -> V1 (Uno)
+    click_on "Next →" # V1 -> V2 (Dos)
     assert_text "Dos"
 
     # Cold reload — reads the LiveSession row and lands where we were.

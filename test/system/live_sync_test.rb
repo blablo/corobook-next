@@ -19,6 +19,9 @@ class LiveSyncTest < ApplicationSystemTestCase
 
   test "advancing moves the operator frame forward through sections" do
     visit operator_path(@session)
+    # The first stop is the song's title slide; advancing then walks the lyric sections.
+    assert_selector "[data-role=operator-frame]", text: "Tres secciones"
+    click_on "Next →"
     assert_selector "[data-role=operator-frame]", text: "Uno"
     click_on "Next →"
     assert_selector "[data-role=operator-frame]", text: "Dos"
