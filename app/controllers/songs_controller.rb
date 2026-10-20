@@ -77,13 +77,18 @@ class SongsController < ApplicationController
   end
 
   # Sections laid out in play order: each arrangement label resolves to its section (repeats
-  # allowed — a chorus reused three times renders three times). No arrangement, or an arrangement
-  # whose labels don't match any section (legacy data), falls back to natural section order.
+  # allowed — a chorus reused three times renders three times). Sections NOT named in the
+  # arrangement are appended in their natural order so nothing is silently dropped from the
+  # sheet. No arrangement, or one whose labels match nothing, falls back to natural order.
   def order_sections(sections, arrangement)
     return sections if arrangement.blank?
 
     by_label = sections.index_by { |s| s["label"] }
     ordered = arrangement.filter_map { |label| by_label[label] }
-    ordered.presence || sections
+    return sections if ordered.empty?
+
+    referenced = arrangement.to_set
+    leftovers = sections.reject { |s| referenced.include?(s["label"]) }
+    ordered + leftovers
   end
 end
