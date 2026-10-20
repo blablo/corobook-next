@@ -54,6 +54,7 @@ class FollowerViewsTest < ActionDispatch::IntegrationTest
   end
 
   test "the musician frame honors arrangement order, not raw section order" do
+    @session.end! # the setup launched one; a church allows only one active service
     # Song whose arrangement puts the Chorus first (its raw section 0 is a chords-only intro).
     song = @church.songs.create!(title: "Razones", song_key: "A",
       chordpro_source: "{key: A}\n{sov: Intro}\n[A] [E]\n{eov}\n{soc: Chorus}\nBendice alma mía\n{eov}",
