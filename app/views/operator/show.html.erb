@@ -12,11 +12,6 @@
           form: { data: { turbo: false, "operator-clicker-target": "next" } }, class: "rounded bg-slate-800 text-white px-3 py-2" %>
     <%= button_to (@session.blanked ? "Unblank" : "Blank"), operator_blank_path(@session), method: :patch,
           form: { data: { turbo: false, "operator-clicker-target": "blank" } }, class: "rounded border px-3 py-2", data: { role: "blank-toggle" } %>
-    <%= button_to "A-", operator_font_path(@session, dir: "down"), method: :patch,
-          form: { data: { turbo: false } }, class: "rounded border px-3 py-2" %>
-    <%= button_to "A+", operator_font_path(@session, dir: "up"), method: :patch,
-          form: { data: { turbo: false } }, class: "rounded border px-3 py-2" %>
-    <span class="text-sm text-slate-500 self-center" data-role="font-scale"><%= @session.font_scale %>%</span>
     <% if @session.active? %>
       <%= button_to "End service", operator_end_path(@session), method: :delete,
             form: { data: { turbo: false } }, class: "rounded bg-red-700 text-white px-3 py-2 ml-auto",

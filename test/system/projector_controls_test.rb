@@ -27,17 +27,6 @@ class ProjectorControlsTest < ApplicationSystemTestCase
     assert_no_selector "[data-role=projector-lyrics]"
   end
 
-  test "font plus and minus change the scale" do
-    visit operator_path(@session)
-    assert_text "100%"
-    click_on "A+"
-    assert_text "110%"
-    assert_equal 110, @session.reload.font_scale
-
-    visit projector_path(@session.projector_token)
-    assert_equal "110", find("[data-role=projector-frame]")["data-font-scale"]
-  end
-
   # Wait for the async key -> POST -> broadcast round-trip to land the expected position.
   def assert_position(expected, msg)
     ok = false
