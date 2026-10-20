@@ -1,24 +1,53 @@
-<%= form_with model: text_slide do |f| %>
+<%= form_with model: text_slide, data: { controller: "slide-editor", "slide-editor-url-value": preview_text_slides_path } do |f| %>
   <% if text_slide.errors.any? %>
-    <div class="mb-4 rounded bg-red-100 text-red-800 px-3 py-2 text-sm">
-      <%= text_slide.errors.full_messages.to_sentence %>
+    <div class="alert alert-error mb-4 text-sm" data-role="slide-errors">
+      <span><%= text_slide.errors.full_messages.to_sentence %></span>
     </div>
   <% end %>
 
-  <div class="mb-4">
-    <%= f.label :title, "Title", class: "block text-sm mb-1" %>
-    <%= f.text_field :title, class: "w-full border rounded px-2 py-1" %>
-  </div>
+  <div class="grid gap-6 lg:grid-cols-2">
+    <%# ── Editor ──────────────────────────────────────────────────── %>
+    <div class="card bg-base-100 ring-1 ring-base-200">
+      <div class="card-body gap-4">
+        <label class="form-control">
+          <span class="label-text text-sm mb-1 block">Title</span>
+          <%= f.text_field :title, class: "input input-bordered w-full", placeholder: "Slide title" %>
+        </label>
 
-  <div class="mb-4">
-    <%= f.label :subtype, "Type", class: "block text-sm mb-1" %>
-    <%= f.select :subtype, TextSlide.subtypes.keys.map { |s| [ s.humanize, s ] }, {}, class: "w-full border rounded px-2 py-1" %>
-  </div>
+        <label class="form-control">
+          <span class="label-text text-sm mb-1 block">Type</span>
+          <%= f.select :subtype, TextSlide.subtypes.keys.map { |s| [ s.humanize, s ] }, {},
+                class: "select select-bordered w-full",
+                data: { "slide-editor-target": "subtype", action: "change->slide-editor#render" } %>
+          <span class="label-text-alt text-xs text-base-content/50 mt-1 block">Styles how the slide looks on the projector.</span>
+        </label>
 
-  <div class="mb-4">
-    <%= f.label :body_markdown, "Body (markdown)", class: "block text-sm mb-1" %>
-    <%= f.text_area :body_markdown, rows: 10, class: "w-full border rounded px-2 py-1 font-mono text-sm" %>
-  </div>
+        <label class="form-control">
+          <span class="label-text text-sm mb-1 block">Body</span>
+          <%= f.text_area :body_markdown, rows: 12,
+                class: "textarea textarea-bordered w-full font-mono text-sm",
+                placeholder: "Type the slide text…\n\n# Big heading\n**bold**  _italic_\n\n- a point\n- another",
+                data: { "slide-editor-target": "body", action: "input->slide-editor#schedule" } %>
+          <span class="label-text-alt text-xs text-base-content/50 mt-1 block">
+            Supports Markdown: <code># Heading</code>, <code>**bold**</code>, <code>_italic_</code>, <code>- list</code>.
+          </span>
+        </label>
 
-  <%= f.submit class: "rounded bg-slate-800 text-white px-3 py-2" %>
+        <div class="flex items-center gap-3">
+          <%= f.submit (text_slide.persisted? ? "Save changes" : "Create slide"), class: "btn btn-primary" %>
+          <%= link_to "Cancel", (text_slide.persisted? ? text_slide_path(text_slide) : text_slides_path), class: "btn btn-ghost" %>
+        </div>
+      </div>
+    </div>
+
+    <%# ── Live preview ────────────────────────────────────────────── %>
+    <div class="lg:sticky lg:top-4 self-start">
+      <div class="text-xs font-semibold uppercase tracking-wide text-base-content/50 mb-2">Preview</div>
+      <div class="rounded-xl bg-neutral text-neutral-content p-6 min-h-48 flex items-center justify-center text-center">
+        <div class="slide-preview prose prose-invert max-w-none" data-slide-editor-target="preview"
+             data-role="slide-preview"></div>
+      </div>
+      <p class="text-xs text-base-content/40 mt-2">This is roughly how the slide appears on the projection screen.</p>
+    </div>
+  </div>
 <% end %>

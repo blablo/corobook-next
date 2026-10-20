@@ -12,7 +12,9 @@ Rails.application.routes.draw do
   delete "logout" => "sessions#destroy", as: :logout
 
   resources :songs
-  resources :text_slides
+  resources :text_slides do
+    post "preview", on: :collection
+  end
 
   get   "operator/:id"         => "operator#show",    as: :operator
   patch "operator/:id/advance" => "operator#advance", as: :operator_advance
