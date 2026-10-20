@@ -47,4 +47,19 @@ class ServiceSetResumeScopingTest < ActionDispatch::IntegrationTest
     post launch_service_set_path(mine)
     assert_redirected_to operator_path(session)
   end
+
+  test "force launch ends the church's other live service and starts this one" do
+    live = @church.service_sets.create!(name: "Demo Live")
+    live.set_items.create!(position: 0, item_type: "song", song: @song)
+    old = LiveSession.launch(live)
+
+    mine = @church.service_sets.create!(name: "Mine")
+    mine.set_items.create!(position: 0, item_type: "song", song: @song)
+
+    post launch_service_set_path(mine, force: 1)
+    assert_equal "ended", old.reload.status
+    new_session = mine.live_sessions.find_by(status: "active")
+    assert new_session, "expected this set to be live after the takeover"
+    assert_redirected_to operator_path(new_session)
+  end
 end
