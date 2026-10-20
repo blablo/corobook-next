@@ -45,7 +45,7 @@ class Corobook::LivePositionTest < ActiveSupport::TestCase
   end
 
   test "arrangement limits the song's section count (plus the title slide)" do
-    @song.update!(arrangement: [ "Coro" ]) # only the chorus, + 1 title slide
+    @song.update!(arrangement: [ "V1" ]) # only the first verse, + 1 title slide
     assert_equal 2, Corobook::LivePosition.new(@set).section_count_for(@i0)
   end
 
@@ -57,5 +57,20 @@ class Corobook::LivePositionTest < ActiveSupport::TestCase
     assert_equal 5, p.stops.length
     n = p.next_stop(@i1.id, 0)
     assert_equal [ @i1.id, 1 ], [ n.set_item_id, n.section_index ]
+  end
+
+  test "a chords-only (intro) section is skipped as a stop, keeping later section indices" do
+    # Intro = chords, no lyrics; then two real lyric sections.
+    song = @church.songs.create!(title: "Con intro",
+      chordpro_source: "{sov: Intro}\n[G] [C]\n{eov}\n{sov: V1}\n[G]Uno\n{eov}\n{soc}\nCoro\n{eoc}")
+    set = @church.service_sets.create!(name: "X")
+    item = set.set_items.create!(position: 0, item_type: "song", song: song)
+    p = Corobook::LivePosition.new(set)
+
+    # Title (0) + V1 (2) + Coro (3). The intro at ordered index 0 -> section index 1 is skipped.
+    assert_equal [ 0, 2, 3 ], p.stops.select { |s| s.set_item_id == item.id }.map(&:section_index)
+    # Advancing from the title lands on V1 (index 2), not the chords-only intro (index 1).
+    n = p.next_stop(item.id, 0)
+    assert_equal 2, n.section_index
   end
 end
