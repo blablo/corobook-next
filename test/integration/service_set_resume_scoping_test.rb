@@ -25,4 +25,26 @@ class ServiceSetResumeScopingTest < ActionDispatch::IntegrationTest
     get service_set_path(other)
     assert_includes response.body, operator_path(session)
   end
+
+  test "launching a set while another is live redirects with an alert, not a 500" do
+    live = @church.service_sets.create!(name: "Live")
+    live.set_items.create!(position: 0, item_type: "song", song: @song)
+    LiveSession.launch(live)
+
+    other = @church.service_sets.create!(name: "Other")
+    other.set_items.create!(position: 0, item_type: "song", song: @song)
+
+    post launch_service_set_path(other)
+    assert_redirected_to service_set_path(other)
+    assert_match(/already live/i, flash[:alert])
+  end
+
+  test "launching a set that is already live resumes its own session" do
+    mine = @church.service_sets.create!(name: "Mine")
+    mine.set_items.create!(position: 0, item_type: "song", song: @song)
+    session = LiveSession.launch(mine)
+
+    post launch_service_set_path(mine)
+    assert_redirected_to operator_path(session)
+  end
 end
