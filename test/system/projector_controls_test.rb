@@ -54,6 +54,11 @@ class ProjectorControlsTest < ApplicationSystemTestCase
     assert_not_equal start, pos.call, "expected Right arrow to advance the session"
 
     # Left arrow goes back to where we started.
+    find("body").send_keys(:left)
+    assert_selector "[data-role=operator-frame]"
+    assert_equal start, pos.call, "expected Left arrow to go back"
+  end
+
   test "a clicker / keyboard on the projector page itself advances and goes back" do
     multi = @church.songs.create!(title: "Dos", chordpro_source: "{sov: Verse 1}\nUno\n{soc: Chorus}\nDos")
     @set.set_items.create!(position: 1, item_type: "song", song: multi)
