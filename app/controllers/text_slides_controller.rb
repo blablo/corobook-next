@@ -27,10 +27,15 @@ class TextSlidesController < ApplicationController
   def create
     @text_slide = church_scope(:text_slides).build(slide_params.merge(reusable: true))
     if @text_slide.save
-      redirect_to @text_slide, notice: "Slide created."
+      respond_to do |format|
+        format.json { render json: { id: @text_slide.id, title: @text_slide.title }, status: :created }
+        format.html { redirect_to @text_slide, notice: "Slide created." }
+      end
     else
-      @church_tags = church_tags
-      render :new, status: :unprocessable_entity
+      respond_to do |format|
+        format.json { render json: { error: @text_slide.errors.full_messages }, status: :unprocessable_entity }
+        format.html { @church_tags = church_tags; render :new, status: :unprocessable_entity }
+      end
     end
   end
 

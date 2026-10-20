@@ -5,15 +5,15 @@ import { Controller } from "@hotwired/stimulus"
 // reorder/remove work with this controller absent (Req 7.3). Native Drag and Drop API, no deps.
 export default class extends Controller {
   static targets = ["program", "query", "results", "announce", "tabs", "tab",
-    "pickerPane", "inlinePane", "inlineForm", "inlineError", "fallback"]
-  static values = { reorderUrl: String, addUrl: String, libraryUrl: String, canEdit: Boolean }
+    "pickerPane", "fallback", "newSlideModal", "newSlideBody"]
+  static values = { reorderUrl: String, addUrl: String, libraryUrl: String, slideCreateUrl: String, canEdit: Boolean }
 
   connect() {
     if (!this.canEditValue) return
     this.kind = "song"
     if (this.hasFallbackTarget) this.fallbackTarget.classList.add("hidden") // JS on → hide no-JS forms
     this.wireRows()
-    this.wireInlineForm()
+    this.wireNewSlideModal()
     this.search()
   }
 
@@ -21,10 +21,7 @@ export default class extends Controller {
   switchTab(e) {
     this.kind = e.currentTarget.dataset.kind
     this.tabTargets.forEach(t => t.classList.toggle("tab-active", t === e.currentTarget))
-    const inline = this.kind === "inline"
-    this.inlinePaneTarget.classList.toggle("hidden", !inline)
-    this.pickerPaneTarget.classList.toggle("hidden", inline)
-    if (!inline) this.search()
+    this.search()
   }
 
   // ---- search (songs/slides) ----
@@ -64,24 +61,35 @@ export default class extends Controller {
     const item = await this.postAdd(body)
     if (item) this.appendRow(item)
   }
-  wireInlineForm() {
-    if (!this.hasInlineFormTarget) return
-    this.inlineFormTarget.addEventListener("submit", async (e) => {
+  // ---- New slide modal (same editor as /text_slides/new) ----
+  openNewSlide() {
+    if (this.hasNewSlideModalTarget) this.newSlideModalTarget.showModal()
+  }
+  closeNewSlide() {
+    if (this.hasNewSlideModalTarget) this.newSlideModalTarget.close()
+  }
+  wireNewSlideModal() {
+    if (!this.hasNewSlideBodyTarget) return
+    const form = this.newSlideBodyTarget.querySelector("form")
+    if (!form) return
+    form.addEventListener("submit", async (e) => {
       e.preventDefault()
-      this.inlineErrorTarget.classList.add("hidden")
-      const fd = new FormData(this.inlineFormTarget)
-      const tags = (fd.get("tags") || "").split(",").map((t) => t.trim()).filter(Boolean)
-      const body = { kind: "inline_slide", title: fd.get("title"), tags, body_markdown: fd.get("body_markdown") }
-      const res = await this.postAddRaw(body)
-      if (res.ok) {
-        this.appendRow(await res.json())
-        this.inlineFormTarget.reset()
-      } else {
-        const err = (await res.json().catch(() => ({}))).error
-        this.inlineErrorTarget.textContent = Array.isArray(err) ? err.join(", ") : (err || "Could not add slide.")
-        this.inlineErrorTarget.classList.remove("hidden")
-      }
+      // The slide-editor controller serializes tags + pages into hidden fields on submit;
+      // give it a tick to run its own submit handler before we read the form.
+      await new Promise((r) => setTimeout(r, 0))
+      const fd = new FormData(form)
+      const res = await fetch(this.slideCreateUrlValue, {
+        method: "POST", headers: { Accept: "application/json", "X-CSRF-Token": this.csrf() }, body: fd
+      })
+      if (!res.ok) { this.flash("Could not create the slide."); return }
+      const slide = await res.json()
+      const item = await this.postAdd({ kind: "text_slide", text_slide_id: slide.id })
+      if (item) this.appendRow(item)
+      this.closeNewSlide()
     })
+  }
+  csrf() {
+    return document.querySelector("meta[name=csrf-token]")?.content || ""
   }
   async postAdd(body) {
     const res = await this.postAddRaw(body)

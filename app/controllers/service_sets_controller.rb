@@ -13,6 +13,9 @@ class ServiceSetsController < ApplicationController
     @active_session = church_scope(:live_sessions).find_by(status: "active")
     @songs = church_scope(:songs).order(:title)
     @reusable_slides = church_scope(:text_slides).where(reusable: true).order(:title)
+    # For the "New slide" modal, which renders the full text_slides/_form editor.
+    @new_slide = church_scope(:text_slides).build(reusable: true, pages: [ { "body_markdown" => "" } ])
+    @church_slide_tags = church_scope(:text_slides).pluck(:tags).flatten.uniq.sort
   end
 
   def new
