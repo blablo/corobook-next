@@ -158,7 +158,7 @@ module Corobook
       # A line is a chord line if its non-space tokens all look like chords (and there is at least
       # one). Repeat markers // are ignored for the test.
       def chord_line?(line)
-        tokens = line.gsub("//", " ").split(/\s+/).reject(&:empty?)
+        tokens = line.gsub(%r{/{2,}}, " ").split(/\s+/).reject(&:empty?)
         return false if tokens.empty?
 
         tokens.all? { |t| CHORD_TOKEN.match?(t) }
@@ -221,7 +221,10 @@ module Corobook
       end
 
       def strip_repeat_markers(line)
-        line.gsub("//", "").rstrip
+        # Legacy repeat wrappers are runs of slashes (// or ///); strip any such run,
+        # including a trailing/leading one left by an odd count, without touching a lone
+        # slash that is part of a chord token (e.g. D/F#) — those sit inside [brackets] here.
+        line.gsub(%r{/{2,}}, "").gsub(%r{(?<![A-Za-z0-9#])/(?![A-Za-z0-9#])}, "").rstrip
       end
     end
   end
