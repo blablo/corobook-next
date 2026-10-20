@@ -70,9 +70,10 @@ class Corobook::Legacy::ChordProConverterTest < ActiveSupport::TestCase
     assert_includes convert("[CORO MACABRO]\nG\nHOLA"), "{soc: Chorus}"
   end
 
-  test "mood becomes a custom directive" do
+  test "mood is accepted but never emitted (no consumer in corobook-next)" do
     out = convert("G\nHOLA", mood: 3)
-    assert_includes out, "{x_corobook_mood: 3}"
+    assert_not_includes out, "x_corobook_mood"
+    assert_not_includes out, "{"
   end
 
   test "accented capitals count as single grapheme columns" do

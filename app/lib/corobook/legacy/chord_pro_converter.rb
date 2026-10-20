@@ -12,7 +12,8 @@ module Corobook
     #   * `[VERSE 1]` / `[CHOIR]` / `[BRIDGE]` / `[END]` / `[INTRO]` headers → section directives.
     #   * `//...//` repeat markers → chorus environment ({soc}/{eoc}).
     #   * tabs expanded to spaces before column math; grapheme-column width (not bytes).
-    #   * `order` → arrangement; `mood` → x_corobook_mood directive.
+    #   * `order` → arrangement. `mood` is accepted for signature stability but not emitted
+    #     (corobook-next has no mood field; emitting a directive only leaked into the editor).
     class ChordProConverter
       TAB_WIDTH = 8
 
@@ -59,7 +60,6 @@ module Corobook
 
       def convert
         out = []
-        out << "{x_corobook_mood: #{@mood}}" if @mood && @mood.to_s != ""
 
         lines = normalize(@lyric).split("\n", -1)
         emit_lines(lines, out)
