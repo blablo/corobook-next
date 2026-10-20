@@ -19,15 +19,17 @@ class LiveSyncTest < ApplicationSystemTestCase
 
   test "advancing moves the operator frame forward through sections" do
     visit operator_path(@session)
-    assert_text "Uno"
+    within("[data-role=operator-frame]") { assert_text "Uno" }
     click_on "Next →"
-    assert_text "Dos"
+    within("[data-role=operator-frame]") { assert_text "Dos" }
     click_on "Next →"
-    assert_text "Coro"
+    within("[data-role=operator-frame]") { assert_text "Coro" }
     # Going back never lands past where we are.
     click_on "← Back"
-    assert_text "Dos"
-    assert_no_text "Coro"
+    within "[data-role=operator-frame]" do
+      assert_text "Dos"
+      assert_no_text "Coro"
+    end
   end
 
   test "the projector view carries a monotonic position version on its frame" do
