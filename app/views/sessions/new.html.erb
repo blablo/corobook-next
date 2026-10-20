@@ -1,26 +1,26 @@
-<div class="mx-auto mt-16 max-w-sm">
-  <h1 class="text-2xl font-semibold mb-6">Sign in</h1>
+<div class="mx-auto mt-16 max-w-sm px-4">
+  <h1 class="text-2xl font-bold mb-6">Sign in</h1>
 
   <% if signed_in? %>
     <p class="mb-4 text-sm" data-role="signed-in">
       Signed in as <%= current_user.email %> — <%= current_church.name %>.
     </p>
-    <%= button_to "Sign out", logout_path, method: :delete, class: "text-sm underline" %>
+    <%= button_to "Sign out", logout_path, method: :delete, class: "btn btn-ghost btn-sm" %>
   <% else %>
     <%= form_with url: login_path, method: :post do |f| %>
-      <div class="mb-4">
-        <%= f.label :church_id, "Church", class: "block text-sm mb-1" %>
-        <%= f.collection_select :church_id, @churches, :id, :name, {}, class: "w-full border rounded px-2 py-1" %>
-      </div>
-      <div class="mb-4">
-        <%= f.label :email, class: "block text-sm mb-1" %>
-        <%= f.email_field :email, autocomplete: "email", class: "w-full border rounded px-2 py-1" %>
-      </div>
-      <div class="mb-6">
-        <%= f.label :password, class: "block text-sm mb-1" %>
-        <%= f.password_field :password, autocomplete: "current-password", class: "w-full border rounded px-2 py-1" %>
-      </div>
-      <%= f.submit "Sign in", class: "w-full rounded bg-slate-800 text-white px-3 py-2" %>
+      <fieldset class="fieldset">
+        <%= f.label :church_id, "Church", class: "fieldset-legend" %>
+        <%= f.collection_select :church_id, @churches, :id, :name, {}, class: "select select-bordered w-full" %>
+      </fieldset>
+      <fieldset class="fieldset">
+        <%= f.label :email, class: "fieldset-legend" %>
+        <%= f.email_field :email, autocomplete: "email", class: "input input-bordered w-full" %>
+      </fieldset>
+      <fieldset class="fieldset mb-4">
+        <%= f.label :password, class: "fieldset-legend" %>
+        <%= f.password_field :password, autocomplete: "current-password", class: "input input-bordered w-full" %>
+      </fieldset>
+      <%= f.submit "Sign in", class: "btn btn-primary w-full" %>
     <% end %>
   <% end %>
 </div>
