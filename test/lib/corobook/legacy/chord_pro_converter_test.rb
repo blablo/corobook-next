@@ -65,6 +65,19 @@ class Corobook::Legacy::ChordProConverterTest < ActiveSupport::TestCase
     assert_includes out, "SE[G]ÑOR"
   end
 
+  test "spanish and variant section headers resolve to directives" do
+    assert_includes convert("[VERSO 1]\nG\nHOLA"), "{sov: Verso 1}"
+    assert_includes convert("[CORO]\nG\nHOLA"), "{soc}"
+    assert_includes convert("[PUENTE]\nG\nHOLA"), "{sob}"
+    assert_includes convert("[FIN]\nG\nHOLA"), "{sov}"
+    # glued identifier (VERSOA), punctuation (VERSE.2), trailing language tag (COROES)
+    assert_includes convert("[VERSOA]\nG\nHOLA"), "{sov: Verso A}"
+    assert_includes convert("[VERSE.2]\nG\nHOLA"), "{sov: Verse 2}"
+    assert_includes convert("[COROES]\nG\nHOLA"), "{soc}"
+    # base term as the trailing word
+    assert_includes convert("[PRIMERA PARTE]\nG\nHOLA"), "{sov:"
+  end
+
   test "never raises on a ragged or malformed blob" do
     assert_nothing_raised { convert("G C D\n") }
     assert_nothing_raised { convert("\n\n[WEIRD]\nstuff") }

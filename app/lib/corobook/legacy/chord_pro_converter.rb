@@ -17,11 +17,19 @@ module Corobook
       TAB_WIDTH = 8
 
       SECTION_MAP = {
-        "VERSE" => :verse, "CHOIR" => :chorus, "CHORUS" => :chorus, "CORO" => :chorus,
-        "BRIDGE" => :bridge, "PUENTE" => :bridge, "INTRO" => :verse, "END" => :verse, "FINAL" => :verse
+        "VERSE" => :verse, "VERSO" => :verse, "ESTROFA" => :verse,
+        "CHOIR" => :chorus, "CHORUS" => :chorus, "CORO" => :chorus, "ESTRIBILLO" => :chorus,
+        "BRIDGE" => :bridge, "PUENTE" => :bridge,
+        "PRECORO" => :prechorus, "PRECHORUS" => :prechorus, "PRECHOIR" => :prechorus,
+        "PREESTRIBILLO" => :prechorus, "PREBRIDGE" => :prechorus,
+        "INTRO" => :verse, "INSTRUMENTAL" => :verse, "SOLO" => :verse, "PUNTOS" => :verse,
+        "PARTE" => :verse,
+        "OUTRO" => :verse, "END" => :verse, "FINAL" => :verse, "FIN" => :verse
       }.freeze
 
-      SECTION_DIRECTIVE = { verse: %w[sov eov], chorus: %w[soc eoc], bridge: %w[sob eob] }.freeze
+      SECTION_DIRECTIVE = {
+        verse: %w[sov eov], chorus: %w[soc eoc], bridge: %w[sob eob], prechorus: %w[sob eob]
+      }.freeze
 
       # A token that looks like a chord (root + optional accidental/quality/extension/bass).
       CHORD_TOKEN = %r{\A[A-G](?:#|b|♭|♯)?[a-zA-Z0-9°ø+\-/#♭♯()]*\z}
@@ -82,17 +90,69 @@ module Corobook
         end
       end
 
-      # A `[LABEL]` header or a bare CORO/VERSE line → section kind + optional numbered label.
+      # Parse a `[LABEL]` header (or a bare CORO/VERSE line) into a section kind + optional
+      # identifier. Legacy labels are messy: `VERSO 1`, `VERSOA`, `VERSO1`, `CHOIR B`, `VERSE-A`,
+      # `VERSE.2`, `PRE CORO`, `CORO FINAL`, plus trailing language tags (`COROES`, `VERSEEN`).
       def section_header(line)
         s = line.strip
-        if (m = /\A\[([A-Za-z]+)(?:\s+(\d+))?\]\z/.match(s))
-          kind = SECTION_MAP[m[1].upcase]
-          return nil unless kind
+        inner =
+          if (m = /\A\[(.+)\]\z/.match(s))
+            m[1].strip
+          elsif s == s.upcase && s.length <= 10 && /\A[A-Za-z]+\z/.match?(s)
+            s # a bare one-word header line (e.g. CORO)
+          end
+        return nil unless inner
 
-          { kind: kind, label: m[2] ? "#{m[1].capitalize} #{m[2]}" : m[1].capitalize }
-        elsif (kind = SECTION_MAP[s.upcase]) && s == s.upcase && s.length <= 8
-          { kind: kind, label: nil }
+        classify_header(inner)
+      end
+
+      # Normalize the raw inner label and resolve it to a kind + numbered/lettered label.
+      def classify_header(inner)
+        # Split into a base word and the rest (identifier): "VERSO 1", "VERSOA", "VERSE.2", "PRE CORO".
+        norm = inner.upcase.gsub(/[.\-]/, " ").squeeze(" ").strip
+        norm = norm.sub(/\s+(ES|EN)\z/, "") # drop a trailing language tag (spaced)
+        # drop a GLUED language tag too (COROES, VERSEEN), but only when a known base remains
+        if (m = /\A(.+?)(ES|EN)\z/.match(norm)) && SECTION_MAP.key?(m[1])
+          norm = m[1]
         end
+
+        base, ident = split_base_ident(norm)
+        return nil if base.nil?
+
+        kind = SECTION_MAP[base]
+        return nil unless kind
+
+        label = ident ? "#{base.capitalize} #{ident}" : nil
+        { kind: kind, label: label }
+      end
+
+      # Peel a known base term off the front of a normalized label, returning [base, identifier].
+      # Handles "VERSO 1", "VERSOA" (glued letter), "PRE CORO", "CORO FINAL".
+      def split_base_ident(norm)
+        # Multi-word: first token is the base when it (or first+second) is a known term.
+        two = norm.split(" ", 2)
+        if two.length == 2 && SECTION_MAP.key?("#{two[0]}#{two[1].split.first}")
+          return [ "#{two[0]}#{two[1].split.first}", nil ]
+        end
+        if two.length == 2 && SECTION_MAP.key?(two[0])
+          return [ two[0], two[1] ]
+        end
+
+        word = norm.split(" ").first.to_s
+        return [ word, nil ] if SECTION_MAP.key?(word)
+
+        # Base term as the LAST word with a leading modifier: "PRIMERA PARTE", "PRE CORO".
+        words = norm.split(" ")
+        if words.length >= 2 && SECTION_MAP.key?(words.last)
+          return [ words.last, words[0...-1].join(" ").capitalize ]
+        end
+
+        # Glued suffix like VERSOA / VERSO1 / CHOIRB: strip a trailing letter or digit run.
+        if (m = /\A([A-Z]+?)([0-9]+|[A-Z])\z/.match(word)) && SECTION_MAP.key?(m[1])
+          return [ m[1], m[2] ]
+        end
+
+        [ nil, nil ]
       end
 
       # A line is a chord line if its non-space tokens all look like chords (and there is at least
