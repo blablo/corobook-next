@@ -142,17 +142,22 @@ export default class extends Controller {
   // ("Verse 1", "Verse 2", "Chorus 1"...) so the arrangement can reference it.
   // Preserves an existing valid number, renumbers conflicts/blanks in order.
   numberSections(sections) {
+    // Only auto-number sections that have NO explicit label. A section that already carries
+    // a label (Intro, Outro, Pre-chorus, Solo, Chorus 2, …) keeps it verbatim — the kind only
+    // determines the ChordPro directive, not the display label.
     const used = {}
     const take = (kind, n) => { (used[kind] = used[kind] || new Set()).add(n) }
     const free = (kind) => { let n = 1; const s = used[kind] || new Set(); while (s.has(n)) n++; return n }
+    // First pass: reserve numbers already claimed by explicit "<Kind> N" labels.
     for (const s of sections) {
       const prefix = this.kindName(s.kind)
       const m = s.label && s.label.match(new RegExp(`^${prefix}\\s+(\\d+)$`, "i"))
-      if (m && !(used[s.kind] && used[s.kind].has(+m[1]))) {
-        s.label = `${prefix} ${+m[1]}`; take(s.kind, +m[1])
-      } else {
-        const n = free(s.kind); s.label = `${prefix} ${n}`; take(s.kind, n)
-      }
+      if (m) take(s.kind, +m[1])
+    }
+    // Second pass: leave explicit labels alone; number only the unlabeled ones.
+    for (const s of sections) {
+      if (s.label && s.label.trim() !== "") continue
+      const n = free(s.kind); s.label = `${this.kindName(s.kind)} ${n}`; take(s.kind, n)
     }
     return sections
   }
