@@ -53,13 +53,11 @@ export default class extends Controller {
 
   // ======================= IMPORT (chords-over-lyrics -> model) =======================
   openImport() {
-    this.importModalTarget.classList.remove("hidden")
-    this.importModalTarget.classList.add("flex")
+    this.importModalTarget.showModal()
     this.importTextTarget.focus()
   }
   closeImport() {
-    this.importModalTarget.classList.add("hidden")
-    this.importModalTarget.classList.remove("flex")
+    this.importModalTarget.close()
   }
   runImport() {
     const sections = this.parseChordsOverLyrics(this.importTextTarget.value)
