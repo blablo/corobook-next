@@ -22,16 +22,37 @@
           <span class="label-text-alt text-xs text-base-content/50 mt-1 block">Styles how the slide looks on the projector.</span>
         </label>
 
-        <label class="form-control">
-          <span class="label-text text-sm mb-1 block">Body</span>
-          <%= f.text_area :body_markdown, rows: 12,
-                class: "textarea textarea-bordered w-full font-mono text-sm",
-                placeholder: "Type the slide text…\n\n# Big heading\n**bold**  _italic_\n\n- a point\n- another",
-                data: { "slide-editor-target": "body", action: "input->slide-editor#schedule" } %>
+        <div class="form-control">
+          <div class="flex items-center justify-between mb-1">
+            <span class="label-text text-sm">Body</span>
+            <button type="button" class="btn btn-ghost btn-xs" data-slide-editor-target="advancedBtn"
+                    data-action="slide-editor#toggleAdvanced">Advanced</button>
+          </div>
+
+          <%# Formatting toolbar — drives the contenteditable; no syntax shown to the user. %>
+          <div class="flex flex-wrap gap-1 mb-1 rounded-t-lg border border-base-300 bg-base-200 px-1 py-1"
+               data-slide-editor-target="toolbar">
+            <button type="button" class="btn btn-ghost btn-xs font-bold" title="Bold (⌘B)" data-action="slide-editor#bold">B</button>
+            <button type="button" class="btn btn-ghost btn-xs italic" title="Italic (⌘I)" data-action="slide-editor#italic">I</button>
+            <button type="button" class="btn btn-ghost btn-xs" title="Heading" data-action="slide-editor#heading">H</button>
+            <button type="button" class="btn btn-ghost btn-xs" title="Bulleted list" data-action="slide-editor#bullet">• List</button>
+            <button type="button" class="btn btn-ghost btn-xs" title="Clear formatting" data-action="slide-editor#clearFormat">Clear</button>
+          </div>
+
+          <%# WYSIWYG surface. Author types here; markdown is generated into the hidden field below. %>
+          <div contenteditable="true" role="textbox" aria-multiline="true" aria-label="Slide body"
+               class="rich-body min-h-48 rounded-b-lg border border-base-300 border-t-0 px-3 py-2 focus:outline-none prose max-w-none"
+               data-slide-editor-target="rich" data-action="input->slide-editor#onRichInput keydown->slide-editor#onKeydown"></div>
+
+          <%# Advanced raw markdown (hidden by default); the canonical stored field. %>
+          <%= f.text_area :body_markdown, rows: 10,
+                class: "textarea textarea-bordered w-full font-mono text-sm mt-2 hidden",
+                data: { "slide-editor-target": "source", action: "input->slide-editor#onSourceInput" } %>
+
           <span class="label-text-alt text-xs text-base-content/50 mt-1 block">
-            Supports Markdown: <code># Heading</code>, <code>**bold**</code>, <code>_italic_</code>, <code>- list</code>.
+            Type your text and use the buttons to format it — no codes to learn.
           </span>
-        </label>
+        </div>
 
         <div class="flex items-center gap-3">
           <%= f.submit (text_slide.persisted? ? "Save changes" : "Create slide"), class: "btn btn-primary" %>
