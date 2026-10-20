@@ -53,6 +53,23 @@ class FollowerViewsTest < ActionDispatch::IntegrationTest
     assert_select "[data-role=projector-lyrics]", count: 0
   end
 
+  test "the musician frame honors arrangement order, not raw section order" do
+    # Song whose arrangement puts the Chorus first (its raw section 0 is a chords-only intro).
+    song = @church.songs.create!(title: "Razones", song_key: "A",
+      chordpro_source: "{key: A}\n{sov: Intro}\n[A] [E]\n{eov}\n{soc: Chorus}\nBendice alma mía\n{eov}",
+      arrangement: [ "Chorus" ])
+    set = @church.service_sets.create!(name: "Otro")
+    set.set_items.create!(position: 0, item_type: "song", song: song)
+    session = LiveSession.launch(set)
+    session.update!(current_section_index: 1) # first ordered lyric section
+
+    get musician_path(session.musician_token)
+    assert_response :success
+    # Must show the arrangement's first section (Chorus lyrics), NOT the raw intro.
+    assert_select "[data-role=musician-frame]", text: /Bendice alma/
+    assert_select "[data-role=musician-frame]", text: /Intro/, count: 0
+  end
+
   test "the musician view 404s on a bad token" do
     get musician_path("nope")
     assert_response :not_found

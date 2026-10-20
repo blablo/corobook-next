@@ -24,16 +24,26 @@ module Corobook
     # The concrete lyric section (JSONB hash) for a song at the current index, or nil.
     # Index 0 is the title slide, so lyric section i lives at session index i + 1.
     def current_section
+      current_section_in(item&.parsed_lyric&.dig("sections") || [])
+    end
+
+    # Same as current_section but over a supplied sections array (e.g. a transposed lyric's
+    # sections), so every follower view resolves the SAME arrangement-ordered section.
+    def current_section_in(sections)
       return nil unless song?
       return nil if title_slide?
 
-      ordered_sections[session.current_section_index - 1]
+      ordered_sections_of(sections)[session.current_section_index - 1]
     end
 
     def ordered_sections
+      ordered_sections_of(item&.parsed_lyric&.dig("sections") || [])
+    end
+
+    # Resolve a sections array into play order (arrangement-resolved, replays included).
+    def ordered_sections_of(sections)
       return [] unless song?
 
-      sections = item.parsed_lyric&.dig("sections") || []
       arrangement = item.arrangement
       return sections if arrangement.blank?
 
