@@ -1,2 +1,11 @@
 @import "tailwindcss";
 @import "../../../vendor/daisyui/daisyui.css";
+
+/* Make sidebar menu items span the full width of the sidebar. DaisyUI sizes a .menu anchor as a
+   grid whose columns are max-content, so the active/hover pill otherwise hugs the label. Forcing
+   the anchor full width and letting the label column stretch makes the highlight fill the rail. */
+[data-role="sidebar"] .menu :where(li) > a {
+  width: 100%;
+  grid-auto-columns: max-content 1fr max-content;
+}
+
