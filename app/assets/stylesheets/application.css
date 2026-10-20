@@ -76,3 +76,14 @@
 .musician-line { font-family: ui-monospace, monospace; white-space: pre-wrap; padding-top: 1.2em; }
 .musician-seg { position: relative; display: inline-block; white-space: pre; vertical-align: bottom; }
 .musician-chord { position: absolute; bottom: 100%; left: 0; font-weight: 700; line-height: 1; white-space: pre; padding-right: 0.5rem; }
+
+/* Sidebar nav: make menu items span the full width of the rail. The DaisyUI stylesheet loads
+   AFTER this file and sets `.menu { width: fit-content }` plus a max-content anchor grid, so the
+   whole menu and its active/hover pill hug the labels. These rules win on load order via
+   !important and stretch the label column so the highlight fills the sidebar. */
+[data-role="sidebar"] .menu { width: 100% !important; }
+[data-role="sidebar"] .menu :where(li) > a,
+[data-role="sidebar"] .menu :where(li) > button {
+  width: 100% !important;
+  grid-auto-columns: max-content 1fr max-content !important;
+}
