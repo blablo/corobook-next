@@ -37,7 +37,7 @@
   <% end %>
 
   <%# ── Chord sheet, in play order ──────────────────────────────── %>
-  <div class="flex flex-col gap-6" data-role="musician-preview">
+  <div class="flex flex-col gap-6 min-w-0" data-role="musician-preview">
     <% @ordered_sections.each do |section| %>
       <%= render "sheet_section", section: section %>
     <% end %>
