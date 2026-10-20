@@ -70,7 +70,8 @@ export default class extends Controller {
       e.preventDefault()
       this.inlineErrorTarget.classList.add("hidden")
       const fd = new FormData(this.inlineFormTarget)
-      const body = { kind: "inline_slide", title: fd.get("title"), subtype: fd.get("subtype"), body_markdown: fd.get("body_markdown") }
+      const tags = (fd.get("tags") || "").split(",").map((t) => t.trim()).filter(Boolean)
+      const body = { kind: "inline_slide", title: fd.get("title"), tags, body_markdown: fd.get("body_markdown") }
       const res = await this.postAddRaw(body)
       if (res.ok) {
         this.appendRow(await res.json())

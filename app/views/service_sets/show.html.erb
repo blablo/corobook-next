@@ -115,9 +115,13 @@
               <label class="sr-only" for="inline-title">Slide title</label>
               <%= text_field_tag :title, nil, id: "inline-title", placeholder: "Title",
                     class: "input input-bordered input-sm w-full mb-2" %>
-              <label class="sr-only" for="inline-body">Slide body (markdown)</label>
-              <%= text_area_tag :body_markdown, nil, id: "inline-body", rows: 3, placeholder: "Markdown…",
-                    class: "textarea textarea-bordered w-full font-mono text-sm mb-2" %>
+              <label class="sr-only" for="inline-tags">Tags</label>
+              <%= text_field_tag :tags, nil, id: "inline-tags", placeholder: "Tags (comma separated)",
+                    class: "input input-bordered input-sm w-full mb-2" %>
+              <label class="sr-only" for="inline-body">Slide text</label>
+              <%= text_area_tag :body_markdown, nil, id: "inline-body", rows: 3, placeholder: "Slide text…",
+                    class: "textarea textarea-bordered w-full text-sm mb-1" %>
+              <p class="text-xs text-base-content/50 mb-2">A quick one-off slide for this set. For tags, pages and formatting, use the full New Slide editor.</p>
               <%= submit_tag "Add slide", class: "btn btn-sm btn-primary w-full" %>
               <p class="text-error text-xs mt-1 hidden" data-set-builder-target="inlineError"></p>
             <% end %>

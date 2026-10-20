@@ -123,7 +123,9 @@ class ServiceSetsController < ApplicationController
       { item_type: "text_slide", text_slide: find_in_church(:text_slides, params[:text_slide_id]) }
     when "inline_slide"
       slide = church_scope(:text_slides).create!(
-        title: params[:title], pages: [ { "body_markdown" => params[:body_markdown].to_s } ],
+        title: params[:title],
+        tags: Array(params[:tags]).map { |t| t.to_s.strip }.reject(&:empty?).uniq,
+        pages: [ { "body_markdown" => params[:body_markdown].to_s } ],
         reusable: false, set_id: @service_set.id
       )
       { item_type: "text_slide", text_slide: slide }
