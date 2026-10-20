@@ -8,6 +8,8 @@
      style="--font-scale: <%= session.font_scale %>;" class="<%= 'is-blanked' if session.blanked %>">
   <% if session.blanked %>
     <div class="projector-blank" data-role="blank"></div>
+  <% elsif frame.title_slide? %>
+    <%= render "songs/projector_title", song: frame.item %>
   <% elsif frame.song? && frame.current_section %>
     <%= render "songs/projector_section",
           song: frame.item, section: frame.current_section,

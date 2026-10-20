@@ -15,6 +15,7 @@ class OperatorAdvanceTest < ActionDispatch::IntegrationTest
   end
 
   test "advance walks sections within a song then crosses into the next item" do
+    # Section 0 is the song's title slide, 1 = V1, 2 = Coro, then the next item.
     assert_equal @i0.id, @session.current_set_item_id
     assert_equal 0, @session.current_section_index
 
@@ -26,9 +27,14 @@ class OperatorAdvanceTest < ActionDispatch::IntegrationTest
 
     patch operator_advance_path(@session)
     @session.reload
+    assert_equal @i0.id, @session.current_set_item_id
+    assert_equal 2, @session.current_section_index
+
+    patch operator_advance_path(@session)
+    @session.reload
     assert_equal @i1.id, @session.current_set_item_id
     assert_equal 0, @session.current_section_index
-    assert_equal 2, @session.position_version
+    assert_equal 3, @session.position_version
   end
 
   test "position_version increases monotonically and back decrements position but still bumps version" do

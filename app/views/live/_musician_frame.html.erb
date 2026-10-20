@@ -5,10 +5,12 @@
 <% frame = Corobook::LiveFrame.new(session) %>
 <div id="live-frame" data-controller="follower" data-follower-version-value="<%= session.position_version %>"
      data-role="musician-frame">
-  <% if frame.song? && frame.current_section %>
+  <% if frame.title_slide? %>
+    <%= render "songs/musician_title", song: frame.item %>
+  <% elsif frame.song? && frame.current_section %>
     <% renderer = Corobook::MusicianRender.new(frame.item, target_key: target_key, semitones: semitones.to_i, follower_capo: capo) %>
     <% transposed, _capo = renderer.call %>
-    <% section = transposed.sections[session.current_section_index] %>
+    <% section = transposed.sections[session.current_section_index - 1] %>
     <% if renderer.displayed_key %>
       <span class="text-xs rounded bg-slate-200 text-slate-900 px-2 py-0.5" data-role="key-badge">Key <%= renderer.displayed_key %></span>
     <% end %>

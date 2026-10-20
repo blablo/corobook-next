@@ -10,6 +10,7 @@ class FollowerViewsTest < ActionDispatch::IntegrationTest
   end
 
   test "the projector view renders for a valid token" do
+    @session.update!(current_section_index: 1) # past the title slide, onto the first lyric section
     get projector_path(@session.projector_token)
     assert_response :success
     assert_select "[data-role=projector-frame]"
@@ -29,6 +30,7 @@ class FollowerViewsTest < ActionDispatch::IntegrationTest
   end
 
   test "two musicians on different keys each see their own chords" do
+    @session.update!(current_section_index: 1) # past the title slide, onto the first lyric section
     get musician_path(@session.musician_token, key: "A")
     assert_response :success
     assert_select "[data-role=chord]", text: "A"
@@ -36,6 +38,19 @@ class FollowerViewsTest < ActionDispatch::IntegrationTest
     get musician_path(@session.musician_token, key: "C")
     assert_response :success
     assert_select "[data-role=chord]", text: "C"
+  end
+
+  test "the first slide of a song is its title with licensing credits" do
+    @song.update!(author: "J. Autor", copyright_line: "© 2020 Casa", ccli_song_number: "12345")
+    # Session starts at section 0 = the title slide.
+    get projector_path(@session.projector_token)
+    assert_response :success
+    assert_select "[data-role=projector-title]"
+    assert_select "[data-role=title]", text: "Himno"
+    assert_select "[data-role=title-credits]", text: /J\. Autor/
+    assert_select "[data-role=title-credits]", text: /CCLI #12345/
+    # The lyrics are NOT on the title slide.
+    assert_select "[data-role=projector-lyrics]", count: 0
   end
 
   test "the musician view 404s on a bad token" do
