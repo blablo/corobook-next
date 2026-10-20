@@ -117,7 +117,7 @@ module Corobook
             i += 1
           else
             @in_repeat = true if repeat_opens?(line)
-            out << strip_repeat_markers(line)
+            out << strip_repeat_markers(strip_line_repeat_slashes(line))
             close_repeat_if(line, out)
             i += 1
           end
@@ -233,7 +233,8 @@ module Corobook
         tokens = line.gsub(%r{/{2,}}, " ").split(/\s+/).reject(&:empty?)
         return false if tokens.empty?
 
-        tokens.all? { |t| CHORD_TOKEN.match?(t) }
+        # A token may be wrapped in legacy repeat slashes (/A-E/); strip them before the test.
+        tokens.all? { |t| CHORD_TOKEN.match?(t.sub(%r{\A/+}, "").sub(%r{/+\z}, "")) }
       end
 
       # Map each chord in the chord line to a grapheme index in the lyric line and emit [chord].
@@ -302,10 +303,21 @@ module Corobook
       end
 
       def strip_repeat_markers(line)
-        # Legacy repeat wrappers are runs of slashes (// or ///); strip any such run,
-        # including a trailing/leading one left by an odd count, without touching a lone
-        # slash that is part of a chord token (e.g. D/F#) — those sit inside [brackets] here.
-        line.gsub(%r{/{2,}}, "").gsub(%r{(?<![A-Za-z0-9#])/(?![A-Za-z0-9#])}, "").rstrip
+        # Legacy repeat wrappers are runs of slashes (// ///) OR a single leading/trailing slash
+        # on the line. Strip those, plus a lone slash isolated by spaces. Internal slashes are
+        # left alone (a time signature like 3/4, and slash-chords, which sit inside [brackets]).
+        line.gsub(%r{/{2,}}, "")
+            .gsub(%r{(?<![A-Za-z0-9#])/(?![A-Za-z0-9#])}, "")
+            .sub(%r{\A(\s*(?:\[[^\]]*\])?)/}, '\1')   # a repeat slash opening the line (after an optional chord)
+            .sub(%r{/((?:\[[^\]]*\])?\s*)\z}, '\1')   # a repeat slash closing the line (before an optional chord)
+            .rstrip
+      end
+
+      # Strip legacy repeat slashes from the START/END of a RAW lyric line (before chords are
+      # placed), so a marker like "/Sonríe" / "Alabaré/" / "//...//" is removed cleanly instead of
+      # landing mid-line after a chord. Internal slashes (a time signature like 3/4) are untouched.
+      def strip_line_repeat_slashes(raw)
+        raw.sub(%r{\A\s*/+}, "").sub(%r{/+\s*\z}, "")
       end
     end
   end

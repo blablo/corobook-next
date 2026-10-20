@@ -57,6 +57,20 @@ class Corobook::Legacy::ChordProConverterTest < ActiveSupport::TestCase
     assert_includes convert("D/F#\nHOLA"), "[D/F#]"
   end
 
+  test "single leading/trailing repeat slashes and slash-wrapped chords are cleaned" do
+    # a single slash opening or closing a lyric line is a repeat marker, not text
+    assert_equal "[G]Sonrie", convert("G\n/Sonrie")
+    assert_equal "Alabare mi [G]Jesus", convert("           G\nAlabare mi Jesus/")
+    # a chord wrapped in slashes on a chord-only line becomes a clean progression, no slashes
+    out = convert("A    B    /A-E/")
+    assert_includes out, "[A]"
+    assert_includes out, "[B]"
+    assert_includes out, "[A-E]"
+    assert_not_includes out, "/"
+    # a time signature like 3/4 inside a lyric is NOT a repeat marker and is preserved
+    assert_includes convert("G\n3/4 Alabanza"), "3/4"
+  end
+
   test "the combining-ring diminished chord survives as a chord token" do
     legacy = "C C°                   Dm\n   CUAN BELLO ES EL SEÑOR"
     out = convert(legacy)
