@@ -103,4 +103,12 @@ class SetBuilderBackendTest < ActionDispatch::IntegrationTest
     assert_includes titles, "Credo"
     assert_not_includes titles, "Inline uno"
   end
+
+  test "the New Set form defaults the date to next Sunday and the name to that date" do
+    get new_service_set_path
+    assert_response :success
+    sunday = Date.current + ((7 - Date.current.wday) % 7)
+    assert_select "input[data-role=set-date][value=?]", sunday.to_s
+    assert_select "input[data-role=set-name][value=?]", sunday.strftime("%A, %b %-d")
+  end
 end

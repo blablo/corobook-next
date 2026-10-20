@@ -16,7 +16,8 @@ class ServiceSetsController < ApplicationController
   end
 
   def new
-    @service_set = church_scope(:service_sets).build
+    date = next_sunday
+    @service_set = church_scope(:service_sets).build(service_date: date, name: default_set_name(date))
   end
 
   def edit; end
@@ -104,6 +105,16 @@ class ServiceSetsController < ApplicationController
   end
 
   private
+
+  # The next Sunday on or after today (today if today is Sunday).
+  def next_sunday(from = Date.current)
+    from + ((7 - from.wday) % 7)
+  end
+
+  # Default set name derived from a service date, e.g. "Sunday, Oct 26".
+  def default_set_name(date)
+    date&.strftime("%A, %b %-d")
+  end
 
   # Attributes for a new set item from the add_item params; church-scoped lookups keep tenancy.
   def item_attributes
