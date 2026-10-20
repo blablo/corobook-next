@@ -1,2 +1,5 @@
-@import "tailwindcss";
+/* DaisyUI is vendored into @layer base/utilities. It must load BEFORE Tailwind's own utilities so
+   that within the shared `utilities` layer Tailwind's classes (w-full, w-56, …) are emitted last
+   and win the cascade over DaisyUI component defaults like `.menu { width: fit-content }`. */
 @import "../../../vendor/daisyui/daisyui.css";
+@import "tailwindcss";
