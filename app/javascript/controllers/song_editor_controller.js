@@ -165,6 +165,9 @@ export default class extends Controller {
     const closeRe = /^\{(eov|eoc|eob|end_of_verse|end_of_chorus|end_of_bridge)\}\s*$/i
     const commentRe = /^\{(?:comment|c):\s*(.*?)\}\s*$/i
     const metaRe = /^\{(title|subtitle|key|capo|transpose)\s*:.*\}\s*$/i
+    // Any other bare {directive} / {directive: value} line (e.g. {x_corobook_mood: 30}) is
+    // metadata, not lyric text — ignore it, matching the Ruby parser's unknown-directive rule.
+    const directiveRe = /^\{\s*[a-zA-Z_]+\s*(?::.*)?\}\s*$/
     const kindOf = (d) => d.toLowerCase().includes("chorus") ? "chorus" : d.toLowerCase().includes("bridge") ? "bridge" : "verse"
     const ensure = () => { if (!current) { current = { kind: "verse", label: null, lines: [] }; sections.push(current) } }
 
@@ -175,6 +178,7 @@ export default class extends Controller {
       if ((m = line.match(openRe))) { current = { kind: kindOf(m[1]), label: m[2] ? m[2].trim() : null, lines: [] }; sections.push(current); continue }
       if (closeRe.test(line)) { current = null; continue }
       if ((m = line.match(commentRe))) { ensure(); current.lines.push({ comment: m[1] }); continue }
+      if (directiveRe.test(line)) { continue }
       if (line.trim() === "") { if (current && current.lines.length) current = null; continue }
       ensure(); current.lines.push(this.parseLine(line))
     }
