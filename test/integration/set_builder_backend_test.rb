@@ -32,6 +32,20 @@ class SetBuilderBackendTest < ActionDispatch::IntegrationTest
     assert JSON.parse(response.body)["error"].present?
   end
 
+  test "inline slide is created with tags and a single page" do
+    assert_difference -> { @set.set_items.count }, 1 do
+      post add_item_service_set_path(@set),
+        params: { kind: "inline_slide", title: "Announcement",
+                  tags: [ "notice", "welcome" ], body_markdown: "Hello" }, as: :json
+    end
+    assert_response :created
+    slide = @set.set_items.order(:position).last.text_slide
+    assert_equal "Announcement", slide.title
+    assert_equal %w[notice welcome], slide.tags
+    assert_equal "Hello", slide.pages.first["body_markdown"]
+    assert_not slide.reusable?
+  end
+
   test "adding another church's song is rejected" do
     foreign = @other.songs.create!(title: "Ajeno", chordpro_source: "[C]x")
     assert_no_difference -> { @set.set_items.count } do
