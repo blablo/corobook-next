@@ -103,14 +103,33 @@ module Corobook
             next
           end
 
-          if chord_line?(line) && i + 1 < lines.length && !chord_line?(lines[i + 1]) && !section_header(lines[i + 1])
+          if chord_line?(line) && i + 1 < lines.length && lyric_line?(lines[i + 1])
             out << merge(line, lines[i + 1])
             i += 2
+          elsif chord_line?(line)
+            # A standalone chord line (intro / instrumental / turnaround, no lyric beneath):
+            # emit the chords as a spaced progression so they read left-to-right, instead of
+            # merging them onto an empty line (which collapses them all to column 0).
+            out << chord_progression(line)
+            i += 1
           else
             out << strip_repeat_markers(line)
             i += 1
           end
         end
+      end
+
+      # True when a line is real lyric content a chord line can sit above: non-blank and not
+      # itself a chord line or a section header.
+      def lyric_line?(line)
+        !line.strip.empty? && !chord_line?(line) && section_header(line).nil?
+      end
+
+      # Render a standalone chord line as "[G] [C] [D] [G]" — chords in source order,
+      # single-spaced, so it displays as a readable progression with no lyric beneath.
+      def chord_progression(line)
+        chords = chord_positions(line).map { |(_c, chord)| chord }
+        chords.map { |c| "[#{c}]" }.join(" ")
       end
 
       # Parse a `[LABEL]` header (or a bare CORO/VERSE line) into a section kind + optional
@@ -235,7 +254,7 @@ module Corobook
         start = nil
         graphemes.each_with_index do |g, idx|
           if g == " "
-            positions << [ start, token ] if token != "" && token != "//"
+            push_chord(positions, start, token)
             token = +""
             start = nil
           else
@@ -243,8 +262,17 @@ module Corobook
             token << g
           end
         end
-        positions << [ start, token ] if token != "" && token != "//"
-        positions.reject { |(_c, t)| t == "//" }
+        push_chord(positions, start, token)
+        positions
+      end
+
+      # Append a cleaned chord token, dropping bare repeat markers and stripping slash-runs
+      # (// ///) glued to a real chord (//G#m, F#//) while keeping a slash-chord like D/F#.
+      def push_chord(positions, start, token)
+        return if token == "" || token.gsub("/", "") == ""
+
+        cleaned = token.sub(%r{\A/+}, "").sub(%r{/+\z}, "")
+        positions << [ start, cleaned ] unless cleaned.empty?
       end
 
       def strip_repeat_markers(line)
