@@ -8,7 +8,7 @@ import { Controller } from "@hotwired/stimulus"
 // commonmarker). An Advanced toggle exposes the raw markdown of the active page.
 export default class extends Controller {
   static targets = ["rich", "source", "preview", "previewLabel", "advancedBtn", "toolbar",
-    "tagChips", "tagInput", "tagFields", "pageFields", "pageLabel", "seed"]
+    "tagChips", "tagInput", "tagFields", "pageFields", "pageStrip", "seed"]
   static values = { url: String }
 
   connect() {
@@ -20,6 +20,7 @@ export default class extends Controller {
     this.renderTags()
     this.loadPage()
     this.renderPageFields()
+    this.renderStrip()
   }
 
   readSeed() {
@@ -57,33 +58,78 @@ export default class extends Controller {
   loadPage() {
     this.richTarget.innerHTML = this.mdToHtml(this.pages[this.active] || "")
     this.sourceTarget.value = this.pages[this.active] || ""
-    this.updatePageLabel()
+    if (this.hasPreviewLabelTarget) this.previewLabelTarget.textContent = this.pages.length > 1 ? `(page ${this.active + 1})` : ""
     this.renderPreview()
   }
-  saveActiveFromRich() { this.pages[this.active] = this.htmlToMd(this.richTarget); this.renderPageFields() }
-  updatePageLabel() {
-    const label = `Page ${this.active + 1} of ${this.pages.length}`
-    if (this.hasPageLabelTarget) this.pageLabelTarget.textContent = label
-    if (this.hasPreviewLabelTarget) this.previewLabelTarget.textContent = this.pages.length > 1 ? `(page ${this.active + 1})` : ""
+
+  // Thumbnail strip: a card per page (number + text snippet) + an "Add page" card.
+  renderStrip() {
+    if (!this.hasPageStripTarget) return
+    const cards = this.pages.map((md, i) => {
+      const snippet = this.esc((this.plain(md) || "Empty").slice(0, 48))
+      const activeCls = i === this.active ? "ring-2 ring-primary" : "ring-1 ring-base-300"
+      return `
+        <div class="pg-card shrink-0 w-28 h-20 rounded-lg ${activeCls} bg-base-100 p-2 text-left relative cursor-pointer select-none"
+             draggable="true" data-i="${i}" title="Page ${i + 1}">
+          <div class="text-[10px] font-semibold text-base-content/40">Page ${i + 1}</div>
+          <div class="text-[11px] leading-tight text-base-content/70 line-clamp-3 mt-0.5">${snippet}</div>
+          <button type="button" class="pg-del absolute top-0.5 right-0.5 btn btn-ghost btn-xs btn-circle text-error opacity-0"
+                  data-i="${i}" aria-label="Remove page ${i + 1}">✕</button>
+        </div>`
+    }).join("")
+    const addCard = `
+      <button type="button" class="pg-add shrink-0 w-28 h-20 rounded-lg border-2 border-dashed border-base-300 text-base-content/40 hover:text-primary hover:border-primary flex items-center justify-center"
+              aria-label="Add a page">+ Add page</button>`
+    this.pageStripTarget.innerHTML = cards + addCard
+    this.wireStrip()
   }
-  prevPage(e) { e.preventDefault(); if (this.active > 0) { this.active--; this.loadPage() } }
-  nextPage(e) { e.preventDefault(); if (this.active < this.pages.length - 1) { this.active++; this.loadPage() } }
-  addPage(e) {
-    e.preventDefault()
+  wireStrip() {
+    this.pageStripTarget.querySelectorAll(".pg-card").forEach(card => {
+      const i = +card.dataset.i
+      card.addEventListener("click", (e) => { if (!e.target.closest(".pg-del")) this.switchTo(i) })
+      card.addEventListener("mouseenter", () => card.querySelector(".pg-del").classList.remove("opacity-0"))
+      card.addEventListener("mouseleave", () => card.querySelector(".pg-del").classList.add("opacity-0"))
+      card.querySelector(".pg-del").addEventListener("click", (e) => { e.stopPropagation(); this.removePageAt(i) })
+      card.addEventListener("dragstart", (e) => { this._drag = i; e.dataTransfer.effectAllowed = "move"; card.classList.add("opacity-50") })
+      card.addEventListener("dragend", () => card.classList.remove("opacity-50"))
+      card.addEventListener("dragover", (e) => e.preventDefault())
+      card.addEventListener("drop", (e) => { e.preventDefault(); this.dropPage(i) })
+    })
+    this.pageStripTarget.querySelector(".pg-add").addEventListener("click", () => this.addPage())
+  }
+  switchTo(i) {
+    this.pages[this.active] = this.htmlToMd(this.richTarget) // save current before leaving
+    this.active = i
+    this.loadPage(); this.renderStrip()
+  }
+  addPage() {
+    this.pages[this.active] = this.htmlToMd(this.richTarget)
     this.pages.splice(this.active + 1, 0, "")
     this.active++
-    this.renderPageFields(); this.loadPage()
+    this.renderPageFields(); this.loadPage(); this.renderStrip()
   }
-  removePage(e) {
-    e.preventDefault()
-    if (this.pages.length === 1) { this.pages[0] = ""; this.active = 0 }
-    else { this.pages.splice(this.active, 1); this.active = Math.max(0, this.active - 1) }
-    this.renderPageFields(); this.loadPage()
+  removePageAt(i) {
+    if (this.pages.length === 1) { this.pages[0] = "" }
+    else { this.pages.splice(i, 1); if (this.active >= this.pages.length) this.active = this.pages.length - 1; else if (i < this.active) this.active-- }
+    this.renderPageFields(); this.loadPage(); this.renderStrip()
+  }
+  dropPage(to) {
+    const from = this._drag
+    if (from == null || from === to) return
+    const activeMd = this.active
+    const [moved] = this.pages.splice(from, 1)
+    this.pages.splice(to, 0, moved)
+    // keep editing the same page content the user was on
+    this.active = this.pages.indexOf(moved) === to ? to : activeMd
+    this._drag = null
+    this.renderPageFields(); this.loadPage(); this.renderStrip()
   }
   renderPageFields() {
     this.pageFieldsTarget.innerHTML = this.pages.map(p =>
       `<textarea class="hidden" name="text_slide[pages][][body_markdown]">${this.esc(p)}</textarea>`).join("")
   }
+  // Plain-text snippet of a page's markdown for the thumbnail.
+  plain(md) { return (md || "").replace(/[#*_>-]/g, "").replace(/\s+/g, " ").trim() }
 
   // ======================= BODY (WYSIWYG) =======================
   bold(e) { e.preventDefault(); this.exec("bold") }
@@ -101,7 +147,12 @@ export default class extends Controller {
     this.pages[this.active] = this.htmlToMd(this.richTarget)
     this.sourceTarget.value = this.pages[this.active]
     this.renderPageFields()
+    this.updateActiveThumb()
     this.schedulePreview()
+  }
+  updateActiveThumb() {
+    const card = this.pageStripTarget?.querySelector(`.pg-card[data-i="${this.active}"] .line-clamp-3`)
+    if (card) card.textContent = (this.plain(this.pages[this.active]) || "Empty").slice(0, 48)
   }
   onSourceInput() {
     this.pages[this.active] = this.sourceTarget.value

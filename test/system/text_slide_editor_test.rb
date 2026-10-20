@@ -35,9 +35,9 @@ class TextSlideEditorTest < ApplicationSystemTestCase
     JS
     find("[data-slide-editor-target=toolbar]").click_button("B")
 
-    # Add a second page and type its body.
-    click_on "+ page"
-    assert_selector "[data-slide-editor-target=pageLabel]", text: "Page 2 of 2"
+    # Add a second page via the strip and type its body.
+    click_on "+ Add page"
+    assert_selector "[data-slide-editor-target=pageStrip] .pg-card", count: 2
     find("[data-slide-editor-target=rich]").click
     find("[data-slide-editor-target=rich]").send_keys("y en su Hijo Jesucristo")
 
