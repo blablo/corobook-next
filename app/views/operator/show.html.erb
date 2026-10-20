@@ -39,8 +39,28 @@
     <% end %>
   </ol>
 
-  <div class="mt-6 text-sm text-slate-500">
-    Projector token: <code><%= @session.projector_token %></code> ·
-    Musician token: <code><%= @session.musician_token %></code>
+  <div class="mt-6 grid gap-4 sm:grid-cols-2" data-role="join-links">
+    <% projector_url = projector_url(@session.projector_token, host: request.host_with_port, protocol: request.protocol.delete_suffix("://")) %>
+    <% musician_url  = musician_url(@session.musician_token,  host: request.host_with_port, protocol: request.protocol.delete_suffix("://")) %>
+
+    <div class="rounded-lg ring-1 ring-slate-200 bg-white p-4 flex items-center gap-4" data-role="projector-join">
+      <%= qr_svg(projector_url, size: 128) %>
+      <div class="min-w-0">
+        <div class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Projector</div>
+        <%= link_to projector_url, projector_url, target: "_blank", rel: "noopener",
+              class: "text-sm text-indigo-700 underline break-all", data: { role: "projector-url" } %>
+        <p class="text-xs text-slate-400 mt-1">Open on the projection screen, or scan to join.</p>
+      </div>
+    </div>
+
+    <div class="rounded-lg ring-1 ring-slate-200 bg-white p-4 flex items-center gap-4" data-role="musician-join">
+      <%= qr_svg(musician_url, size: 128) %>
+      <div class="min-w-0">
+        <div class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Musician</div>
+        <%= link_to musician_url, musician_url, target: "_blank", rel: "noopener",
+              class: "text-sm text-indigo-700 underline break-all", data: { role: "musician-url" } %>
+        <p class="text-xs text-slate-400 mt-1">Musicians scan this to follow along on their phone.</p>
+      </div>
+    </div>
   </div>
 </div>

@@ -59,4 +59,15 @@ class OperatorAdvanceTest < ActionDispatch::IntegrationTest
       b.update!(current_section_index: 2) # real change on a stale lock_version 0
     end
   end
+
+  test "the operator view shows clickable projector/musician join URLs and QR codes" do
+    get operator_path(@session)
+    assert_response :success
+    # Clickable join URLs carrying the follow tokens.
+    assert_select "[data-role=projector-url][href*='/p/#{@session.projector_token}']"
+    assert_select "[data-role=musician-url][href*='/m/#{@session.musician_token}']"
+    # A QR svg per join card.
+    assert_select "[data-role=projector-join] svg"
+    assert_select "[data-role=musician-join] svg"
+  end
 end

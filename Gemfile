@@ -69,3 +69,6 @@ end
 
 # CSV moved out of Ruby default gems in 3.4; pin it for the usage report export.
 gem "csv"
+
+# Inline SVG QR codes for the live operator join links (projector / musician).
+gem "rqrcode", "~> 3.2"
