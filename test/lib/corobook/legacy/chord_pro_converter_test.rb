@@ -36,6 +36,12 @@ class Corobook::Legacy::ChordProConverterTest < ActiveSupport::TestCase
     assert_includes out, "HOLA"
   end
 
+  test "slash runs of any length are stripped but slash chords survive" do
+    assert_not_includes convert("G\n///HOLA///"), "/"
+    # a slash INSIDE a chord token (D/F#) must survive
+    assert_includes convert("D/F#\nHOLA"), "[D/F#]"
+  end
+
   test "the combining-ring diminished chord survives as a chord token" do
     legacy = "C C°                   Dm\n   CUAN BELLO ES EL SEÑOR"
     out = convert(legacy)
