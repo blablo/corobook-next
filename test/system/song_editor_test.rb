@@ -157,7 +157,7 @@ class SongEditorTest < ApplicationSystemTestCase
     assert_selector "[data-role=sections] .chord-pill", minimum: 2
     source = find("input[data-song-editor-target=source]", visible: false).value
     assert_includes source, "{sov: Verse 1}"
-    assert_includes source, "{soc: Chorus 1}"
+    assert_includes source, "{soc: Chorus}"
     assert_includes source, "Al mundo paz"
     assert_match(/\[C\]/, source)
 

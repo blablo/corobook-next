@@ -8,7 +8,7 @@ class SongShowSectionsTest < ActionDispatch::IntegrationTest
   end
 
   def labels_in(body)
-    body.scan(/data-role="section-label"[^>]*>(.*?)<\/h2>/m).flatten.map(&:strip)
+    body.scan(/data-role="section-label"[^>]*>(.*?)<\/(?:h2|span|div)>/m).flatten.map(&:strip)
   end
 
   test "arrangement defines order and repeats without hiding unlisted sections" do
