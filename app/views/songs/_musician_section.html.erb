@@ -14,7 +14,7 @@
       <div class="musician-annotation italic text-slate-500"><%= line["annotation"] %></div>
     <% else %>
       <div class="musician-line" data-role="musician-line"><%
-        (line["segments"] || []).each do |seg| %><span class="musician-seg"><span class="musician-chord" data-role="chord"><%= seg["chord"] %></span><span class="musician-text"><%= seg["text"].presence || raw("&nbsp;") %></span></span><%
+        (line["segments"] || []).each do |seg| %><span class="musician-seg"><span class="musician-chord" data-role="chord"><%= seg["chord"] %></span><span class="musician-text"><%= sheet_segment_text(seg["text"]) %></span></span><%
         end %></div>
     <% end %>
   <% end %>
