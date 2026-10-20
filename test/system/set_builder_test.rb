@@ -70,4 +70,13 @@ class SetBuilderTest < ApplicationSystemTestCase
     end
     assert_no_selector "[data-role=set-item]"
   end
+
+  test "setting the service date inline persists it" do
+    visit service_set_path(@set)
+    input = find("[data-role=service-date]")
+    # Native date inputs are unreliable with fill_in under Selenium; set value + fire change.
+    page.execute_script("arguments[0].value = '2026-12-25'; arguments[0].dispatchEvent(new Event('change'))", input.native)
+    assert_text "goes live"
+    assert_equal Date.new(2026, 12, 25), @set.reload.service_date
+  end
 end
