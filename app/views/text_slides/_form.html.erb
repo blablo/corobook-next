@@ -34,17 +34,12 @@
         <%# ── Pages ──────────────────────────────────────────────── %>
         <div class="form-control">
           <div class="flex items-center justify-between mb-1">
-            <span class="label-text text-sm">Body</span>
-            <div class="flex items-center gap-1">
-              <button type="button" class="btn btn-ghost btn-xs" title="Previous page" data-action="slide-editor#prevPage">‹</button>
-              <span class="text-xs text-base-content/60" data-slide-editor-target="pageLabel">Page 1 of 1</span>
-              <button type="button" class="btn btn-ghost btn-xs" title="Next page" data-action="slide-editor#nextPage">›</button>
-              <button type="button" class="btn btn-ghost btn-xs" title="Add a page" data-action="slide-editor#addPage">+ page</button>
-              <button type="button" class="btn btn-ghost btn-xs text-error" title="Remove this page" data-action="slide-editor#removePage">✕</button>
-              <span class="mx-1 opacity-30">|</span>
-              <button type="button" class="btn btn-ghost btn-xs" data-slide-editor-target="advancedBtn" data-action="slide-editor#toggleAdvanced">Advanced</button>
-            </div>
+            <span class="label-text text-sm">Pages</span>
+            <button type="button" class="btn btn-ghost btn-xs" data-slide-editor-target="advancedBtn" data-action="slide-editor#toggleAdvanced">Advanced</button>
           </div>
+
+          <%# ── Page thumbnail strip: click to switch, drag to reorder, ✕ to remove, + to add ── %>
+          <div class="flex gap-2 overflow-x-auto pb-2 mb-2" data-slide-editor-target="pageStrip"></div>
 
           <div class="flex flex-wrap gap-1 mb-1 rounded-t-lg border border-base-300 bg-base-200 px-1 py-1" data-slide-editor-target="toolbar">
             <button type="button" class="btn btn-ghost btn-xs font-bold" title="Bold (⌘B)" data-action="slide-editor#bold">B</button>
