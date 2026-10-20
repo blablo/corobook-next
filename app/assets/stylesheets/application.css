@@ -77,13 +77,9 @@
 .musician-seg { position: relative; display: inline-block; white-space: pre; vertical-align: bottom; }
 .musician-chord { position: absolute; bottom: 100%; left: 0; font-weight: 700; line-height: 1; white-space: pre; padding-right: 0.5rem; }
 
-/* Sidebar nav: make menu items span the full width of the rail. The DaisyUI stylesheet loads
-   AFTER this file and sets `.menu { width: fit-content }` plus a max-content anchor grid, so the
-   whole menu and its active/hover pill hug the labels. These rules win on load order via
-   !important and stretch the label column so the highlight fills the sidebar. */
-[data-role="sidebar"] .menu { width: 100% !important; }
-[data-role="sidebar"] .menu :where(li) > a,
-[data-role="sidebar"] .menu :where(li) > button {
-  width: 100% !important;
+/* Sidebar nav full width. DaisyUI's menu component is used as-is (ul.menu w-full); this only
+   forces the anchor's grid to let the label column stretch, so the active pill fills the item.
+   DaisyUI's tailwind.css loads after this file, so !important keeps the override winning. */
+[data-role="sidebar"] .menu :where(li) > a {
   grid-auto-columns: max-content 1fr max-content !important;
 }
