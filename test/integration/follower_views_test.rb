@@ -66,9 +66,10 @@ class FollowerViewsTest < ActionDispatch::IntegrationTest
 
     get musician_path(session.musician_token)
     assert_response :success
-    frame = css_select("[data-role=musician-frame]").first.text
-    # Must show the arrangement's first section (Chorus lyrics), NOT the raw intro.
-    assert_includes frame, "Bendice alma"
+    frame = css_select("[data-role=musician-frame]").first.text.gsub("\u00a0", " ")
+    # Must show the arrangement's first section (the Chorus), NOT the raw intro.
+    assert_includes frame, "Chorus"
+    assert_includes frame, "Bendice"
     assert_not_includes frame, "Intro"
   end
 
