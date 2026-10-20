@@ -10,7 +10,7 @@
   <% elsif frame.song? && frame.current_section %>
     <% renderer = Corobook::MusicianRender.new(frame.item, target_key: target_key, semitones: semitones.to_i, follower_capo: capo) %>
     <% transposed, _capo = renderer.call %>
-    <% section = transposed.sections[session.current_section_index - 1] %>
+    <% section = frame.current_section_in(transposed.to_h["sections"]) %>
     <% if renderer.displayed_key %>
       <span class="text-xs rounded bg-slate-200 text-slate-900 px-2 py-0.5" data-role="key-badge">Key <%= renderer.displayed_key %></span>
     <% end %>
