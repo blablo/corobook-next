@@ -31,6 +31,19 @@ module Corobook
         verse: %w[sov eov], chorus: %w[soc eoc], bridge: %w[sob eob], prechorus: %w[sob eob]
       }.freeze
 
+      # Canonical English section label per base term (the directive kind alone can't tell
+      # Intro/Outro/Verse apart — they all serialize to {sov} — so standardize by base word).
+      CANONICAL = {
+        "VERSE" => "Verse", "VERSO" => "Verse", "ESTROFA" => "Verse",
+        "CHOIR" => "Chorus", "CHORUS" => "Chorus", "CORO" => "Chorus", "ESTRIBILLO" => "Chorus",
+        "BRIDGE" => "Bridge", "PUENTE" => "Bridge",
+        "PRECORO" => "Pre-chorus", "PRECHORUS" => "Pre-chorus", "PRECHOIR" => "Pre-chorus",
+        "PREESTRIBILLO" => "Pre-chorus", "PREBRIDGE" => "Pre-chorus",
+        "INTRO" => "Intro", "INSTRUMENTAL" => "Instrumental", "SOLO" => "Solo", "PUNTOS" => "Verse",
+        "PARTE" => "Verse",
+        "OUTRO" => "Outro", "END" => "Outro", "FINAL" => "Outro", "FIN" => "Outro"
+      }.freeze
+
       # A token that looks like a chord (root + optional accidental/quality/extension/bass).
       CHORD_TOKEN = %r{\A[A-G](?:#|b|♭|♯)?[a-zA-Z0-9°ø+\-/#♭♯()]*\z}
 
@@ -54,12 +67,22 @@ module Corobook
         out.join("\n")
       end
 
-      # The arrangement array parsed from the legacy `order` CSV, or nil.
+      # The arrangement array parsed from the legacy `order` CSV, standardized to the same
+      # canonical labels the sections use (so play order resolves), or nil.
       def arrangement
         return nil if @order.to_s.strip.empty?
 
-        labels = @order.to_s.split(",").map(&:strip).reject(&:empty?)
+        labels = @order.to_s.split(",").filter_map { |raw| canonical_label(raw.strip) }
         labels.empty? ? nil : labels
+      end
+
+      # Map one raw legacy order label (e.g. "VERSO 1", "CORO", "FIN") to its canonical form
+      # ("Verse 1", "Chorus", "Outro"). Falls back to a cleaned title-case of the original.
+      def canonical_label(raw)
+        return nil if raw.empty?
+
+        h = classify_header(raw)
+        h ? h[:label] : raw.split(/\s+/).map(&:capitalize).join(" ")
       end
 
       private
@@ -122,7 +145,11 @@ module Corobook
         kind = SECTION_MAP[base]
         return nil unless kind
 
-        label = ident ? "#{base.capitalize} #{ident}" : nil
+        # Standardize: canonical English name + a numeric identifier only (drop letter/odd
+        # suffixes like "2A", "MACABRO", "G"). A bare header keeps no number.
+        name = CANONICAL[base] || base.capitalize
+        num = ident.to_s[/\d+/]
+        label = num ? "#{name} #{num}" : name
         { kind: kind, label: label }
       end
 

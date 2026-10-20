@@ -16,10 +16,10 @@ class Corobook::Legacy::ChordProConverterTest < ActiveSupport::TestCase
   end
 
   test "section headers become section directives" do
-    legacy = "[VERSE 1]\nD\nHOLA\n[CHOIR]\nG\nCORO"
+    legacy = "[VERSE 1]\nD\nHOLA\n[CHOIR]\nG\nLALA"
     out = convert(legacy)
     assert_includes out, "{sov: Verse 1}"
-    assert_includes out, "{soc}"
+    assert_includes out, "{soc: Chorus}"
   end
 
   test "tabs are expanded before column math" do
@@ -52,10 +52,22 @@ class Corobook::Legacy::ChordProConverterTest < ActiveSupport::TestCase
     assert_equal "CUAN BELLO ES EL SEÑOR", out.gsub(/\[[^\]]*\]/, "").strip
   end
 
-  test "order becomes an arrangement array" do
-    conv = Corobook::Legacy::ChordProConverter.new("G\nHOLA", order: "VERSE 1, CHOIR, VERSE 2")
+  test "order becomes a canonical English arrangement array" do
+    conv = Corobook::Legacy::ChordProConverter.new("G\nHOLA", order: "VERSO 1, CORO, VERSE 2, FIN")
     conv.convert
-    assert_equal [ "VERSE 1", "CHOIR", "VERSE 2" ], conv.arrangement
+    assert_equal [ "Verse 1", "Chorus", "Verse 2", "Outro" ], conv.arrangement
+  end
+
+  test "section labels and arrangement are standardized to English" do
+    assert_includes convert("[VERSO 1]\nG\nHOLA"), "{sov: Verse 1}"
+    assert_includes convert("[CORO 2]\nG\nHOLA"), "{soc: Chorus 2}"
+    assert_includes convert("[PUENTE]\nG\nHOLA"), "{sob: Bridge}"
+    assert_includes convert("[PRECORO]\nG\nHOLA"), "{sob: Pre-chorus}"
+    assert_includes convert("[FINAL]\nG\nHOLA"), "{sov: Outro}"
+    assert_includes convert("[INTRO]\nG\nHOLA"), "{sov: Intro}"
+    # letter / odd suffixes collapse to the number (or drop)
+    assert_includes convert("[VERSO 2A]\nG\nHOLA"), "{sov: Verse 2}"
+    assert_includes convert("[CORO MACABRO]\nG\nHOLA"), "{soc: Chorus}"
   end
 
   test "mood becomes a custom directive" do
@@ -71,17 +83,17 @@ class Corobook::Legacy::ChordProConverterTest < ActiveSupport::TestCase
     assert_includes out, "SE[G]ÑOR"
   end
 
-  test "spanish and variant section headers resolve to directives" do
-    assert_includes convert("[VERSO 1]\nG\nHOLA"), "{sov: Verso 1}"
-    assert_includes convert("[CORO]\nG\nHOLA"), "{soc}"
-    assert_includes convert("[PUENTE]\nG\nHOLA"), "{sob}"
-    assert_includes convert("[FIN]\nG\nHOLA"), "{sov}"
-    # glued identifier (VERSOA), punctuation (VERSE.2), trailing language tag (COROES)
-    assert_includes convert("[VERSOA]\nG\nHOLA"), "{sov: Verso A}"
+  test "variant, glued, punctuated and language-tagged headers resolve and standardize" do
+    assert_includes convert("[VERSO 1]\nG\nHOLA"), "{sov: Verse 1}"
+    assert_includes convert("[CORO]\nG\nHOLA"), "{soc: Chorus}"
+    assert_includes convert("[PUENTE]\nG\nHOLA"), "{sob: Bridge}"
+    assert_includes convert("[FIN]\nG\nHOLA"), "{sov: Outro}"
+    # glued identifier (VERSOA → number dropped, no digit), punctuation (VERSE.2), language tag (COROES)
+    assert_includes convert("[VERSO1]\nG\nHOLA"), "{sov: Verse 1}"
     assert_includes convert("[VERSE.2]\nG\nHOLA"), "{sov: Verse 2}"
-    assert_includes convert("[COROES]\nG\nHOLA"), "{soc}"
+    assert_includes convert("[COROES]\nG\nHOLA"), "{soc: Chorus}"
     # base term as the trailing word
-    assert_includes convert("[PRIMERA PARTE]\nG\nHOLA"), "{sov:"
+    assert_includes convert("[PRIMERA PARTE]\nG\nHOLA"), "{sov: Verse"
   end
 
   test "never raises on a ragged or malformed blob" do
