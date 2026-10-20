@@ -3,6 +3,13 @@ require "test_helper"
 class Corobook::Legacy::ChordProConverterTest < ActiveSupport::TestCase
   def convert(lyric, **opts) = Corobook::Legacy::ChordProConverter.convert(lyric, **opts)
 
+  test "a standalone chord line (intro, no lyric beneath) becomes a spaced progression" do
+    # A chord line followed by a blank line / section — not merged onto an empty line.
+    assert_equal "{sov: Intro}\n[G] [C] [D] [G]\n", convert("[INTRO]\nG  C  D  G\n")
+    # and it must NOT collapse all chords to column 0
+    assert_not_includes convert("[INTRO]\nG  C  D  G\n"), "[G][C]"
+  end
+
   test "places a chord above the column of its lyric grapheme" do
     legacy = "G       C\nHOLA MUNDO"
     #          col0    col8 → grapheme index 8 is the second 'D' position
