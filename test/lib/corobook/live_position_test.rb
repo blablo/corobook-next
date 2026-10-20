@@ -47,4 +47,14 @@ class Corobook::LivePositionTest < ActiveSupport::TestCase
     @song.update!(arrangement: [ "Coro" ]) # only the chorus
     assert_equal 1, Corobook::LivePosition.new(@set).section_count_for(@i0)
   end
+
+  test "a multi-page slide contributes one stop per page" do
+    @slide.update!(pages: [ { "body_markdown" => "uno" }, { "body_markdown" => "dos" } ])
+    p = Corobook::LivePosition.new(@set)
+    assert_equal 2, p.section_count_for(@i1)
+    # 2 song sections + 2 slide pages = 4 stops; Next walks page 0 -> page 1 on the slide.
+    assert_equal 4, p.stops.length
+    n = p.next_stop(@i1.id, 0)
+    assert_equal [ @i1.id, 1 ], [ n.set_item_id, n.section_index ]
+  end
 end

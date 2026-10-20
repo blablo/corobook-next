@@ -14,6 +14,6 @@
     <% end %>
     <%= render "songs/musician_section", section: section, displayed_key: renderer.displayed_key if section %>
   <% elsif frame.text_slide? %>
-    <%= render "text_slides/musician_slide", slide: frame.item %>
+    <%= render "text_slides/musician_slide", slide: frame.item, page: session.current_section_index %>
   <% end %>
 </div>

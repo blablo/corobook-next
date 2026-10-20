@@ -1,10 +1,9 @@
 <%#
-  Projector rendering of a text slide (Req 3.5). Locals: slide.
-  Subtype drives a CSS class only; no copyright notice on text slides.
+  Projector rendering of a text slide (Req 3.5). Locals: slide, page (0-based, optional).
+  Neutral style — slides no longer carry a subtype. Renders one page of the slide.
 %>
-<div class="projector-slide <%= slide.subtype_class %>" data-controller="fit"
-     data-role="projector-slide" data-subtype="<%= slide.subtype %>">
+<div class="projector-slide" data-controller="fit" data-role="projector-slide">
   <div data-fit-target="content" class="projector-slide-body">
-    <%= raw slide.rendered_html %>
+    <%= raw slide.rendered_html(local_assigns.fetch(:page, 0)) %>
   </div>
 </div>

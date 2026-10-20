@@ -115,9 +115,6 @@
               <label class="sr-only" for="inline-title">Slide title</label>
               <%= text_field_tag :title, nil, id: "inline-title", placeholder: "Title",
                     class: "input input-bordered input-sm w-full mb-2" %>
-              <%= select_tag :subtype,
-                    options_for_select(TextSlide.subtypes.keys.map { |s| [ s.humanize, s ] }, "sermon_point"),
-                    class: "select select-bordered select-sm w-full mb-2" %>
               <label class="sr-only" for="inline-body">Slide body (markdown)</label>
               <%= text_area_tag :body_markdown, nil, id: "inline-body", rows: 3, placeholder: "Markdown…",
                     class: "textarea textarea-bordered w-full font-mono text-sm mb-2" %>
