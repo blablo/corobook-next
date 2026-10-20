@@ -1,4 +1,4 @@
-<div class="mx-auto mt-8 max-w-4xl" data-role="operator">
+<div class="mx-auto mt-8 max-w-4xl" data-role="operator" data-controller="operator-clicker">
   <div class="flex items-center justify-between mb-4">
     <h1 class="text-2xl font-semibold"><%= @session.service_set.name %></h1>
     <span class="text-xs rounded px-2 py-0.5 <%= @session.active? ? 'bg-green-200 text-green-900' : 'bg-slate-300 text-slate-700' %>"
@@ -7,11 +7,11 @@
 
   <div class="flex gap-2 mb-4" data-role="operator-controls">
     <%= button_to "← Back", operator_back_path(@session), method: :patch,
-          form: { data: { turbo: false } }, class: "rounded border px-3 py-2" %>
+          form: { data: { turbo: false, "operator-clicker-target": "back" } }, class: "rounded border px-3 py-2" %>
     <%= button_to "Next →", operator_advance_path(@session), method: :patch,
-          form: { data: { turbo: false } }, class: "rounded bg-slate-800 text-white px-3 py-2" %>
+          form: { data: { turbo: false, "operator-clicker-target": "next" } }, class: "rounded bg-slate-800 text-white px-3 py-2" %>
     <%= button_to (@session.blanked ? "Unblank" : "Blank"), operator_blank_path(@session), method: :patch,
-          form: { data: { turbo: false } }, class: "rounded border px-3 py-2", data: { role: "blank-toggle" } %>
+          form: { data: { turbo: false, "operator-clicker-target": "blank" } }, class: "rounded border px-3 py-2", data: { role: "blank-toggle" } %>
     <%= button_to "A-", operator_font_path(@session, dir: "down"), method: :patch,
           form: { data: { turbo: false } }, class: "rounded border px-3 py-2" %>
     <%= button_to "A+", operator_font_path(@session, dir: "up"), method: :patch,
@@ -23,6 +23,10 @@
             data: { role: "end-service" } %>
     <% end %>
   </div>
+
+  <p class="text-xs text-slate-400 mb-4" data-role="clicker-hint">
+    Tip: a presentation clicker or your keyboard arrows (← →, Page Up/Down) advance the service. Press <kbd class="px-1 rounded bg-slate-200 text-slate-700">B</kbd> to blank.
+  </p>
 
   <div class="border rounded p-4 mb-6" data-role="operator-frame">
     <%= render "live/musician_frame", session: @session, target_key: nil, semitones: 0, capo: nil %>
