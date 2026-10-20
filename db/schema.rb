@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_19_211500) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_20_150000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -21,6 +21,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_211500) do
     t.string "ccli_license_number"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "invitations", force: :cascade do |t|
+    t.bigint "church_id", null: false
+    t.bigint "invited_by_id", null: false
+    t.citext "email", null: false
+    t.string "role", default: "editor", null: false
+    t.string "token_digest", null: false
+    t.datetime "expires_at", null: false
+    t.datetime "accepted_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["church_id", "email"], name: "index_pending_invitations", unique: true, where: "(accepted_at IS NULL)"
+    t.index ["church_id"], name: "index_invitations_on_church_id"
+    t.index ["invited_by_id"], name: "index_invitations_on_invited_by_id"
+    t.index ["token_digest"], name: "index_invitations_on_token_digest", unique: true
+    t.check_constraint "role::text = ANY (ARRAY['admin'::text, 'editor'::text])", name: "invitations_role_check"
   end
 
   create_table "live_sessions", force: :cascade do |t|
@@ -141,6 +158,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_211500) do
     t.check_constraint "role::text = ANY (ARRAY['admin'::character varying::text, 'editor'::character varying::text])", name: "users_role_check"
   end
 
+  add_foreign_key "invitations", "churches"
+  add_foreign_key "invitations", "users", column: "invited_by_id"
   add_foreign_key "live_sessions", "churches"
   add_foreign_key "live_sessions", "service_sets"
   add_foreign_key "live_sessions", "set_items", column: "current_set_item_id"
