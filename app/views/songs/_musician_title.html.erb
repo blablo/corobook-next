@@ -8,7 +8,7 @@
   <% credits << song.copyright_line if song.copyright_line.present? %>
   <% credits << "CCLI ##{song.ccli_song_number}" if song.ccli_song_number.present? %>
   <% if credits.any? %>
-    <div class="mt-2 text-sm text-slate-500" data-role="title-credits">
+    <div class="mt-2 text-sm text-white/60" data-role="title-credits">
       <% credits.each do |line| %><div><%= line %></div><% end %>
     </div>
   <% end %>
