@@ -60,6 +60,7 @@ module Corobook
 
       def convert
         out = []
+        @in_repeat = false
 
         lines = normalize(@lyric).split("\n", -1)
         emit_lines(lines, out)
@@ -97,26 +98,44 @@ module Corobook
           line = lines[i]
 
           if (header = section_header(line))
-            open, close = SECTION_DIRECTIVE[header[:kind]]
+            open, _close = SECTION_DIRECTIVE[header[:kind]]
             out << (header[:label] ? "{#{open}: #{header[:label]}}" : "{#{open}}")
             i += 1
             next
           end
 
+          # A // repeat marker (legacy "repeat this block") opens on one line and closes on a
+          # later one. Preserve the meaning as a {comment: ×2} annotation after the block, while
+          # the slashes themselves are stripped from the displayed lyric.
           if chord_line?(line) && i + 1 < lines.length && lyric_line?(lines[i + 1])
+            @in_repeat = true if repeat_opens?(lines[i + 1])
             out << merge(line, lines[i + 1])
+            close_repeat_if(lines[i + 1], out)
             i += 2
           elsif chord_line?(line)
-            # A standalone chord line (intro / instrumental / turnaround, no lyric beneath):
-            # emit the chords as a spaced progression so they read left-to-right, instead of
-            # merging them onto an empty line (which collapses them all to column 0).
             out << chord_progression(line)
             i += 1
           else
+            @in_repeat = true if repeat_opens?(line)
             out << strip_repeat_markers(line)
+            close_repeat_if(line, out)
             i += 1
           end
         end
+      end
+
+      # The line opens a repeat block if it begins with a run of slashes.
+      def repeat_opens?(line)
+        line.strip.start_with?("//")
+      end
+
+      # Emit the repeat annotation when a repeat block closes on this line (ends with slashes),
+      # so a single-line repeat (//...//) and a multi-line one both get one ×2 marker.
+      def close_repeat_if(raw_line, out)
+        return unless @in_repeat && raw_line.strip.end_with?("//")
+
+        out << "{comment: ×2}"
+        @in_repeat = false
       end
 
       # True when a line is real lyric content a chord line can sit above: non-blank and not
@@ -125,11 +144,18 @@ module Corobook
         !line.strip.empty? && !chord_line?(line) && section_header(line).nil?
       end
 
-      # Render a standalone chord line as "[G] [C] [D] [G]" — chords in source order,
-      # single-spaced, so it displays as a readable progression with no lyric beneath.
+      # Render a standalone chord line (intro / instrumental) as a progression where each chord
+      # sits over its own run of spaces, e.g. "[G]   [C]   [D]   [G]". The gap is sized to the
+      # chord's own width + padding so adjacent chord pills never collide in the editor (which
+      # positions each pill by character column), and so the sheet view spaces them out too.
+      PROGRESSION_GAP = 3
+
       def chord_progression(line)
         chords = chord_positions(line).map { |(_c, chord)| chord }
-        chords.map { |c| "[#{c}]" }.join(" ")
+        chords.map.with_index { |c, idx|
+          # last chord needs no trailing spacer
+          idx == chords.length - 1 ? "[#{c}]" : "[#{c}]#{' ' * (c.length + PROGRESSION_GAP)}"
+        }.join
       end
 
       # Parse a `[LABEL]` header (or a bare CORO/VERSE line) into a section kind + optional

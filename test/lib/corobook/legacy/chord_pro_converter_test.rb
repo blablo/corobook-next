@@ -4,10 +4,18 @@ class Corobook::Legacy::ChordProConverterTest < ActiveSupport::TestCase
   def convert(lyric, **opts) = Corobook::Legacy::ChordProConverter.convert(lyric, **opts)
 
   test "a standalone chord line (intro, no lyric beneath) becomes a spaced progression" do
-    # A chord line followed by a blank line / section — not merged onto an empty line.
-    assert_equal "{sov: Intro}\n[G] [C] [D] [G]\n", convert("[INTRO]\nG  C  D  G\n")
+    # A chord line followed by a blank line / section — not merged onto an empty line, and
+    # each chord gets its own run of spaces so pills don't collide.
+    assert_equal "{sov: Intro}\n[G]    [C]    [D]    [G]\n", convert("[INTRO]\nG  C  D  G\n")
     # and it must NOT collapse all chords to column 0
     assert_not_includes convert("[INTRO]\nG  C  D  G\n"), "[G][C]"
+  end
+
+  test "a // repeat block is preserved as a ×2 annotation, slashes stripped" do
+    out = convert("//Canta otra vez\ny otra vez//")
+    assert_not_includes out, "/"
+    assert_includes out, "Canta otra vez"
+    assert_includes out, "{comment: ×2}"
   end
 
   test "places a chord above the column of its lyric grapheme" do
