@@ -53,6 +53,8 @@
 .live-ended { text-align: center; font-size: 1.5rem; color: #9aa0a6; }
 
 /* ── Musician view (kept functional; its own design pass comes later) ─────── */
-.musician-line { font-family: ui-monospace, monospace; white-space: pre-wrap; }
-.musician-seg { display: inline-flex; flex-direction: column; vertical-align: bottom; }
-.musician-chord { font-weight: 700; min-height: 1.2em; }
+/* Chords float above their text run (absolute, bottom-full) so a chord wider than its
+   syllable never injects a space into the lyric; text runs stay contiguous. */
+.musician-line { font-family: ui-monospace, monospace; white-space: pre-wrap; padding-top: 1.2em; }
+.musician-seg { position: relative; display: inline-block; white-space: pre; vertical-align: bottom; }
+.musician-chord { position: absolute; bottom: 100%; left: 0; font-weight: 700; line-height: 1; white-space: pre; padding-right: 0.5rem; }
