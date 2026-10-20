@@ -31,6 +31,17 @@ Rails.application.routes.draw do
 
   get "reports/usage" => "reports#usage", as: :usage_report
 
+  # Team management (admin): members + pending invitations.
+  resource  :team, only: [ :show ], controller: "team"
+  resources :members, only: [ :update, :destroy ]
+  resources :invitations, only: [ :create, :destroy ] do
+    member { post :resend }
+  end
+
+  # Public invitation accept flow — tenancy is resolved by the token, no session required.
+  get  "invitations/:token/accept" => "invitation_acceptances#show",   as: :accept_invitation
+  post "invitations/:token/accept" => "invitation_acceptances#create"
+
   resources :service_sets, path: "sets", as: :service_sets do
     member do
       post "items", to: "service_sets#add_item", as: :add_item

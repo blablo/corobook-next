@@ -1,0 +1,29 @@
+<div class="mx-auto mt-16 max-w-sm" data-role="accept-invitation">
+  <h1 class="text-2xl font-semibold mb-2">Join <%= @invitation.church.name %></h1>
+  <p class="text-sm text-slate-500 mb-6">
+    You were invited as <strong><%= @invitation.role %></strong>. Set a password to finish.
+  </p>
+
+  <% if flash.now[:alert] || flash[:alert] %>
+    <p class="mb-4 text-sm text-red-700" data-role="accept-error"><%= flash.now[:alert] || flash[:alert] %></p>
+  <% end %>
+
+  <%= form_with url: accept_invitation_path(token: params[:token]), method: :post do |f| %>
+    <div class="mb-4">
+      <%= f.label :email, class: "block text-sm mb-1" %>
+      <%= f.email_field :email, value: @invitation.email, disabled: true,
+            class: "w-full border rounded px-2 py-1 bg-slate-100 text-slate-600" %>
+    </div>
+    <div class="mb-4">
+      <%= f.label :password, "Password", class: "block text-sm mb-1" %>
+      <%= f.password_field :password, autocomplete: "new-password",
+            class: "w-full border rounded px-2 py-1" %>
+    </div>
+    <div class="mb-6">
+      <%= f.label :password_confirmation, "Confirm password", class: "block text-sm mb-1" %>
+      <%= f.password_field :password_confirmation, autocomplete: "new-password",
+            class: "w-full border rounded px-2 py-1" %>
+    </div>
+    <%= f.submit "Join #{@invitation.church.name}", class: "w-full rounded bg-slate-800 text-white px-3 py-2" %>
+  <% end %>
+</div>
