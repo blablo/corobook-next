@@ -18,7 +18,7 @@
 </div>
 
 <% if show_editor_warnings && notice.warn? %>
-  <p class="rounded bg-amber-100 text-amber-900 px-3 py-2 text-sm mt-2" data-role="copyright-warning">
+  <div class="alert alert-warning text-sm mt-2" data-role="copyright-warning">
     <%= notice.warning %>
-  </p>
+  </div>
 <% end %>

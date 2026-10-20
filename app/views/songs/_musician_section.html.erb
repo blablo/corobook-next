@@ -4,14 +4,14 @@
 %>
 <div class="musician-section <%= 'is-replay' if section['replay_of'] %>" data-role="musician-section">
   <% if section["label"].present? || section["replay_of"] %>
-    <div class="musician-section-label text-sm text-slate-500" data-role="section-label">
+    <div class="musician-section-label text-sm text-white/60" data-role="section-label">
       <%= section["label"] %><%= " (repeat)" if section["replay_of"] %>
     </div>
   <% end %>
 
   <% (section["lines"] || []).each do |line| %>
     <% if line["annotation"] %>
-      <div class="musician-annotation italic text-slate-500"><%= line["annotation"] %></div>
+      <div class="musician-annotation italic text-white/60"><%= line["annotation"] %></div>
     <% else %>
       <div class="musician-line" data-role="musician-line"><%
         (line["segments"] || []).each do |seg| %><span class="musician-seg"><span class="musician-chord" data-role="chord"><%= seg["chord"] %></span><span class="musician-text"><%= sheet_segment_text(seg["text"]) %></span></span><%

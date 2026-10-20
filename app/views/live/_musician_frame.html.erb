@@ -12,7 +12,7 @@
     <% transposed, _capo = renderer.call %>
     <% section = frame.current_section_in(transposed.to_h["sections"]) %>
     <% if renderer.displayed_key %>
-      <span class="text-xs rounded bg-slate-200 text-slate-900 px-2 py-0.5" data-role="key-badge">Key <%= renderer.displayed_key %></span>
+      <span class="badge badge-sm bg-white/90 text-black border-0" data-role="key-badge">Key <%= renderer.displayed_key %></span>
     <% end %>
     <%= render "songs/musician_section", section: section, displayed_key: renderer.displayed_key if section %>
   <% elsif frame.text_slide? %>
