@@ -42,12 +42,10 @@ export default class extends Controller {
   }
   removeTag(i) { this.tags.splice(i, 1); this.renderTags() }
   renderTags() {
-    this.tagChipsTarget.innerHTML = this.tags.length
-      ? this.tags.map((t, i) => `
+    this.tagChipsTarget.innerHTML = this.tags.map((t, i) => `
           <span class="badge badge-neutral gap-1">${this.esc(t)}
             <button type="button" class="tag-x" data-i="${i}" aria-label="Remove ${this.esc(t)}">✕</button>
           </span>`).join("")
-      : `<span class="text-sm text-base-content/40">No tags yet</span>`
     this.tagChipsTarget.querySelectorAll(".tag-x").forEach(b =>
       b.addEventListener("click", (e) => { e.stopPropagation(); this.removeTag(+b.dataset.i) }))
     this.tagFieldsTarget.innerHTML = this.tags.map(t =>
@@ -62,23 +60,22 @@ export default class extends Controller {
     this.renderPreview()
   }
 
-  // Thumbnail strip: a card per page (number + text snippet) + an "Add page" card.
   renderStrip() {
     if (!this.hasPageStripTarget) return
     const cards = this.pages.map((md, i) => {
       const snippet = this.esc((this.plain(md) || "Empty").slice(0, 48))
-      const activeCls = i === this.active ? "ring-2 ring-primary" : "ring-1 ring-base-300"
+      const activeCls = i === this.active ? "border-primary border-2" : "border-base-300 border"
       return `
-        <div class="pg-card shrink-0 w-28 h-20 rounded-lg ${activeCls} bg-base-100 p-2 text-left relative cursor-pointer select-none"
+        <div class="pg-card group shrink-0 w-28 h-20 box-border rounded-lg overflow-hidden ${activeCls} bg-base-100 p-2 text-left relative cursor-pointer select-none"
              draggable="true" data-i="${i}" title="Page ${i + 1}">
           <div class="text-[10px] font-semibold text-base-content/40">Page ${i + 1}</div>
-          <div class="text-[11px] leading-tight text-base-content/70 line-clamp-3 mt-0.5">${snippet}</div>
-          <button type="button" class="pg-del absolute top-0.5 right-0.5 btn btn-ghost btn-xs btn-circle text-error opacity-0"
+          <div class="text-[11px] leading-tight text-base-content/70 line-clamp-3 mt-0.5 pr-4">${snippet}</div>
+          <button type="button" class="pg-del absolute top-0.5 right-0.5 text-error opacity-0 group-hover:opacity-100 text-xs leading-none px-1"
                   data-i="${i}" aria-label="Remove page ${i + 1}">✕</button>
         </div>`
     }).join("")
     const addCard = `
-      <button type="button" class="pg-add shrink-0 w-28 h-20 rounded-lg border-2 border-dashed border-base-300 text-base-content/40 hover:text-primary hover:border-primary flex items-center justify-center"
+      <button type="button" class="pg-add shrink-0 w-28 h-20 box-border rounded-lg border-2 border-dashed border-base-300 text-base-content/40 hover:text-primary hover:border-primary flex items-center justify-center text-sm"
               aria-label="Add a page">+ Add page</button>`
     this.pageStripTarget.innerHTML = cards + addCard
     this.wireStrip()
@@ -87,8 +84,6 @@ export default class extends Controller {
     this.pageStripTarget.querySelectorAll(".pg-card").forEach(card => {
       const i = +card.dataset.i
       card.addEventListener("click", (e) => { if (!e.target.closest(".pg-del")) this.switchTo(i) })
-      card.addEventListener("mouseenter", () => card.querySelector(".pg-del").classList.remove("opacity-0"))
-      card.addEventListener("mouseleave", () => card.querySelector(".pg-del").classList.add("opacity-0"))
       card.querySelector(".pg-del").addEventListener("click", (e) => { e.stopPropagation(); this.removePageAt(i) })
       card.addEventListener("dragstart", (e) => { this._drag = i; e.dataTransfer.effectAllowed = "move"; card.classList.add("opacity-50") })
       card.addEventListener("dragend", () => card.classList.remove("opacity-50"))
