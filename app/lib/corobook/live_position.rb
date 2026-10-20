@@ -49,7 +49,7 @@ module Corobook
       if item.item_type == "song"
         song_section_count(item.song)
       else
-        1
+        [ item.text_slide&.page_count.to_i, 1 ].max
       end
     end
 

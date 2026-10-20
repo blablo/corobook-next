@@ -6,22 +6,30 @@ class TextSlidesController < ApplicationController
 
   def index
     @query = params[:q]
-    @text_slides = church_scope(:text_slides).where(reusable: true).search(@query).order(:title)
+    @tag = params[:tag].presence
+    scope = church_scope(:text_slides).where(reusable: true)
+    scope = scope.tagged(@tag) if @tag
+    @text_slides = scope.search(@query).order(:title)
+    @church_tags = church_tags
   end
 
   def show; end
 
   def new
-    @text_slide = church_scope(:text_slides).build(reusable: true, subtype: "statement")
+    @text_slide = church_scope(:text_slides).build(reusable: true, pages: [ { "body_markdown" => "" } ])
+    @church_tags = church_tags
   end
 
-  def edit; end
+  def edit
+    @church_tags = church_tags
+  end
 
   def create
     @text_slide = church_scope(:text_slides).build(slide_params.merge(reusable: true))
     if @text_slide.save
       redirect_to @text_slide, notice: "Slide created."
     else
+      @church_tags = church_tags
       render :new, status: :unprocessable_entity
     end
   end
@@ -30,6 +38,7 @@ class TextSlidesController < ApplicationController
     if @text_slide.update(slide_params)
       redirect_to @text_slide, notice: "Slide updated."
     else
+      @church_tags = church_tags
       render :edit, status: :unprocessable_entity
     end
   end
@@ -39,19 +48,23 @@ class TextSlidesController < ApplicationController
     redirect_to text_slides_path, notice: "Slide deleted."
   end
 
-  # Live preview: render markdown to the same safe HTML the projector uses, without persisting.
+  # Live preview: render one page's markdown to the same safe HTML the projector uses.
   def preview
-    slide = TextSlide.new(body_markdown: params[:body_markdown].to_s, subtype: params[:subtype].presence || "statement")
-    render json: { html: slide.rendered_html, subtype_class: slide.subtype_class }
+    render json: { html: Commonmarker.to_html(params[:body_markdown].to_s.encode("UTF-8")) }
   end
 
   private
+
+  # The church's existing tag vocabulary, for autocomplete + the index filter.
+  def church_tags
+    church_scope(:text_slides).pluck(:tags).flatten.uniq.sort
+  end
 
   def set_slide
     @text_slide = find_in_church(:text_slides, params[:id])
   end
 
   def slide_params
-    params.require(:text_slide).permit(:title, :subtype, :body_markdown)
+    params.require(:text_slide).permit(:title, tags: [], pages: [ :body_markdown ])
   end
 end
