@@ -14,6 +14,13 @@ class SetItem < ApplicationRecord
     song || text_slide
   end
 
+  # The referenced item's title, or nil when the reference was deleted from the library.
+  def resolved_title = item&.title
+
+  # True when this item's song/slide no longer exists (a dangling reference the builder renders
+  # as a removable "missing" placeholder and treats as not launchable).
+  def missing? = item.nil?
+
   private
 
   def exactly_one_item
