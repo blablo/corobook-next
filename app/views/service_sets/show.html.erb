@@ -10,12 +10,22 @@
   <header class="mb-5 pb-4 border-b border-base-300 flex flex-wrap items-start justify-between gap-3">
     <div class="min-w-0">
       <h1 class="text-2xl sm:text-3xl font-bold leading-tight truncate"><%= @service_set.name %></h1>
-      <p class="mt-1 text-sm text-base-content/60">
-        <%= @service_set.service_date&.strftime("%A, %B %-d, %Y") || "No date set" %>
-        <% if can_edit? %>
-          · <%= link_to "Edit details", edit_service_set_path(@service_set), class: "link link-hover" %>
+      <% if can_edit? %>
+        <%= form_with model: @service_set, url: service_set_path(@service_set), method: :patch,
+              data: { turbo: false }, class: "mt-1 flex items-center gap-2 flex-wrap" do |f| %>
+          <%= f.label :service_date, "Service date", class: "text-sm text-base-content/60" %>
+          <%= f.date_field :service_date, onchange: "this.form.requestSubmit()",
+                class: "input input-bordered input-xs w-auto", data: { role: "service-date" } %>
+          <noscript><%= f.submit "Save", class: "btn btn-xs btn-outline" %></noscript>
+          <span class="text-sm text-base-content/60">
+            <%= @service_set.service_date ? "→ goes live #{@service_set.service_date.strftime('%A, %b %-d')}" : "— no date set yet" %>
+          </span>
         <% end %>
-      </p>
+      <% else %>
+        <p class="mt-1 text-sm text-base-content/60">
+          <%= @service_set.service_date&.strftime("%A, %B %-d, %Y") || "No date set" %>
+        </p>
+      <% end %>
       <% if @active_session %>
         <p class="mt-2 inline-flex items-center gap-1 rounded bg-warning/15 text-warning px-2 py-0.5 text-xs font-semibold" data-role="live-warning">
           ● This set is live
