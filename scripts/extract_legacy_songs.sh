@@ -22,15 +22,20 @@ trap 'rm -f "$TSV"' EXIT
 mkdir -p "$(dirname "$OUT")"
 
 # --batch gives tab-separated rows with \t, \n, \\ backslash-escaped inside field values.
+# --default-character-set=binary is REQUIRED: the legacy columns are declared `utf8` but hold
+# real multi-byte UTF-8 (e.g. é = 0xC3 0xA9). Asking the mysql 8 client for utf8mb4 makes it
+# down-convert those to lone latin1 bytes (é → 0xE9), which then scrub out as dropped accents.
+# `binary` transfers the stored bytes verbatim, so the UTF-8 survives intact.
 docker run --rm -e MYSQL_PWD="$LEGACY_DB_PASSWORD" mysql:8 \
-  mysql -h "$LEGACY_DB_HOST" -u "$USER" --connect-timeout=20 --default-character-set=utf8mb4 \
+  mysql -h "$LEGACY_DB_HOST" -u "$USER" --connect-timeout=20 --default-character-set=binary \
         --batch -e \
   "SELECT id, title, author, lyric, link, reference, mood, \`order\` FROM songs ORDER BY id;" \
   "$DB" > "$TSV"
 
-# Parse the batch TSV (header row + escaped fields) into JSON.
+# Parse the batch TSV (header row + escaped fields) into JSON. Bytes are already valid UTF-8
+# (binary transfer), so scrub only as a defensive last resort against a stray bad byte.
 ruby -rjson -e '
-  raw = File.binread(ARGV[0]).force_encoding("UTF-8").scrub("")
+  raw = File.binread(ARGV[0]).force_encoding("UTF-8").scrub("?")
   lines = raw.split("\n", -1)
   headers = lines.shift.to_s.split("\t")
   unesc = ->(s) { s.gsub(/\\(.)/) { $1 == "n" ? "\n" : ($1 == "t" ? "\t" : $1) } }
