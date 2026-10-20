@@ -39,6 +39,12 @@ class TextSlidesController < ApplicationController
     redirect_to text_slides_path, notice: "Slide deleted."
   end
 
+  # Live preview: render markdown to the same safe HTML the projector uses, without persisting.
+  def preview
+    slide = TextSlide.new(body_markdown: params[:body_markdown].to_s, subtype: params[:subtype].presence || "statement")
+    render json: { html: slide.rendered_html, subtype_class: slide.subtype_class }
+  end
+
   private
 
   def set_slide

@@ -16,8 +16,12 @@ class TextSlideEditorTest < ApplicationSystemTestCase
     visit new_text_slide_path
     fill_in "Title", with: "El Credo"
     select "Statement of faith", from: "Type"
-    fill_in "Body (markdown)", with: "**Creo** en un solo Dios"
-    click_on "Create Text slide"
+    fill_in "Body", with: "**Creo** en un solo Dios"
+
+    # Live preview reflects the markdown + subtype before saving.
+    assert_selector "[data-role=slide-preview].slide-statement-of-faith strong", text: "Creo"
+
+    click_on "Create slide"
 
     assert_text "Slide created."
 
