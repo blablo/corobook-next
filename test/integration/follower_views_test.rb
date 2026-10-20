@@ -66,9 +66,10 @@ class FollowerViewsTest < ActionDispatch::IntegrationTest
 
     get musician_path(session.musician_token)
     assert_response :success
+    frame = css_select("[data-role=musician-frame]").first.text
     # Must show the arrangement's first section (Chorus lyrics), NOT the raw intro.
-    assert_select "[data-role=musician-frame]", text: /Bendice alma/
-    assert_select "[data-role=musician-frame]", text: /Intro/, count: 0
+    assert_includes frame, "Bendice alma"
+    assert_not_includes frame, "Intro"
   end
 
   test "the musician view 404s on a bad token" do
