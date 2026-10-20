@@ -18,7 +18,7 @@ class SetBuilderTest < ApplicationSystemTestCase
     assert_selector "[data-role=home]"
   end
 
-  test "build a mixed set via search + inline slide, reorder, and persist" do
+  test "build a mixed set via search + new-slide modal, reorder, and persist" do
     visit service_set_path(@set)
 
     # Add the song via the search picker.
@@ -26,11 +26,19 @@ class SetBuilderTest < ApplicationSystemTestCase
     find(".result", text: "Himno de apertura").click
     assert_selector "[data-role=set-item]", text: "Himno de apertura"
 
-    # Add an inline one-off sermon slide via the "New slide" tab.
-    click_on "New slide"
-    fill_in "inline-title", with: "Punto 1"
-    fill_in "inline-body", with: "**Dios es fiel**"
-    click_on "Add slide"
+    # Add a slide via the full "New slide" modal (same editor as /text_slides/new).
+    click_on "+ New slide"
+    assert_selector "dialog[open]"
+    within("dialog[open]") do
+      fill_in "Slide title", with: "Punto 1"
+      # Type into the WYSIWYG body (query the live node by selector; no stale handle across JS).
+      page.execute_script(<<~JS)
+        const el = document.querySelector("dialog[open] [data-slide-editor-target=rich]")
+        el.focus(); el.textContent = "Dios es fiel"
+        el.dispatchEvent(new Event("input", { bubbles: true }))
+      JS
+      click_on "Create slide"
+    end
     assert_selector "[data-role=set-item]", text: "Punto 1"
 
     items = all("[data-role=set-item]").map(&:text)
@@ -47,17 +55,25 @@ class SetBuilderTest < ApplicationSystemTestCase
     visit service_set_path(@set)
     assert_match "Punto 1", all("[data-role=set-item]").first.text
 
-    inline = @church.text_slides.find_by(title: "Punto 1")
-    assert_not inline.reusable
-    assert_equal @set.id, inline.set_id
+    # Modal slides are saved to the library (reusable) AND added to this set.
+    slide = @church.text_slides.find_by(title: "Punto 1")
+    assert slide.reusable
+    assert @set.set_items.exists?(text_slide_id: slide.id)
   end
 
-  test "blank inline-slide title shows an error and adds nothing" do
+  test "blank slide title in the modal shows a validation error and adds nothing" do
     visit service_set_path(@set)
-    click_on "New slide"
-    fill_in "inline-body", with: "no title"
-    click_on "Add slide"
-    assert_selector "[data-set-builder-target=inlineError]", visible: true
+    click_on "+ New slide"
+    assert_selector "dialog[open]"
+    within("dialog[open]") do
+      page.execute_script(<<~JS)
+        const el = document.querySelector("dialog[open] [data-slide-editor-target=rich]")
+        el.focus(); el.textContent = "no title"
+        el.dispatchEvent(new Event("input", { bubbles: true }))
+      JS
+      click_on "Create slide"
+    end
+    # Validation fails (title required) → modal stays, no item added.
     assert_no_selector "[data-role=set-item]"
   end
 

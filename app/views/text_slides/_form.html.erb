@@ -69,7 +69,11 @@
         <div class="flex items-center gap-3">
           <%= f.submit (text_slide.persisted? ? "Save changes" : "Create slide"), class: "btn btn-primary",
                 data: { "slide-editor-target": "submit" } %>
-          <%= link_to "Cancel", (text_slide.persisted? ? text_slide_path(text_slide) : text_slides_path), class: "btn btn-ghost" %>
+          <% if local_assigns[:modal] %>
+            <button type="button" class="btn btn-ghost" data-action="set-builder#closeNewSlide">Cancel</button>
+          <% else %>
+            <%= link_to "Cancel", (text_slide.persisted? ? text_slide_path(text_slide) : text_slides_path), class: "btn btn-ghost" %>
+          <% end %>
         </div>
       </div>
     </div>

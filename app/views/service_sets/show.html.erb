@@ -4,6 +4,7 @@
      data-set-builder-reorder-url-value="<%= reorder_service_set_path(@service_set) %>"
      data-set-builder-add-url-value="<%= add_item_service_set_path(@service_set) %>"
      data-set-builder-library-url-value="<%= library_service_set_path(@service_set) %>"
+     data-set-builder-slide-create-url-value="<%= text_slides_path %>"
      data-set-builder-can-edit-value="<%= can_edit? %>">
 
   <%# ── Header ──────────────────────────────────────────────────── %>
@@ -72,8 +73,10 @@
           <div role="tablist" class="tabs tabs-boxed tabs-sm mb-3" data-set-builder-target="tabs">
             <button type="button" class="tab tab-active" data-set-builder-target="tab" data-kind="song" data-action="set-builder#switchTab">Songs</button>
             <button type="button" class="tab" data-set-builder-target="tab" data-kind="slide" data-action="set-builder#switchTab">Slides</button>
-            <button type="button" class="tab" data-set-builder-target="tab" data-kind="inline" data-action="set-builder#switchTab">New slide</button>
           </div>
+          <% if can_edit? %>
+            <button type="button" class="btn btn-sm btn-primary w-full mb-3" data-action="set-builder#openNewSlide">+ New slide</button>
+          <% end %>
 
           <%# Search picker (songs + slides) — enhanced; falls back to the native forms below with JS off %>
           <div data-set-builder-target="pickerPane">
@@ -106,28 +109,25 @@
               <% end %>
             </details>
           </div>
-
-          <%# Inline one-off slide (3rd tab) — always a real form; controller posts it as JSON %>
-          <div class="hidden mt-1" data-set-builder-target="inlinePane">
-            <%= form_with url: add_item_service_set_path(@service_set), method: :post,
-                  data: { "set-builder-target": "inlineForm" } do %>
-              <%= hidden_field_tag :kind, "inline_slide" %>
-              <label class="sr-only" for="inline-title">Slide title</label>
-              <%= text_field_tag :title, nil, id: "inline-title", placeholder: "Title",
-                    class: "input input-bordered input-sm w-full mb-2" %>
-              <label class="sr-only" for="inline-tags">Tags</label>
-              <%= text_field_tag :tags, nil, id: "inline-tags", placeholder: "Tags (comma separated)",
-                    class: "input input-bordered input-sm w-full mb-2" %>
-              <label class="sr-only" for="inline-body">Slide text</label>
-              <%= text_area_tag :body_markdown, nil, id: "inline-body", rows: 3, placeholder: "Slide text…",
-                    class: "textarea textarea-bordered w-full text-sm mb-1" %>
-              <p class="text-xs text-base-content/50 mb-2">A quick one-off slide for this set. For tags, pages and formatting, use the full New Slide editor.</p>
-              <%= submit_tag "Add slide", class: "btn btn-sm btn-primary w-full" %>
-              <p class="text-error text-xs mt-1 hidden" data-set-builder-target="inlineError"></p>
-            <% end %>
-          </div>
         </div>
       </aside>
     <% end %>
   </div>
+
+  <% if can_edit? %>
+    <%# ── New slide modal: the SAME editor as /text_slides/new. Creates a reusable slide, then
+        the set-builder controller adds it to this set and appends the row. ── %>
+    <dialog class="modal" data-set-builder-target="newSlideModal">
+      <div class="modal-box max-w-4xl w-full">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-lg font-bold">New slide</h3>
+          <button type="button" class="btn btn-sm btn-circle btn-ghost" aria-label="Close" data-action="set-builder#closeNewSlide">✕</button>
+        </div>
+        <div data-set-builder-target="newSlideBody">
+          <%= render "text_slides/form", text_slide: @new_slide, church_tags: @church_slide_tags, modal: true %>
+        </div>
+      </div>
+      <form method="dialog" class="modal-backdrop"><button aria-label="Close">close</button></form>
+    </dialog>
+  <% end %>
 </div>
