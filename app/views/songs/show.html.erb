@@ -1,6 +1,6 @@
-<div class="mx-auto my-8 max-w-3xl px-4 sm:px-6" data-role="song-sheet">
+<div class="mx-auto my-4 sm:my-8 max-w-3xl px-4 sm:px-6" data-role="song-sheet">
   <%# ── Header band ─────────────────────────────────────────────── %>
-  <header class="mb-6 pb-5 border-b border-base-300">
+  <header class="mb-4 pb-3 sm:mb-6 sm:pb-5 border-b border-base-300">
     <div class="flex items-start justify-between gap-4">
       <div class="min-w-0">
         <h1 class="text-3xl sm:text-4xl font-bold leading-tight tracking-tight truncate"><%= @song.title %></h1>
@@ -37,7 +37,7 @@
   <% end %>
 
   <%# ── Chord sheet, in play order ──────────────────────────────── %>
-  <div class="flex flex-col gap-6 min-w-0" data-role="musician-preview">
+  <div class="flex flex-col gap-3 sm:gap-6 min-w-0" data-role="musician-preview">
     <% @ordered_sections.each do |section| %>
       <%= render "sheet_section", section: section %>
     <% end %>

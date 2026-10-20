@@ -4,20 +4,29 @@
   aligned per-segment (chord stacked over its text run), matching a printed chord sheet.
 %>
 <section data-role="sheet-section" class="min-w-0">
-  <div class="flex items-center gap-2 mb-2">
-    <span class="h-4 w-1 rounded-full bg-primary/70"></span>
+  <div class="flex items-center gap-2 mb-1 sm:mb-2">
+    <span class="h-3.5 w-1 rounded-full bg-primary/70"></span>
     <h2 class="text-xs font-bold uppercase tracking-[0.12em] text-base-content/60" data-role="section-label">
       <%= section["label"].presence || section["kind"]&.capitalize %>
     </h2>
   </div>
-  <div class="rounded-xl bg-base-200/40 px-5 py-4 overflow-x-auto">
+  <div class="rounded-lg bg-base-200/40 px-3 py-2 sm:px-5 sm:py-3 overflow-x-auto">
     <% (section["lines"] || []).each do |line| %>
       <% if line["annotation"].present? %>
-        <div class="italic text-base-content/50 text-sm font-mono py-1"><%= line["annotation"] %></div>
+        <div class="italic text-base-content/50 text-sm font-mono py-0.5"><%= line["annotation"] %></div>
       <% else %>
-        <div class="font-mono text-[15px] leading-[1.35] whitespace-nowrap py-0.5 pt-5" data-role="sheet-line"><%
-          (line["segments"] || []).each do |seg| %><span class="relative inline-block whitespace-pre align-bottom"><% if seg["chord"].present? %><span class="absolute bottom-full left-0 text-primary font-bold text-[13px] tracking-tight leading-none whitespace-pre pr-2" data-role="chord"><%= seg["chord"] %></span><% end %><span class="text-base-content/90 whitespace-pre"><%= sheet_segment_text(seg["text"]) %></span></span><%
-          end %></div>
+        <%
+          segments = line["segments"] || []
+          has_chords = segments.any? { |s| s["chord"].present? }
+          blank_line = segments.all? { |s| s["chord"].blank? && s["text"].to_s.strip.empty? }
+        %>
+        <% if blank_line %>
+          <div class="h-2" aria-hidden="true"></div>
+        <% else %>
+          <div class="font-mono text-[15px] leading-tight whitespace-nowrap <%= has_chords ? 'pt-[1.4em]' : 'py-px' %>" data-role="sheet-line"><%
+            segments.each do |seg| %><span class="relative inline-block whitespace-pre align-bottom"><% if seg["chord"].present? %><span class="absolute bottom-full left-0 text-primary font-bold text-[13px] tracking-tight leading-none whitespace-pre pr-2" data-role="chord"><%= seg["chord"] %></span><% end %><span class="text-base-content/90 whitespace-pre"><%= sheet_segment_text(seg["text"]) %></span></span><%
+            end %></div>
+        <% end %>
       <% end %>
     <% end %>
   </div>
