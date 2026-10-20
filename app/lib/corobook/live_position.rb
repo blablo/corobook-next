@@ -44,10 +44,11 @@ module Corobook
       stops.find { |s| s.set_item_id == set_item_id }
     end
 
-    # How many ordered sections an item renders. A song honors its arrangement length when set.
+    # How many ordered sections an item renders. A song honors its arrangement length when set,
+    # plus one leading TITLE slide (section index 0) shown before its first lyric section.
     def section_count_for(item)
       if item.item_type == "song"
-        song_section_count(item.song)
+        song_section_count(item.song) + 1
       else
         [ item.text_slide&.page_count.to_i, 1 ].max
       end

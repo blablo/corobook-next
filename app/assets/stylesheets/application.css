@@ -43,6 +43,14 @@
   color: #9aa0a6; letter-spacing: 0.02em; text-align: center; font-weight: 400;
 }
 
+/* Title slide: the song name large and centered, with any licensing/credit lines muted below. */
+.projector-title { justify-content: center; }
+.projector-title-content { width: 100%; text-align: center; }
+.projector-title-name { font-weight: 800; line-height: 1.1; }
+.projector-title-credits { margin-top: 5vh; color: #9aa0a6; font-weight: 400; }
+.projector-title-credit-line { font-size: clamp(0.9rem, 1.8vw, 1.4rem); letter-spacing: 0.02em; }
+.projector-title-credit-line + .projector-title-credit-line { margin-top: 0.4em; }
+
 /* Blank: a true-black fill that hides everything (operator pressed Blank). */
 .projector-root.is-blanked, .projector-blank { background: #000; }
 .projector-blank { position: fixed; inset: 0; }

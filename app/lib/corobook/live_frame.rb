@@ -18,11 +18,16 @@ module Corobook
 
     def text_slide? = item_type == "text_slide"
 
-    # The concrete section (JSONB hash) for a song at the current index, or nil.
+    # A song shows a TITLE slide at section index 0, then its lyric sections at 1..N.
+    def title_slide? = song? && session.current_section_index.zero?
+
+    # The concrete lyric section (JSONB hash) for a song at the current index, or nil.
+    # Index 0 is the title slide, so lyric section i lives at session index i + 1.
     def current_section
       return nil unless song?
+      return nil if title_slide?
 
-      ordered_sections[session.current_section_index]
+      ordered_sections[session.current_section_index - 1]
     end
 
     def ordered_sections
@@ -39,7 +44,8 @@ module Corobook
     def final_section?
       return true unless song?
 
-      session.current_section_index >= ordered_sections.length - 1
+      # +1 accounts for the leading title slide at index 0.
+      session.current_section_index >= ordered_sections.length
     end
   end
 end
