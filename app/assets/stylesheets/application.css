@@ -38,6 +38,13 @@
 }
 .projector-line + .projector-line { margin-top: 0.35em; }
 
+/* Operator preview: a bounded dark mini-stage showing the live projector frame in place, so the
+   operator sees exactly what's on the screen. Overrides the full-viewport projector stage sizing. */
+.projector-preview { background: #000; color: #fff; aspect-ratio: 16 / 9; }
+.projector-preview #live-frame { position: static; inset: auto; height: 100%; padding: 4% 5%; }
+.projector-preview .projector-line { font-size: clamp(1rem, 3.5vw, 2rem); }
+.projector-preview .projector-title-name { font-size: clamp(1.25rem, 4vw, 2.5rem); }
+
 .projector-copyright {
   margin-top: 4vh; font-size: clamp(0.8rem, 1.4vw, 1.1rem);
   color: #9aa0a6; letter-spacing: 0.02em; text-align: center; font-weight: 400;
