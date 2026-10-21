@@ -9,14 +9,14 @@
   <div class="card bg-base-100 ring-1 ring-base-200">
     <div class="card-body gap-4">
       <fieldset class="fieldset">
-        <%= f.label :service_date, "Service date", class: "fieldset-legend" %>
+        <legend class="fieldset-legend">Service date</legend>
         <%= f.date_field :service_date, class: "input input-bordered w-full",
               data: { role: "set-date" } %>
         <p class="label">Defaults to the next Sunday.</p>
       </fieldset>
 
       <fieldset class="fieldset">
-        <%= f.label :name, "Name", class: "fieldset-legend" %>
+        <legend class="fieldset-legend">Name</legend>
         <%= f.text_field :name, class: "input input-bordered w-full",
               data: { role: "set-name" } %>
         <p class="label">Defaults to the date — change it if you like.</p>
