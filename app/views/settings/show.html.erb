@@ -1,0 +1,49 @@
+<% content_for :title, "Settings" %>
+
+<div class="mx-auto max-w-3xl p-4" data-role="settings">
+  <h1 class="text-2xl font-semibold mb-6">Settings</h1>
+
+  <%# ── Church subdomain ─────────────────────────────────────────── %>
+  <section data-role="subdomain-settings">
+    <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/60 mb-2">Church subdomain</h2>
+    <p class="text-sm text-base-content/60 mb-4 max-w-prose">
+      Pick a unique subdomain for <span class="font-medium"><%= @church.name %></span>. Once set, your
+      team will be able to sign in at your own address and skip choosing the church.
+      <span class="text-base-content/50">(The sign-in shortcut is coming next — setting it now reserves your name.)</span>
+    </p>
+
+    <%= form_with model: @church, url: settings_path, method: :patch, data: { controller: "subdomain-preview" } do |f| %>
+      <% if @church.errors[:subdomain].any? %>
+        <div class="alert alert-error mb-4 text-sm" data-role="subdomain-error">
+          <div>Subdomain <%= @church.errors[:subdomain].to_sentence %>.</div>
+        </div>
+      <% end %>
+
+      <fieldset class="fieldset max-w-md">
+        <%= f.label :subdomain, "Subdomain", class: "fieldset-legend" %>
+        <label class="input input-bordered flex items-center gap-1 w-full">
+          <%= f.text_field :subdomain,
+                value: @church.subdomain,
+                placeholder: "gracia",
+                autocomplete: "off", autocapitalize: "off", spellcheck: "false",
+                class: "grow", data: { role: "subdomain-input", action: "input->subdomain-preview#update" } %>
+          <span class="text-base-content/50 text-sm whitespace-nowrap">.<%= request.domain.presence || "example.com" %></span>
+        </label>
+        <p class="label text-base-content/60">
+          3–63 characters, lowercase letters, numbers, and hyphens. Leave blank to remove.
+        </p>
+      </fieldset>
+
+      <p class="text-sm mt-3">
+        Your address will be:
+        <code class="px-1 py-0.5 rounded bg-base-200" data-role="subdomain-preview-url">
+          <%= @church.subdomain.present? ? "https://#{@church.subdomain}.#{request.domain.presence || 'example.com'}/" : "— not set —" %>
+        </code>
+      </p>
+
+      <div class="mt-4">
+        <%= f.submit "Save settings", class: "btn btn-primary btn-sm" %>
+      </div>
+    <% end %>
+  </section>
+</div>
