@@ -1,4 +1,5 @@
-<div class="mx-auto my-4 sm:my-8 max-w-3xl px-4 sm:px-6" data-role="song-sheet">
+<div class="mx-auto my-4 sm:my-8 max-w-3xl px-4 sm:px-6" data-role="song-sheet"
+     data-controller="autoscroll">
   <%# ── Header band ─────────────────────────────────────────────── %>
   <header class="mb-4 pb-3 sm:mb-6 sm:pb-5 border-b border-base-300">
     <div class="flex items-start justify-between gap-4">
@@ -52,4 +53,24 @@
   <% if can_edit? && notice.warn? %>
     <p class="alert alert-warning text-sm mt-4" data-role="copyright-warning"><%= notice.warning %></p>
   <% end %>
+
+  <%# ── Hands-free auto-scroll (teleprompter) ───────────────────────
+      A floating control so a player can let the sheet scroll itself instead of swiping.
+      Play/pause toggles window auto-scroll; the slider sets the speed (persisted). Any
+      manual scroll/touch/arrow pauses it. Hidden from print. %>
+  <div class="autoscroll-dock" data-role="autoscroll-dock" role="group" aria-label="Auto-scroll">
+    <button type="button" class="btn btn-primary btn-circle shadow-lg"
+            data-autoscroll-target="toggle" data-action="autoscroll#toggle"
+            aria-pressed="false" aria-label="Play auto-scroll" title="Auto-scroll (Space)">
+      <svg data-autoscroll-icon="play" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      <svg data-autoscroll-icon="pause" class="w-5 h-5 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+    </button>
+    <div class="autoscroll-speed">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M5 12l4-4M5 12l4 4"/></svg>
+      <input type="range" min="1" max="10" step="1" value="4" class="range range-primary range-xs"
+             data-autoscroll-target="speed" data-action="input->autoscroll#changeSpeed"
+             aria-label="Scroll speed" />
+      <span class="autoscroll-speed-label" data-autoscroll-target="speedLabel">×4</span>
+    </div>
+  </div>
 </div>

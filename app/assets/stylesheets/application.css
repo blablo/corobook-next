@@ -185,3 +185,28 @@
 @media (prefers-reduced-motion: reduce) {
   .musician-row { scroll-behavior: auto; }
 }
+
+/* ── Song sheet auto-scroll dock ─────────────────────────────────────────────
+   A floating teleprompter control on the song view (a light admin page, so it uses
+   semantic theme tokens). Fixed bottom-center, above the sheet; never printed. */
+.autoscroll-dock {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: 1.25rem; z-index: 40;
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.5rem 0.9rem 0.5rem 0.5rem;
+  background: var(--color-base-100, #fff);
+  border: 1px solid var(--color-base-300, #d4d8de);
+  border-radius: 9999px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+.autoscroll-speed { display: flex; align-items: center; gap: 0.5rem; }
+.autoscroll-speed .range { width: 7rem; }
+.autoscroll-speed-label {
+  font-size: 0.8rem; font-weight: 700; min-width: 2rem; text-align: right;
+  color: var(--color-base-content, #16181d);
+}
+@media print { .autoscroll-dock { display: none !important; } }
+@media (prefers-reduced-motion: reduce) {
+  /* The control still works on demand; we simply don't imply motion is free. */
+  .autoscroll-dock { opacity: 0.95; }
+}
