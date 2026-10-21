@@ -28,5 +28,15 @@
       </fieldset>
       <%= f.submit "Sign in", class: "btn btn-primary w-full" %>
     <% end %>
+
+    <% if @unconfirmed_email.present? %>
+      <div class="mt-4 rounded-lg bg-base-200 p-3 text-sm" data-role="unconfirmed-notice">
+        <p class="mb-2">Your email isn't confirmed yet.</p>
+        <%= form_with url: resend_confirmation_path, method: :post do %>
+          <input type="hidden" name="email" value="<%= @unconfirmed_email %>">
+          <button type="submit" class="btn btn-ghost btn-sm" data-role="resend-confirmation">Resend confirmation email</button>
+        <% end %>
+      </div>
+    <% end %>
   <% end %>
 </div>

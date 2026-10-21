@@ -14,6 +14,10 @@ Rails.application.routes.draw do
   # Public self-serve signup: creates a new church + its first admin user.
   get  "signup" => "registrations#new",    as: :signup
   post "signup" => "registrations#create"
+  # Email confirmation gate for self-serve signups.
+  get  "signup/check-email" => "registrations#check_email", as: :signup_check_email
+  get  "confirm/:token"     => "email_confirmations#show",   as: :email_confirmation
+  post "confirm/resend"     => "email_confirmations#resend", as: :resend_confirmation
 
   resources :songs
   resources :text_slides do

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_21_180000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_21_190000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -156,7 +156,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_21_180000) do
     t.string "role", default: "editor", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "confirmed_at"
+    t.string "confirmation_token_digest"
+    t.datetime "confirmation_sent_at"
     t.index ["church_id", "email"], name: "index_users_on_church_id_and_email", unique: true
+    t.index ["confirmation_token_digest"], name: "index_users_on_confirmation_token_digest", unique: true, where: "(confirmation_token_digest IS NOT NULL)"
     t.check_constraint "role::text = ANY (ARRAY['admin'::character varying, 'editor'::character varying]::text[])", name: "users_role_check"
   end
 
