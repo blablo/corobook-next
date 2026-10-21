@@ -269,13 +269,10 @@ export default class extends Controller {
     }
     this.visualTarget.querySelector("[data-role=sections]").innerHTML =
       this.model.length ? this.model.map(sec).join("") : `<p class="text-base-content/50 text-sm mb-3">No sections yet. Add a verse or chorus to begin.</p>`
-    // Direct listeners for chord pills — dynamic nodes aren't reliably bound by Stimulus actions.
+    // Chord pills: DRAG to reposition along the line, CLICK (no movement) to remove.
+    // Dynamic nodes aren't reliably bound by Stimulus actions, so wire directly.
     this.visualTarget.querySelectorAll(".chord-pill").forEach(pill => {
-      pill.addEventListener("mousedown", (ev) => {
-        ev.preventDefault(); ev.stopPropagation()
-        const { si, li, at } = pill.dataset
-        this.removeChordAt(si, li, +at)
-      })
+      pill.addEventListener("mousedown", (ev) => this.startChordDrag(ev, pill))
     })
     // Clicking the chord row (not a pill) opens the picker at the clicked column.
     this.visualTarget.querySelectorAll(".chordrow").forEach(row => {
@@ -302,8 +299,8 @@ export default class extends Controller {
     const chords = [...(ln.chords || [])].sort((a, b) => a.at - b.at)
     const chordPills = chords.map((c) => {
       const at = Math.max(0, Math.min(c.at, ln.text.length))
-      return `<span class="chord-pill absolute top-0 inline-flex items-center gap-0.5 text-primary font-bold cursor-pointer leading-none hover:bg-primary/10 rounded px-0.5"
-                 style="left:${at}ch" data-si="${si}" data-li="${li}" data-at="${c.at}" title="Click to remove ${this.esc(c.chord)}">${this.esc(c.chord)}<span class="text-error text-[10px] opacity-0 group-hover:opacity-70">✕</span></span>`
+      return `<span class="chord-pill absolute top-0 inline-flex items-center gap-0.5 text-primary font-bold cursor-grab active:cursor-grabbing leading-none hover:bg-primary/10 rounded px-0.5 select-none"
+                 style="left:${at}ch" data-si="${si}" data-li="${li}" data-at="${c.at}" title="Drag to move • click to remove">${this.esc(c.chord)}<span class="text-error text-[10px] opacity-0 group-hover:opacity-70">✕</span></span>`
     }).join("")
     return `
       <div class="mb-2 group" data-li="${li}">
@@ -471,6 +468,60 @@ export default class extends Controller {
     anchorEl.parentElement.appendChild(pop)
     this.openPicker = pop
   }
+  // Drag a chord pill to reposition it along the line (snap to character column), or — if the
+  // pointer never really moved — treat it as a click and remove the chord (preserves the
+  // long-standing click-to-remove behavior a system test relies on). The picker still opens from
+  // the chord row for adding/changing.
+  startChordDrag(ev, pill) {
+    ev.preventDefault(); ev.stopPropagation()
+    this.closePicker()
+    const si = +pill.dataset.si, li = +pill.dataset.li, from = +pill.dataset.at
+    const row = pill.closest(".chordrow")
+    const lyric = row?.parentElement.querySelector(".lyric-edit")
+    if (!row || !lyric) { this.removeChordAt(si, li, from); return }
+
+    const text = (this.model[si].lines[li].text) || ""
+    const chWidth = this.charWidth(lyric)
+    const lyricLeft = lyric.getBoundingClientRect().left
+    const startX = ev.clientX
+    let moved = false
+    let targetAt = from
+
+    const colAt = (clientX) => {
+      const x = clientX - lyricLeft
+      let at = chWidth > 0 ? Math.round(x / chWidth) : 0
+      return Math.max(0, Math.min(at, text.length))
+    }
+
+    const onMove = (e) => {
+      if (!moved && Math.abs(e.clientX - startX) < 4) return // below threshold — still a click
+      moved = true
+      pill.classList.add("opacity-70", "ring-1", "ring-primary")
+      targetAt = colAt(e.clientX)
+      pill.style.left = `${targetAt}ch` // live preview
+    }
+    const onUp = () => {
+      document.removeEventListener("mousemove", onMove)
+      document.removeEventListener("mouseup", onUp)
+      if (!moved) { this.removeChordAt(si, li, from); return } // a plain click removes
+      this.moveChord(si, li, from, targetAt)
+    }
+    document.addEventListener("mousemove", onMove)
+    document.addEventListener("mouseup", onUp)
+  }
+
+  // Move a chord from one character offset to another. If a chord already sits at the target
+  // column, the dragged chord replaces it (one chord per column, matching placeChord).
+  moveChord(si, li, from, to) {
+    if (from === to) { this.commit(); return }
+    const ln = this.model[si].lines[li]
+    const dragged = (ln.chords || []).find(c => c.at === from)
+    if (!dragged) { this.commit(); return }
+    ln.chords = (ln.chords || []).filter(c => c.at !== from && c.at !== to)
+    ln.chords.push({ at: to, chord: dragged.chord })
+    this.commit()
+  }
+
   placeChord(si, li, at, chord) {
     const ln = this.model[si].lines[li]
     const offset = +at
