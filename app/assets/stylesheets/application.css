@@ -210,3 +210,16 @@
   /* The control still works on demand; we simply don't imply motion is free. */
   .autoscroll-dock { opacity: 0.95; }
 }
+
+/* ── Set preview page (one-page read-through inside the admin shell) ──────────
+   Reuses the musician chart styling on a light surface. The preview's own top bar
+   should not be sticky (the shell already has a sticky navbar), and the header +
+   app chrome drop away when printing so the sheet prints clean. */
+.musician-preview-page .musician-topbar { position: static; border-radius: 0.75rem; margin-bottom: 1rem; }
+.musician-preview-page .musician-setlist { padding: 0; }
+@media print {
+  .no-print { display: none !important; }
+  /* Print just the set: strip the app shell chrome around the preview. */
+  [data-role=set-preview] { margin: 0 !important; max-width: none !important; }
+  .musician-preview-page .musician-row { break-inside: avoid; box-shadow: none; border-color: #ccc; }
+}

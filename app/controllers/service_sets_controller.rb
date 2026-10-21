@@ -1,8 +1,8 @@
 class ServiceSetsController < ApplicationController
   layout "shell"
   before_action :require_sign_in
-  before_action :require_editor, except: %i[index show]
-  before_action :set_service_set, only: %i[show edit update destroy add_item reorder remove_item library]
+  before_action :require_editor, except: %i[index show preview]
+  before_action :set_service_set, only: %i[show edit update destroy add_item reorder remove_item library preview]
 
   def index
     sets = church_scope(:service_sets)
@@ -27,6 +27,16 @@ class ServiceSetsController < ApplicationController
     # For the "New slide" modal, which renders the full text_slides/_form editor.
     @new_slide = church_scope(:text_slides).build(reusable: true, pages: [ { "body_markdown" => "" } ])
     @church_slide_tags = church_scope(:text_slides).pluck(:tags).flatten.uniq.sort
+  end
+
+  # A one-page, read-through of the whole set in order — every song's sections and every slide,
+  # like the musician sees it — so an editor can eyeball the whole service before going live.
+  # Honors an optional viewer key/capo (same per-viewer transpose as the musician view).
+  def preview
+    @set_rows = Corobook::MusicianSetView.new(
+      @service_set,
+      target_key: params[:key], semitones: params[:semitones].to_i, capo: params[:capo].presence
+    ).rows
   end
 
   def new
