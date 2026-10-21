@@ -81,10 +81,11 @@ export default class extends Controller {
     this.rafId = requestAnimationFrame(this.tick.bind(this))
   }
 
-  // Slider is 1..10; map to ~20..200 px/s (gentle to brisk reading pace).
+  // Slider is 1..10; map to ~5..41 px/s — a slow crawl up to a gentle reading pace. The old
+  // range (up to ~200 px/s) was far too fast; even the top of this range is unhurried.
   pxPerSecond() {
-    const unit = this.hasSpeedTarget ? Number(this.speedTarget.value) : 4
-    return Math.max(1, unit) * 20
+    const unit = this.hasSpeedTarget ? Number(this.speedTarget.value) : 3
+    return Math.max(1, unit) * 4 + 1
   }
 
   changeSpeed() {
