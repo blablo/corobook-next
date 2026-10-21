@@ -1,0 +1,24 @@
+<%#
+  One section of a song in the musician's full-set chart. Locals: section, projected (bool).
+  Chords float above their syllable (same technique as the live musician frame) but on a LIGHT,
+  high-readability surface — this is a lead sheet, not the projector stage.
+  A chords-only intro/instrumental (projected == false) is shown with a muted "not projected" tag.
+%>
+<div class="musician-chart-section <%= 'is-replay' if section['replay_of'] %>" data-role="chart-section">
+  <% if section["label"].present? || section["replay_of"] %>
+    <div class="musician-chart-label" data-role="section-label">
+      <%= section["label"] %><%= " (repeat)" if section["replay_of"] %>
+      <% unless projected %><span class="musician-chart-tag" data-role="not-projected">instrumental</span><% end %>
+    </div>
+  <% end %>
+
+  <% (section["lines"] || []).each do |line| %>
+    <% if line["annotation"] %>
+      <div class="musician-chart-annotation"><%= line["annotation"] %></div>
+    <% else %>
+      <div class="musician-chart-line" data-role="musician-line"><%
+        (line["segments"] || []).each do |seg| %><span class="musician-seg"><span class="musician-chord" data-role="chord"><%= seg["chord"] %></span><span class="musician-text"><%= sheet_segment_text(seg["text"]) %></span></span><%
+        end %></div>
+    <% end %>
+  <% end %>
+</div>

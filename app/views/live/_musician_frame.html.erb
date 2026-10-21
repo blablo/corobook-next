@@ -4,17 +4,24 @@
 %>
 <% frame = Corobook::LiveFrame.new(session) %>
 <div id="live-frame" data-controller="follower" data-follower-version-value="<%= session.position_version %>"
-     data-role="musician-frame">
+     data-role="musician-frame"
+     data-item-id="<%= session.current_set_item_id %>" data-section-index="<%= session.current_section_index %>">
   <% if frame.title_slide? %>
-    <%= render "songs/musician_title", song: frame.item %>
+    <div class="musician-chart-title" data-role="chart-title">
+      <h2><%= frame.item.title %></h2>
+      <% credits = [ frame.item.author, frame.item.copyright_line, (frame.item.ccli_song_number.present? ? "CCLI ##{frame.item.ccli_song_number}" : nil) ].compact %>
+      <% if credits.any? %>
+        <div class="musician-chart-credits"><% credits.each do |c| %><div><%= c %></div><% end %></div>
+      <% end %>
+    </div>
   <% elsif frame.song? && frame.current_section %>
     <% renderer = Corobook::MusicianRender.new(frame.item, target_key: target_key, semitones: semitones.to_i, follower_capo: capo) %>
     <% transposed, _capo = renderer.call %>
     <% section = frame.current_section_in(transposed.to_h["sections"]) %>
     <% if renderer.displayed_key %>
-      <span class="badge badge-sm bg-white/90 text-black border-0" data-role="key-badge">Key <%= renderer.displayed_key %></span>
+      <span data-role="key-badge">Key <%= renderer.displayed_key %></span>
     <% end %>
-    <%= render "songs/musician_section", section: section, displayed_key: renderer.displayed_key if section %>
+    <%= render "songs/musician_chart_section", section: section, projected: true if section %>
   <% elsif frame.text_slide? %>
     <%= render "text_slides/musician_slide", slide: frame.item, page: session.current_section_index %>
   <% end %>
