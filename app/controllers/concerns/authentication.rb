@@ -8,20 +8,46 @@ module Authentication
 
   private
 
-  # The church addressed by the request's subdomain, if any (approach A: a login convenience only —
-  # it pre-selects the church at sign-in and does NOT scope tenancy after login, which still comes
-  # from the signed-in user's own church). Ignores empty/`www` subdomains and anything unmatched.
-  # Memoized per request.
+  # The church addressed by the request host, if any (approach A: a login convenience only — it
+  # pre-selects the church at sign-in and does NOT scope tenancy after login, which still comes
+  # from the signed-in user's own church).
+  #
+  # Churches live UNDER a configured base host: <church>.<base>, e.g. gracia.corobook.duckdns.org
+  # where the base is corobook.duckdns.org. We resolve the church label by stripping the known base
+  # host from the request host — deterministic regardless of tld_length / domain depth, unlike
+  # request.subdomain (which miscounts labels on multi-level hosts like *.duckdns.org). Memoized.
   def subdomain_church
     return @subdomain_church if defined?(@subdomain_church)
 
-    label = request.subdomain.to_s.split(".").first.to_s.downcase
-    @subdomain_church =
-      if label.blank? || label == "www"
-        nil
-      else
-        Church.find_by(subdomain: label)
-      end
+    label = church_subdomain_label
+    @subdomain_church = label.present? ? Church.find_by(subdomain: label) : nil
+  end
+
+  # The church label in front of the base host, or nil when the request is the bare base host
+  # (or www). Case-insensitive; only a single leading label is treated as the church.
+  def church_subdomain_label
+    host = request.host.to_s.downcase
+    base = app_base_host
+    return nil if host.blank? || base.blank?
+    return nil if host == base || host == "www.#{base}"
+
+    suffix = ".#{base}"
+    return nil unless host.end_with?(suffix)
+
+    label = host.delete_suffix(suffix)
+    # Only a single leading label is a church subdomain (gracia.base → "gracia"); anything deeper
+    # (a.b.base) is not a church host.
+    return nil if label.blank? || label.include?(".") || label == "www"
+
+    label
+  end
+
+  # The app's canonical base host (no church subdomain), from APP_HOST, else the mailer host, else
+  # the request's own host as a last resort (dev/localhost).
+  def app_base_host
+    ENV["APP_HOST"].presence ||
+      Rails.application.config.action_mailer.default_url_options&.dig(:host).presence ||
+      request.host
   end
 
   # Current is reset by the Rails executor around each HTTP request, so setting it here is
