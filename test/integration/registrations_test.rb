@@ -72,4 +72,37 @@ class RegistrationsTest < ActionDispatch::IntegrationTest
     get signup_path
     assert_redirected_to root_path
   end
+
+  test "a subdomain race (DB unique index fires) shows a clean error, not a 500" do
+    Church.create!(name: "First", subdomain: "gracia")
+
+    # Simulate the validate-then-save race: neutralize the model's uniqueness check for the
+    # duration of this request so the DB partial unique index is what rejects the duplicate —
+    # the controller must turn that RecordNotUnique into a friendly error instead of a 500.
+    # (No stubbing lib in this project, so swap valid? to drop the subdomain error, then restore.)
+    Church.class_eval do
+      alias_method :__orig_valid?, :valid?
+      def valid?(context = nil)
+        __orig_valid?(context)
+        errors.delete(:subdomain) # pretend the subdomain looked free (the race window)
+        errors.empty?
+      end
+    end
+
+    begin
+      assert_no_difference [ "Church.count", "User.count" ] do
+        post signup_path, params: {
+          church: { name: "Second", subdomain: "gracia" },
+          user: { email: "x@example.com", password: "secret123", password_confirmation: "secret123" }
+        }
+      end
+      assert_response :unprocessable_entity
+      assert_select "[data-role=signup-error]", text: /already been taken/i
+    ensure
+      Church.class_eval do
+        alias_method :valid?, :__orig_valid?
+        remove_method :__orig_valid?
+      end
+    end
+  end
 end
