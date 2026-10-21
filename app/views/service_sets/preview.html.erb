@@ -1,0 +1,46 @@
+<% content_for :title, "#{@service_set.name} — preview" %>
+
+<div class="mx-auto my-6 max-w-3xl px-4 sm:px-6 musician-root musician-preview-page" data-role="set-preview">
+  <%# ── Header (hidden when printing) ───────────────────────────── %>
+  <header class="musician-topbar no-print">
+    <div class="min-w-0">
+      <div class="musician-setname" data-role="set-name"><%= @service_set.name %></div>
+      <div class="text-xs text-base-content/60">
+        <%= @service_set.service_date&.strftime("%A, %B %-d, %Y") || "No date set" %>
+        · <%= pluralize(@set_rows.count { |r| r.kind != :title }, "stop") %>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <%= link_to "← Back to set", service_set_path(@service_set), class: "btn btn-ghost btn-sm" %>
+      <button type="button" class="btn btn-primary btn-sm" onclick="window.print()">Print</button>
+    </div>
+  </header>
+
+  <%# ── The whole set in order ──────────────────────────────────── %>
+  <div class="musician-setlist" data-role="set-list">
+    <% @set_rows.each do |row| %>
+      <section class="musician-row" data-role="set-row"
+               data-item-id="<%= row.item_id %>" data-section-index="<%= row.section_index %>">
+        <% case row.kind %>
+        <% when :title %>
+          <div class="musician-chart-title" data-role="chart-title">
+            <h2><%= row.song.title %></h2>
+            <% if row.displayed_key %><span class="musician-chart-key" data-role="key-badge">Key <%= row.displayed_key %></span><% end %>
+            <% credits = [ row.song.author, row.song.copyright_line, (row.song.ccli_song_number.present? ? "CCLI ##{row.song.ccli_song_number}" : nil) ].compact %>
+            <% if credits.any? %>
+              <div class="musician-chart-credits"><% credits.each do |c| %><div><%= c %></div><% end %></div>
+            <% end %>
+          </div>
+        <% when :section %>
+          <%= render "songs/musician_chart_section", section: row.section, projected: row.projected %>
+        <% when :slide %>
+          <%= render "text_slides/musician_slide", slide: row.slide, page: row.page %>
+        <% end %>
+      </section>
+    <% end %>
+
+    <% if @set_rows.empty? %>
+      <p class="musician-empty" data-role="empty">This set has no items yet.</p>
+    <% end %>
+  </div>
+</div>
