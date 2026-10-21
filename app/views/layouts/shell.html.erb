@@ -25,7 +25,7 @@
             <%# Brand shows in the navbar only on mobile, where the sidebar (which carries it) is hidden. %>
             <%= link_to root_path, class: "text-lg font-semibold lg:hidden" do %>Corobook<% end %>
             <% if respond_to?(:current_church) && current_church %>
-              <span class="badge badge-ghost whitespace-nowrap" data-role="church-name"><%= current_church.name %></span>
+              <span class="text-base font-medium text-base-content whitespace-nowrap truncate max-w-[12rem] sm:max-w-xs" data-role="church-name"><%= current_church.name %></span>
             <% end %>
           </div>
           <div class="navbar-end">
