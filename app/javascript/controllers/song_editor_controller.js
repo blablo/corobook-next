@@ -549,11 +549,27 @@ export default class extends Controller {
   }
 
   // ======================= structure actions =======================
+  // Add a section. A button may carry an explicit data-label (Intro, Outro, Pre-chorus, Solo,
+  // Instrumental) — those are verse-kind sections with a fixed label, numbered only if repeated
+  // (Intro, then "Intro 2"). Without a label, auto-number by kind (Verse 1, Chorus 1, …).
   addSection(e) {
     const kind = e.currentTarget.dataset.kind
-    this.model.push({ kind, label: this.nextLabel(kind), lines: [{ text: "", chords: [] }] })
+    const label = e.currentTarget.dataset.label
+      ? this.nextNamedLabel(e.currentTarget.dataset.label)
+      : this.nextLabel(kind)
+    this.model.push({ kind, label, lines: [{ text: "", chords: [] }] })
     this.commit()
     this.focusLine(this.model.length - 1, 0)
+  }
+
+  // Unique label for a fixed name: "Intro" if free, else "Intro 2", "Intro 3", … so a song can
+  // carry two instrumentals without a label collision (arrangement references need unique labels).
+  nextNamedLabel(name) {
+    const existing = new Set(this.model.map(s => s.label).filter(Boolean))
+    if (!existing.has(name)) return name
+    let n = 2
+    while (existing.has(`${name} ${n}`)) n++
+    return `${name} ${n}`
   }
 
   // Next unique numbered label for a kind, e.g. "Verse 1", "Verse 2".
