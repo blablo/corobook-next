@@ -10,14 +10,14 @@
     <%# ── Editor ──────────────────────────────────────────────────── %>
     <div class="card bg-base-100 ring-1 ring-base-200">
       <div class="card-body gap-4">
-        <label class="form-control">
-          <span class="label-text text-sm mb-1 block">Title</span>
+        <fieldset class="fieldset">
+          <%= f.label :title, "Title", class: "fieldset-legend" %>
           <%= f.text_field :title, class: "input input-bordered w-full", placeholder: "Slide title" %>
-        </label>
+        </fieldset>
 
         <%# ── Tags ───────────────────────────────────────────────── %>
-        <div class="form-control">
-          <span class="label-text text-sm mb-1 block">Tags</span>
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">Tags</legend>
           <div class="flex flex-wrap items-center gap-1.5 rounded-lg border border-base-300 px-2 py-1.5 min-h-10 focus-within:border-primary cursor-text"
                data-action="click->slide-editor#focusTag">
             <span class="contents" data-slide-editor-target="tagChips"></span>
@@ -28,15 +28,15 @@
           <datalist id="church-tags">
             <% (local_assigns[:church_tags] || []).each do |t| %><option value="<%= t %>"><% end %>
           </datalist>
-          <span class="label-text-alt text-xs text-base-content/50 mt-1 block">Type a tag and press Enter. Used to organize and search slides.</span>
+          <p class="label">Type a tag and press Enter. Used to organize and search slides.</p>
           <%# hidden tag inputs are injected here by the controller %>
           <div data-slide-editor-target="tagFields"></div>
-        </div>
+        </fieldset>
 
         <%# ── Pages ──────────────────────────────────────────────── %>
-        <div class="form-control">
+        <fieldset class="fieldset">
           <div class="flex items-center justify-between mb-1">
-            <span class="label-text text-sm">Pages</span>
+            <span class="text-sm font-medium">Pages</span>
             <button type="button" class="btn btn-ghost btn-xs" data-slide-editor-target="advancedBtn" data-action="slide-editor#toggleAdvanced">Advanced</button>
           </div>
 
@@ -61,10 +61,10 @@
           <%# hidden page body inputs injected by the controller %>
           <div data-slide-editor-target="pageFields"></div>
 
-          <span class="label-text-alt text-xs text-base-content/50 mt-1 block">
+          <p class="label">
             Type your text and use the buttons to format it — no codes to learn. Add pages when the text is too long for one screen.
-          </span>
-        </div>
+          </p>
+        </fieldset>
 
         <div class="flex items-center gap-3">
           <%= f.submit (text_slide.persisted? ? "Save changes" : "Create slide"), class: "btn btn-primary",
