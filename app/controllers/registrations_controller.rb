@@ -22,6 +22,16 @@ class RegistrationsController < ApplicationController
     flash.now[:alert] = (@church.errors.full_messages + @user.errors.full_messages).to_sentence.presence ||
                         "Could not create your account."
     render :new, status: :unprocessable_entity
+  rescue ActiveRecord::RecordNotUnique => e
+    # The DB unique index fired where the model validation's check-then-save window raced (two
+    # signups grabbing the same subdomain at once). Turn the 500 into the same friendly error.
+    if e.message.include?("subdomain")
+      @church.errors.add(:subdomain, "has already been taken")
+    else
+      @church.errors.add(:base, "Could not create your account. Please try again.")
+    end
+    flash.now[:alert] = @church.errors.full_messages.to_sentence
+    render :new, status: :unprocessable_entity
   end
 
   private
