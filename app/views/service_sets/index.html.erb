@@ -11,13 +11,28 @@
       </div>
     </div>
   <% else %>
-    <ul class="list bg-base-100 rounded-box border border-base-200">
-      <% @service_sets.each do |set| %>
-        <li class="list-row items-center" data-role="set-row">
-          <%= link_to set.name, service_set_path(set), class: "link link-hover list-col-grow font-medium" %>
-          <span class="text-sm text-base-content/60"><%= set.service_date %></span>
-        </li>
-      <% end %>
-    </ul>
+    <% if @upcoming_sets.any? %>
+      <h2 class="text-xs font-semibold uppercase tracking-wide text-base-content/40 mb-2">Upcoming</h2>
+      <ul class="list bg-base-100 rounded-box border border-base-200 mb-6" data-role="upcoming-sets">
+        <% @upcoming_sets.each do |set| %>
+          <li class="list-row items-center" data-role="set-row">
+            <%= link_to set.name, service_set_path(set), class: "link link-hover list-col-grow font-medium" %>
+            <span class="text-sm text-base-content/60"><%= set.service_date %></span>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <% if @past_sets.any? %>
+      <h2 class="text-xs font-semibold uppercase tracking-wide text-base-content/40 mb-2">Past</h2>
+      <ul class="list bg-base-100 rounded-box border border-base-200" data-role="past-sets">
+        <% @past_sets.each do |set| %>
+          <li class="list-row items-center" data-role="set-row">
+            <%= link_to set.name, service_set_path(set), class: "link link-hover list-col-grow font-medium" %>
+            <span class="text-sm text-base-content/60"><%= set.service_date %></span>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
   <% end %>
 </div>
