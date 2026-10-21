@@ -70,9 +70,118 @@
 
 .live-ended { text-align: center; font-size: 1.5rem; color: #9aa0a6; }
 
-/* ── Musician view (kept functional; its own design pass comes later) ─────── */
-/* Chords float above their text run (absolute, bottom-full) so a chord wider than its
-   syllable never injects a space into the lyric; text runs stay contiguous. */
-.musician-line { font-family: ui-monospace, monospace; white-space: pre-wrap; padding-top: 1.2em; }
+/* ── Musician view — a LIGHT, high-readability lead sheet (not the dark stage) ──
+   The projector/congregation surfaces stay true-black; the musician reads from a
+   bright paper-like chart. The whole set is shown in order; a sticky header tracks
+   the live "Now" and peeks at "Next". */
+
+/* Override the shared black follower background for the musician page only. */
+.follower-body:has(.musician-root) { background: #f6f7f9; }
+
+.musician-root {
+  min-height: 100vh;
+  padding: 0 0 4rem;
+  box-sizing: border-box;
+  background: #f6f7f9;
+  color: #16181d;
+  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Chord/lyric layout: chord floats above its syllable so a wide chord never injects a space.
+   Shared by the live "Now" frame and the full chart. Monospace keeps columns honest. */
+.musician-line,
+.musician-chart-line {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  white-space: pre-wrap; padding-top: 1.35em;
+  font-size: 1.15rem; line-height: 1.5;
+}
 .musician-seg { position: relative; display: inline-block; white-space: pre; vertical-align: bottom; }
-.musician-chord { position: absolute; bottom: 100%; left: 0; font-weight: 700; line-height: 1; white-space: pre; padding-right: 0.5rem; }
+.musician-chord {
+  position: absolute; bottom: 100%; left: 0; font-weight: 700; line-height: 1;
+  white-space: pre; padding-right: 0.5rem; color: #1a56db; /* chords in a strong blue */
+}
+
+/* Top bar: set name + key/capo chooser, sticky so controls are always reachable. */
+.musician-topbar {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  background: #ffffff; border-bottom: 1px solid #e3e6ea;
+}
+.musician-setname { font-weight: 700; font-size: 1.05rem; }
+.musician-key-chooser { display: flex; align-items: center; gap: 1rem; font-size: 0.85rem; color: #4a5059; }
+.musician-key-chooser label { display: inline-flex; align-items: center; gap: 0.4rem; }
+.musician-field {
+  border: 1px solid #c9ced6; border-radius: 0.5rem; padding: 0.3rem 0.5rem; width: 4rem;
+  background: #fff; color: #16181d; font-size: 0.95rem;
+}
+.musician-field-sm { width: 3.25rem; }
+
+/* Above the fold: the sticky Now/Next header that follows the projector. */
+.musician-nowbar {
+  position: sticky; top: 3.25rem; z-index: 20;
+  margin: 0 0 1.25rem; padding: 1rem 1.25rem 1.1rem;
+  background: #fffdf4; border-bottom: 2px solid #e8d98f; /* a warm "live" band */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+.musician-cue {
+  display: inline-block; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.08em;
+  text-transform: uppercase; padding: 0.1rem 0.5rem; border-radius: 0.4rem; margin-bottom: 0.4rem;
+}
+.musician-cue-now { background: #b45309; color: #fff; }
+.musician-cue-next { background: #e5e7eb; color: #4a5059; }
+.musician-now #live-frame {
+  display: block; padding: 0; text-align: left; align-items: stretch; /* undo stage centering */
+}
+.musician-now .musician-chart-section,
+.musician-now .musician-section { margin: 0; }
+/* The Now frame's chords stay blue and bold; its key badge is a light pill. */
+.musician-now [data-role=key-badge] {
+  display: inline-block; background: #eef2ff; color: #1a56db; border: 1px solid #c7d2fe;
+  font-size: 0.75rem; font-weight: 700; padding: 0.1rem 0.5rem; border-radius: 0.4rem; margin-bottom: 0.5rem;
+}
+.musician-next { margin-top: 0.9rem; padding-top: 0.75rem; border-top: 1px dashed #e8d98f; }
+.musician-next-body { color: #4a5059; font-size: 0.95rem; }
+.musician-peek-label { font-weight: 700; color: #16181d; margin-right: 0.4rem; }
+.musician-peek-title { font-weight: 700; }
+.musician-peek-lyric { color: #6b7280; }
+
+/* The whole-set chart. */
+.musician-setlist { padding: 0 1.25rem; max-width: 56rem; margin: 0 auto; }
+.musician-row {
+  padding: 0.9rem 1.1rem; margin-bottom: 0.85rem;
+  background: #ffffff; border: 1px solid #e3e6ea; border-radius: 0.75rem;
+  scroll-margin-top: 8rem; /* clear the sticky Now/Next header when scrolled to */
+}
+.musician-row.is-current { border-color: #b45309; box-shadow: 0 0 0 2px rgba(180,83,9,0.25); }
+
+.musician-chart-title h2 { font-size: 1.5rem; font-weight: 800; margin: 0; }
+.musician-chart-key {
+  display: inline-block; background: #eef2ff; color: #1a56db; border: 1px solid #c7d2fe;
+  font-size: 0.8rem; font-weight: 700; padding: 0.1rem 0.5rem; border-radius: 0.4rem; margin-top: 0.4rem;
+}
+.musician-chart-credits { margin-top: 0.5rem; color: #6b7280; font-size: 0.9rem; }
+
+.musician-chart-label,
+.musician-section-label {
+  font-size: 0.8rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
+  color: #b45309; margin-bottom: 0.1rem;
+}
+.musician-chart-tag {
+  margin-left: 0.5rem; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.03em;
+  color: #6b7280; background: #f1f3f5; border: 1px solid #e3e6ea;
+  padding: 0.05rem 0.4rem; border-radius: 0.4rem; text-transform: lowercase;
+}
+.musician-chart-section { margin: 0.5rem 0 0.75rem; }
+.musician-chart-section.is-replay { opacity: 0.92; }
+.musician-chart-annotation,
+.musician-annotation { font-style: italic; color: #6b7280; }
+.musician-empty { color: #6b7280; padding: 2rem 1.25rem; text-align: center; }
+
+/* The live frame still carries dark-stage classes on the projector; keep the shared chord
+   float technique working there. The musician's live frame is recolored above. */
+.musician-section-label { color: #b45309; }
+
+@media (prefers-reduced-motion: reduce) {
+  .musician-row { scroll-behavior: auto; }
+}

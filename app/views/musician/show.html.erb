@@ -1,16 +1,70 @@
 <%= turbo_stream_from [ @session, :musician ] %>
 <div class="musician-root" data-role="musician-root"
-     data-controller="musician-key" data-musician-key-token-value="<%= @session.musician_token %>">
-  <form class="musician-key-chooser mb-3" data-action="change->musician-key#choose">
-    <label class="text-sm mr-2">Key
-      <input type="text" name="key" value="<%= @target_key %>" data-role="key-input"
-             class="border rounded px-2 py-1 w-20" />
-    </label>
-    <label class="text-sm">Capo
-      <input type="number" name="capo" value="<%= @capo %>" min="0" max="11"
-             data-role="capo-input" class="border rounded px-2 py-1 w-16" />
-    </label>
-  </form>
+     data-controller="musician-key musician-follow"
+     data-musician-key-token-value="<%= @session.musician_token %>">
 
-  <%= render "live/musician_frame", session: @session, target_key: @target_key, semitones: @semitones, capo: @capo %>
+  <%# ── Top bar: set name + key/capo chooser ─────────────────────────── %>
+  <div class="musician-topbar">
+    <div class="musician-setname" data-role="set-name"><%= @session.service_set.name %></div>
+    <form class="musician-key-chooser" data-action="change->musician-key#choose">
+      <label>Key
+        <input type="text" name="key" value="<%= @target_key %>" data-role="key-input"
+               class="musician-field" inputmode="text" autocomplete="off" />
+      </label>
+      <label>Capo
+        <input type="number" name="capo" value="<%= @capo %>" min="0" max="11"
+               data-role="capo-input" class="musician-field musician-field-sm" />
+      </label>
+    </form>
+  </div>
+
+  <%# ── Above the fold: what the projector is on NOW + a peek at NEXT ──── %>
+  <div class="musician-nowbar" data-role="now-bar">
+    <div class="musician-now">
+      <span class="musician-cue musician-cue-now">Now</span>
+      <%# The live frame — re-rendered by the operator broadcast so it follows the projector. %>
+      <%= render "live/musician_frame", session: @session,
+            target_key: @target_key, semitones: @semitones, capo: @capo %>
+    </div>
+    <% next_row = musician_next_row(@set_rows, @session) %>
+    <% if next_row %>
+      <div class="musician-next" data-role="next-peek">
+        <span class="musician-cue musician-cue-next">Next</span>
+        <div class="musician-next-body"><%= musician_row_peek(next_row) %></div>
+      </div>
+    <% end %>
+  </div>
+
+  <%# ── The whole set, in order, at this musician's key ───────────────── %>
+  <div class="musician-setlist" data-role="set-list">
+    <% last_item_id = nil %>
+    <% @set_rows.each do |row| %>
+      <% current = musician_current_row?(row, @session) %>
+      <section class="musician-row<%= ' is-current' if current %>"
+               id="row-<%= row.item_id %>-<%= row.section_index %>"
+               data-role="set-row"
+               data-item-id="<%= row.item_id %>" data-section-index="<%= row.section_index %>"
+               <%= 'data-current="true"'.html_safe if current %>>
+        <% case row.kind %>
+        <% when :title %>
+          <div class="musician-chart-title" data-role="chart-title">
+            <h2><%= row.song.title %></h2>
+            <% if row.displayed_key %><span class="musician-chart-key" data-role="key-badge">Key <%= row.displayed_key %></span><% end %>
+            <% credits = [ row.song.author, row.song.copyright_line, (row.song.ccli_song_number.present? ? "CCLI ##{row.song.ccli_song_number}" : nil) ].compact %>
+            <% if credits.any? %>
+              <div class="musician-chart-credits"><% credits.each do |c| %><div><%= c %></div><% end %></div>
+            <% end %>
+          </div>
+        <% when :section %>
+          <%= render "songs/musician_chart_section", section: row.section, projected: row.projected %>
+        <% when :slide %>
+          <%= render "text_slides/musician_slide", slide: row.slide, page: row.page %>
+        <% end %>
+      </section>
+    <% end %>
+
+    <% if @set_rows.empty? %>
+      <p class="musician-empty" data-role="empty">This set has no items yet.</p>
+    <% end %>
+  </div>
 </div>
