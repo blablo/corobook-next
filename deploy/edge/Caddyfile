@@ -1,0 +1,31 @@
+# Shared edge Caddy — one site block per hostname, each with automatic HTTPS. Certs are issued and
+# renewed automatically once each hostname's DNS points at this server and 80/443 are reachable.
+#
+# Only Corobook is wired by default. Add your other two sites by UNCOMMENTING and editing the
+# blocks below (an empty/placeholder site address makes Caddy fail to start, which is why they are
+# commented rather than env-driven-optional).
+
+# ── Corobook (the Rails app) ──
+# `corobook-web` is the app container's name on the shared `edge` network.
+{$COROBOOK_HOST} {
+	encode zstd gzip
+	reverse_proxy corobook-web:80
+}
+
+# ── Your other Docker app ──  (uncomment + edit)
+# Attach that app's container to the `edge` network (e.g. `networks: [edge]` with edge external),
+# then point this block at its container-name:port on that network.
+#
+# myapp.example.duckdns.org {
+# 	encode zstd gzip
+# 	reverse_proxy myapp:3000
+# }
+
+# ── Static HTML site ──  (uncomment + edit)
+# Put the site's files in deploy/edge/static/ (mounted read-only at /srv/static below).
+#
+# static.example.duckdns.org {
+# 	encode zstd gzip
+# 	root * /srv/static
+# 	file_server
+# }

@@ -1,108 +1,122 @@
-# Preprod deployment (manual, Docker + Caddy + DuckDNS)
+# Preprod deployment (manual Docker + a shared Caddy edge)
 
-Deploy Corobook to a preprod server you control by checking out the repo and running Docker
-Compose on the box. TLS is automatic (Caddy + Let's Encrypt) on a DuckDNS hostname.
+This box hosts several sites — Corobook, your other Docker app, and a static HTML page. One
+**shared Caddy** owns ports 80/443 and fronts all of them with automatic HTTPS (Let's Encrypt).
+Each app stack runs WITHOUT its own proxy and joins a shared `edge` Docker network that Caddy
+routes over.
 
-This is **manual**: there's no SSH automation or registry push — you run the commands on the server.
+This is **manual**: you check out the repo on the server and run Docker Compose yourself.
 
----
-
-## Prerequisites (on the preprod server)
-
-- Docker + the Docker Compose plugin.
-- Ports **80 and 443** open to the internet (Let's Encrypt validates over 80; traffic serves on 443).
-- Git, and the repo checked out.
-- Your `config/master.key` value (for `RAILS_MASTER_KEY`) — never commit it.
-
-## 1. Point DuckDNS at the server
-
-1. In your [DuckDNS](https://www.duckdns.org) account, pick/confirm a subdomain, e.g.
-   `corobook-preprod`.
-2. Set its IP to the server's **public IP** (the DuckDNS dashboard, or the standard
-   `duckdns.org/update?domains=corobook-preprod&token=…&ip=…` call from the box).
-3. Confirm it resolves: `dig +short corobook-preprod.duckdns.org` → your server IP.
-
-TLS will not issue until this resolves to the server and 80/443 are reachable.
-
-## 2. Check out the code
-
-```sh
-git clone <repo-url> corobook && cd corobook
-# or: git pull  to update an existing checkout
+```
+            ┌───────────── Caddy (deploy/edge) — owns :80/:443, auto-HTTPS ─────────────┐
+ Internet ─►│  corobook-preprod.duckdns.org → corobook-web:80  (Corobook, this repo)     │
+            │  <your-app-host>              → <your-app>:<port> (your other Docker app)   │
+            │  <static-host>                → file_server /srv/static (your static site)  │
+            └────────────────────────────────── edge network ───────────────────────────┘
 ```
 
-## 3. Configure the environment
+## Prerequisites (on the server)
+
+- Docker + the Docker Compose plugin; ports **80 and 443** open to the internet.
+- The repo checked out; your `config/master.key` value (for `RAILS_MASTER_KEY`).
+- Each site's hostname (DuckDNS or otherwise) pointing at this server's public IP.
+
+## 1. Point DNS at the server
+
+For each hostname (start with Corobook's, e.g. `corobook-preprod.duckdns.org`), set its A record to
+the server's public IP. Confirm: `dig +short corobook-preprod.duckdns.org` → your IP. TLS won't
+issue until this resolves and 80/443 are reachable.
+
+## 2. Bring up the shared edge (once)
 
 ```sh
-cd deploy
+cd deploy/edge
+cp .env.edge.example .env.edge        # set COROBOOK_HOST
+docker compose --env-file .env.edge up -d
+```
+
+This starts Caddy and creates the shared **`edge`** network. By default it routes only Corobook;
+add your other app and the static site in step 5.
+
+## 3. Configure Corobook
+
+```sh
+cd ../                                 # deploy/
 cp .env.preprod.example .env.preprod
 ```
 
-Edit `deploy/.env.preprod` and set:
+Set in `deploy/.env.preprod`:
 
-- `APP_HOST` — your DuckDNS host, e.g. `corobook-preprod.duckdns.org`.
-- `RAILS_MASTER_KEY` — the contents of `config/master.key`.
-- `COROBOOK_NEXT_DATABASE_PASSWORD` — any strong password (used for the Postgres role + the app).
-- `MAIL_DOMAIN` / `MAIL_FROM` — optional for preprod. Without a Resend-verified domain,
-  confirmation emails won't deliver, but the on-screen fallback link still lets you confirm
-  accounts (see `docs/mail-setup.md`).
+- `APP_HOST` — Corobook's hostname (same as `COROBOOK_HOST`), for links in emails + subdomain base.
+- `RAILS_MASTER_KEY` — contents of `config/master.key`.
+- `COROBOOK_NEXT_DATABASE_PASSWORD` — a strong password (Postgres role + app).
+- `MAIL_DOMAIN` / `MAIL_FROM` — optional on preprod (see `docs/mail-setup.md`).
 
-`deploy/.env.preprod` is gitignored — it holds secrets, keep it on the server only.
-
-## 4. Build and start
+## 4. Bring up Corobook
 
 ```sh
 # from deploy/
 docker compose --env-file .env.preprod -f docker-compose.preprod.yml up -d --build
 ```
 
-This starts four services:
-
-| Service    | What it does                                                            |
-|------------|-------------------------------------------------------------------------|
-| `postgres` | Postgres 16, data persisted in the `pg_data` volume.                    |
-| `web`      | The app (production image). First boot runs `db:prepare` (creates the 4 prod DBs) then serves. |
-| `worker`   | Solid Queue worker — processes `deliver_later` mail jobs.               |
-| `caddy`    | Reverse proxy; obtains + renews the Let's Encrypt cert for `APP_HOST`.  |
-
-## 5. Verify
+Services: `postgres`, `web` (container `corobook-web`, first boot runs `db:prepare`), `worker`
+(Solid Queue). No published ports — the edge Caddy reaches `corobook-web:80` over the `edge`
+network. Verify:
 
 ```sh
-docker compose --env-file .env.preprod -f docker-compose.preprod.yml ps      # all healthy/up
-docker compose --env-file .env.preprod -f docker-compose.preprod.yml logs -f caddy   # cert issued?
-curl -I https://corobook-preprod.duckdns.org/up    # expect HTTP/2 200
+curl -I https://corobook-preprod.duckdns.org/up   # expect HTTP/2 200
 ```
 
-Then open `https://<APP_HOST>/` — the public landing page. Create an account; since mail may not
-deliver on preprod, confirm via the on-screen fallback link (or `docker compose … logs web` shows
-the letter_opener-style output is dev-only — on preprod use the fallback link shown after signup).
+## 5. Add your other two sites to the same Caddy
 
-## Updating preprod
+Edit `deploy/edge/Caddyfile` (both example blocks are commented out):
+
+- **Other Docker app** — attach its container to the `edge` network. In its own compose add:
+  ```yaml
+  networks: [ default, edge ]
+  # ...
+  networks:
+    edge:
+      external: true
+      name: edge
+  ```
+  Then uncomment the app block in the Caddyfile and set its hostname + `reverse_proxy
+  <container-name>:<port>`.
+- **Static HTML site** — copy its files into `deploy/edge/static/`, uncomment the static block,
+  set its hostname.
+
+Reload Caddy after editing:
 
 ```sh
-git pull
-cd deploy
+cd deploy/edge
+docker compose --env-file .env.edge up -d   # picks up the Caddyfile change
+# or: docker compose --env-file .env.edge exec caddy caddy reload --config /etc/caddy/Caddyfile
+```
+
+Caddy fetches a cert for each new hostname automatically.
+
+## Updating / teardown
+
+```sh
+# update Corobook
+git pull && cd deploy
 docker compose --env-file .env.preprod -f docker-compose.preprod.yml up -d --build
-```
 
-`db:prepare` on boot applies any new migrations idempotently.
-
-## Teardown / reset
-
-```sh
-# stop (keep data)
+# stop Corobook (keep data) / wipe data (destructive)
 docker compose --env-file .env.preprod -f docker-compose.preprod.yml down
-# stop AND wipe the database + issued certs (destructive)
 docker compose --env-file .env.preprod -f docker-compose.preprod.yml down -v
 ```
 
+The edge Caddy stays up across app redeploys. Bring order down as: app stacks first, edge last (so
+nothing references the `edge` network when you remove it).
+
 ## Notes
 
-- **TLS**: Caddy stores certs in the `caddy_data` volume, so restarts don't re-request them
-  (avoids Let's Encrypt rate limits). Don't `down -v` casually in a loop.
-- **SSL redirects**: the app runs with `assume_ssl`/`force_ssl`; Caddy terminates TLS and proxies
-  plain HTTP to `web:80`, which is why `assume_ssl` is on (no redirect loop).
-- **DuckDNS + subdomain login**: on `x.duckdns.org` the app reads `x` as a "subdomain"; since no
-  church claims it, login falls back to the normal church picker — harmless.
-- This is **preprod**, not production hardening: single box, no backups/offsite, self-contained
-  Postgres. Add those before calling it production.
+- **Certs** live in the `caddy_data` volume — restarts don't re-request them (Let's Encrypt
+  rate-limit safe). Don't `down -v` the edge casually.
+- **SSL**: TLS terminates at Caddy; the app runs with `assume_ssl`/`force_ssl`, so it trusts the
+  forwarded proto and won't redirect-loop.
+- **DuckDNS + subdomain login**: church subdomains resolve by stripping the configured `APP_HOST`
+  base, so `gracia.corobook-preprod.duckdns.org` works and the bare host shows the picker. (Each
+  church subdomain you actually use needs its own DNS record + a Caddy block or a wildcard.)
+- This is **preprod**: single box, no backups/offsite. Harden before production.
