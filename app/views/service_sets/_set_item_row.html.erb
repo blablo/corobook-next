@@ -15,6 +15,10 @@
   <span class="flex-1 min-w-0 truncate">
     <% if item.missing? %>
       <span class="italic text-error">Missing item (removed from library)</span>
+    <% elsif item.item_type == "song" %>
+      <%= link_to item.resolved_title, song_path(item.song), class: "link link-hover font-medium", draggable: "false", data: { role: "item-link" } %>
+    <% elsif item.item_type == "text_slide" && item.text_slide&.reusable? %>
+      <%= link_to item.resolved_title, text_slide_path(item.text_slide), class: "link link-hover font-medium", draggable: "false", data: { role: "item-link" } %>
     <% else %>
       <%= item.resolved_title %>
     <% end %>
