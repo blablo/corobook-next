@@ -23,10 +23,10 @@
     </div>
   <% end %>
 
-  <ul class="divide-y divide-base-200">
+  <ul class="list bg-base-100 rounded-box border border-base-200" data-role="slide-results">
     <% @text_slides.each do |slide| %>
-      <li class="py-2 flex items-center justify-between gap-3">
-        <%= link_to slide.title, slide, class: "link link-hover font-medium" %>
+      <li class="list-row items-center">
+        <%= link_to slide.title, slide, class: "list-col-grow link link-hover font-medium" %>
         <span class="flex items-center gap-1.5 shrink-0">
           <% if slide.page_count > 1 %>
             <span class="badge badge-sm badge-outline"><%= slide.page_count %> pages</span>
@@ -38,7 +38,7 @@
       </li>
     <% end %>
     <% if @text_slides.empty? %>
-      <li class="py-2 text-sm text-base-content/50">No slides<%= " for ##{@tag}" if @tag %> yet.</li>
+      <li class="list-row text-sm text-base-content/50">No slides<%= " for ##{@tag}" if @tag %> yet.</li>
     <% end %>
   </ul>
 </div>
