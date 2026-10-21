@@ -1,0 +1,87 @@
+# Preprod deployment — run on the preprod server after `git checkout` + `docker compose ... up -d`.
+# Production image (Dockerfile), Postgres, a Solid Queue worker, and Caddy for automatic HTTPS on
+# the DuckDNS hostname. Secrets/host come from deploy/.env.preprod (see deploy/.env.preprod.example).
+#
+#   cd deploy
+#   cp .env.preprod.example .env.preprod   # then fill it in
+#   docker compose --env-file .env.preprod -f docker-compose.preprod.yml up -d --build
+#
+# First boot creates the 4 production databases via `db:prepare` (primary/cache/queue/cable).
+
+name: corobook-preprod
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: corobook_next
+      POSTGRES_PASSWORD: ${COROBOOK_NEXT_DATABASE_PASSWORD:?set in .env.preprod}
+      POSTGRES_DB: corobook_next_production
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "corobook_next"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    # Prepare all 4 prod DBs (idempotent) then boot the server on :80 inside the network.
+    command: bash -c "bin/rails db:prepare && bin/rails server -b 0.0.0.0 -p 80"
+    environment:
+      RAILS_ENV: production
+      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY:?set in .env.preprod}
+      DATABASE_HOST: postgres
+      COROBOOK_NEXT_DATABASE_PASSWORD: ${COROBOOK_NEXT_DATABASE_PASSWORD:?}
+      APP_HOST: ${APP_HOST:?set to your DuckDNS host, e.g. corobook-preprod.duckdns.org}
+      MAIL_DOMAIN: ${MAIL_DOMAIN:-example.com}
+      MAIL_FROM: ${MAIL_FROM:-Corobook <no-reply@example.com>}
+      # Preprod runs behind Caddy (TLS terminates there); trust its forwarded proto.
+      RAILS_ASSUME_SSL: "true"
+      RAILS_SERVE_STATIC_FILES: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    command: bash -c "bin/jobs"
+    environment:
+      RAILS_ENV: production
+      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY:?}
+      DATABASE_HOST: postgres
+      COROBOOK_NEXT_DATABASE_PASSWORD: ${COROBOOK_NEXT_DATABASE_PASSWORD:?}
+      APP_HOST: ${APP_HOST:?}
+      MAIL_DOMAIN: ${MAIL_DOMAIN:-example.com}
+      MAIL_FROM: ${MAIL_FROM:-Corobook <no-reply@example.com>}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      APP_HOST: ${APP_HOST:?}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data   # persists issued TLS certs across restarts
+      - caddy_config:/config
+    depends_on:
+      - web
+
+volumes:
+  pg_data:
+  caddy_data:
+  caddy_config:

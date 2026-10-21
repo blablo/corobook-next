@@ -42,4 +42,42 @@ class SubdomainLoginTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "select[name='church_id']"
   end
+
+  # ── Multi-level base host: churches live UNDER a configured base, e.g.
+  #    gracia.corobook.duckdns.org where the base host is corobook.duckdns.org. ──
+  test "a church under a multi-level base host pins that church" do
+    with_app_host("corobook.duckdns.org") do
+      get login_url(host: "gracia.corobook.duckdns.org")
+      assert_response :success
+      assert_select "[data-role=subdomain-church]", text: /Gracia/
+      assert_select "select[name='church_id']", count: 0
+    end
+  end
+
+  test "the bare multi-level base host shows the picker, not a church named for a base label" do
+    with_app_host("corobook.duckdns.org") do
+      get login_url(host: "corobook.duckdns.org")
+      assert_response :success
+      assert_select "select[name='church_id']"
+      assert_select "[data-role=subdomain-church]", count: 0
+    end
+  end
+
+  test "a deeper host (a.b.base) is not treated as a church subdomain" do
+    with_app_host("corobook.duckdns.org") do
+      get login_url(host: "a.gracia.corobook.duckdns.org")
+      assert_response :success
+      assert_select "select[name='church_id']"
+    end
+  end
+
+  private
+
+  def with_app_host(host)
+    prev = ENV["APP_HOST"]
+    ENV["APP_HOST"] = host
+    yield
+  ensure
+    ENV["APP_HOST"] = prev
+  end
 end
