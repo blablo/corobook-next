@@ -1,7 +1,0 @@
-# Caddy reverse proxy with automatic HTTPS (Let's Encrypt) for the preprod DuckDNS host.
-# {$APP_HOST} is substituted from the environment (deploy/.env.preprod). Caddy obtains and renews
-# the certificate automatically once the DuckDNS A record points at this server and 80/443 are open.
-{$APP_HOST} {
-	encode zstd gzip
-	reverse_proxy web:80
-}

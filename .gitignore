@@ -11,8 +11,9 @@
 /.env*
 # ...but keep the committed template (no secrets).
 !/.env.example
-# Deploy secrets (real values); the .example template is kept.
+# Deploy secrets (real values); the .example templates are kept.
 /deploy/.env.preprod
+/deploy/edge/.env.edge
 
 # Ignore all logfiles and tempfiles.
 /log/*

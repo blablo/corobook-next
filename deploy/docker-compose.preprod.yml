@@ -1,12 +1,13 @@
-# Preprod deployment — run on the preprod server after `git checkout` + `docker compose ... up -d`.
-# Production image (Dockerfile), Postgres, a Solid Queue worker, and Caddy for automatic HTTPS on
-# the DuckDNS hostname. Secrets/host come from deploy/.env.preprod (see deploy/.env.preprod.example).
+# Corobook preprod app stack — NO proxy here. A SHARED Caddy (see deploy/edge/) fronts this app,
+# your other Docker app, and the static site, all on one box with automatic HTTPS.
 #
-#   cd deploy
-#   cp .env.preprod.example .env.preprod   # then fill it in
-#   docker compose --env-file .env.preprod -f docker-compose.preprod.yml up -d --build
+# Order of operations (full details in docs/deploy-preprod.md):
+#   1. Bring up the shared edge once:  cd deploy/edge && docker compose --env-file .env.edge up -d
+#      (that creates the shared `edge` network and runs Caddy)
+#   2. Bring up Corobook:              cd deploy && docker compose --env-file .env.preprod -f docker-compose.preprod.yml up -d --build
 #
-# First boot creates the 4 production databases via `db:prepare` (primary/cache/queue/cable).
+# Caddy reaches this app over the shared network as http://corobook-web:80 (see deploy/edge/Caddyfile).
+# First boot runs db:prepare (creates the 4 prod DBs: primary/cache/queue/cable).
 
 name: corobook-preprod
 
@@ -20,6 +21,7 @@ services:
       POSTGRES_DB: corobook_next_production
     volumes:
       - pg_data:/var/lib/postgresql/data
+    networks: [ internal ]
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "corobook_next"]
       interval: 5s
@@ -30,8 +32,10 @@ services:
     build:
       context: ..
       dockerfile: Dockerfile
+    # A STABLE name so the shared Caddy can target it (reverse_proxy corobook-web:80). No published
+    # ports — only the edge Caddy is public; the app is reachable only on the docker networks.
+    container_name: corobook-web
     restart: unless-stopped
-    # Prepare all 4 prod DBs (idempotent) then boot the server on :80 inside the network.
     command: bash -c "bin/rails db:prepare && bin/rails server -b 0.0.0.0 -p 80"
     environment:
       RAILS_ENV: production
@@ -41,9 +45,10 @@ services:
       APP_HOST: ${APP_HOST:?set to your DuckDNS host, e.g. corobook-preprod.duckdns.org}
       MAIL_DOMAIN: ${MAIL_DOMAIN:-example.com}
       MAIL_FROM: ${MAIL_FROM:-Corobook <no-reply@example.com>}
-      # Preprod runs behind Caddy (TLS terminates there); trust its forwarded proto.
+      # TLS terminates at the shared Caddy; trust its forwarded proto so force_ssl doesn't loop.
       RAILS_ASSUME_SSL: "true"
       RAILS_SERVE_STATIC_FILES: "true"
+    networks: [ internal, edge ]
     depends_on:
       postgres:
         condition: service_healthy
@@ -62,26 +67,16 @@ services:
       APP_HOST: ${APP_HOST:?}
       MAIL_DOMAIN: ${MAIL_DOMAIN:-example.com}
       MAIL_FROM: ${MAIL_FROM:-Corobook <no-reply@example.com>}
+    networks: [ internal ]
     depends_on:
       postgres:
         condition: service_healthy
 
-  caddy:
-    image: caddy:2
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    environment:
-      APP_HOST: ${APP_HOST:?}
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data   # persists issued TLS certs across restarts
-      - caddy_config:/config
-    depends_on:
-      - web
+networks:
+  internal:        # private: app ↔ postgres
+  edge:            # shared with the Caddy edge + your other apps
+    external: true
+    name: edge
 
 volumes:
   pg_data:
-  caddy_data:
-  caddy_config:
