@@ -11,6 +11,10 @@ Rails.application.routes.draw do
   post "login"  => "sessions#create"
   delete "logout" => "sessions#destroy", as: :logout
 
+  # Public self-serve signup: creates a new church + its first admin user.
+  get  "signup" => "registrations#new",    as: :signup
+  post "signup" => "registrations#create"
+
   resources :songs
   resources :text_slides do
     post "preview", on: :collection

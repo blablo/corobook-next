@@ -1,0 +1,45 @@
+<% content_for :title, "Corobook — worship presentation & song management" %>
+
+<div data-role="landing">
+  <%# ── Hero ─────────────────────────────────────────────────────── %>
+  <section class="mx-auto max-w-5xl px-4 sm:px-6 pt-16 pb-12 text-center">
+    <p class="text-sm font-semibold uppercase tracking-wide text-primary mb-3">For worship teams</p>
+    <h1 class="text-4xl sm:text-5xl font-extrabold leading-tight tracking-tight max-w-3xl mx-auto">
+      Build your set, project the words, play from the chords.
+    </h1>
+    <p class="mt-4 text-lg text-base-content/70 max-w-2xl mx-auto">
+      Corobook puts your songs, slides and service order in one place — then runs the whole
+      service live: lyrics on the screen, chords on every musician's phone, in their own key.
+    </p>
+    <div class="mt-8 flex items-center justify-center gap-3">
+      <%= link_to "Create your church account", signup_path, class: "btn btn-primary btn-lg", data: { role: "cta-signup" } %>
+      <%= link_to "Sign in", login_path, class: "btn btn-ghost btn-lg" %>
+    </div>
+  </section>
+
+  <%# ── Feature highlights ───────────────────────────────────────── %>
+  <section class="mx-auto max-w-5xl px-4 sm:px-6 pb-20">
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <% [
+        ["Build services in minutes", "Drag songs and slides into order, reuse any slide, and set the service date — your Sunday is ready."],
+        ["Project the words", "A clean, high-contrast projector view your congregation reads easily, driven live from the operator or a presentation clicker."],
+        ["Every musician, their key", "Players open the set on their phone and see the whole service as a chart — transposed to the key and capo they choose."],
+        ["No-syntax song editor", "Type lyrics, click above a word to drop a chord, drag it to the right spot. No ChordPro, no markup — ever."],
+        ["Arrangements & sections", "Verse, Chorus, Bridge, Intro, Pre-chorus, Solo and more — ordered and repeated exactly how you play them."],
+        ["CCLI-aware", "Track what you present with copyright-aware song credits and a usage report for your license reporting."]
+      ].each do |title, body| %>
+        <div class="card bg-base-100 card-border">
+          <div class="card-body gap-1">
+            <h3 class="font-semibold"><%= title %></h3>
+            <p class="text-sm text-base-content/70"><%= body %></p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="mt-12 text-center">
+      <%= link_to "Create your church account", signup_path, class: "btn btn-primary btn-lg" %>
+      <p class="mt-2 text-sm text-base-content/50">Free to start · set up your church in a minute.</p>
+    </div>
+  </section>
+</div>

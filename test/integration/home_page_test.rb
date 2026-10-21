@@ -6,9 +6,11 @@ class HomePageTest < ActionDispatch::IntegrationTest
     @user = User.create!(church: @church, email: "home@example.com", password: "secret123", role: "admin")
   end
 
-  test "a signed-out visitor to root is redirected to login" do
+  test "a signed-out visitor to root sees the public landing page" do
     get root_path
-    assert_redirected_to login_path
+    assert_response :success
+    assert_select "[data-role=landing]"
+    assert_select "[data-role=cta-signup]"
   end
 
   test "a signed-in user sees the home page with their church name" do
