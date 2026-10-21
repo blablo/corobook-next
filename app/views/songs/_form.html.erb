@@ -10,25 +10,25 @@
     <div class="card-body gap-4">
       <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50">Song details</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <fieldset class="fieldset">
-          <legend class="fieldset-legend">Title</legend>
+        <label class="form-control">
+          <span class="label-text text-sm mb-1 block">Title</span>
           <%= f.text_field :title, class: "input input-bordered w-full", placeholder: "Song title" %>
-        </fieldset>
-        <fieldset class="fieldset">
-          <legend class="fieldset-legend">Author</legend>
+        </label>
+        <label class="form-control">
+          <span class="label-text text-sm mb-1 block">Author</span>
           <%= f.text_field :author, class: "input input-bordered w-full", placeholder: "Author" %>
-        </fieldset>
-        <fieldset class="fieldset">
-          <legend class="fieldset-legend">Key</legend>
+        </label>
+        <label class="form-control">
+          <span class="label-text text-sm mb-1 block">Key</span>
           <%= f.select :song_key,
                 options_for_select(%w[C C# D Eb E F F# G Ab A Bb B Am Bm Cm C#m Dm Em Fm F#m Gm G#m], song.song_key),
                 { include_blank: "—" },
                 class: "select select-bordered w-full", data: { "song-editor-target": "keyField" } %>
-        </fieldset>
-        <fieldset class="fieldset">
-          <legend class="fieldset-legend">Capo</legend>
+        </label>
+        <label class="form-control">
+          <span class="label-text text-sm mb-1 block">Capo</span>
           <%= f.number_field :capo, in: 0..11, class: "input input-bordered w-full" %>
-        </fieldset>
+        </label>
       </div>
     </div>
   </div>
@@ -105,20 +105,20 @@
   <div class="card bg-base-100 ring-1 ring-base-200 mb-6">
     <div class="card-body gap-4">
       <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50">Copyright &amp; CCLI</h2>
-      <fieldset class="fieldset">
-        <legend class="fieldset-legend">Copyright line</legend>
+      <label class="form-control">
+        <span class="label-text text-sm mb-1 block">Copyright line</span>
         <%= f.text_field :copyright_line, class: "input input-bordered w-full", placeholder: "© 2001 Author / Publisher" %>
-      </fieldset>
+      </label>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <fieldset class="fieldset">
-          <legend class="fieldset-legend">CCLI song number</legend>
+        <label class="form-control">
+          <span class="label-text text-sm mb-1 block">CCLI song number</span>
           <%= f.number_field :ccli_song_number, class: "input input-bordered w-full" %>
-        </fieldset>
-        <fieldset class="fieldset">
-          <legend class="fieldset-legend">Status</legend>
+        </label>
+        <label class="form-control">
+          <span class="label-text text-sm mb-1 block">Status</span>
           <%= f.select :copyright_status, Song.copyright_statuses.keys.map { |k| [k.humanize, k] },
                 {}, class: "select select-bordered w-full" %>
-        </fieldset>
+        </label>
       </div>
     </div>
   </div>
