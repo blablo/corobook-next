@@ -3,10 +3,26 @@ module Authentication
 
   included do
     before_action :set_current_user
-    helper_method :current_user, :current_church, :signed_in?
+    helper_method :current_user, :current_church, :signed_in?, :subdomain_church
   end
 
   private
+
+  # The church addressed by the request's subdomain, if any (approach A: a login convenience only —
+  # it pre-selects the church at sign-in and does NOT scope tenancy after login, which still comes
+  # from the signed-in user's own church). Ignores empty/`www` subdomains and anything unmatched.
+  # Memoized per request.
+  def subdomain_church
+    return @subdomain_church if defined?(@subdomain_church)
+
+    label = request.subdomain.to_s.split(".").first.to_s.downcase
+    @subdomain_church =
+      if label.blank? || label == "www"
+        nil
+      else
+        Church.find_by(subdomain: label)
+      end
+  end
 
   # Current is reset by the Rails executor around each HTTP request, so setting it here is
   # request-local. It is NOT reset around Action Cable / Solid Queue — code on those paths must

@@ -1,18 +1,20 @@
 class SessionsController < ApplicationController
   def new
-    @churches = Church.order(:name)
+    # With a subdomain church, the picker is hidden and auth is scoped to it; otherwise show all.
+    @churches = Church.order(:name) unless subdomain_church
   end
 
   def create
-    church = Church.find_by(id: params[:church_id])
+    # A subdomain pins the church (approach A: login convenience); else use the picked church.
+    church = subdomain_church || Church.find_by(id: params[:church_id])
     user = church&.users&.find_by(email: params[:email].to_s.strip.downcase)
 
     if user&.authenticate(params[:password])
       sign_in(user)
       redirect_to after_sign_in_path, notice: "Signed in to #{church.name}."
     else
-      @churches = Church.order(:name)
-      flash.now[:alert] = "Invalid church, email, or password."
+      @churches = Church.order(:name) unless subdomain_church
+      flash.now[:alert] = subdomain_church ? "Invalid email or password." : "Invalid church, email, or password."
       render :new, status: :unprocessable_entity
     end
   end
