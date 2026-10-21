@@ -8,10 +8,16 @@
     <%= button_to "Sign out", logout_path, method: :delete, class: "btn btn-ghost btn-sm" %>
   <% else %>
     <%= form_with url: login_path, method: :post do |f| %>
-      <fieldset class="fieldset">
-        <%= f.label :church_id, "Church", class: "fieldset-legend" %>
-        <%= f.collection_select :church_id, @churches, :id, :name, {}, class: "select select-bordered w-full" %>
-      </fieldset>
+      <% if subdomain_church %>
+        <p class="mb-4 text-sm text-base-content/70" data-role="subdomain-church">
+          Signing in to <span class="font-semibold"><%= subdomain_church.name %></span>.
+        </p>
+      <% else %>
+        <fieldset class="fieldset">
+          <%= f.label :church_id, "Church", class: "fieldset-legend" %>
+          <%= f.collection_select :church_id, @churches, :id, :name, {}, class: "select select-bordered w-full" %>
+        </fieldset>
+      <% end %>
       <fieldset class="fieldset">
         <%= f.label :email, class: "fieldset-legend" %>
         <%= f.email_field :email, autocomplete: "email", class: "input input-bordered w-full" %>
