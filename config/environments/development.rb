@@ -12,6 +12,12 @@ Rails.application.configure do
   # Show full error reports.
   config.consider_all_requests_local = true
 
+  # Allow <anything>.lvh.me (and bare lvh.me) so church subdomains can be tested locally —
+  # lvh.me and all its subdomains resolve to 127.0.0.1. Development only; production host
+  # authorization is configured separately. localhost/loopback are already permitted by default.
+  config.hosts << /.*\.lvh\.me/
+  config.hosts << "lvh.me"
+
   # Enable server timing.
   config.server_timing = true
 
