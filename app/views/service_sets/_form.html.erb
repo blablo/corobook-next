@@ -8,19 +8,19 @@
 
   <div class="card bg-base-100 ring-1 ring-base-200">
     <div class="card-body gap-4">
-      <fieldset class="fieldset">
-        <legend class="fieldset-legend">Service date</legend>
+      <label class="form-control">
+        <span class="label-text text-sm mb-1 block">Service date</span>
         <%= f.date_field :service_date, class: "input input-bordered w-full",
               data: { role: "set-date" } %>
-        <p class="label">Defaults to the next Sunday.</p>
-      </fieldset>
+        <span class="label-text-alt text-xs text-base-content/50 mt-1 block">Defaults to the next Sunday.</span>
+      </label>
 
-      <fieldset class="fieldset">
-        <legend class="fieldset-legend">Name</legend>
+      <label class="form-control">
+        <span class="label-text text-sm mb-1 block">Name</span>
         <%= f.text_field :name, class: "input input-bordered w-full",
               data: { role: "set-name" } %>
-        <p class="label">Defaults to the date — change it if you like.</p>
-      </fieldset>
+        <span class="label-text-alt text-xs text-base-content/50 mt-1 block">Defaults to the date — change it if you like.</span>
+      </label>
 
       <div class="flex items-center gap-3">
         <%= f.submit (service_set.persisted? ? "Save changes" : "Create set"), class: "btn btn-primary" %>
