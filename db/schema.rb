@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_20_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_21_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -21,6 +21,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_150000) do
     t.string "ccli_license_number"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.citext "subdomain"
+    t.index ["subdomain"], name: "index_churches_on_subdomain", unique: true, where: "(subdomain IS NOT NULL)"
   end
 
   create_table "invitations", force: :cascade do |t|
@@ -64,7 +66,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_150000) do
     t.index ["service_set_id"], name: "index_live_sessions_on_service_set_id"
     t.check_constraint "current_section_index >= 0", name: "live_sessions_section_index_check"
     t.check_constraint "font_scale >= 50 AND font_scale <= 400", name: "live_sessions_font_scale_check"
-    t.check_constraint "status::text = ANY (ARRAY['active'::character varying::text, 'ended'::character varying::text])", name: "live_sessions_status_check"
+    t.check_constraint "status::text = ANY (ARRAY['active'::character varying, 'ended'::character varying]::text[])", name: "live_sessions_status_check"
   end
 
   create_table "service_sets", force: :cascade do |t|
@@ -90,7 +92,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_150000) do
     t.index ["text_slide_id"], name: "index_set_items_on_text_slide_id"
     t.check_constraint "((song_id IS NOT NULL)::integer + (text_slide_id IS NOT NULL)::integer) = 1", name: "set_items_exactly_one_item_check"
     t.check_constraint "\"position\" >= 0", name: "set_items_position_check"
-    t.check_constraint "item_type::text = ANY (ARRAY['song'::character varying::text, 'text_slide'::character varying::text])", name: "set_items_item_type_check"
+    t.check_constraint "item_type::text = ANY (ARRAY['song'::character varying, 'text_slide'::character varying]::text[])", name: "set_items_item_type_check"
   end
 
   create_table "songs", force: :cascade do |t|
@@ -114,7 +116,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_150000) do
     t.index ["church_id", "title"], name: "index_songs_on_church_id_and_title"
     t.index ["plain_text"], name: "index_songs_on_plain_text_trgm", opclass: :gin_trgm_ops, using: :gin
     t.check_constraint "capo >= 0 AND capo <= 11", name: "songs_capo_check"
-    t.check_constraint "copyright_status::text = ANY (ARRAY['copyrighted'::character varying::text, 'public_domain'::character varying::text, 'unknown'::character varying::text])", name: "songs_copyright_status_check"
+    t.check_constraint "copyright_status::text = ANY (ARRAY['copyrighted'::character varying, 'public_domain'::character varying, 'unknown'::character varying]::text[])", name: "songs_copyright_status_check"
   end
 
   create_table "text_slides", force: :cascade do |t|
@@ -155,7 +157,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_150000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["church_id", "email"], name: "index_users_on_church_id_and_email", unique: true
-    t.check_constraint "role::text = ANY (ARRAY['admin'::character varying::text, 'editor'::character varying::text])", name: "users_role_check"
+    t.check_constraint "role::text = ANY (ARRAY['admin'::character varying, 'editor'::character varying]::text[])", name: "users_role_check"
   end
 
   add_foreign_key "invitations", "churches"
