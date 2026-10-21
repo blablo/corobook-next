@@ -27,7 +27,8 @@ class InvitationAcceptancesController < ApplicationController
       email: @invitation.email,
       role: @invitation.role,
       password: params[:password],
-      password_confirmation: params[:password_confirmation]
+      password_confirmation: params[:password_confirmation],
+      confirmed_at: Time.current # accepting an emailed invitation proves email ownership
     )
 
     ActiveRecord::Base.transaction do

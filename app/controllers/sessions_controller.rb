@@ -10,6 +10,12 @@ class SessionsController < ApplicationController
     user = church&.users&.find_by(email: params[:email].to_s.strip.downcase)
 
     if user&.authenticate(params[:password])
+      unless user.confirmed?
+        @churches = Church.order(:name) unless subdomain_church
+        @unconfirmed_email = user.email
+        flash.now[:alert] = "Please confirm your email before signing in. Check your inbox, or resend the link below."
+        return render :new, status: :unprocessable_entity
+      end
       sign_in(user)
       redirect_to after_sign_in_path, notice: "Signed in to #{church.name}."
     else

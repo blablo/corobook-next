@@ -10,7 +10,7 @@ class RegistrationsTest < ActionDispatch::IntegrationTest
 
   test "signed-in root shows the dashboard" do
     church = Church.create!(name: "Gracia")
-    user = church.users.create!(email: "a@example.com", password: "secret123", role: "admin")
+    user = church.users.create!(email: "a@example.com", password: "secret123", role: "admin", confirmed_at: Time.current)
     post login_path, params: { church_id: church.id, email: user.email, password: "secret123" }
     get root_path
     assert_response :success
@@ -26,22 +26,21 @@ class RegistrationsTest < ActionDispatch::IntegrationTest
     assert_select "[data-role=admin-email]"
   end
 
-  test "signup creates a church and its first admin, then signs in" do
+  test "signup creates an UNCONFIRMED church+admin and routes to check-email (no sign-in)" do
     assert_difference [ "Church.count", "User.count" ], 1 do
       post signup_path, params: {
         church: { name: "Nueva Vida", subdomain: "nueva-vida" },
         user: { email: "pastor@example.com", password: "secret123", password_confirmation: "secret123" }
       }
     end
-    assert_redirected_to root_path
-    church = Church.find_by(name: "Nueva Vida")
-    assert_equal "nueva-vida", church.subdomain
-    user = church.users.sole
+    assert_redirected_to signup_check_email_path(email: "pastor@example.com")
+    user = Church.find_by(name: "Nueva Vida").users.sole
     assert user.admin?
-    assert_equal "pastor@example.com", user.email
-    # Signed in — root now shows the dashboard.
-    follow_redirect!
-    assert_select "[data-role=home]"
+    assert_not user.confirmed?, "a self-serve signup must start unconfirmed"
+    assert user.confirmation_token_digest.present?
+    # Not signed in — visiting root still shows the public landing page.
+    get root_path
+    assert_select "[data-role=landing]"
   end
 
   test "signup is atomic: a bad subdomain rolls back the church too" do
@@ -67,7 +66,7 @@ class RegistrationsTest < ActionDispatch::IntegrationTest
 
   test "a signed-in user is redirected away from signup" do
     church = Church.create!(name: "Gracia")
-    user = church.users.create!(email: "a@example.com", password: "secret123", role: "admin")
+    user = church.users.create!(email: "a@example.com", password: "secret123", role: "admin", confirmed_at: Time.current)
     post login_path, params: { church_id: church.id, email: user.email, password: "secret123" }
     get signup_path
     assert_redirected_to root_path
