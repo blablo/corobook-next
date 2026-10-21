@@ -5,7 +5,15 @@ class ServiceSetsController < ApplicationController
   before_action :set_service_set, only: %i[show edit update destroy add_item reorder remove_item library]
 
   def index
-    @service_sets = church_scope(:service_sets).order(service_date: :desc, name: :asc)
+    sets = church_scope(:service_sets)
+    today = Date.current
+    # Upcoming = today or later (plus any set with no date), soonest first.
+    @upcoming_sets = sets.where("service_date >= ? OR service_date IS NULL", today)
+                         .order(Arel.sql("service_date ASC NULLS LAST, name ASC"))
+    # Past = before today, newest first.
+    @past_sets = sets.where("service_date < ?", today)
+                     .order(service_date: :desc, name: :asc)
+    @service_sets = @upcoming_sets + @past_sets
   end
 
   def show
