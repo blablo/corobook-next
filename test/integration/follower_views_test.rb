@@ -40,6 +40,25 @@ class FollowerViewsTest < ActionDispatch::IntegrationTest
     assert_select "[data-role=slide-bg]", false
   end
 
+  test "a text slide with a fixed font size hands it to the projector fit controller" do
+    slide = @church.text_slides.create!(title: "Grande", font_size: 12, pages: [ { "body_markdown" => "Hola" } ])
+    item = @set.set_items.create!(position: 1, item_type: "text_slide", text_slide: slide)
+    @session.update!(current_set_item_id: item.id, current_section_index: 0)
+
+    get projector_path(@session.projector_token)
+    assert_response :success
+    assert_select "[data-role=projector-slide][data-fit-fixed-value='12']"
+  end
+
+  test "an auto-size text slide renders fixed value 0 (auto-fit)" do
+    slide = @church.text_slides.create!(title: "Auto", pages: [ { "body_markdown" => "Hola" } ])
+    item = @set.set_items.create!(position: 1, item_type: "text_slide", text_slide: slide)
+    @session.update!(current_set_item_id: item.id, current_section_index: 0)
+
+    get projector_path(@session.projector_token)
+    assert_select "[data-role=projector-slide][data-fit-fixed-value='0']"
+  end
+
   test "a bad projector token returns 404" do
     get projector_path("not-a-real-token")
     assert_response :not_found

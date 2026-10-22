@@ -35,6 +35,16 @@
             <p class="label whitespace-normal">Shown behind the slide text on the projector. PNG, JPEG, WebP or GIF, up to 10&nbsp;MB.</p>
           </fieldset>
 
+          <%# Font size (all pages). Auto scales the text to fit the screen. %>
+          <fieldset class="fieldset">
+            <legend class="fieldset-legend">Font size</legend>
+            <%= f.select :font_size,
+                  [ [ "Auto — fit to screen", "" ] ] + TextSlide::FONT_SIZE_OPTIONS.map { |n| [ "#{n}% of screen height", n ] },
+                  {}, class: "select w-full",
+                  data: { role: "slide-font-size", action: "change->slide-editor#setFontSize" } %>
+            <p class="label whitespace-normal">Applies to every page of this slide. Sized relative to the screen, so it looks the same on any projector.</p>
+          </fieldset>
+
           <%# Tags %>
           <fieldset class="fieldset">
             <legend class="fieldset-legend">Tags</legend>
@@ -100,7 +110,8 @@
                 <div class="projector-slide-scrim"></div>
               </div>
             <% end %>
-            <div class="projector-slide<%= ' has-bg' if text_slide.background_image? %>" data-controller="fit" data-role="projector-slide">
+            <div class="projector-slide<%= ' has-bg' if text_slide.background_image? %>" data-controller="fit" data-role="projector-slide"
+                 data-fit-fixed-value="<%= text_slide.font_size.to_i %>">
               <div class="projector-slide-body" data-fit-target="content" data-slide-editor-target="preview" data-role="slide-preview"></div>
             </div>
           </div>

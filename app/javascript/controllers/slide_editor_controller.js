@@ -165,6 +165,13 @@ export default class extends Controller {
   }
 
   // ======================= PREVIEW =======================
+  // Font size select: hand the fixed size (or 0 = auto) to the preview's fit controller, which
+  // observes data-fit-fixed-value and refits live.
+  setFontSize(e) {
+    const fitEl = this.previewTarget.closest('[data-controller~="fit"]')
+    if (fitEl) fitEl.setAttribute("data-fit-fixed-value", e.target.value || "0")
+  }
+
   schedulePreview() { clearTimeout(this._t); this._t = setTimeout(() => this.renderPreview(), 200) }
   async renderPreview() {
     try {

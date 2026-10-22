@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_22_201350) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_22_203500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -174,9 +174,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_22_201350) do
     t.datetime "updated_at", null: false
     t.jsonb "tags", default: [], null: false
     t.jsonb "pages", default: [], null: false
+    t.integer "font_size"
     t.index ["church_id", "title"], name: "index_text_slides_on_church_id_and_title"
     t.index ["set_id"], name: "index_text_slides_on_set_id"
     t.index ["tags"], name: "index_text_slides_on_tags", using: :gin
+    t.check_constraint "font_size IS NULL OR font_size >= 2 AND font_size <= 30", name: "text_slides_font_size_check"
   end
 
   create_table "usage_events", force: :cascade do |t|
