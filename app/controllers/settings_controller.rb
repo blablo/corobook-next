@@ -3,16 +3,27 @@ class SettingsController < ApplicationController
   before_action :require_sign_in
   before_action :require_admin
 
+  # General settings (church subdomain).
   def show
+    @church = Current.church
+  end
+
+  # Projection settings (per-church projector look & behaviour).
+  def projection
     @church = Current.church
   end
 
   def update
     @church = Current.church
+    # Which sub-page the form was submitted from — drives both the error re-render and the
+    # success redirect, so each sub-page round-trips to itself.
+    section = params[:section].to_s == "projection" ? :projection : :show
+
     if @church.update(settings_params)
-      redirect_to settings_path, notice: "Settings saved."
+      redirect_to(section == :projection ? projection_settings_path : settings_path,
+                  notice: "Settings saved.")
     else
-      render :show, status: :unprocessable_entity
+      render section, status: :unprocessable_entity
     end
   end
 

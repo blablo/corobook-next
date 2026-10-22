@@ -46,24 +46,41 @@ class SettingsControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-role=nav-settings]"
   end
 
-  test "an admin sees the projection settings with a live preview" do
+  test "the general settings page shows the sub-nav and subdomain, not the projection form" do
     login(@admin)
     get settings_path
+    assert_response :success
+    assert_select "[data-role=settings-subnav]"
+    assert_select "[data-role=subnav-projection]"
+    assert_select "[data-role=subdomain-input]"
+    assert_select "[data-role=projector-settings]", false
+  end
+
+  test "an admin sees the projection sub-page with a live preview" do
+    login(@admin)
+    get projection_settings_path
+    assert_response :success
+    assert_select "[data-role=settings-subnav]"
     assert_select "[data-role=projector-settings]"
     assert_select "[data-role=pp-stage]"
-    assert_select "[data-role=pp-bg]"
     assert_select "[data-role=pp-pagination]"
   end
 
-  test "an admin can save projection settings" do
+  test "an editor is denied the projection sub-page" do
+    login(@editor)
+    get projection_settings_path
+    assert_redirected_to login_path
+  end
+
+  test "saving projection settings redirects back to the projection sub-page" do
     login(@admin)
-    patch settings_path, params: { church: {
+    patch settings_path, params: { section: "projection", church: {
       projector_bg_color: "#112233", projector_text_color: "#eeeeee",
       projector_font: "serif", projector_lyric_case: "upper",
       projector_valign: "top", projector_pagination: "by_lines",
       projector_lines_per_slide: "6", projector_bold: "0", projector_show_credits: "0"
     } }
-    assert_redirected_to settings_path
+    assert_redirected_to projection_settings_path
     @church.reload
     assert_equal "#112233", @church.projector_bg_color
     assert_equal "serif", @church.projector_font
@@ -75,10 +92,18 @@ class SettingsControllerTest < ActionDispatch::IntegrationTest
     refute @church.projector_show_credits
   end
 
-  test "invalid projection settings re-render unprocessable" do
+  test "invalid projection settings re-render the projection page unprocessable" do
     login(@admin)
-    patch settings_path, params: { church: { projector_bg_color: "notacolor" } }
+    patch settings_path, params: { section: "projection", church: { projector_bg_color: "notacolor" } }
     assert_response :unprocessable_entity
+    assert_select "[data-role=projector-settings]"
     assert_equal "#000000", @church.reload.projector_bg_color
+  end
+
+  test "saving general settings redirects back to the general page" do
+    login(@admin)
+    patch settings_path, params: { section: "general", church: { subdomain: "gracia" } }
+    assert_redirected_to settings_path
+    assert_equal "gracia", @church.reload.subdomain
   end
 end

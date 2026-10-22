@@ -1,0 +1,125 @@
+<% content_for :title, "Projection settings" %>
+
+<div class="mx-auto max-w-3xl p-4" data-role="settings">
+  <h1 class="text-2xl font-semibold mb-4">Settings</h1>
+  <%= render "settings/subnav", current: :projection %>
+
+  <%# ── Projection (per-church projector look & behaviour) ──────────────── %>
+  <section data-role="projector-settings" data-controller="projector-preview">
+    <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/60 mb-2">Projection</h2>
+    <p class="text-sm text-base-content/60 mb-4 max-w-prose">
+      Define how song lyrics look on the projection screen for <span class="font-medium"><%= @church.name %></span>.
+      These apply to every live service. Changes preview live below and take effect on the next
+      slide once saved.
+    </p>
+
+    <%= form_with model: @church, url: settings_path, method: :patch do |f| %>
+      <%= hidden_field_tag :section, "projection" %>
+      <div class="grid gap-6 lg:grid-cols-[1fr_minmax(18rem,22rem)]">
+        <%# Controls %>
+        <div class="grid gap-4 sm:grid-cols-2 content-start">
+          <fieldset class="fieldset">
+            <%= f.label :projector_bg_color, "Background colour", class: "fieldset-legend" %>
+            <%= f.color_field :projector_bg_color, class: "input input-bordered h-10 w-full p-1",
+                  data: { role: "pp-bg", action: "input->projector-preview#update" } %>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <%= f.label :projector_text_color, "Text colour", class: "fieldset-legend" %>
+            <%= f.color_field :projector_text_color, class: "input input-bordered h-10 w-full p-1",
+                  data: { role: "pp-text", action: "input->projector-preview#update" } %>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <%= f.label :projector_font, "Font", class: "fieldset-legend" %>
+            <%= f.select :projector_font,
+                  [ ["Sans-serif", "sans"], ["Serif", "serif"], ["Condensed", "condensed"], ["Monospace", "mono"] ],
+                  {}, class: "select select-bordered w-full",
+                  data: { role: "pp-font", action: "change->projector-preview#update" } %>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <%= f.label :projector_line_height, "Line spacing", class: "fieldset-legend" %>
+            <%= f.select :projector_line_height,
+                  [ ["Tight", "tight"], ["Normal", "normal"], ["Relaxed", "relaxed"] ],
+                  {}, class: "select select-bordered w-full",
+                  data: { role: "pp-lh", action: "change->projector-preview#update" } %>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <%= f.label :projector_lyric_case, "Lyric casing", class: "fieldset-legend" %>
+            <%= f.select :projector_lyric_case,
+                  [ ["As written", "none"], ["UPPERCASE", "upper"], ["Title Case", "title"] ],
+                  {}, class: "select select-bordered w-full",
+                  data: { role: "pp-lyric-case", action: "change->projector-preview#update" } %>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <%= f.label :projector_title_case, "Title casing", class: "fieldset-legend" %>
+            <%= f.select :projector_title_case,
+                  [ ["As written", "none"], ["UPPERCASE", "upper"], ["Title Case", "title"] ],
+                  {}, class: "select select-bordered w-full",
+                  data: { role: "pp-title-case", action: "change->projector-preview#update" } %>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <%= f.label :projector_valign, "Vertical position", class: "fieldset-legend" %>
+            <%= f.select :projector_valign,
+                  [ ["Top", "top"], ["Center", "center"], ["Bottom", "bottom"] ],
+                  {}, class: "select select-bordered w-full",
+                  data: { role: "pp-valign", action: "change->projector-preview#update" } %>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <%= f.label :projector_pagination, "Break slides by", class: "fieldset-legend" %>
+            <%= f.select :projector_pagination,
+                  [ ["Song section", "by_section"], ["Number of lines", "by_lines"] ],
+                  {}, class: "select select-bordered w-full",
+                  data: { role: "pp-pagination", action: "change->projector-preview#update" } %>
+            <p class="label text-base-content/60">Section = one verse/chorus per slide. Lines = fixed-size slides.</p>
+          </fieldset>
+
+          <fieldset class="fieldset" data-role="pp-lines-field">
+            <%= f.label :projector_lines_per_slide, "Lines per slide", class: "fieldset-legend" %>
+            <%= f.number_field :projector_lines_per_slide, min: 1, max: 20,
+                  class: "input input-bordered w-full",
+                  data: { role: "pp-lines", action: "input->projector-preview#update" } %>
+            <p class="label text-base-content/60">Chunks reset at each section boundary.</p>
+          </fieldset>
+
+          <label class="fieldset-label cursor-pointer gap-3 sm:col-span-2">
+            <%= f.check_box :projector_bold, class: "toggle toggle-primary",
+                  data: { role: "pp-bold", action: "change->projector-preview#update" } %>
+            <span>Bold lyric text</span>
+          </label>
+
+          <label class="fieldset-label cursor-pointer gap-3 sm:col-span-2">
+            <%= f.check_box :projector_show_credits, class: "toggle toggle-primary",
+                  data: { action: "change->projector-preview#update" } %>
+            <span>Show author / copyright / CCLI credits on screen</span>
+          </label>
+        </div>
+
+        <%# Live preview — a 16:9 mini-stage mirroring the real projector. %>
+        <div class="content-start">
+          <p class="text-xs text-base-content/50 mb-1">Preview</p>
+          <div class="projector-preview rounded overflow-hidden" data-role="pp-stage"
+               data-projector-preview-target="stage">
+            <div id="pp-frame" data-projector-preview-target="frame"
+                 style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:6% 7%; text-align:center; height:100%;">
+              <div data-projector-preview-target="title"
+                   style="font-weight:800; line-height:1.1; font-size:clamp(1.1rem,3.5vw,2rem); margin-bottom:0.6em;">
+                Amazing Grace
+              </div>
+              <div data-projector-preview-target="lyrics" style="width:100%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-5">
+        <%= f.submit "Save projection settings", class: "btn btn-primary btn-sm" %>
+      </div>
+    <% end %>
+  </section>
+</div>
