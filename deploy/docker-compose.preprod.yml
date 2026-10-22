@@ -42,7 +42,7 @@ services:
       RAILS_MASTER_KEY: ${RAILS_MASTER_KEY:?set in .env.preprod}
       DATABASE_HOST: postgres
       COROBOOK_NEXT_DATABASE_PASSWORD: ${COROBOOK_NEXT_DATABASE_PASSWORD:?}
-      APP_HOST: ${APP_HOST:?set to your DuckDNS host, e.g. corobook-preprod.duckdns.org}
+      APP_HOST: ${APP_HOST:?set to your DuckDNS host, e.g. corobook.duckdns.org}
       MAIL_DOMAIN: ${MAIL_DOMAIN:-example.com}
       MAIL_FROM: ${MAIL_FROM:-Corobook <no-reply@example.com>}
       # TLS terminates at the shared Caddy; trust its forwarded proto so force_ssl doesn't loop.

@@ -9,7 +9,7 @@ This is **manual**: you check out the repo on the server and run Docker Compose 
 
 ```
             ┌───────────── Caddy (deploy/edge) — owns :80/:443, auto-HTTPS ─────────────┐
- Internet ─►│  corobook-preprod.duckdns.org → corobook-web:80  (Corobook, this repo)     │
+ Internet ─►│  corobook.duckdns.org → corobook-web:80  (Corobook, this repo)     │
             │  <your-app-host>              → <your-app>:<port> (your other Docker app)   │
             │  <static-host>                → file_server /srv/static (your static site)  │
             └────────────────────────────────── edge network ───────────────────────────┘
@@ -23,8 +23,8 @@ This is **manual**: you check out the repo on the server and run Docker Compose 
 
 ## 1. Point DNS at the server
 
-For each hostname (start with Corobook's, e.g. `corobook-preprod.duckdns.org`), set its A record to
-the server's public IP. Confirm: `dig +short corobook-preprod.duckdns.org` → your IP. TLS won't
+For each hostname (start with Corobook's, e.g. `corobook.duckdns.org`), set its A record to
+the server's public IP. Confirm: `dig +short corobook.duckdns.org` → your IP. TLS won't
 issue until this resolves and 80/443 are reachable.
 
 ## 2. Bring up the shared edge (once)
@@ -64,7 +64,7 @@ Services: `postgres`, `web` (container `corobook-web`, first boot runs `db:prepa
 network. Verify:
 
 ```sh
-curl -I https://corobook-preprod.duckdns.org/up   # expect HTTP/2 200
+curl -I https://corobook.duckdns.org/up   # expect HTTP/2 200
 ```
 
 ## 5. Add your other two sites to the same Caddy
@@ -117,6 +117,6 @@ nothing references the `edge` network when you remove it).
 - **SSL**: TLS terminates at Caddy; the app runs with `assume_ssl`/`force_ssl`, so it trusts the
   forwarded proto and won't redirect-loop.
 - **DuckDNS + subdomain login**: church subdomains resolve by stripping the configured `APP_HOST`
-  base, so `gracia.corobook-preprod.duckdns.org` works and the bare host shows the picker. (Each
+  base, so `gracia.corobook.duckdns.org` works and the bare host shows the picker. (Each
   church subdomain you actually use needs its own DNS record + a Caddy block or a wildcard.)
 - This is **preprod**: single box, no backups/offsite. Harden before production.

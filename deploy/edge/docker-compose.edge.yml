@@ -21,7 +21,7 @@ services:
       - "443:443"
     environment:
       # Corobook's hostname (set in .env.edge). Caddy gets a Let's Encrypt cert for it.
-      COROBOOK_HOST: ${COROBOOK_HOST:?e.g. corobook-preprod.duckdns.org}
+      COROBOOK_HOST: ${COROBOOK_HOST:?e.g. corobook.duckdns.org}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ./static:/srv/static:ro   # static HTML site files (used once you uncomment its block)
