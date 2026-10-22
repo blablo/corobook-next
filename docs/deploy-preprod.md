@@ -7,6 +7,19 @@ routes over.
 
 This is **manual**: you check out the repo on the server and run Docker Compose yourself.
 
+## Quick start
+
+On the server, from the repo root:
+
+```sh
+make -C deploy setup
+```
+
+That runs an interactive script which asks for the hostname, Rails master key, DB password and
+mail settings, writes `deploy/.env.preprod` + `deploy/edge/.env.edge`, then brings up the shared
+Caddy edge and the Corobook stack. The rest of this document explains each step it performs (and
+how to add your other app + static site to the shared Caddy). Other targets: `make -C deploy help`.
+
 ```
             ┌───────────── Caddy (deploy/edge) — owns :80/:443, auto-HTTPS ─────────────┐
  Internet ─►│  corobook.duckdns.org → corobook-web:80  (Corobook, this repo)     │
