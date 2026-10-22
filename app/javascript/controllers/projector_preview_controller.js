@@ -4,7 +4,7 @@ import { Controller } from "@hotwired/stimulus"
 // controls and paints a 16:9 sample slide, so an admin sees the result before saving. Mirrors the
 // server-side ProjectorSettings mapping (fonts, line-heights, valign, casing, by-lines chunking).
 export default class extends Controller {
-  static targets = ["stage", "frame", "title", "lyrics"]
+  static targets = ["stage", "frame", "lyrics"]
 
   static FONTS = {
     sans: '-apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
@@ -47,7 +47,6 @@ export default class extends Controller {
     const lh = this.constructor.LINE_HEIGHTS[this.val("pp-lh")] || "1.15"
     const valign = this.constructor.VALIGN[this.val("pp-valign")] || "center"
     const lyricCase = this.constructor.CASE[this.val("pp-lyric-case")] || "none"
-    const titleCase = this.constructor.CASE[this.val("pp-title-case")] || "none"
     const bold = this.val("pp-bold")
     const pagination = this.val("pp-pagination")
     const perSlide = Math.max(1, Math.min(20, parseInt(this.val("pp-lines"), 10) || 4))
@@ -63,7 +62,6 @@ export default class extends Controller {
     frame.style.fontFamily = font
     frame.style.justifyContent = valign
 
-    this.titleTarget.style.textTransform = titleCase
 
     // Show only the first slide's worth of lines: section mode = whole sample; by_lines = first N.
     const lines = pagination === "by_lines" ? this.constructor.SAMPLE.slice(0, perSlide) : this.constructor.SAMPLE
