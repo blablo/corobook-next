@@ -1,9 +1,12 @@
-# Production deployment (manual Docker + a shared Caddy edge)
+# Production deployment (manual Docker)
 
-This box hosts several sites — Corobook, your other Docker app, and a static HTML page. One
-**shared Caddy** owns ports 80/443 and fronts all of them with automatic HTTPS (Let's Encrypt).
-Each app stack runs WITHOUT its own proxy and joins a shared `edge` Docker network that Caddy
-routes over.
+This deploys the **Corobook app stack** (web + postgres + worker) on the server. It runs WITHOUT
+its own reverse proxy: a **shared Caddy edge** — maintained separately as infra, since it fronts
+several unrelated sites on the box — owns ports 80/443, terminates TLS, and routes to this app over
+an external `edge` Docker network. This repo only knows how to run the app and join that network.
+
+> The shared Caddy edge (its Caddyfile, compose, and the routing block for `corobook`) is **not**
+> in this repo. Start it first; it creates the external `edge` network. This stack then joins it.
 
 This is **manual**: you check out the repo on the server and run Docker Compose yourself.
 
@@ -16,120 +19,67 @@ make -C deploy setup
 ```
 
 That runs an interactive script which asks for the hostname, Rails master key, DB password and
-mail settings, writes `deploy/.env.prod` + `deploy/edge/.env.edge`, then brings up the shared
-Caddy edge and the Corobook stack. The rest of this document explains each step it performs (and
-how to add your other app + static site to the shared Caddy). Other targets: `make -C deploy help`.
-
-```
-            ┌───────────── Caddy (deploy/edge) — owns :80/:443, auto-HTTPS ─────────────┐
- Internet ─►│  corobook.duckdns.org → corobook-web:80  (Corobook, this repo)     │
-            │  <your-app-host>              → <your-app>:<port> (your other Docker app)   │
-            │  <static-host>                → file_server /srv/static (your static site)  │
-            └────────────────────────────────── edge network ───────────────────────────┘
-```
+mail settings, writes `deploy/.env.prod`, and brings up the Corobook stack (it checks the external
+`edge` network exists first). Other targets: `make -C deploy help`.
 
 ## Prerequisites (on the server)
 
-- Docker + the Docker Compose plugin; ports **80 and 443** open to the internet.
+- Docker + the Docker Compose plugin.
 - The repo checked out; your `config/master.key` value (for `RAILS_MASTER_KEY`).
-- Each site's hostname (DuckDNS or otherwise) pointing at this server's public IP.
+- **The shared Caddy edge already running**, so the external `edge` network exists:
+  `docker network inspect edge` should succeed. Its routing must include a block sending
+  Corobook's hostname to `corobook-web:80` over the `edge` network, and Corobook's DNS must point
+  at the server (the edge needs 80/443 open to issue the TLS cert).
 
-## 1. Point DNS at the server
-
-For each hostname (start with Corobook's, e.g. `corobook.duckdns.org`), set its A record to
-the server's public IP. Confirm: `dig +short corobook.duckdns.org` → your IP. TLS won't
-issue until this resolves and 80/443 are reachable.
-
-## 2. Bring up the shared edge (once)
+## 1. Configure Corobook
 
 ```sh
-cd deploy/edge
-cp .env.edge.example .env.edge        # set COROBOOK_HOST
-docker compose --env-file .env.edge up -d
-```
-
-This starts Caddy and creates the shared **`edge`** network. By default it routes only Corobook;
-add your other app and the static site in step 5.
-
-## 3. Configure Corobook
-
-```sh
-cd ../                                 # deploy/
+cd deploy
 cp .env.prod.example .env.prod
 ```
 
 Set in `deploy/.env.prod`:
 
-- `APP_HOST` — Corobook's hostname (same as `COROBOOK_HOST`), for links in emails + subdomain base.
+- `APP_HOST` — Corobook's hostname (for links in emails + the church-subdomain base).
 - `RAILS_MASTER_KEY` — contents of `config/master.key`.
 - `COROBOOK_NEXT_DATABASE_PASSWORD` — a strong password (Postgres role + app).
-- `MAIL_DOMAIN` / `MAIL_FROM` — optional on production (see `docs/mail-setup.md`).
+- `MAIL_DOMAIN` / `MAIL_FROM` — optional (see `docs/mail-setup.md`).
 
-## 4. Bring up Corobook
+## 2. Bring up Corobook
 
 ```sh
 # from deploy/
 docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
+# or: make up
 ```
 
-Services: `postgres`, `web` (container `corobook-web`, first boot runs `db:prepare`), `worker`
-(Solid Queue). No published ports — the edge Caddy reaches `corobook-web:80` over the `edge`
-network. Verify:
+Services: `postgres`, `web` (container `corobook-web`, first boot runs `db:prepare` to create the
+4 prod DBs: primary/cache/queue/cable), `worker` (Solid Queue). No published ports — the shared edge
+reaches `corobook-web:80` over the `edge` network. Verify through the edge:
 
 ```sh
-curl -I https://corobook.duckdns.org/up   # expect HTTP/2 200
+curl -I https://<APP_HOST>/up   # expect HTTP/2 200
 ```
-
-## 5. Add your other two sites to the same Caddy
-
-Edit `deploy/edge/Caddyfile` (both example blocks are commented out):
-
-- **Other Docker app** — attach its container to the `edge` network. In its own compose add:
-  ```yaml
-  networks: [ default, edge ]
-  # ...
-  networks:
-    edge:
-      external: true
-      name: edge
-  ```
-  Then uncomment the app block in the Caddyfile and set its hostname + `reverse_proxy
-  <container-name>:<port>`.
-- **Static HTML site** — copy its files into `deploy/edge/static/`, uncomment the static block,
-  set its hostname.
-
-Reload Caddy after editing:
-
-```sh
-cd deploy/edge
-docker compose --env-file .env.edge up -d   # picks up the Caddyfile change
-# or: docker compose --env-file .env.edge exec caddy caddy reload --config /etc/caddy/Caddyfile
-```
-
-Caddy fetches a cert for each new hostname automatically.
 
 ## Updating / teardown
 
 ```sh
 # update Corobook
 git pull && cd deploy
-docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
+docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build   # or: make rebuild
 
 # stop Corobook (keep data) / wipe data (destructive)
-docker compose --env-file .env.prod -f docker-compose.prod.yml down
-docker compose --env-file .env.prod -f docker-compose.prod.yml down -v
+docker compose --env-file .env.prod -f docker-compose.prod.yml down            # or: make down
+docker compose --env-file .env.prod -f docker-compose.prod.yml down -v         # or: make destroy
 ```
 
-The edge Caddy stays up across app redeploys. Bring order down as: app stacks first, edge last (so
-nothing references the `edge` network when you remove it).
+The shared edge is independent — redeploying this app does not touch it.
 
 ## Notes
 
-- **Certs** live in the `caddy_data` volume — restarts don't re-request them (Let's Encrypt
-  rate-limit safe). Don't `down -v` the edge casually.
-- **SSL**: TLS terminates at Caddy; the app runs with `assume_ssl`/`force_ssl`, so it trusts the
-  forwarded proto and won't redirect-loop.
+- **SSL**: TLS terminates at the shared Caddy edge; the app runs with `assume_ssl`/`force_ssl`, so
+  it trusts the forwarded proto and won't redirect-loop.
 - **DuckDNS + subdomain login**: church subdomains resolve by stripping the configured `APP_HOST`
-  base, so `gracia.corobook.duckdns.org` works and the bare host shows the picker. (Each
-  church subdomain you actually use needs its own DNS record + a Caddy block or a wildcard.)
+  base, so `gracia.<APP_HOST>` works and the bare host shows the picker. (Each church subdomain you
+  actually use needs its own DNS record + an edge routing block, or a wildcard cert.)
 - This is a **single-box** deploy: no backups/offsite yet. Add those before relying on it.

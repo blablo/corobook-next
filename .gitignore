@@ -13,7 +13,6 @@
 !/.env.example
 # Deploy secrets (real values); the .example templates are kept.
 /deploy/.env.prod
-/deploy/edge/.env.edge
 
 # Ignore all logfiles and tempfiles.
 /log/*
