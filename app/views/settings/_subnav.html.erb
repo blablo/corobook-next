@@ -1,0 +1,10 @@
+<%#
+  Settings sub-navigation. A DaisyUI tabbed bar across the settings sub-pages. `current` is the
+  active sub-page key (:general or :projection).
+%>
+<div role="tablist" class="tabs tabs-bordered mb-6" data-role="settings-subnav">
+  <%= link_to "General", settings_path, role: "tab",
+        class: "tab #{'tab-active' if current == :general}", data: { role: "subnav-general" } %>
+  <%= link_to "Projection", projection_settings_path, role: "tab",
+        class: "tab #{'tab-active' if current == :projection}", data: { role: "subnav-projection" } %>
+</div>

@@ -41,8 +41,10 @@ Rails.application.routes.draw do
 
   # Team management (admin): members + pending invitations.
   resource  :team, only: [ :show ], controller: "team"
-  # Church settings (admin): subdomain, and future configuration.
-  resource  :settings, only: [ :show, :update ], controller: "settings"
+  # Church settings (admin): a small settings area with sub-pages (General, Projection).
+  resource  :settings, only: [ :show, :update ], controller: "settings" do
+    get :projection
+  end
   resources :members, only: [ :update, :destroy ]
   resources :invitations, only: [ :create, :destroy ] do
     member { post :resend }
