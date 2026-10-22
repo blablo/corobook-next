@@ -3,7 +3,15 @@ class TextSlide < ApplicationRecord
 
   belongs_to :service_set, foreign_key: :set_id, optional: true, inverse_of: :inline_text_slides
 
+  # Optional projection background image (text slides only; song lyrics use the church's
+  # solid/gradient projector background). Stored via ActiveStorage (local disk service).
+  has_one_attached :background_image
+
+  BACKGROUND_IMAGE_TYPES = %w[image/png image/jpeg image/webp image/gif].freeze
+  BACKGROUND_IMAGE_MAX_BYTES = 10.megabytes
+
   before_validation :normalize_tags_and_pages
+  validate :acceptable_background_image
 
   scope :search, ->(q) {
     next all if q.blank?
@@ -34,6 +42,9 @@ class TextSlide < ApplicationRecord
     Commonmarker.to_html(page_markdown(index).encode("UTF-8"))
   end
 
+  # True when a usable projection background image is attached.
+  def background_image? = background_image.attached?
+
   private
 
   # Tags: trimmed, lower-cased, de-duplicated. Pages: array of { "body_markdown" => str }, >= 1.
@@ -41,5 +52,17 @@ class TextSlide < ApplicationRecord
     self.tags = Array(tags).map { |t| t.to_s.strip.downcase }.reject(&:blank?).uniq
     self.pages = Array(pages).map { |p| { "body_markdown" => (p.is_a?(Hash) ? p["body_markdown"] : p).to_s } }
     self.pages = [ { "body_markdown" => "" } ] if pages.empty?
+  end
+
+  # Reject a background image that is the wrong type or too large (Req: projection backgrounds).
+  def acceptable_background_image
+    return unless background_image.attached?
+
+    unless background_image.content_type.in?(BACKGROUND_IMAGE_TYPES)
+      errors.add(:background_image, "must be a PNG, JPEG, WebP or GIF image")
+    end
+    if background_image.byte_size > BACKGROUND_IMAGE_MAX_BYTES
+      errors.add(:background_image, "must be 10 MB or smaller")
+    end
   end
 end

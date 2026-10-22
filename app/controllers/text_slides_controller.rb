@@ -40,6 +40,9 @@ class TextSlidesController < ApplicationController
   end
 
   def update
+    # Explicit removal of the background image (a checkbox in the form).
+    @text_slide.background_image.purge if params[:text_slide][:remove_background_image] == "1"
+
     if @text_slide.update(slide_params)
       redirect_to @text_slide, notice: "Slide updated."
     else
@@ -70,6 +73,6 @@ class TextSlidesController < ApplicationController
   end
 
   def slide_params
-    params.require(:text_slide).permit(:title, tags: [], pages: [ :body_markdown ])
+    params.require(:text_slide).permit(:title, :background_image, tags: [], pages: [ :body_markdown ])
   end
 end
