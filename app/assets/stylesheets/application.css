@@ -29,7 +29,7 @@
 #live-frame {
   flex: 1; display: flex; flex-direction: column;
   align-items: center; justify-content: var(--proj-valign, center);
-  padding: 6vh 6vw; text-align: center;
+  padding: 6vh 6vw; text-align: center; position: relative;
   background: var(--proj-bg, #000); color: var(--proj-text, #fff);
   font-family: var(--proj-font, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
 }
@@ -73,6 +73,17 @@
 
 .projector-slide { width: 100%; }
 .projector-slide-body { text-align: center; font-weight: 600; }
+
+/* Text-slide background image: a cover photo filling the stage, with a dark scrim behind the
+   text for legibility. The bg sits BEHIND the stage padding (inset:0 over the whole #live-frame),
+   while the body stays within the normal centered flow, lifted above the scrim. */
+.projector-slide-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background-size: cover; background-position: center; background-repeat: no-repeat;
+}
+.projector-slide-scrim { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.45); }
+.projector-slide.has-bg { position: relative; z-index: 1; }
+.projector-slide.has-bg .projector-slide-body { color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.6); }
 
 .live-ended { text-align: center; font-size: 1.5rem; color: #9aa0a6; }
 

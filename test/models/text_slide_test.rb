@@ -23,6 +23,27 @@ class TextSlideTest < ActiveSupport::TestCase
     assert slide(reusable: false, set_id: 123).valid?
   end
 
+  test "accepts a valid background image and reports it attached" do
+    s = slide
+    s.background_image.attach(io: File.open(Rails.root.join("test/fixtures/files/bg.png")),
+                              filename: "bg.png", content_type: "image/png")
+    assert s.valid?, s.errors.full_messages.to_sentence
+    assert s.save
+    assert s.background_image?
+  end
+
+  test "rejects a background image of the wrong content type" do
+    s = slide
+    s.background_image.attach(io: StringIO.new("not an image"),
+                              filename: "evil.txt", content_type: "text/plain")
+    assert_not s.valid?
+    assert s.errors[:background_image].any?
+  end
+
+  test "a slide without a background image reports not attached" do
+    assert_not slide.background_image?
+  end
+
   test "markdown is rendered to HTML per page" do
     s = slide(pages: [ { "body_markdown" => "**Creo**" }, { "body_markdown" => "_mas_" } ])
     assert_equal "<p><strong>Creo</strong></p>\n", s.rendered_html(0)

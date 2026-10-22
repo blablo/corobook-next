@@ -1,8 +1,15 @@
 <%#
   Projector rendering of a text slide (Req 3.5). Locals: slide, page (0-based, optional).
-  Neutral style — slides no longer carry a subtype. Renders one page of the slide.
+  When the slide has a background image it fills the stage as a cover photo, with a dark scrim
+  behind the text for legibility. Otherwise the slide renders on the church's normal background.
 %>
-<div class="projector-slide" data-controller="fit" data-role="projector-slide">
+<% if slide.background_image? %>
+  <div class="projector-slide-bg" data-role="slide-bg"
+       style="background-image: url('<%= rails_blob_path(slide.background_image, only_path: true) %>');">
+    <div class="projector-slide-scrim"></div>
+  </div>
+<% end %>
+<div class="projector-slide<%= ' has-bg' if slide.background_image? %>" data-controller="fit" data-role="projector-slide">
   <div data-fit-target="content" class="projector-slide-body">
     <%= raw slide.rendered_html(local_assigns.fetch(:page, 0)) %>
   </div>

@@ -17,6 +17,29 @@ class FollowerViewsTest < ActionDispatch::IntegrationTest
     assert_select "[data-role=projector-lyrics]", text: /Hola mundo/
   end
 
+  test "a text slide with a background image renders it on the projector" do
+    slide = @church.text_slides.create!(title: "Aviso", pages: [ { "body_markdown" => "Bienvenidos" } ])
+    slide.background_image.attach(io: File.open(Rails.root.join("test/fixtures/files/bg.png")),
+                                  filename: "bg.png", content_type: "image/png")
+    item = @set.set_items.create!(position: 1, item_type: "text_slide", text_slide: slide)
+    @session.update!(current_set_item_id: item.id, current_section_index: 0)
+
+    get projector_path(@session.projector_token)
+    assert_response :success
+    assert_select "[data-role=slide-bg]"
+    assert_select ".projector-slide.has-bg"
+  end
+
+  test "a text slide without a background image renders no background element" do
+    slide = @church.text_slides.create!(title: "Plano", pages: [ { "body_markdown" => "Hola" } ])
+    item = @set.set_items.create!(position: 1, item_type: "text_slide", text_slide: slide)
+    @session.update!(current_set_item_id: item.id, current_section_index: 0)
+
+    get projector_path(@session.projector_token)
+    assert_response :success
+    assert_select "[data-role=slide-bg]", false
+  end
+
   test "a bad projector token returns 404" do
     get projector_path("not-a-real-token")
     assert_response :not_found
