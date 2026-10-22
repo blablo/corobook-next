@@ -22,34 +22,45 @@ export default class extends Controller {
   }
 
   fit() {
-    // Measure against the BOUNDED stage, not this element. The fit controller sits on
-    // .projector-section, which is a flex child that grows to its own content height — so
-    // measuring `this.element` makes scrollHeight == clientHeight and the text never shrinks
-    // (it overflows the real projector). #live-frame is bounded by the viewport, so use it as
-    // the box; fall back to this.element when there is no stage ancestor.
-    const stage = this.element.closest("#live-frame") || this.element
-    const box = stage
+    // The real projector stage (#live-frame) is viewport-bounded and has padding; its inner
+    // content box is what the lyrics may fill. .projector-section is width:100% of that box, so
+    // width is not the constraint — HEIGHT is. We binary-search the largest font size whose
+    // rendered section height fits the stage's inner height.
+    const stage = this.element.closest("#live-frame") || this.element.parentElement || this.element
     const content = this.hasContentTarget ? this.contentTarget : this.element
-    // Measure the WHOLE section (this.element) against the stage — not just the content target —
-    // so a copyright line or title credits sitting beside the content are counted and cannot be
-    // pushed off-screen. Font-size is still applied to the content (the lyrics/title block).
-    const measured = this.element
+    const measured = this.element // the whole section (lyrics + any copyright/credits)
+
+    // Inner (content-box) size of the stage: clientHeight/Width already exclude border and the
+    // scrollbar, so subtract only the padding to get the space children actually get.
     const cs = getComputedStyle(stage)
     const padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom)
     const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight)
-    const availH = box.clientHeight - padY
-    const availW = box.clientWidth - padX
+    const availH = stage.clientHeight - padY
+    const availW = stage.clientWidth - padX
+    if (availH <= 0 || availW <= 0) return // not laid out yet
+
     let lo = this.minValue
     let hi = this.maxValue
 
-    // Binary search the largest font size that does not overflow the stage.
     while (hi - lo > 1) {
       const mid = Math.floor((lo + hi) / 2)
       content.style.fontSize = `${mid}px`
-      const fits = measured.scrollHeight <= availH && measured.scrollWidth <= availW
-      if (fits) lo = mid; else hi = mid
+      // HEIGHT is the fill driver. The section is width:100%, so its scrollWidth always equals
+      // availW within sub-pixel rounding — only a genuinely unbreakable line (several px past the
+      // edge) counts as a width overflow, otherwise width would falsely clamp the font to nothing.
+      const heightFits = measured.scrollHeight <= availH
+      const widthFits = measured.scrollWidth <= availW + 4
+      if (heightFits && widthFits) lo = mid; else hi = mid
     }
     content.style.fontSize = `${lo}px`
+
+    // Apply the operator's font-scale override (percent) from the frame, if present.
+    const scaleEl = this.element.closest("[data-font-scale]") || this.element.querySelector("[data-font-scale]")
+    const scale = scaleEl ? Number(scaleEl.dataset.fontScale) : 100
+    if (scale && scale !== 100) {
+      content.style.fontSize = `${Math.round(lo * scale / 100)}px`
+    }
+  }
 
     // Apply the operator's font-scale override (percent) from the frame, if present.
     const scaleEl = this.element.closest("[data-font-scale]") || this.element.querySelector("[data-font-scale]")
