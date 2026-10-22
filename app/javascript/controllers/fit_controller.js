@@ -5,7 +5,17 @@ import { Controller } from "@hotwired/stimulus"
 // lyric block is width:100% of the stage, so only its height can grow it to fill the screen.
 export default class extends Controller {
   static targets = ["content"]
-  static values = { min: { type: Number, default: 12 }, max: { type: Number, default: 400 } }
+  // fixed: a fixed font size as a percentage of the stage (container) height; 0 = auto-fit.
+  static values = {
+    min: { type: Number, default: 12 },
+    max: { type: Number, default: 400 },
+    fixed: { type: Number, default: 0 }
+  }
+
+  // The slide editor changes data-fit-fixed-value as the size select changes; refit live.
+  fixedValueChanged() {
+    if (this.resizeObserver) this.schedule()
+  }
 
   connect() {
     this.schedule()
@@ -36,8 +46,17 @@ export default class extends Controller {
   }
 
   fit() {
-    const stage = this.element.closest("#live-frame") || this.element.closest(".projector-preview") || this.element.parentElement || this.element
     const content = this.hasContentTarget ? this.contentTarget : this.element
+
+    // Fixed size: a percentage of the stage height via container-query units, so it is the same
+    // proportion of the screen on the projector, the operator preview and the editor preview.
+    if (this.fixedValue > 0) {
+      content.style.fontSize = `${this.fixedValue}cqh`
+      content.style.visibility = "visible"
+      return
+    }
+
+    const stage = this.element.closest("#live-frame") || this.element.closest(".projector-preview") || this.element.parentElement || this.element
     const measured = this.element // the whole section (lyrics + any copyright/credits)
 
     // Inner (content-box) size of the stage. clientHeight/Width exclude border and scrollbar, so

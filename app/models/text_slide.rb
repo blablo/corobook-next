@@ -10,6 +10,11 @@ class TextSlide < ApplicationRecord
   BACKGROUND_IMAGE_TYPES = %w[image/png image/jpeg image/webp image/gif].freeze
   BACKGROUND_IMAGE_MAX_BYTES = 10.megabytes
 
+  # Fixed font sizes offered in the editor, as a percentage of the screen height. nil = auto (fit).
+  FONT_SIZE_OPTIONS = [ 4, 5, 6, 8, 10, 12, 14, 16, 18, 20, 24 ].freeze
+
+  validates :font_size, numericality: { only_integer: true, in: 2..30 }, allow_nil: true
+
   before_validation :normalize_tags_and_pages
   validate :acceptable_background_image
 

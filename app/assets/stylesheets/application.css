@@ -46,7 +46,11 @@
 /* Operator preview: a bounded mini-stage showing the live projector frame in place, so the
    operator sees exactly what's on the screen — including the church's projector colours, which
    the inner #live-frame carries as --proj-* vars. */
-.projector-preview { background: var(--proj-bg, #000); color: var(--proj-text, #fff); aspect-ratio: 16 / 9; position: relative; }
+.projector-preview { background: var(--proj-bg, #000); color: var(--proj-text, #fff); aspect-ratio: 16 / 9; position: relative; container-type: size; }
+/* The real projector stage is also a size container, so a slide's fixed font size (in cqh) is a
+   percentage of the screen height. Scoped to .projector-root: the musician page reuses
+   #live-frame as a content-sized band, which size containment would collapse. */
+.projector-root #live-frame { container-type: size; }
 .projector-preview #live-frame { position: static; inset: auto; height: 100%; padding: 4% 5%; }
 /* Slide-show previews render a .projector-slide DIRECTLY in the preview box (no #live-frame);
    center and pad it so the slide body sits in the middle and the background image fills the box. */
