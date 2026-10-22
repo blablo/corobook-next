@@ -115,12 +115,18 @@ DB_PW="${DB_PW:-$DEF_PW}"
 [ -n "$DB_PW" ] || die "A database password is required."
 
 hdr "4) Mail (optional on production)"
-say "${DIM}If the domain isn't verified with your mail provider, confirmation emails won't deliver —${RESET}"
-say "${DIM}the on-screen fallback link still works. See docs/mail-setup.md.${RESET}"
+say "${DIM}The Resend API key authenticates SMTP sending. Without it (or if the domain isn't${RESET}"
+say "${DIM}verified with Resend) confirmation emails won't deliver — the on-screen fallback link${RESET}"
+say "${DIM}still works. Get a key at https://resend.com -> API Keys. See docs/mail-setup.md.${RESET}"
 DEF_MD="$(read_env "$ENV_PROD" MAIL_DOMAIN)"; DEF_MD="${DEF_MD:-example.com}"
 MAIL_DOMAIN="$(ask "Mail domain" "$DEF_MD")"
 DEF_MF="$(read_env "$ENV_PROD" MAIL_FROM)"; DEF_MF="${DEF_MF:-Corobook <no-reply@$MAIL_DOMAIN>}"
 MAIL_FROM="$(ask "Mail 'from' address" "$DEF_MF")"
+DEF_RK="$(read_env "$ENV_PROD" RESEND_API_KEY)"
+RK_HAD="no"; [ -n "$DEF_RK" ] && RK_HAD="yes"
+RESEND_API_KEY="$(ask_secret "Resend API key (re_..., blank to skip) (hidden)" "$RK_HAD")"
+RESEND_API_KEY="${RESEND_API_KEY:-$DEF_RK}"
+[ -n "$RESEND_API_KEY" ] || warn "No Resend API key set — email sending will fail until you add one."
 
 # ─────────────────────────────── write env file ───────────────────────────────
 hdr "Writing env file"
@@ -134,6 +140,7 @@ RAILS_MASTER_KEY=$RAILS_MASTER_KEY
 COROBOOK_NEXT_DATABASE_PASSWORD=$DB_PW
 MAIL_DOMAIN=$MAIL_DOMAIN
 MAIL_FROM=$MAIL_FROM
+RESEND_API_KEY=$RESEND_API_KEY
 EOF
 ok "Wrote ${ENV_PROD#$REPO_ROOT/}"
 

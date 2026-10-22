@@ -62,8 +62,9 @@ Rails.application.configure do
     host: ENV.fetch("APP_HOST", "corobook.example.com"), protocol: "https"
   }
 
-  # Deliver invitation/transactional mail through Resend over SMTP. The API key lives in Rails
-  # encrypted credentials (bin/rails credentials:edit -> resend.api_key), never in the repo.
+  # Deliver invitation/transactional mail through Resend over SMTP. The API key comes from the
+  # RESEND_API_KEY env var (set in deploy/.env.prod by deploy/setup.sh), falling back to Rails
+  # encrypted credentials (bin/rails credentials:edit -> resend.api_key) for older deployments.
   # Generic SMTP keeps the app provider-agnostic (swap to SES/Brevo by changing this block only).
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.perform_deliveries = true
@@ -72,7 +73,7 @@ Rails.application.configure do
     address:              "smtp.resend.com",
     port:                 587,
     user_name:            "resend",
-    password:             Rails.application.credentials.dig(:resend, :api_key),
+    password:             ENV["RESEND_API_KEY"].presence || Rails.application.credentials.dig(:resend, :api_key),
     authentication:       :plain,
     enable_starttls_auto: true
   }
