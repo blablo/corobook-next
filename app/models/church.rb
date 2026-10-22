@@ -15,10 +15,14 @@ class Church < ApplicationRecord
   LINE_HEIGHT_OPTIONS = %w[tight normal relaxed].freeze
   VALIGN_OPTIONS      = %w[top center bottom].freeze
   PAGINATION_OPTIONS  = %w[by_section by_lines].freeze
+  BG_TYPE_OPTIONS     = %w[solid gradient].freeze
   HEX_COLOR_FORMAT    = /\A#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})\z/
 
-  validates :projector_bg_color, :projector_text_color,
+  validates :projector_bg_color, :projector_text_color, :projector_bg_color2,
             format: { with: HEX_COLOR_FORMAT, message: "must be a hex color like #112233" }
+  validates :projector_bg_type, inclusion: { in: BG_TYPE_OPTIONS }
+  validates :projector_bg_gradient_angle,
+            numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 360 }
   validates :projector_lyric_case, :projector_title_case, inclusion: { in: CASE_OPTIONS }
   validates :projector_font, inclusion: { in: FONT_OPTIONS }
   validates :projector_line_height, inclusion: { in: LINE_HEIGHT_OPTIONS }

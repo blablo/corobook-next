@@ -75,6 +75,7 @@ class SettingsControllerTest < ActionDispatch::IntegrationTest
     login(@admin)
     patch settings_path, params: { section: "projection", church: {
       projector_bg_color: "#112233", projector_text_color: "#eeeeee",
+      projector_bg_type: "gradient", projector_bg_color2: "#334455", projector_bg_gradient_angle: "120",
       projector_font: "serif", projector_lyric_case: "upper",
       projector_valign: "top", projector_pagination: "by_lines",
       projector_lines_per_slide: "6", projector_bold: "0", projector_show_credits: "0"
@@ -82,6 +83,9 @@ class SettingsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to projection_settings_path
     @church.reload
     assert_equal "#112233", @church.projector_bg_color
+    assert_equal "gradient", @church.projector_bg_type
+    assert_equal "#334455", @church.projector_bg_color2
+    assert_equal 120, @church.projector_bg_gradient_angle
     assert_equal "serif", @church.projector_font
     assert_equal "upper", @church.projector_lyric_case
     assert_equal "top", @church.projector_valign

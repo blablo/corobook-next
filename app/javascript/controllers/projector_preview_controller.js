@@ -35,7 +35,13 @@ export default class extends Controller {
   }
 
   update() {
-    const bg = this.val("pp-bg") || "#000000"
+    const bgType = this.val("pp-bg-type")
+    const bg1 = this.val("pp-bg") || "#000000"
+    const bg2 = this.val("pp-bg2") || "#1a1a2e"
+    const angle = parseInt(this.val("pp-bg-angle"), 10)
+    const background = bgType === "gradient"
+      ? `linear-gradient(${isNaN(angle) ? 160 : angle}deg, ${bg1}, ${bg2})`
+      : bg1
     const text = this.val("pp-text") || "#ffffff"
     const font = this.constructor.FONTS[this.val("pp-font")] || this.constructor.FONTS.sans
     const lh = this.constructor.LINE_HEIGHTS[this.val("pp-lh")] || "1.15"
@@ -46,13 +52,11 @@ export default class extends Controller {
     const pagination = this.val("pp-pagination")
     const perSlide = Math.max(1, Math.min(20, parseInt(this.val("pp-lines"), 10) || 4))
 
-    // Stage colours (also drives the .projector-preview box via inline vars).
-    this.stageTarget.style.setProperty("--proj-bg", bg)
-    this.stageTarget.style.setProperty("--proj-text", text)
-    this.stageTarget.style.background = bg
+    // Stage background (solid or gradient).
+    this.stageTarget.style.background = background
 
     const frame = this.frameTarget
-    frame.style.background = bg
+    frame.style.background = background
     frame.style.color = text
     frame.style.fontFamily = font
     frame.style.justifyContent = valign
@@ -76,5 +80,14 @@ export default class extends Controller {
     // Lines-per-slide only matters in by_lines mode.
     const linesField = this.element.querySelector('[data-role="pp-lines-field"]')
     if (linesField) linesField.style.display = pagination === "by_lines" ? "" : "none"
+
+    // Gradient colour + angle only matter in gradient mode.
+    const isGradient = bgType === "gradient"
+    const color2Field = this.element.querySelector('[data-role="pp-bg-color2-field"]')
+    const angleField = this.element.querySelector('[data-role="pp-bg-angle-field"]')
+    if (color2Field) color2Field.style.display = isGradient ? "" : "none"
+    if (angleField) angleField.style.display = isGradient ? "" : "none"
+    const angleLabel = this.element.querySelector('[data-role="pp-bg-angle-label"]')
+    if (angleLabel && !isNaN(angle)) angleLabel.textContent = `${angle}°`
   }
 }
