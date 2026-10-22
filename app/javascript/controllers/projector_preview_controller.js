@@ -51,6 +51,8 @@ export default class extends Controller {
     const bold = this.val("pp-bold")
     const pagination = this.val("pp-pagination")
     const perSlide = Math.max(1, Math.min(20, parseInt(this.val("pp-lines"), 10) || 4))
+    // Fixed lyric size as % of screen height (cqh — the preview stage is a size container); 0 = auto.
+    const fixedSize = parseInt(this.val("pp-font-size"), 10) || 0
 
     // Stage background (solid or gradient).
     this.stageTarget.style.background = background
@@ -72,7 +74,7 @@ export default class extends Controller {
       div.style.fontWeight = bold ? "700" : "400"
       div.style.lineHeight = lh
       div.style.textTransform = lyricCase
-      div.style.fontSize = "clamp(0.85rem, 2.6vw, 1.5rem)"
+      div.style.fontSize = fixedSize > 0 ? `${fixedSize}cqh` : "clamp(0.85rem, 2.6vw, 1.5rem)"
       div.style.marginTop = "0.3em"
       this.lyricsTarget.appendChild(div)
     })

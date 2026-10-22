@@ -1,15 +1,15 @@
-<% content_for :title, "Projection settings" %>
+<% content_for :title, "Song projection settings" %>
 
 <div class="mx-auto max-w-3xl p-4" data-role="settings">
-  <h1 class="text-2xl font-semibold mb-6">Projection settings</h1>
+  <h1 class="text-2xl font-semibold mb-6">Song projection settings</h1>
 
-  <%# ── Projection (per-church projector look & behaviour) ──────────────── %>
+  <%# ── Song projection (per-church look & behaviour of song lyrics on the projector) ── %>
   <section data-role="projector-settings" data-controller="projector-preview">
-    <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/60 mb-2">Projection</h2>
+    <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/60 mb-2">Song projection</h2>
     <p class="text-sm text-base-content/60 mb-4 max-w-prose">
       Define how song lyrics look on the projection screen for <span class="font-medium"><%= @church.name %></span>.
-      These apply to every live service. Changes preview live below and take effect on the next
-      slide once saved.
+      These apply to songs in every live service; custom slides keep their own look. Changes preview
+      live below and take effect on the next slide once saved.
     </p>
 
     <%= form_with model: @church, url: settings_path, method: :patch do |f| %>
@@ -67,6 +67,14 @@
                   [ ["Tight", "tight"], ["Normal", "normal"], ["Relaxed", "relaxed"] ],
                   {}, class: "select select-bordered w-full",
                   data: { role: "pp-lh", action: "change->projector-preview#update" } %>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <%= f.label :projector_font_size, "Font size", class: "fieldset-legend" %>
+            <%= f.select :projector_font_size,
+                  [ [ "Auto — fit to screen", "" ] ] + TextSlide::FONT_SIZE_OPTIONS.map { |n| [ "#{n}% of screen height", n ] },
+                  {}, class: "select w-full",
+                  data: { role: "pp-font-size", action: "change->projector-preview#update" } %>
           </fieldset>
 
           <fieldset class="fieldset">

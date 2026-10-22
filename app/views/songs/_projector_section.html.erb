@@ -6,6 +6,7 @@
     is_final_section  - true on the final slide of the song (shows the copyright notice).
     song, church_license
     show_credits      - whether the copyright/licensing notice may render (church setting; default true).
+    font_size         - fixed lyric size as % of screen height (church setting); 0 = auto-fit.
     show_editor_warnings (default false).
 %>
 <% show_editor_warnings = local_assigns.fetch(:show_editor_warnings, false) %>
@@ -13,7 +14,7 @@
 <% lines = local_assigns[:lines] || Corobook::ChordPro::Transform.section_plain_lines(section) %>
 <% notice = Corobook::CopyrightNotice.for(song, church_license: church_license) %>
 
-<div class="projector-section" data-controller="fit">
+<div class="projector-section" data-controller="fit" data-fit-fixed-value="<%= local_assigns.fetch(:font_size, 0).to_i %>">
   <div data-fit-target="content" class="projector-lyrics" data-role="projector-lyrics">
     <% lines.each do |line| %>
       <div class="projector-line"><%= line.presence || raw("&nbsp;") %></div>
