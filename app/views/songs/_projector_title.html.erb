@@ -1,20 +1,25 @@
 <%#
   Projector TITLE slide for a song (shown as the first stop before its lyrics).
-  Locals: song. Shows the title, and below it any available licensing/credit data
-  (author, copyright line, CCLI number) — each line omitted when blank.
+  Locals: song, show_credits (default true).
+  A fixed TEMPLATE, not auto-fit: the title is sized as a share of the screen (cqh/cqw units
+  against the projector stage container) so every song's title looks the same — a short title is
+  not blown up to fill the screen. Below it: a thin divider and the licensing/credit lines
+  (author, copyright line, CCLI number), each omitted when blank.
 %>
-<div class="projector-section projector-title" data-role="projector-title" data-controller="fit">
-  <div data-fit-target="content" class="projector-title-content">
+<% show_credits = local_assigns.fetch(:show_credits, true) %>
+<% credits = [] %>
+<% if show_credits %>
+  <% credits << song.author if song.author.present? %>
+  <% credits << song.copyright_line if song.copyright_line.present? %>
+  <% credits << "CCLI ##{song.ccli_song_number}" if song.ccli_song_number.present? %>
+<% end %>
+
+<div class="projector-section projector-title" data-role="projector-title">
+  <div class="projector-title-content">
     <div class="projector-title-name" data-role="title"><%= song.title %></div>
 
-    <% show_credits = local_assigns.fetch(:show_credits, true) %>
-    <% credits = [] %>
-    <% if show_credits %>
-      <% credits << song.author if song.author.present? %>
-      <% credits << song.copyright_line if song.copyright_line.present? %>
-      <% credits << "CCLI ##{song.ccli_song_number}" if song.ccli_song_number.present? %>
-    <% end %>
     <% if credits.any? %>
+      <div class="projector-title-rule" aria-hidden="true"></div>
       <div class="projector-title-credits" data-role="title-credits">
         <% credits.each do |line| %>
           <div class="projector-title-credit-line"><%= line %></div>

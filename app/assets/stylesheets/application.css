@@ -69,12 +69,22 @@
   color: #9aa0a6; letter-spacing: 0.02em; text-align: center; font-weight: 400;
 }
 
-/* Title slide: the song name large and centered, with any licensing/credit lines muted below. */
-.projector-title { justify-content: center; }
-.projector-title-content { width: 100%; text-align: center; }
-.projector-title-name { font-weight: 800; line-height: 1.1; text-transform: var(--proj-title-case, none); }
-.projector-title-credits { margin-top: 5vh; color: #9aa0a6; font-weight: 400; }
-.projector-title-credit-line { font-size: clamp(0.9rem, 1.8vw, 1.4rem); letter-spacing: 0.02em; }
+/* Title slide TEMPLATE: fixed proportions of the screen (cqh/cqw against the projector stage, a
+   size container), not auto-fit, so every title looks consistent. Always vertically centered
+   (margin-block:auto) whatever the lyric position setting. Colours follow the church text colour. */
+.projector-title { margin-block: auto; justify-content: center; }
+.projector-title-content { width: 100%; text-align: center; display: flex; flex-direction: column; align-items: center; }
+.projector-title-name {
+  max-width: 85%; font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; text-wrap: balance;
+  font-size: min(10cqh, 7cqw);
+  text-transform: var(--proj-title-case, none);
+}
+.projector-title-rule {
+  width: 8cqw; height: max(2px, 0.5cqh); margin: 4cqh auto 3cqh;
+  background: currentColor; opacity: 0.45; border-radius: 9999px;
+}
+.projector-title-credits { opacity: 0.7; font-weight: 400; }
+.projector-title-credit-line { font-size: min(3cqh, 2.2cqw); letter-spacing: 0.02em; }
 .projector-title-credit-line + .projector-title-credit-line { margin-top: 0.4em; }
 
 /* Blank: a true-black fill that hides everything (operator pressed Blank). */
