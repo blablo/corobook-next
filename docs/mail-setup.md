@@ -37,37 +37,52 @@ An unverified domain is the most common reason "mail silently doesn't arrive" �
 In Resend → **API Keys** → create a key with **Sending** permission. Copy it once
 (`re_xxxxxxxx…`); you can't read it again later.
 
-## 3. Store the key in Rails encrypted credentials (NOT env, NOT the repo)
+## 3. Set the API key as an environment variable
+
+The app reads the key from the **`RESEND_API_KEY`** environment variable. On the production box
+this lives in `deploy/.env.prod` (gitignored, owner-only). The easiest way is the interactive
+setup, which prompts for it (hidden input) and writes it for you:
 
 ```sh
-bin/rails credentials:edit
+make -C deploy setup
 ```
 
-Add:
-
-```yaml
-resend:
-  api_key: re_xxxxxxxxxxxxxxxxxxxxxxxx
-```
-
-Save and close. This writes `config/credentials.yml.enc` (encrypted, committed) and requires the
-`RAILS_MASTER_KEY` (or `config/master.key`) to decrypt in production. Confirm it's readable:
+Or add it to `deploy/.env.prod` by hand:
 
 ```sh
-RAILS_ENV=production bin/rails runner \
-  'puts Rails.application.credentials.dig(:resend, :api_key) ? "KEY_PRESENT" : "KEY_MISSING"'
+RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxx
 ```
+
+`deploy/docker-compose.prod.yml` passes `RESEND_API_KEY` into both the `web` and `worker`
+containers, so restart the stack to pick up the change:
+
+```sh
+make -C deploy rebuild      # or: docker restart corobook-web corobook-worker-1
+```
+
+Confirm it's readable inside the container:
+
+```sh
+docker exec corobook-web bin/rails runner \
+  'puts ENV["RESEND_API_KEY"].present? ? "KEY_PRESENT" : "KEY_MISSING"'
+```
+
+> **Legacy fallback.** `production.rb` reads `ENV["RESEND_API_KEY"]` first and falls back to Rails
+> encrypted credentials (`bin/rails credentials:edit` → `resend.api_key`) if the env var is unset.
+> The env var is preferred; you do not need both. Older deployments that already set the
+> credentials entry keep working untouched.
 
 ## 4. Set the production environment variables
 
-See `.env.example`. In your production host's environment set:
+See `.env.example`. In your production host's environment (`deploy/.env.prod`) set:
 
-| Var           | Example                              | Purpose                                            |
-|---------------|--------------------------------------|----------------------------------------------------|
-| `APP_HOST`    | `corobook.app`                       | Host for absolute links in emails (HTTPS).         |
-| `MAIL_DOMAIN` | `corobook.app`                       | Must be a **Resend-verified** domain.              |
-| `MAIL_FROM`   | `Corobook <no-reply@corobook.app>`   | The `From` header on all outgoing mail.            |
-| `RAILS_MASTER_KEY` | (your master key)               | Decrypts credentials (holds the Resend API key).   |
+| Var                | Example                              | Purpose                                            |
+|--------------------|--------------------------------------|----------------------------------------------------|
+| `APP_HOST`         | `corobook.app`                       | Host for absolute links in emails (HTTPS).         |
+| `MAIL_DOMAIN`      | `corobook.app`                       | Must be a **Resend-verified** domain.              |
+| `MAIL_FROM`        | `Corobook <no-reply@corobook.app>`   | The `From` header on all outgoing mail.            |
+| `RESEND_API_KEY`   | `re_xxxxxxxx…`                       | Authenticates SMTP sending (step 3).               |
+| `RAILS_MASTER_KEY` | (your master key)                    | Decrypts credentials.                              |
 
 ## 5. Run the Solid Queue worker
 
@@ -105,7 +120,8 @@ credentials key the password reads) — no application or mailer code changes.
 
 ## Troubleshooting
 
-- **`KEY_MISSING`** — the credentials entry isn't there or `RAILS_MASTER_KEY` is wrong.
+- **`KEY_MISSING`** — `RESEND_API_KEY` isn't set in the container env (check `deploy/.env.prod`
+  and that you restarted the stack), and no credentials fallback is present.
 - **Mail queued but never arrives** — the Solid Queue worker (step 5) isn't running.
 - **Resend rejects the send** — the `MAIL_DOMAIN` isn't verified, or `MAIL_FROM` uses a different
   domain than the verified one.

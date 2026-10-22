@@ -45,6 +45,7 @@ services:
       APP_HOST: ${APP_HOST:?set to your DuckDNS host, e.g. corobook.duckdns.org}
       MAIL_DOMAIN: ${MAIL_DOMAIN:-example.com}
       MAIL_FROM: ${MAIL_FROM:-Corobook <no-reply@example.com>}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
       # TLS terminates at the shared Caddy; trust its forwarded proto so force_ssl doesn't loop.
       RAILS_ASSUME_SSL: "true"
       RAILS_SERVE_STATIC_FILES: "true"
@@ -67,6 +68,7 @@ services:
       APP_HOST: ${APP_HOST:?}
       MAIL_DOMAIN: ${MAIL_DOMAIN:-example.com}
       MAIL_FROM: ${MAIL_FROM:-Corobook <no-reply@example.com>}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
     networks: [ internal ]
     depends_on:
       postgres:
