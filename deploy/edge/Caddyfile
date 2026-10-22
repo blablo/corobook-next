@@ -12,6 +12,20 @@
 	reverse_proxy corobook-web:80
 }
 
+# ── Legacy corobook app (real domain corobook.com) ──
+# The old corobook Docker container on this box, on port 3001. Attach its container to the
+# shared `edge` network (in its compose: `networks: [default, edge]` with edge external; or live:
+# `docker network connect edge <container>`), then set the container name below.
+# corobook.com's A record (and www) must point at this server's IP before Caddy can get the cert.
+corobook.com {
+	encode zstd gzip
+	reverse_proxy corobook-legacy:3001
+}
+
+www.corobook.com {
+	redir https://corobook.com{uri} permanent
+}
+
 # ── Your other Docker app ──  (uncomment + edit)
 # Attach that app's container to the `edge` network (e.g. `networks: [edge]` with edge external),
 # then point this block at its container-name:port on that network.
