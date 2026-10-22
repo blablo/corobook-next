@@ -12,7 +12,7 @@
 # ...but keep the committed template (no secrets).
 !/.env.example
 # Deploy secrets (real values); the .example templates are kept.
-/deploy/.env.preprod
+/deploy/.env.prod
 /deploy/edge/.env.edge
 
 # Ignore all logfiles and tempfiles.
