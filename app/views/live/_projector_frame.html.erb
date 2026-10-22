@@ -3,18 +3,22 @@
   stale/out-of-order frames (design §6.2). Blanked → black screen.
 %>
 <% frame = Corobook::LiveFrame.new(session) %>
+<% proj = session.church.projector_settings %>
 <div id="live-frame" data-controller="follower" data-follower-version-value="<%= session.position_version %>"
      data-role="projector-frame" data-font-scale="<%= session.font_scale %>"
-     style="--font-scale: <%= session.font_scale %>;" class="<%= 'is-blanked' if session.blanked %>">
+     style="--font-scale: <%= session.font_scale %>; <%= proj.style %>;"
+     class="<%= 'is-blanked' if session.blanked %>">
   <% if session.blanked %>
     <div class="projector-blank" data-role="blank"></div>
   <% elsif frame.title_slide? %>
-    <%= render "songs/projector_title", song: frame.item %>
+    <%= render "songs/projector_title", song: frame.item, show_credits: proj.show_credits? %>
   <% elsif frame.song? && frame.current_section %>
     <%= render "songs/projector_section",
-          song: frame.item, section: frame.current_section,
-          is_final_section: frame.final_section?,
-          church_license: session.church.ccli_license_number %>
+          lines: frame.current_section_plain_lines,
+          is_final_section: frame.final_chunk?,
+          song: frame.item,
+          church_license: session.church.ccli_license_number,
+          show_credits: proj.show_credits? %>
   <% elsif frame.text_slide? %>
     <%= render "text_slides/projector_slide", slide: frame.item, page: session.current_section_index %>
   <% end %>

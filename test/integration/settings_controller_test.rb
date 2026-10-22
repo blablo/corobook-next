@@ -45,4 +45,40 @@ class SettingsControllerTest < ActionDispatch::IntegrationTest
     get root_path
     assert_select "[data-role=nav-settings]"
   end
+
+  test "an admin sees the projection settings with a live preview" do
+    login(@admin)
+    get settings_path
+    assert_select "[data-role=projector-settings]"
+    assert_select "[data-role=pp-stage]"
+    assert_select "[data-role=pp-bg]"
+    assert_select "[data-role=pp-pagination]"
+  end
+
+  test "an admin can save projection settings" do
+    login(@admin)
+    patch settings_path, params: { church: {
+      projector_bg_color: "#112233", projector_text_color: "#eeeeee",
+      projector_font: "serif", projector_lyric_case: "upper",
+      projector_valign: "top", projector_pagination: "by_lines",
+      projector_lines_per_slide: "6", projector_bold: "0", projector_show_credits: "0"
+    } }
+    assert_redirected_to settings_path
+    @church.reload
+    assert_equal "#112233", @church.projector_bg_color
+    assert_equal "serif", @church.projector_font
+    assert_equal "upper", @church.projector_lyric_case
+    assert_equal "top", @church.projector_valign
+    assert_equal "by_lines", @church.projector_pagination
+    assert_equal 6, @church.projector_lines_per_slide
+    refute @church.projector_bold
+    refute @church.projector_show_credits
+  end
+
+  test "invalid projection settings re-render unprocessable" do
+    login(@admin)
+    patch settings_path, params: { church: { projector_bg_color: "notacolor" } }
+    assert_response :unprocessable_entity
+    assert_equal "#000000", @church.reload.projector_bg_color
+  end
 end

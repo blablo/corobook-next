@@ -9,6 +9,31 @@ class Church < ApplicationRecord
 
   validates :name, presence: true
 
+  # ── Projector settings (per-church projection look & behaviour) ──────────────
+  CASE_OPTIONS        = %w[none upper title].freeze
+  FONT_OPTIONS        = %w[sans serif condensed mono].freeze
+  LINE_HEIGHT_OPTIONS = %w[tight normal relaxed].freeze
+  VALIGN_OPTIONS      = %w[top center bottom].freeze
+  PAGINATION_OPTIONS  = %w[by_section by_lines].freeze
+  HEX_COLOR_FORMAT    = /\A#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})\z/
+
+  validates :projector_bg_color, :projector_text_color,
+            format: { with: HEX_COLOR_FORMAT, message: "must be a hex color like #112233" }
+  validates :projector_lyric_case, :projector_title_case, inclusion: { in: CASE_OPTIONS }
+  validates :projector_font, inclusion: { in: FONT_OPTIONS }
+  validates :projector_line_height, inclusion: { in: LINE_HEIGHT_OPTIONS }
+  validates :projector_valign, inclusion: { in: VALIGN_OPTIONS }
+  validates :projector_pagination, inclusion: { in: PAGINATION_OPTIONS }
+  validates :projector_lines_per_slide,
+            numericality: { only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 20 }
+
+  # A value object bundling the projection settings, for CSS-variable + casing generation.
+  def projector_settings
+    Corobook::ProjectorSettings.new(self)
+  end
+
+  def paginate_by_lines? = projector_pagination == "by_lines"
+
   # Optional unique subdomain (e.g. "gracia" → gracia.example.com). When set it will later let a
   # church's members skip the church picker at login. Nil/blank = no subdomain (unset).
   # Rules: 3–63 chars, lowercase letters/digits/hyphens, not starting/ending with a hyphen, and

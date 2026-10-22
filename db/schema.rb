@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_21_190000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_22_150000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -22,7 +22,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_21_190000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.citext "subdomain"
+    t.string "projector_bg_color", default: "#000000", null: false
+    t.string "projector_text_color", default: "#ffffff", null: false
+    t.string "projector_lyric_case", default: "none", null: false
+    t.string "projector_title_case", default: "none", null: false
+    t.string "projector_font", default: "sans", null: false
+    t.string "projector_line_height", default: "normal", null: false
+    t.boolean "projector_bold", default: true, null: false
+    t.boolean "projector_show_credits", default: true, null: false
+    t.string "projector_valign", default: "center", null: false
+    t.string "projector_pagination", default: "by_section", null: false
+    t.integer "projector_lines_per_slide", default: 4, null: false
     t.index ["subdomain"], name: "index_churches_on_subdomain", unique: true, where: "(subdomain IS NOT NULL)"
+    t.check_constraint "projector_lines_per_slide >= 1 AND projector_lines_per_slide <= 20", name: "churches_projector_lines_per_slide_check"
   end
 
   create_table "invitations", force: :cascade do |t|
@@ -58,6 +70,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_21_190000) do
     t.datetime "ended_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "current_chunk_index", default: 0, null: false
     t.index ["church_id"], name: "index_live_sessions_on_church_id"
     t.index ["church_id"], name: "index_one_active_live_session_per_church", unique: true, where: "((status)::text = 'active'::text)"
     t.index ["current_set_item_id"], name: "index_live_sessions_on_current_set_item_id"

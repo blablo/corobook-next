@@ -17,30 +17,36 @@
 
 .projector-root {
   position: fixed; inset: 0;
-  background: #000; color: #fff;
+  background: var(--proj-bg, #000); color: var(--proj-text, #fff);
   display: flex; flex-direction: column;
-  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--proj-font, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
 }
 .musician-root { min-height: 100vh; padding: 2rem; box-sizing: border-box; }
 
-/* The live frame is the flex stage: lyrics centered, copyright pinned to the foot. */
+/* The live frame is the flex stage: lyrics vertically placed per church setting, copyright
+   pinned to the foot. The frame itself carries --proj-* vars so the operator-preview (which
+   renders the same frame) inherits the look too. */
 #live-frame {
   flex: 1; display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
+  align-items: center; justify-content: var(--proj-valign, center);
   padding: 6vh 6vw; text-align: center;
+  background: var(--proj-bg, #000); color: var(--proj-text, #fff);
+  font-family: var(--proj-font, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
 }
 .projector-section { display: flex; flex-direction: column; align-items: center; width: 100%; }
 
 .projector-lyrics { width: 100%; }
 .projector-line {
-  font-weight: 700; line-height: 1.15; letter-spacing: -0.01em;
-  text-wrap: balance;
+  font-weight: var(--proj-weight, 700); line-height: var(--proj-line-height, 1.15);
+  letter-spacing: -0.01em; text-wrap: balance;
+  text-transform: var(--proj-lyric-case, none);
 }
 .projector-line + .projector-line { margin-top: 0.35em; }
 
-/* Operator preview: a bounded dark mini-stage showing the live projector frame in place, so the
-   operator sees exactly what's on the screen. Overrides the full-viewport projector stage sizing. */
-.projector-preview { background: #000; color: #fff; aspect-ratio: 16 / 9; position: relative; }
+/* Operator preview: a bounded mini-stage showing the live projector frame in place, so the
+   operator sees exactly what's on the screen — including the church's projector colours, which
+   the inner #live-frame carries as --proj-* vars. */
+.projector-preview { background: var(--proj-bg, #000); color: var(--proj-text, #fff); aspect-ratio: 16 / 9; position: relative; }
 .projector-preview #live-frame { position: static; inset: auto; height: 100%; padding: 4% 5%; }
 .projector-preview .projector-line { font-size: clamp(1rem, 3.5vw, 2rem); }
 .projector-preview .projector-title-name { font-size: clamp(1.25rem, 4vw, 2.5rem); }
@@ -56,7 +62,7 @@
 /* Title slide: the song name large and centered, with any licensing/credit lines muted below. */
 .projector-title { justify-content: center; }
 .projector-title-content { width: 100%; text-align: center; }
-.projector-title-name { font-weight: 800; line-height: 1.1; }
+.projector-title-name { font-weight: 800; line-height: 1.1; text-transform: var(--proj-title-case, none); }
 .projector-title-credits { margin-top: 5vh; color: #9aa0a6; font-weight: 400; }
 .projector-title-credit-line { font-size: clamp(0.9rem, 1.8vw, 1.4rem); letter-spacing: 0.02em; }
 .projector-title-credit-line + .projector-title-credit-line { margin-top: 0.4em; }

@@ -7,10 +7,13 @@
   <div data-fit-target="content" class="projector-title-content">
     <div class="projector-title-name" data-role="title"><%= song.title %></div>
 
+    <% show_credits = local_assigns.fetch(:show_credits, true) %>
     <% credits = [] %>
-    <% credits << song.author if song.author.present? %>
-    <% credits << song.copyright_line if song.copyright_line.present? %>
-    <% credits << "CCLI ##{song.ccli_song_number}" if song.ccli_song_number.present? %>
+    <% if show_credits %>
+      <% credits << song.author if song.author.present? %>
+      <% credits << song.copyright_line if song.copyright_line.present? %>
+      <% credits << "CCLI ##{song.ccli_song_number}" if song.ccli_song_number.present? %>
+    <% end %>
     <% if credits.any? %>
       <div class="projector-title-credits" data-role="title-credits">
         <% credits.each do |line| %>
