@@ -1,90 +1,90 @@
 <%= form_with model: text_slide, html: { multipart: true },
       data: { controller: "slide-editor", "slide-editor-url-value": preview_text_slides_path } do |f| %>
   <% if text_slide.errors.any? %>
-    <div class="alert alert-error mb-4 text-sm" data-role="slide-errors">
+    <div role="alert" class="alert alert-error mb-4" data-role="slide-errors">
       <span><%= text_slide.errors.full_messages.to_sentence %></span>
     </div>
   <% end %>
 
-  <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-    <%# ── Editor ──────────────────────────────────────────────────── %>
-    <div class="card bg-base-100 ring-1 ring-base-200 min-w-0 overflow-hidden">
-      <div class="card-body gap-4 min-w-0">
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 items-start">
+    <%# ── Editor column ───────────────────────────────────────────── %>
+    <div class="card card-border bg-base-100 min-w-0">
+      <div class="card-body gap-4">
+        <%# Title %>
         <fieldset class="fieldset">
-          <%= f.label :title, "Title", class: "fieldset-legend" %>
-          <%= f.text_field :title, class: "input input-bordered w-full", placeholder: "Slide title" %>
+          <legend class="fieldset-legend">Title</legend>
+          <%= f.text_field :title, class: "input w-full", placeholder: "Slide title" %>
         </fieldset>
 
-        <%# ── Background image (projection only) ──────────────────── %>
-        <fieldset class="fieldset" data-role="slide-bg-field">
+        <%# Background image (projection only) %>
+        <fieldset class="fieldset">
           <legend class="fieldset-legend">Background image</legend>
           <% if text_slide.background_image? %>
-            <div class="flex items-center gap-3 mb-2" data-role="slide-bg-current">
+            <div class="flex items-center gap-3" data-role="slide-bg-current">
               <%= image_tag rails_blob_path(text_slide.background_image, only_path: true),
-                    class: "h-16 w-28 object-cover rounded border border-base-300", alt: "Current background" %>
-              <label class="label cursor-pointer gap-2 text-sm">
+                    class: "h-14 w-24 object-cover rounded border border-base-300", alt: "Current background" %>
+              <label class="label">
                 <%= f.check_box :remove_background_image, { class: "checkbox checkbox-sm" }, "1", "0" %>
-                <span>Remove background</span>
+                Remove
               </label>
             </div>
           <% end %>
           <%= f.file_field :background_image, accept: "image/png,image/jpeg,image/webp,image/gif",
-                class: "file-input file-input-sm w-full max-w-full" %>
-          <p class="label text-base-content/60">Shown behind the slide text on the projector (PNG, JPEG, WebP or GIF, up to 10&nbsp;MB). A dark overlay keeps the text readable.</p>
+                class: "file-input w-full" %>
+          <p class="label">Shown behind the slide text on the projector. PNG, JPEG, WebP or GIF, up to 10&nbsp;MB.</p>
         </fieldset>
 
-        <%# ── Tags ───────────────────────────────────────────────── %>
+        <%# Tags %>
         <fieldset class="fieldset">
           <legend class="fieldset-legend">Tags</legend>
-          <div class="flex flex-wrap items-center gap-1.5 rounded-lg border border-base-300 px-2 py-1.5 min-h-10 focus-within:border-primary cursor-text"
+          <div class="input w-full flex flex-wrap items-center gap-1.5 h-auto min-h-10 py-1.5 cursor-text"
                data-action="click->slide-editor#focusTag">
             <span class="contents" data-slide-editor-target="tagChips"></span>
             <input type="text" list="church-tags" placeholder="Add a tag…"
-                   class="flex-1 min-w-32 bg-transparent border-0 focus:outline-none text-sm py-0.5"
+                   class="grow min-w-24 bg-transparent border-0 focus:outline-none text-sm"
                    data-slide-editor-target="tagInput" data-action="keydown->slide-editor#onTagKey">
           </div>
           <datalist id="church-tags">
             <% (local_assigns[:church_tags] || []).each do |t| %><option value="<%= t %>"><% end %>
           </datalist>
-          <p class="label">Type a tag and press Enter. Used to organize and search slides.</p>
-          <%# hidden tag inputs are injected here by the controller %>
+          <p class="label">Type a tag and press Enter.</p>
           <div data-slide-editor-target="tagFields"></div>
         </fieldset>
 
-        <%# ── Pages ──────────────────────────────────────────────── %>
+        <%# Pages %>
         <fieldset class="fieldset">
-          <div class="flex items-center justify-between mb-1">
-            <span class="text-sm font-medium">Pages</span>
+          <div class="flex items-center justify-between">
+            <legend class="fieldset-legend">Pages</legend>
             <button type="button" class="btn btn-ghost btn-xs" data-slide-editor-target="advancedBtn" data-action="slide-editor#toggleAdvanced">Advanced</button>
           </div>
 
-          <%# ── Page thumbnail strip: click to switch, drag to reorder, ✕ to remove, + to add ── %>
-          <div class="flex gap-2 overflow-x-auto pb-2 mb-2" data-slide-editor-target="pageStrip"></div>
+          <%# Page thumbnail strip: click to switch, drag to reorder, ✕ to remove, + to add %>
+          <div class="flex gap-2 overflow-x-auto pb-1" data-slide-editor-target="pageStrip"></div>
 
-          <div class="flex flex-wrap gap-1 mb-1 rounded-t-lg border border-base-300 bg-base-200 px-1 py-1" data-slide-editor-target="toolbar">
-            <button type="button" class="btn btn-ghost btn-xs font-bold" title="Bold (⌘B)" data-action="slide-editor#bold">B</button>
-            <button type="button" class="btn btn-ghost btn-xs italic" title="Italic (⌘I)" data-action="slide-editor#italic">I</button>
-            <button type="button" class="btn btn-ghost btn-xs" title="Heading" data-action="slide-editor#heading">H</button>
-            <button type="button" class="btn btn-ghost btn-xs" title="Bulleted list" data-action="slide-editor#bullet">• List</button>
-            <button type="button" class="btn btn-ghost btn-xs" title="Clear formatting" data-action="slide-editor#clearFormat">Clear</button>
+          <%# Editor toolbar + body — a joined control (join-vertical keeps the rounded corners) %>
+          <div class="join join-vertical w-full">
+            <div class="join-item flex flex-wrap gap-1 border border-base-300 bg-base-200 p-1" data-slide-editor-target="toolbar">
+              <button type="button" class="btn btn-ghost btn-xs font-bold" title="Bold (⌘B)" data-action="slide-editor#bold">B</button>
+              <button type="button" class="btn btn-ghost btn-xs italic" title="Italic (⌘I)" data-action="slide-editor#italic">I</button>
+              <button type="button" class="btn btn-ghost btn-xs" title="Heading" data-action="slide-editor#heading">H</button>
+              <button type="button" class="btn btn-ghost btn-xs" title="Bulleted list" data-action="slide-editor#bullet">• List</button>
+              <button type="button" class="btn btn-ghost btn-xs" title="Clear formatting" data-action="slide-editor#clearFormat">Clear</button>
+            </div>
+
+            <div contenteditable="true" role="textbox" aria-multiline="true" aria-label="Slide body"
+                 class="join-item border border-t-0 border-base-300 px-3 py-2 min-h-48 focus:outline-none wrap-anywhere"
+                 data-slide-editor-target="rich" data-action="input->slide-editor#onRichInput keydown->slide-editor#onKeydown"></div>
+
+            <%= f.text_area nil, name: nil,
+                  class: "join-item textarea w-full font-mono text-sm hidden",
+                  rows: 10, data: { "slide-editor-target": "source", action: "input->slide-editor#onSourceInput" } %>
           </div>
 
-          <div contenteditable="true" role="textbox" aria-multiline="true" aria-label="Slide body"
-               class="rich-body min-h-48 rounded-b-lg border border-base-300 border-t-0 px-3 py-2 focus:outline-none prose max-w-none break-words"
-               data-slide-editor-target="rich" data-action="input->slide-editor#onRichInput keydown->slide-editor#onKeydown"></div>
-
-          <textarea rows="10" class="textarea textarea-bordered w-full font-mono text-sm mt-2 hidden"
-                    data-slide-editor-target="source" data-action="input->slide-editor#onSourceInput"></textarea>
-
-          <%# hidden page body inputs injected by the controller %>
           <div data-slide-editor-target="pageFields"></div>
-
-          <p class="label">
-            Type your text and use the buttons to format it — no codes to learn. Add pages when the text is too long for one screen.
-          </p>
+          <p class="label">Type your text and use the buttons to format it — no codes to learn. Add pages when the text is too long for one screen.</p>
         </fieldset>
 
-        <div class="flex items-center gap-3">
+        <div class="card-actions items-center gap-3">
           <%= f.submit (text_slide.persisted? ? "Save changes" : "Create slide"), class: "btn btn-primary",
                 data: { "slide-editor-target": "submit" } %>
           <% if local_assigns[:modal] %>
@@ -96,12 +96,12 @@
       </div>
     </div>
 
-    <%# ── Live preview — the SAME projector mini-stage the show page and operator use, so what
+    <%# ── Preview column — the SAME projector mini-stage the show page and operator use, so what
           you see while editing matches what projects. slide-editor injects the current page's
           HTML into .projector-slide-body and refits. ──────────────────────── %>
-    <div class="lg:sticky lg:top-4 self-start min-w-0">
+    <div class="lg:sticky lg:top-4 min-w-0">
       <div class="text-xs font-semibold uppercase tracking-wide text-base-content/50 mb-2">Preview <span data-slide-editor-target="previewLabel"></span></div>
-      <div class="projector-preview rounded overflow-hidden" data-slide-editor-target="previewStage">
+      <div class="projector-preview rounded-box overflow-hidden" data-slide-editor-target="previewStage">
         <% if text_slide.background_image? %>
           <div class="projector-slide-bg" data-role="slide-bg"
                style="background-image: url('<%= rails_blob_path(text_slide.background_image, only_path: true) %>');">
