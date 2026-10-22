@@ -59,6 +59,26 @@ class FollowerViewsTest < ActionDispatch::IntegrationTest
     assert_select "[data-role=projector-slide][data-fit-fixed-value='0']"
   end
 
+  test "the church's song font size reaches the lyric section's fit controller" do
+    @church.update!(projector_font_size: 14)
+    @session.update!(current_section_index: 1) # first lyric section
+    get projector_path(@session.projector_token)
+    assert_select ".projector-section[data-fit-fixed-value='14']"
+  end
+
+  test "song projection colours apply to songs but not to custom slides" do
+    @church.update!(projector_bg_color: "#123456")
+    @session.update!(current_section_index: 1)
+    get projector_path(@session.projector_token)
+    assert_select "[data-role=projector-frame][style*='#123456']"
+
+    slide = @church.text_slides.create!(title: "Aviso", pages: [ { "body_markdown" => "Hola" } ])
+    item = @set.set_items.create!(position: 1, item_type: "text_slide", text_slide: slide)
+    @session.update!(current_set_item_id: item.id, current_section_index: 0)
+    get projector_path(@session.projector_token)
+    assert_select "[data-role=projector-frame][style*='#123456']", false
+  end
+
   test "a bad projector token returns 404" do
     get projector_path("not-a-real-token")
     assert_response :not_found

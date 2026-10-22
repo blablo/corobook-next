@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_22_203500) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_22_205000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -64,8 +64,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_22_203500) do
     t.string "projector_bg_type", default: "solid", null: false
     t.string "projector_bg_color2", default: "#1a1a2e", null: false
     t.integer "projector_bg_gradient_angle", default: 160, null: false
+    t.integer "projector_font_size"
     t.index ["subdomain"], name: "index_churches_on_subdomain", unique: true, where: "(subdomain IS NOT NULL)"
     t.check_constraint "projector_bg_gradient_angle >= 0 AND projector_bg_gradient_angle <= 360", name: "churches_projector_bg_gradient_angle_check"
+    t.check_constraint "projector_font_size IS NULL OR projector_font_size >= 2 AND projector_font_size <= 30", name: "churches_projector_font_size_check"
     t.check_constraint "projector_lines_per_slide >= 1 AND projector_lines_per_slide <= 20", name: "churches_projector_lines_per_slide_check"
   end
 

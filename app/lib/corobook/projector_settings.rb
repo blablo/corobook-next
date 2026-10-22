@@ -55,6 +55,9 @@ module Corobook
 
     def show_credits? = church.projector_show_credits
 
+    # Fixed song-lyric font size as % of screen height, or 0 for auto-fit.
+    def font_size = church.projector_font_size.to_i
+
     def lines_per_slide = church.projector_lines_per_slide
 
     def paginate_by_lines? = church.paginate_by_lines?

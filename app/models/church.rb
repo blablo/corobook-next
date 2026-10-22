@@ -30,6 +30,8 @@ class Church < ApplicationRecord
   validates :projector_pagination, inclusion: { in: PAGINATION_OPTIONS }
   validates :projector_lines_per_slide,
             numericality: { only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 20 }
+  # Song lyric font size as % of screen height; nil = auto (fit to screen).
+  validates :projector_font_size, numericality: { only_integer: true, in: 2..30 }, allow_nil: true
 
   # A value object bundling the projection settings, for CSS-variable + casing generation.
   def projector_settings
