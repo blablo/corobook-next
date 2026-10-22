@@ -1,4 +1,4 @@
-# Preprod deployment (manual Docker + a shared Caddy edge)
+# Production deployment (manual Docker + a shared Caddy edge)
 
 This box hosts several sites — Corobook, your other Docker app, and a static HTML page. One
 **shared Caddy** owns ports 80/443 and fronts all of them with automatic HTTPS (Let's Encrypt).
@@ -16,7 +16,7 @@ make -C deploy setup
 ```
 
 That runs an interactive script which asks for the hostname, Rails master key, DB password and
-mail settings, writes `deploy/.env.preprod` + `deploy/edge/.env.edge`, then brings up the shared
+mail settings, writes `deploy/.env.prod` + `deploy/edge/.env.edge`, then brings up the shared
 Caddy edge and the Corobook stack. The rest of this document explains each step it performs (and
 how to add your other app + static site to the shared Caddy). Other targets: `make -C deploy help`.
 
@@ -55,21 +55,21 @@ add your other app and the static site in step 5.
 
 ```sh
 cd ../                                 # deploy/
-cp .env.preprod.example .env.preprod
+cp .env.prod.example .env.prod
 ```
 
-Set in `deploy/.env.preprod`:
+Set in `deploy/.env.prod`:
 
 - `APP_HOST` — Corobook's hostname (same as `COROBOOK_HOST`), for links in emails + subdomain base.
 - `RAILS_MASTER_KEY` — contents of `config/master.key`.
 - `COROBOOK_NEXT_DATABASE_PASSWORD` — a strong password (Postgres role + app).
-- `MAIL_DOMAIN` / `MAIL_FROM` — optional on preprod (see `docs/mail-setup.md`).
+- `MAIL_DOMAIN` / `MAIL_FROM` — optional on production (see `docs/mail-setup.md`).
 
 ## 4. Bring up Corobook
 
 ```sh
 # from deploy/
-docker compose --env-file .env.preprod -f docker-compose.preprod.yml up -d --build
+docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
 ```
 
 Services: `postgres`, `web` (container `corobook-web`, first boot runs `db:prepare`), `worker`
@@ -113,11 +113,11 @@ Caddy fetches a cert for each new hostname automatically.
 ```sh
 # update Corobook
 git pull && cd deploy
-docker compose --env-file .env.preprod -f docker-compose.preprod.yml up -d --build
+docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
 
 # stop Corobook (keep data) / wipe data (destructive)
-docker compose --env-file .env.preprod -f docker-compose.preprod.yml down
-docker compose --env-file .env.preprod -f docker-compose.preprod.yml down -v
+docker compose --env-file .env.prod -f docker-compose.prod.yml down
+docker compose --env-file .env.prod -f docker-compose.prod.yml down -v
 ```
 
 The edge Caddy stays up across app redeploys. Bring order down as: app stacks first, edge last (so
@@ -132,4 +132,4 @@ nothing references the `edge` network when you remove it).
 - **DuckDNS + subdomain login**: church subdomains resolve by stripping the configured `APP_HOST`
   base, so `gracia.corobook.duckdns.org` works and the bare host shows the picker. (Each
   church subdomain you actually use needs its own DNS record + a Caddy block or a wildcard.)
-- This is **preprod**: single box, no backups/offsite. Harden before production.
+- This is a **single-box** deploy: no backups/offsite yet. Add those before relying on it.

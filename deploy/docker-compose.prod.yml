@@ -1,15 +1,15 @@
-# Corobook preprod app stack — NO proxy here. A SHARED Caddy (see deploy/edge/) fronts this app,
+# Corobook production app stack — NO proxy here. A SHARED Caddy (see deploy/edge/) fronts this app,
 # your other Docker app, and the static site, all on one box with automatic HTTPS.
 #
-# Order of operations (full details in docs/deploy-preprod.md):
+# Order of operations (full details in docs/deploy-prod.md):
 #   1. Bring up the shared edge once:  cd deploy/edge && docker compose --env-file .env.edge up -d
 #      (that creates the shared `edge` network and runs Caddy)
-#   2. Bring up Corobook:              cd deploy && docker compose --env-file .env.preprod -f docker-compose.preprod.yml up -d --build
+#   2. Bring up Corobook:              cd deploy && docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
 #
 # Caddy reaches this app over the shared network as http://corobook-web:80 (see deploy/edge/Caddyfile).
 # First boot runs db:prepare (creates the 4 prod DBs: primary/cache/queue/cable).
 
-name: corobook-preprod
+name: corobook
 
 services:
   postgres:
@@ -17,7 +17,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: corobook_next
-      POSTGRES_PASSWORD: ${COROBOOK_NEXT_DATABASE_PASSWORD:?set in .env.preprod}
+      POSTGRES_PASSWORD: ${COROBOOK_NEXT_DATABASE_PASSWORD:?set in .env.prod}
       POSTGRES_DB: corobook_next_production
     volumes:
       - pg_data:/var/lib/postgresql/data
@@ -39,7 +39,7 @@ services:
     command: bash -c "bin/rails db:prepare && bin/rails server -b 0.0.0.0 -p 80"
     environment:
       RAILS_ENV: production
-      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY:?set in .env.preprod}
+      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY:?set in .env.prod}
       DATABASE_HOST: postgres
       COROBOOK_NEXT_DATABASE_PASSWORD: ${COROBOOK_NEXT_DATABASE_PASSWORD:?}
       APP_HOST: ${APP_HOST:?set to your DuckDNS host, e.g. corobook.duckdns.org}
