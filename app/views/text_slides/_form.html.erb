@@ -96,13 +96,23 @@
       </div>
     </div>
 
-    <%# ── Live preview ────────────────────────────────────────────── %>
+    <%# ── Live preview — the SAME projector mini-stage the show page and operator use, so what
+          you see while editing matches what projects. slide-editor injects the current page's
+          HTML into .projector-slide-body and refits. ──────────────────────── %>
     <div class="lg:sticky lg:top-4 self-start">
       <div class="text-xs font-semibold uppercase tracking-wide text-base-content/50 mb-2">Preview <span data-slide-editor-target="previewLabel"></span></div>
-      <div class="rounded-xl bg-neutral text-neutral-content p-6 min-h-48 flex items-center justify-center text-center">
-        <div class="slide-preview prose prose-invert max-w-none" data-slide-editor-target="preview" data-role="slide-preview"></div>
+      <div class="projector-preview rounded overflow-hidden" data-slide-editor-target="previewStage">
+        <% if text_slide.background_image? %>
+          <div class="projector-slide-bg" data-role="slide-bg"
+               style="background-image: url('<%= rails_blob_path(text_slide.background_image, only_path: true) %>');">
+            <div class="projector-slide-scrim"></div>
+          </div>
+        <% end %>
+        <div class="projector-slide<%= ' has-bg' if text_slide.background_image? %>" data-controller="fit" data-role="projector-slide">
+          <div class="projector-slide-body" data-fit-target="content" data-slide-editor-target="preview" data-role="slide-preview"></div>
+        </div>
       </div>
-      <p class="text-xs text-base-content/40 mt-2">This is roughly how the current page appears on the projection screen.</p>
+      <p class="text-xs text-base-content/40 mt-2">This is how the current page appears on the projection screen.</p>
     </div>
   </div>
 
