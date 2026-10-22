@@ -6,9 +6,9 @@
     </div>
   <% end %>
 
-  <div class="grid gap-6 lg:grid-cols-2">
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
     <%# ── Editor ──────────────────────────────────────────────────── %>
-    <div class="card bg-base-100 ring-1 ring-base-200 min-w-0">
+    <div class="card bg-base-100 ring-1 ring-base-200 min-w-0 overflow-hidden">
       <div class="card-body gap-4 min-w-0">
         <fieldset class="fieldset">
           <%= f.label :title, "Title", class: "fieldset-legend" %>
@@ -70,7 +70,7 @@
           </div>
 
           <div contenteditable="true" role="textbox" aria-multiline="true" aria-label="Slide body"
-               class="rich-body min-h-48 rounded-b-lg border border-base-300 border-t-0 px-3 py-2 focus:outline-none prose max-w-none"
+               class="rich-body min-h-48 rounded-b-lg border border-base-300 border-t-0 px-3 py-2 focus:outline-none prose max-w-none break-words"
                data-slide-editor-target="rich" data-action="input->slide-editor#onRichInput keydown->slide-editor#onKeydown"></div>
 
           <textarea rows="10" class="textarea textarea-bordered w-full font-mono text-sm mt-2 hidden"
