@@ -53,17 +53,18 @@ export default class extends Controller {
     // Fixed lyric size as % of screen height (cqh — the preview stage is a size container); 0 = auto.
     const fixedSize = parseInt(this.val("pp-font-size"), 10) || 0
 
-    // Stage background (solid or gradient).
+    // Stage background (solid or gradient). Painted on the stage only — the frame sits inside the
+    // stage padding, so a second copy of a gradient there would show a seam.
     this.stageTarget.style.background = background
 
     const frame = this.frameTarget
-    frame.style.background = background
     frame.style.color = text
     frame.style.fontFamily = font
     frame.style.justifyContent = valign
 
-
     // Show only the first slide's worth of lines: section mode = whole sample; by_lines = first N.
+    // Font size is NOT set per line: the fit controller sizes the whole block, exactly as on the
+    // real projector (auto-fit, or the fixed % of screen height).
     const lines = pagination === "by_lines" ? this.constructor.SAMPLE.slice(0, perSlide) : this.constructor.SAMPLE
     this.lyricsTarget.innerHTML = ""
     lines.forEach((line) => {
@@ -72,10 +73,15 @@ export default class extends Controller {
       div.style.fontWeight = bold ? "700" : "400"
       div.style.lineHeight = lh
       div.style.textTransform = lyricCase
-      div.style.fontSize = fixedSize > 0 ? `${fixedSize}cqh` : "clamp(0.85rem, 2.6vw, 1.5rem)"
       div.style.marginTop = "0.3em"
       this.lyricsTarget.appendChild(div)
     })
+
+    const fitEl = this.lyricsTarget.closest('[data-controller~="fit"]')
+    if (fitEl) {
+      fitEl.setAttribute("data-fit-fixed-value", String(fixedSize))
+      fitEl.dispatchEvent(new CustomEvent("fit:refit"))
+    }
 
     // Lines-per-slide only matters in by_lines mode.
     const linesField = this.element.querySelector('[data-role="pp-lines-field"]')

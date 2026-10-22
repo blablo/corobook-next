@@ -131,14 +131,18 @@
           </label>
         </div>
 
-        <%# Live preview — a 16:9 mini-stage mirroring the real projector. %>
+        <%# Live preview — a 16:9 mini-stage mirroring the real projector. The lyrics are sized by the
+            SAME fit controller as the projector (auto-fit, or a fixed % of the screen height). The
+            padding sits on the stage because that is the box the fit controller measures. %>
         <div class="content-start">
           <p class="text-xs text-base-content/50 mb-1">Preview</p>
           <div class="projector-preview rounded overflow-hidden" data-role="pp-stage"
-               data-projector-preview-target="stage">
+               data-projector-preview-target="stage" style="padding: 5% 6%;">
             <div id="pp-frame" data-projector-preview-target="frame"
-                 style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:6% 7%; text-align:center; height:100%;">
-              <div data-projector-preview-target="lyrics" style="width:100%;"></div>
+                 style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; height:100%;">
+              <div class="w-full" data-controller="fit" data-fit-fixed-value="<%= @church.projector_font_size.to_i %>">
+                <div data-fit-target="content" data-projector-preview-target="lyrics" style="width:100%;"></div>
+              </div>
             </div>
           </div>
         </div>
