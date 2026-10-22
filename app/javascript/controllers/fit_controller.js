@@ -19,6 +19,9 @@ export default class extends Controller {
   }
 
   contentTargetConnected() {
+    // Hide the freshly-rendered content until the first fit sizes it, so a slide change never
+    // flashes the small default size before the resize lands.
+    this.contentTarget.style.visibility = "hidden"
     this.schedule()
   }
 
@@ -39,7 +42,12 @@ export default class extends Controller {
     const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight)
     const availH = stage.clientHeight - padY
     const availW = stage.clientWidth - padX
-    if (availH <= 1 || availW <= 1) return // not laid out yet
+    if (availH <= 1 || availW <= 1) {
+      // Not laid out yet — do not leave the content hidden; reveal and try again next frame.
+      content.style.visibility = "visible"
+      this.schedule()
+      return
+    }
 
     let lo = this.minValue
     let hi = this.maxValue
@@ -62,5 +70,8 @@ export default class extends Controller {
     if (scale && scale !== 100) {
       content.style.fontSize = `${Math.round(lo * scale / 100)}px`
     }
+
+    // Now that it is correctly sized, reveal it (no small→big flash on slide change).
+    content.style.visibility = "visible"
   }
 }
