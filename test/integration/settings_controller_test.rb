@@ -40,18 +40,18 @@ class SettingsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to login_path
   end
 
-  test "the admin sidebar links to settings" do
+  test "the admin sidebar nests General and Projection under Settings" do
     login(@admin)
     get root_path
     assert_select "[data-role=nav-settings]"
+    assert_select "[data-role=nav-settings-general]"
+    assert_select "[data-role=nav-settings-projection]"
   end
 
-  test "the general settings page shows the sub-nav and subdomain, not the projection form" do
+  test "the general settings page shows the subdomain, not the projection form" do
     login(@admin)
     get settings_path
     assert_response :success
-    assert_select "[data-role=settings-subnav]"
-    assert_select "[data-role=subnav-projection]"
     assert_select "[data-role=subdomain-input]"
     assert_select "[data-role=projector-settings]", false
   end
@@ -60,7 +60,6 @@ class SettingsControllerTest < ActionDispatch::IntegrationTest
     login(@admin)
     get projection_settings_path
     assert_response :success
-    assert_select "[data-role=settings-subnav]"
     assert_select "[data-role=projector-settings]"
     assert_select "[data-role=pp-stage]"
     assert_select "[data-role=pp-pagination]"
