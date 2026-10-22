@@ -11,11 +11,16 @@ export default class extends Controller {
     this.schedule()
     this.resizeObserver = new ResizeObserver(() => this.schedule())
     // Observe the bounded stage (the viewport-sized frame) so a window/preview resize refits.
-    this.resizeObserver.observe(this.element.closest("#live-frame") || this.element)
+    this.resizeObserver.observe(this.element.closest("#live-frame") || this.element.closest(".projector-preview") || this.element)
+    // Allow another controller (e.g. the slide editor's live preview) to request a refit after
+    // it swaps the content HTML, which the ResizeObserver does not see.
+    this.refitHandler = () => this.schedule()
+    this.element.addEventListener("fit:refit", this.refitHandler)
   }
 
   disconnect() {
     this.resizeObserver?.disconnect()
+    this.element.removeEventListener("fit:refit", this.refitHandler)
   }
 
   contentTargetConnected() {
@@ -31,7 +36,7 @@ export default class extends Controller {
   }
 
   fit() {
-    const stage = this.element.closest("#live-frame") || this.element.parentElement || this.element
+    const stage = this.element.closest("#live-frame") || this.element.closest(".projector-preview") || this.element.parentElement || this.element
     const content = this.hasContentTarget ? this.contentTarget : this.element
     const measured = this.element // the whole section (lyrics + any copyright/credits)
 

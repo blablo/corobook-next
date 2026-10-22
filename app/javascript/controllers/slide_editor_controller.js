@@ -175,6 +175,10 @@ export default class extends Controller {
       if (!res.ok) return
       const { html } = await res.json()
       this.previewTarget.innerHTML = html || `<p class="opacity-40">Nothing to preview yet.</p>`
+      // The preview now lives inside the projector mini-stage; tell its fit controller to resize
+      // (a content swap is invisible to the ResizeObserver).
+      const fitEl = this.previewTarget.closest('[data-controller~="fit"]')
+      if (fitEl) fitEl.dispatchEvent(new CustomEvent("fit:refit"))
     } catch { /* keep last good preview */ }
   }
 
