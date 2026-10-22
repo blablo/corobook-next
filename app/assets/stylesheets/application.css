@@ -48,8 +48,8 @@
    the inner #live-frame carries as --proj-* vars. */
 .projector-preview { background: var(--proj-bg, #000); color: var(--proj-text, #fff); aspect-ratio: 16 / 9; position: relative; }
 .projector-preview #live-frame { position: static; inset: auto; height: 100%; padding: 4% 5%; }
-.projector-preview .projector-line { font-size: clamp(1rem, 3.5vw, 2rem); }
-.projector-preview .projector-title-name { font-size: clamp(1.25rem, 4vw, 2.5rem); }
+/* The operator preview uses the SAME fit controller as the real projector, sized to this smaller
+   stage — so the text proportions match what the congregation sees (just scaled down). */
 /* The blank overlay is position:fixed for the real full-screen projector; inside the operator
    preview it must stay WITHIN the preview box, not cover the whole page. */
 .projector-preview .projector-blank { position: absolute; }
