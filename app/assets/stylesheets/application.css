@@ -229,3 +229,20 @@
   [data-role=set-preview] { margin: 0 !important; max-width: none !important; }
   .musician-preview-page .musician-row { break-inside: avoid; box-shadow: none; border-color: #ccc; }
 }
+
+/* ── Sidebar nested submenu (Settings → General/Projection) ───────────────────
+   The shared sidebar uses DaisyUI's default near-black `menu-active` pill. For a
+   NESTED submenu that reads as too heavy (a full black slab under its parent), so
+   the active sub-item uses a soft base-200 fill with a primary left accent instead.
+   DaisyUI loads after this file, so the active override needs !important. */
+.sidebar-submenu { padding-left: 0.5rem; }
+.sidebar-submenu > li > a {
+  font-size: 0.875rem;
+  color: color-mix(in oklab, var(--color-base-content) 70%, transparent);
+}
+.sidebar-submenu > li > a.menu-active {
+  background: var(--color-base-200) !important;
+  color: var(--color-base-content) !important;
+  border-left: 3px solid var(--color-primary);
+  font-weight: 500;
+}
