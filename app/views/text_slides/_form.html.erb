@@ -8,8 +8,8 @@
 
   <div class="grid gap-6 lg:grid-cols-2">
     <%# ── Editor ──────────────────────────────────────────────────── %>
-    <div class="card bg-base-100 ring-1 ring-base-200">
-      <div class="card-body gap-4">
+    <div class="card bg-base-100 ring-1 ring-base-200 min-w-0">
+      <div class="card-body gap-4 min-w-0">
         <fieldset class="fieldset">
           <%= f.label :title, "Title", class: "fieldset-legend" %>
           <%= f.text_field :title, class: "input input-bordered w-full", placeholder: "Slide title" %>
@@ -99,7 +99,7 @@
     <%# ── Live preview — the SAME projector mini-stage the show page and operator use, so what
           you see while editing matches what projects. slide-editor injects the current page's
           HTML into .projector-slide-body and refits. ──────────────────────── %>
-    <div class="lg:sticky lg:top-4 self-start">
+    <div class="lg:sticky lg:top-4 self-start min-w-0">
       <div class="text-xs font-semibold uppercase tracking-wide text-base-content/50 mb-2">Preview <span data-slide-editor-target="previewLabel"></span></div>
       <div class="projector-preview rounded overflow-hidden" data-slide-editor-target="previewStage">
         <% if text_slide.background_image? %>
