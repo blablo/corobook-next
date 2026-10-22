@@ -28,6 +28,27 @@ class Corobook::ProjectorSettingsTest < ActiveSupport::TestCase
     assert_includes style, "--proj-lyric-case: none"
   end
 
+  test "gradient background emits a linear-gradient CSS value" do
+    church = Church.create!(name: "Grad", projector_bg_type: "gradient",
+      projector_bg_color: "#101010", projector_bg_color2: "#303060",
+      projector_bg_gradient_angle: 120)
+    style = church.projector_settings.style
+    assert_includes style, "--proj-bg: linear-gradient(120deg, #101010, #303060)"
+    assert_equal "linear-gradient(120deg, #101010, #303060)", church.projector_settings.background_css
+  end
+
+  test "solid background mode emits just the colour" do
+    church = Church.create!(name: "Solid", projector_bg_type: "solid", projector_bg_color: "#123456")
+    assert_equal "#123456", church.projector_settings.background_css
+  end
+
+  test "rejects a bad gradient colour or out-of-range angle" do
+    church = Church.new(name: "Bad", projector_bg_color2: "nope", projector_bg_gradient_angle: 400)
+    refute church.valid?
+    assert church.errors[:projector_bg_color2].any?
+    assert church.errors[:projector_bg_gradient_angle].any?
+  end
+
   test "rejects a non-hex colour and an out-of-range line count" do
     church = Church.new(name: "Bad", projector_bg_color: "black", projector_lines_per_slide: 99)
     refute church.valid?

@@ -18,9 +18,33 @@
         <%# Controls %>
         <div class="grid gap-4 sm:grid-cols-2 content-start">
           <fieldset class="fieldset">
+            <%= f.label :projector_bg_type, "Background", class: "fieldset-legend" %>
+            <%= f.select :projector_bg_type,
+                  [ ["Solid colour", "solid"], ["Gradient", "gradient"] ],
+                  {}, class: "select select-bordered w-full",
+                  data: { role: "pp-bg-type", action: "change->projector-preview#update" } %>
+          </fieldset>
+
+          <fieldset class="fieldset">
             <%= f.label :projector_bg_color, "Background colour", class: "fieldset-legend" %>
             <%= f.color_field :projector_bg_color, class: "input input-bordered h-10 w-full p-1",
                   data: { role: "pp-bg", action: "input->projector-preview#update" } %>
+          </fieldset>
+
+          <fieldset class="fieldset" data-role="pp-bg-color2-field">
+            <%= f.label :projector_bg_color2, "Gradient second colour", class: "fieldset-legend" %>
+            <%= f.color_field :projector_bg_color2, class: "input input-bordered h-10 w-full p-1",
+                  data: { role: "pp-bg2", action: "input->projector-preview#update" } %>
+          </fieldset>
+
+          <fieldset class="fieldset" data-role="pp-bg-angle-field">
+            <%= f.label :projector_bg_gradient_angle, "Gradient angle", class: "fieldset-legend" %>
+            <label class="input input-bordered flex items-center gap-2 w-full">
+              <%= f.range_field :projector_bg_gradient_angle, min: 0, max: 360, step: 5,
+                    class: "range range-sm grow",
+                    data: { role: "pp-bg-angle", action: "input->projector-preview#update" } %>
+              <span class="text-base-content/60 text-sm whitespace-nowrap" data-role="pp-bg-angle-label"><%= @church.projector_bg_gradient_angle %>°</span>
+            </label>
           </fieldset>
 
           <fieldset class="fieldset">

@@ -33,6 +33,7 @@ class SettingsController < ApplicationController
     params.require(:church).permit(
       :subdomain,
       :projector_bg_color, :projector_text_color,
+      :projector_bg_type, :projector_bg_color2, :projector_bg_gradient_angle,
       :projector_lyric_case, :projector_title_case,
       :projector_font, :projector_line_height,
       :projector_bold, :projector_show_credits,

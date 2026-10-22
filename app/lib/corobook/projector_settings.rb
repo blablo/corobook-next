@@ -30,7 +30,7 @@ module Corobook
     # The `style="..."` declaration string for #live-frame: all projector CSS vars in one place.
     def style
       vars = {
-        "--proj-bg"          => church.projector_bg_color,
+        "--proj-bg"          => background_css,
         "--proj-text"        => church.projector_text_color,
         "--proj-font"        => FONT_STACKS.fetch(church.projector_font, FONT_STACKS["sans"]),
         "--proj-line-height" => LINE_HEIGHTS.fetch(church.projector_line_height, "1.15"),
@@ -40,6 +40,17 @@ module Corobook
         "--proj-title-case"  => CASE_TRANSFORMS.fetch(church.projector_title_case, "none")
       }
       vars.map { |k, v| "#{k}: #{v}" }.join("; ")
+    end
+
+    # The CSS value for the projector background: a solid colour, or a linear gradient between the
+    # two colours at the configured angle. Usable directly as a CSS `background` value.
+    def background_css
+      if church.projector_bg_type == "gradient"
+        "linear-gradient(#{church.projector_bg_gradient_angle}deg, " \
+          "#{church.projector_bg_color}, #{church.projector_bg_color2})"
+      else
+        church.projector_bg_color
+      end
     end
 
     def show_credits? = church.projector_show_credits
