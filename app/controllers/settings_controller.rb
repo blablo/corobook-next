@@ -19,6 +19,13 @@ class SettingsController < ApplicationController
   private
 
   def settings_params
-    params.require(:church).permit(:subdomain)
+    params.require(:church).permit(
+      :subdomain,
+      :projector_bg_color, :projector_text_color,
+      :projector_lyric_case, :projector_title_case,
+      :projector_font, :projector_line_height,
+      :projector_bold, :projector_show_credits,
+      :projector_valign, :projector_pagination, :projector_lines_per_slide
+    )
   end
 end

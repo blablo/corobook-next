@@ -12,11 +12,11 @@ class ProjectorController < ApplicationController
   end
 
   def advance
-    move { |pos| pos.next_stop(@session.current_set_item_id, @session.current_section_index) }
+    move { |pos| pos.next_stop(@session.current_set_item_id, @session.current_section_index, @session.current_chunk_index) }
   end
 
   def back
-    move { |pos| pos.prev_stop(@session.current_set_item_id, @session.current_section_index) }
+    move { |pos| pos.prev_stop(@session.current_set_item_id, @session.current_section_index, @session.current_chunk_index) }
   end
 
   private
@@ -42,6 +42,7 @@ class ProjectorController < ApplicationController
           @session.update!(
             current_set_item_id: target.set_item_id,
             current_section_index: target.section_index,
+            current_chunk_index: target.chunk_index,
             position_version: @session.position_version + 1
           )
           capture_usage(@session)

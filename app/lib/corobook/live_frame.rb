@@ -57,5 +57,32 @@ module Corobook
       # +1 accounts for the leading title slide at index 0.
       session.current_section_index >= ordered_sections.length
     end
+
+    # The plain lyric lines the projector should show RIGHT NOW. In by_section mode this is the
+    # whole current section; in by_lines mode it is only the current N-line chunk of that section
+    # (chunks reset at the section boundary). Returns [] when there is no current song section.
+    def current_section_plain_lines(section = current_section)
+      return [] unless section
+
+      lines = Corobook::ChordPro::Transform.section_plain_lines(section)
+      return lines unless session.church&.paginate_by_lines?
+
+      n = session.church.projector_lines_per_slide.to_i.clamp(1, 20)
+      lines.each_slice(n).to_a[session.current_chunk_index] || []
+    end
+
+    # True when the current chunk is the LAST chunk of the LAST section — i.e. the copyright
+    # notice should show. In by_section mode this is just final_section?.
+    def final_chunk?
+      return final_section? unless session.church&.paginate_by_lines?
+      return false unless final_section?
+
+      section = current_section
+      return true unless section
+
+      n = session.church.projector_lines_per_slide.to_i.clamp(1, 20)
+      total_chunks = [ (Corobook::ChordPro::Transform.section_plain_lines(section).length.to_f / n).ceil, 1 ].max
+      session.current_chunk_index >= total_chunks - 1
+    end
   end
 end

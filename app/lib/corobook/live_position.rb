@@ -6,10 +6,17 @@ module Corobook
   # materialized section, replays included), else natural section order. A text slide is a single
   # stop. Pure over the Set's current items; no DB writes.
   class LivePosition
-    Stop = Struct.new(:set_item_id, :section_index, keyword_init: true)
+    Stop = Struct.new(:set_item_id, :section_index, :chunk_index, keyword_init: true) do
+      def initialize(set_item_id:, section_index:, chunk_index: 0)
+        super
+      end
+    end
 
     def initialize(service_set)
+      @service_set = service_set
       @items = service_set.set_items.order(:position).includes(:song, :text_slide).to_a
+      @by_lines = service_set.church&.paginate_by_lines? || false
+      @lines_per_slide = service_set.church&.projector_lines_per_slide.to_i.clamp(1, 20)
     end
 
     # The flat ordered list of stops across the whole set. For a song: the title slide (index 0)
@@ -30,32 +37,49 @@ module Corobook
     end
 
     # Title slide at index 0, then one stop per ordered lyric section at index i+1, skipping
-    # any section that carries chords but no lyric text.
+    # any section that carries chords but no lyric text. In by_lines mode a lyric section is
+    # further split into N-line chunks (reset at the section boundary), each its own stop
+    # sharing the section_index but with an incrementing chunk_index.
     def song_stops(item)
       stops = [ Stop.new(set_item_id: item.id, section_index: 0) ]
       ordered_sections(item.song).each_with_index do |section, i|
         next if chords_only_section?(section)
 
-        stops << Stop.new(set_item_id: item.id, section_index: i + 1)
+        chunk_count = chunk_count_for(section)
+        chunk_count.times do |c|
+          stops << Stop.new(set_item_id: item.id, section_index: i + 1, chunk_index: c)
+        end
       end
       stops
     end
 
-    def first = stops.first
+    # How many projector stops a lyric section yields: 1 in by_section mode, or ceil(lines / N)
+    # in by_lines mode (at least 1).
+    def chunk_count_for(section)
+      return 1 unless @by_lines
 
-    def index_of(set_item_id, section_index)
-      stops.index { |s| s.set_item_id == set_item_id && s.section_index == section_index }
+      line_count = Corobook::ChordPro::Transform.section_plain_lines(section).length
+      [ (line_count.to_f / @lines_per_slide).ceil, 1 ].max
     end
 
-    def next_stop(set_item_id, section_index)
-      i = index_of(set_item_id, section_index)
+    def first = stops.first
+
+    def index_of(set_item_id, section_index, chunk_index = 0)
+      stops.index do |s|
+        s.set_item_id == set_item_id && s.section_index == section_index &&
+          s.chunk_index == chunk_index
+      end
+    end
+
+    def next_stop(set_item_id, section_index, chunk_index = 0)
+      i = index_of(set_item_id, section_index, chunk_index)
       return nil if i.nil? || i >= stops.length - 1
 
       stops[i + 1]
     end
 
-    def prev_stop(set_item_id, section_index)
-      i = index_of(set_item_id, section_index)
+    def prev_stop(set_item_id, section_index, chunk_index = 0)
+      i = index_of(set_item_id, section_index, chunk_index)
       return nil if i.nil? || i.zero?
 
       stops[i - 1]

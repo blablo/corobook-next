@@ -7,11 +7,11 @@ class OperatorController < ApplicationController
   def show; end
 
   def advance
-    move { |pos| pos.next_stop(@session.current_set_item_id, @session.current_section_index) }
+    move { |pos| pos.next_stop(@session.current_set_item_id, @session.current_section_index, @session.current_chunk_index) }
   end
 
   def back
-    move { |pos| pos.prev_stop(@session.current_set_item_id, @session.current_section_index) }
+    move { |pos| pos.prev_stop(@session.current_set_item_id, @session.current_section_index, @session.current_chunk_index) }
   end
 
   # Jump to the first section of any item already in the Set (Req 6.10).
@@ -52,6 +52,7 @@ class OperatorController < ApplicationController
         @session.update!(
           current_set_item_id: target.set_item_id,
           current_section_index: target.section_index,
+          current_chunk_index: target.chunk_index,
           position_version: @session.position_version + 1
         )
         capture_usage(@session) # 8.1 hooks here — additive, inside the position transaction
