@@ -55,22 +55,24 @@
 
           <%# Pages %>
           <fieldset class="fieldset">
-            <div class="flex items-center justify-between">
-              <legend class="fieldset-legend">Pages</legend>
-              <button type="button" class="btn btn-ghost btn-xs" data-slide-editor-target="advancedBtn" data-action="slide-editor#toggleAdvanced">Advanced</button>
-            </div>
+            <legend class="fieldset-legend">Pages</legend>
 
             <%# Page thumbnail strip: click to switch, drag to reorder, ✕ to remove, + to add %>
             <div class="flex gap-2 overflow-x-auto pb-1" data-slide-editor-target="pageStrip"></div>
 
-            <%# Editor toolbar + body — a joined control (join-vertical keeps the rounded corners) %>
+            <%# Editor bar + body — a joined control. The bar stays visible in both modes: the
+                formatting group (toolbar target) hides in Advanced mode, the toggle stays at right. %>
             <div class="join join-vertical w-full">
-              <div class="join-item flex flex-wrap gap-1 border border-base-300 bg-base-200 p-1" data-slide-editor-target="toolbar">
-                <button type="button" class="btn btn-ghost btn-xs font-bold" title="Bold (⌘B)" data-action="slide-editor#bold">B</button>
-                <button type="button" class="btn btn-ghost btn-xs italic" title="Italic (⌘I)" data-action="slide-editor#italic">I</button>
-                <button type="button" class="btn btn-ghost btn-xs" title="Heading" data-action="slide-editor#heading">H</button>
-                <button type="button" class="btn btn-ghost btn-xs" title="Bulleted list" data-action="slide-editor#bullet">• List</button>
-                <button type="button" class="btn btn-ghost btn-xs" title="Clear formatting" data-action="slide-editor#clearFormat">Clear</button>
+              <div class="join-item flex items-center gap-1 border border-base-300 bg-base-200 p-1">
+                <div class="flex flex-wrap gap-1" data-slide-editor-target="toolbar">
+                  <button type="button" class="btn btn-ghost btn-xs font-bold" title="Bold (⌘B)" data-action="slide-editor#bold">B</button>
+                  <button type="button" class="btn btn-ghost btn-xs italic" title="Italic (⌘I)" data-action="slide-editor#italic">I</button>
+                  <button type="button" class="btn btn-ghost btn-xs" title="Heading" data-action="slide-editor#heading">H</button>
+                  <button type="button" class="btn btn-ghost btn-xs" title="Bulleted list" data-action="slide-editor#bullet">• List</button>
+                  <button type="button" class="btn btn-ghost btn-xs" title="Clear formatting" data-action="slide-editor#clearFormat">Clear</button>
+                </div>
+                <button type="button" class="btn btn-ghost btn-xs ml-auto" title="Edit the raw text"
+                        data-slide-editor-target="advancedBtn" data-action="slide-editor#toggleAdvanced">Advanced</button>
               </div>
 
               <div contenteditable="true" role="textbox" aria-multiline="true" aria-label="Slide body"
