@@ -1,12 +1,12 @@
-# Corobook production app stack — NO proxy here. A SHARED Caddy (see deploy/edge/) fronts this app,
-# your other Docker app, and the static site, all on one box with automatic HTTPS.
+# Corobook production app stack — NO proxy here. A SHARED Caddy reverse proxy (maintained in a
+# SEPARATE infra repo) fronts this app and other sites on the box with automatic HTTPS. That edge
+# owns the external `edge` Docker network; this stack only joins it.
 #
 # Order of operations (full details in docs/deploy-prod.md):
-#   1. Bring up the shared edge once:  cd deploy/edge && docker compose --env-file .env.edge up -d
-#      (that creates the shared `edge` network and runs Caddy)
-#   2. Bring up Corobook:              cd deploy && docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
+#   1. Start the shared Caddy edge first (separate infra) — it creates the external `edge` network.
+#   2. Bring up Corobook:  cd deploy && docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
 #
-# Caddy reaches this app over the shared network as http://corobook-web:80 (see deploy/edge/Caddyfile).
+# The edge reaches this app over the shared network as http://corobook-web:80.
 # First boot runs db:prepare (creates the 4 prod DBs: primary/cache/queue/cable).
 
 name: corobook
