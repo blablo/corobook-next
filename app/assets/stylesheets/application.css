@@ -243,6 +243,20 @@
   font-weight: 500;
 }
 
+/* Hover, keyboard focus, and the pressed (:active) state all use the same soft fill — never the
+   DaisyUI near-black flash. The label/background stay base-content/base-200 on press. */
+.sidebar-menu > li > a:hover,
+.sidebar-menu > li > a:focus,
+.sidebar-menu > li > a:active,
+.sidebar-menu > li > a:focus-visible,
+.sidebar-submenu > li > a:hover,
+.sidebar-submenu > li > a:focus,
+.sidebar-submenu > li > a:active,
+.sidebar-submenu > li > a:focus-visible {
+  background: var(--color-base-200) !important;
+  color: var(--color-base-content) !important;
+}
+
 /* Nested submenu: indent and slightly mute the sub-item labels. */
 .sidebar-submenu { padding-left: 0.5rem; }
 .sidebar-submenu > li > a {
