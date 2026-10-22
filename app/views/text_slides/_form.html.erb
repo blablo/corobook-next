@@ -32,23 +32,24 @@
             <% end %>
             <%= f.file_field :background_image, accept: "image/png,image/jpeg,image/webp,image/gif",
                   class: "file-input w-full" %>
-            <p class="label">Shown behind the slide text on the projector. PNG, JPEG, WebP or GIF, up to 10&nbsp;MB.</p>
+            <p class="label whitespace-normal">Shown behind the slide text on the projector. PNG, JPEG, WebP or GIF, up to 10&nbsp;MB.</p>
           </fieldset>
 
           <%# Tags %>
           <fieldset class="fieldset">
             <legend class="fieldset-legend">Tags</legend>
-            <div class="input w-full flex flex-wrap items-center gap-1.5 h-auto min-h-10 py-1.5 cursor-text"
+            <%# Chip input: custom by design (DaisyUI has no tag-input primitive), styled like an input. %>
+            <div class="flex flex-wrap items-center gap-1.5 w-full rounded-field border border-base-300 bg-base-100 px-2 py-1.5 min-h-10 focus-within:border-primary cursor-text"
                  data-action="click->slide-editor#focusTag">
               <span class="contents" data-slide-editor-target="tagChips"></span>
               <input type="text" list="church-tags" placeholder="Add a tag…"
-                     class="grow min-w-24 bg-transparent border-0 focus:outline-none text-sm"
+                     class="flex-1 min-w-32 bg-transparent border-0 focus:outline-none text-sm py-0.5"
                      data-slide-editor-target="tagInput" data-action="keydown->slide-editor#onTagKey">
             </div>
             <datalist id="church-tags">
               <% (local_assigns[:church_tags] || []).each do |t| %><option value="<%= t %>"><% end %>
             </datalist>
-            <p class="label">Type a tag and press Enter.</p>
+            <p class="label whitespace-normal">Type a tag and press Enter.</p>
             <div data-slide-editor-target="tagFields"></div>
           </fieldset>
 
@@ -82,7 +83,7 @@
             </div>
 
             <div data-slide-editor-target="pageFields"></div>
-            <p class="label">Type your text and use the buttons to format it — no codes to learn. Add pages when the text is too long for one screen.</p>
+            <p class="label whitespace-normal">Type your text and use the buttons to format it — no codes to learn. Add pages when the text is too long for one screen.</p>
           </fieldset>
         </div>
 
