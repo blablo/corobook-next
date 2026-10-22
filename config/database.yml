@@ -92,7 +92,8 @@ production:
   primary: &primary_production
     <<: *default
     database: corobook_next_production
-    username: corobook_next
+    host: <%= ENV.fetch("DATABASE_HOST") { "localhost" } %>
+    username: <%= ENV.fetch("DATABASE_USERNAME") { "corobook_next" } %>
     password: <%= ENV["COROBOOK_NEXT_DATABASE_PASSWORD"] %>
   cache:
     <<: *primary_production
