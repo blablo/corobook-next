@@ -20,7 +20,11 @@
     </h2>
     <div class="flex flex-col gap-3">
       <% @text_slide.page_count.times do |i| %>
-        <%= render "projector_slide", slide: @text_slide, page: i %>
+        <%# Bounded 16:9 mini-stage (position:relative) so an absolute background image is
+            contained within the preview box rather than escaping to fill the page. %>
+        <div class="projector-preview rounded overflow-hidden">
+          <%= render "projector_slide", slide: @text_slide, page: i %>
+        </div>
       <% end %>
     </div>
   </section>

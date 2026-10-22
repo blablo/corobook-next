@@ -48,6 +48,12 @@
    the inner #live-frame carries as --proj-* vars. */
 .projector-preview { background: var(--proj-bg, #000); color: var(--proj-text, #fff); aspect-ratio: 16 / 9; position: relative; }
 .projector-preview #live-frame { position: static; inset: auto; height: 100%; padding: 4% 5%; }
+/* Slide-show previews render a .projector-slide DIRECTLY in the preview box (no #live-frame);
+   center and pad it so the slide body sits in the middle and the background image fills the box. */
+.projector-preview > .projector-slide {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  padding: 4% 5%; box-sizing: border-box; text-align: center;
+}
 /* The operator preview uses the SAME fit controller as the real projector, sized to this smaller
    stage — so the text proportions match what the congregation sees (just scaled down). */
 /* The blank overlay is position:fixed for the real full-screen projector; inside the operator
