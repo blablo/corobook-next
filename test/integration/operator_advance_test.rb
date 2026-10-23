@@ -14,6 +14,12 @@ class OperatorAdvanceTest < ActionDispatch::IntegrationTest
     post login_path, params: { church_id: @church.id, email: "op@example.com", password: "secret123" }
   end
 
+  test "the operator page links back to the set" do
+    get operator_path(@session)
+    assert_response :success
+    assert_select "[data-role=back-to-set][href='#{service_set_path(@set)}']"
+  end
+
   test "advance walks sections within a song then crosses into the next item" do
     # Section 0 is the song's title slide, 1 = V1, 2 = Coro, then the next item.
     assert_equal @i0.id, @session.current_set_item_id
