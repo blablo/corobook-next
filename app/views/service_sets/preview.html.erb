@@ -34,6 +34,14 @@
         <% when :section %>
           <%= render "songs/musician_chart_section", section: row.section, projected: row.projected %>
         <% when :slide %>
+          <div class="musician-chart-title" data-role="slide-title">
+            <h2>
+              <%= row.slide.title.presence || "Untitled slide" %>
+              <% if row.slide.page_count > 1 %>
+                <span class="musician-chart-key" data-role="slide-page">page <%= row.page + 1 %> of <%= row.slide.page_count %></span>
+              <% end %>
+            </h2>
+          </div>
           <%= render "text_slides/musician_slide", slide: row.slide, page: row.page %>
         <% end %>
       </section>
