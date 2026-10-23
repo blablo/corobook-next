@@ -1,0 +1,23 @@
+# Español — mirrors en.yml. A missing key here falls back to English.
+es:
+  nav:
+    library_heading: "Biblioteca"
+    admin_heading: "Administración"
+    home: "Inicio"
+    dashboard: "Panel"
+    songs: "Canciones"
+    slides: "Diapositivas"
+    services: "Servicios"
+    team: "Equipo"
+    usage_report: "Informe de uso"
+    settings: "Ajustes"
+    settings_general: "General"
+    settings_projection: "Proyección de canciones"
+  common:
+    language: "Idioma"
+    english: "English"
+    spanish: "Español"
+    sign_out: "Cerrar sesión"
+    new_service: "Nuevo servicio"
+    new_song: "Nueva canción"
+    new_slide: "Nueva diapositiva"
