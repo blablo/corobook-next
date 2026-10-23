@@ -49,7 +49,7 @@ class ServiceSetsController < ApplicationController
   def create
     @service_set = church_scope(:service_sets).build(service_set_params)
     if @service_set.save
-      redirect_to @service_set, notice: "Set created."
+      redirect_to @service_set, notice: "Service created."
     else
       render :new, status: :unprocessable_entity
     end
@@ -57,7 +57,7 @@ class ServiceSetsController < ApplicationController
 
   def update
     if @service_set.update(service_set_params)
-      redirect_to @service_set, notice: "Set updated."
+      redirect_to @service_set, notice: "Service updated."
     else
       render :edit, status: :unprocessable_entity
     end
@@ -65,7 +65,7 @@ class ServiceSetsController < ApplicationController
 
   def destroy
     @service_set.destroy
-    redirect_to service_sets_path, notice: "Set deleted."
+    redirect_to service_sets_path, notice: "Service deleted."
   end
 
   # Append a song, a reusable slide, or a new inline one-off slide at the end of the set.
@@ -95,7 +95,7 @@ class ServiceSetsController < ApplicationController
     if ids.sort != current.sort
       return respond_to do |format|
         format.json { render json: { error: "stale", items: ordered_items_json }, status: :conflict }
-        format.html { redirect_to @service_set, alert: "The set changed — reloaded." }
+        format.html { redirect_to @service_set, alert: "The service changed — reloaded." }
       end
     end
 

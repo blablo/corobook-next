@@ -5,7 +5,7 @@
       <span class="badge <%= @session.active? ? 'badge-success' : 'badge-ghost' %>"
             data-role="live-indicator"><%= @session.active? ? "LIVE" : "ENDED" %></span>
     </div>
-    <%= link_to "← Back to set", service_set_path(@session.service_set),
+    <%= link_to "← Back to service", service_set_path(@session.service_set),
           class: "btn btn-ghost btn-sm", data: { role: "back-to-set" } %>
   </div>
 
