@@ -49,6 +49,30 @@ class Corobook::LivePositionTest < ActiveSupport::TestCase
     assert_equal 2, Corobook::LivePosition.new(@set).section_count_for(@i0)
   end
 
+  test "a repeated arrangement label replays its section every time (regression: song 127)" do
+    # Coro reused three times must play three times, not be consumed after the first.
+    @song.update!(
+      chordpro_source: "{sov: V1}\n[G]uno\n{eov}\n{soc: Coro}\n[C]coro\n{eoc}",
+      arrangement: [ "Coro", "V1", "Coro" ])
+    p = Corobook::LivePosition.new(@set)
+    # title + Coro + V1 + Coro = 4 song stops
+    assert_equal 4, p.section_count_for(@i0)
+    ordered = Corobook::LivePosition.resolve_arrangement(
+      @song.parsed_lyric["sections"], @song.arrangement)
+    assert_equal [ "Coro", "V1", "Coro" ], ordered.map { |s| s["label"] }
+  end
+
+  test "resolve_arrangement appends unreferenced sections only when asked" do
+    @song.update!(chordpro_source: "{sov: V1}\n[G]uno\n{eov}\n{soc: Coro}\n[C]coro\n{eoc}")
+    sections = @song.parsed_lyric["sections"]
+    # Projector (default): arrangement is the exact running order, Coro not played.
+    proj = Corobook::LivePosition.resolve_arrangement(sections, [ "V1" ])
+    assert_equal [ "V1" ], proj.map { |s| s["label"] }
+    # Musician/sheet: unnamed Coro appended so the band still sees it.
+    mus = Corobook::LivePosition.resolve_arrangement(sections, [ "V1" ], append_unreferenced: true)
+    assert_equal [ "V1", "Coro" ], mus.map { |s| s["label"] }
+  end
+
   test "a multi-page slide contributes one stop per page" do
     @slide.update!(pages: [ { "body_markdown" => "uno" }, { "body_markdown" => "dos" } ])
     p = Corobook::LivePosition.new(@set)

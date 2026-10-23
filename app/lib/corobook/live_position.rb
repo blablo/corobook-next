@@ -101,17 +101,40 @@ module Corobook
     # The song's sections in play order (arrangement-resolved, replays included) — the same
     # ordering LiveFrame uses, so stop indices line up with what gets rendered.
     def ordered_sections(song)
-      sections = song.parsed_lyric&.dig("sections") || []
-      arrangement = song.arrangement
-      return sections if arrangement.blank?
-
-      by_label = sections.group_by { |s| s["label"] }
-      arrangement.filter_map { |label| by_label[label]&.shift }
+      self.class.resolve_arrangement(song.parsed_lyric&.dig("sections"), song.arrangement)
     end
 
     # True when a section has at least one chord but no lyric text anywhere (an intro /
     # instrumental). Such a section projects as a blank screen, so it is skipped as a stop.
     def chords_only_section?(section) = self.class.chords_only_section?(section)
+
+    # Resolve a song's sections into play order for a given arrangement — the single source of
+    # truth shared by the projector (LivePosition/LiveFrame), the musician view and the song
+    # sheet, so every surface honors the SAME order and the SAME repeats.
+    #
+    # Each arrangement label resolves to its materialized section BY LABEL; a label named N times
+    # (a chorus reused) plays N times (a replay of the same section) — fixing the old projector
+    # bug where a consuming walk dropped every repeat after the first.
+    #
+    # `append_unreferenced` decides what happens to a section NOT named in the arrangement:
+    #   - false (projector/operator): the arrangement IS the running order, so an unnamed section
+    #     is not played — the arrangement defines exactly what projects.
+    #   - true (musician view, song sheet): the section is appended in natural order so the band
+    #     still sees everything, never silently hidden from the chart.
+    # No arrangement — or one whose labels match nothing — always falls back to natural order.
+    def self.resolve_arrangement(sections, arrangement, append_unreferenced: false)
+      sections = sections || []
+      return sections if arrangement.blank?
+
+      by_label = sections.index_by { |s| s["label"] }
+      ordered = arrangement.filter_map { |label| by_label[label] }
+      return sections if ordered.empty?
+      return ordered unless append_unreferenced
+
+      referenced = arrangement.to_set
+      leftovers = sections.reject { |s| referenced.include?(s["label"]) }
+      ordered + leftovers
+    end
 
     def self.chords_only_section?(section)
       lines = section["lines"] || []
