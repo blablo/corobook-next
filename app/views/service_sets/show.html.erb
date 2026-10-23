@@ -29,7 +29,7 @@
       <% end %>
       <% if @active_session %>
         <p class="mt-2" data-role="live-warning">
-          <span class="badge badge-warning badge-sm gap-1">● This set is live</span>
+          <span class="badge badge-warning badge-sm gap-1">● This service is live</span>
         </p>
       <% end %>
     </div>
@@ -59,7 +59,7 @@
         <p class="py-3 text-sm">
           <span class="font-semibold"><%= @other_live_session.service_set.name %></span> is live right now.
           Going live with <span class="font-semibold"><%= @service_set.name %></span> will end it and move the
-          projector and musicians to this set.
+          projector and musicians to this service.
         </p>
         <div class="flex justify-end gap-2">
           <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('go-live-takeover').close()">Cancel</button>
@@ -96,7 +96,7 @@
       <aside class="lg:sticky lg:top-4 self-start">
         <div class="card card-border bg-base-100">
           <div class="card-body p-4">
-          <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50 mb-3">Add to set</h2>
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50 mb-3">Add to service</h2>
 
           <div class="flex items-center justify-between gap-2 mb-3">
             <div role="tablist" class="tabs tabs-box tabs-sm" data-set-builder-target="tabs">

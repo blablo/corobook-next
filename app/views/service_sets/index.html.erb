@@ -1,13 +1,13 @@
 <div class="mx-auto mt-8 max-w-3xl p-4" data-role="sets-index">
   <div class="flex items-center justify-between mb-4">
-    <h1 class="text-2xl font-semibold">Sets — <%= current_church.name %></h1>
-    <%= link_to "New set", new_service_set_path, class: "btn btn-primary btn-sm" %>
+    <h1 class="text-2xl font-semibold">Services — <%= current_church.name %></h1>
+    <%= link_to "New service", new_service_set_path, class: "btn btn-primary btn-sm" %>
   </div>
 
   <% if @service_sets.empty? %>
     <div class="card bg-base-100 border border-base-200">
       <div class="card-body items-center text-center text-sm text-base-content/60" data-role="empty">
-        No sets yet.
+        No services yet.
       </div>
     </div>
   <% else %>

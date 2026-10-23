@@ -6,7 +6,7 @@
   <div class="flex flex-col sm:flex-row sm:items-center gap-3">
     <div class="flex-1">
       <h1 class="text-2xl font-bold">Dashboard</h1>
-      <p class="text-sm text-base-content/60">Build sets, manage your library, and go live.</p>
+      <p class="text-sm text-base-content/60">Build services, manage your library, and go live.</p>
     </div>
     <%= form_with url: songs_path, method: :get, class: "join w-full sm:w-80", data: { role: "song-search" } do %>
       <%= search_field_tag :q, nil, placeholder: "Search songs…",
@@ -26,11 +26,11 @@
       <div class="card-body gap-4">
         <% if @hero_set.nil? %>
           <p class="text-xs font-semibold uppercase tracking-wide text-primary">Get started</p>
-          <h2 class="text-2xl font-bold">No sets yet</h2>
-          <p class="text-base-content/70 max-w-prose">Create your first set to start building a service — add songs and slides, then go live to the projector.</p>
+          <h2 class="text-2xl font-bold">No services yet</h2>
+          <p class="text-base-content/70 max-w-prose">Create your first service to start building it — add songs and slides, then go live to the projector.</p>
           <div class="card-actions">
             <%= link_to new_service_set_path, class: "btn btn-primary btn-lg", data: { role: "new-set" } do %>
-              Create your first set
+              Create your first service
             <% end %>
           </div>
         <% else %>
@@ -64,11 +64,11 @@
             <% elsif item_count.zero? %>
               <%= link_to "Add items", service_set_path(@hero_set),
                     class: "btn btn-primary btn-lg", data: { role: "add-items" } %>
-              <span class="text-sm text-base-content/60" data-role="empty-set-hint">This set has no items yet — add songs or slides first.</span>
+              <span class="text-sm text-base-content/60" data-role="empty-set-hint">This service has no items yet — add songs or slides first.</span>
             <% else %>
               <%= button_to "Go live", launch_service_set_path(@hero_set), method: :post,
                     class: "btn btn-primary btn-lg gap-2", data: { role: "go-live" } %>
-              <%= link_to "Edit set", service_set_path(@hero_set), class: "btn btn-ghost btn-lg" %>
+              <%= link_to "Edit service", service_set_path(@hero_set), class: "btn btn-ghost btn-lg" %>
             <% end %>
             <% if @hero_set.service_date.blank? && !@active_session %>
               <%= link_to "Set a date", edit_service_set_path(@hero_set), class: "btn btn-link btn-sm px-0" %>
@@ -82,7 +82,7 @@
     <section class="card bg-base-100 shadow-sm ring-1 ring-base-200">
       <div class="card-body gap-2">
         <div class="flex items-center justify-between">
-          <h3 class="font-semibold">Recent sets</h3>
+          <h3 class="font-semibold">Recent services</h3>
           <%= link_to "All", service_sets_path, class: "link link-hover text-sm text-base-content/60" %>
         </div>
         <% if @recent_sets.any? %>
@@ -117,7 +117,7 @@
             <% end %>
           </ul>
         <% else %>
-          <p class="text-sm text-base-content/60 py-4">No sets yet.</p>
+          <p class="text-sm text-base-content/60 py-4">No services yet.</p>
         <% end %>
       </div>
     </section>
@@ -133,7 +133,7 @@
           <span class="inline-grid place-items-center size-10 rounded-lg bg-primary/10 text-primary shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
           </span>
-          <span class="font-medium">New set</span>
+          <span class="font-medium">New service</span>
         </div>
       <% end %>
       <%= link_to new_song_path,
@@ -178,7 +178,7 @@
       <%= link_to service_sets_path,
             class: "card bg-base-100 ring-1 ring-base-200 hover:ring-primary hover:shadow-md transition-all" do %>
         <div class="card-body p-4 gap-0">
-          <span class="text-xs text-base-content/60">Sets</span>
+          <span class="text-xs text-base-content/60">Services</span>
           <span class="text-3xl font-bold leading-tight"><%= @counts[:sets] %></span>
         </div>
       <% end %>

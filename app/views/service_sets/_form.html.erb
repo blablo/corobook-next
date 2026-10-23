@@ -23,7 +23,7 @@
       </fieldset>
 
       <div class="flex items-center gap-3">
-        <%= f.submit (service_set.persisted? ? "Save changes" : "Create set"), class: "btn btn-primary" %>
+        <%= f.submit (service_set.persisted? ? "Save changes" : "Create service"), class: "btn btn-primary" %>
         <%= link_to "Cancel", (service_set.persisted? ? service_set_path(service_set) : service_sets_path), class: "btn btn-ghost" %>
       </div>
     </div>
