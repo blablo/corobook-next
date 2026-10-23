@@ -57,6 +57,7 @@ Rails.application.routes.draw do
   resources :service_sets, path: "sets", as: :service_sets do
     member do
       get "preview"
+      get "print"
       post "items", to: "service_sets#add_item", as: :add_item
       patch "reorder"
       delete "items/:item_id", to: "service_sets#remove_item", as: :remove_item
