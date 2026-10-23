@@ -18,6 +18,7 @@
   <% elsif frame.song? && frame.current_section %>
     <%= render "songs/projector_section",
           lines: frame.current_section_plain_lines,
+          repeats: frame.current_repeat_marks,
           is_final_section: frame.final_chunk?,
           song: frame.item,
           church_license: session.church.ccli_license_number,

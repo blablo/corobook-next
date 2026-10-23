@@ -3,6 +3,8 @@
   Locals:
     lines             - pre-resolved plain lyric lines for this slide (by_section = whole section,
                         by_lines = the current N-line chunk). Falls back to section_plain_lines(section).
+    repeats           - { line index on this slide => "×2" } repeat markers (LiveFrame#current_repeat_marks).
+                        Falls back to the section's own markers when lines are not passed.
     is_final_section  - true on the final slide of the song (shows the copyright notice).
     song, church_license
     show_credits      - whether the copyright/licensing notice may render (church setting; default true).
@@ -12,12 +14,13 @@
 <% show_editor_warnings = local_assigns.fetch(:show_editor_warnings, false) %>
 <% show_credits = local_assigns.fetch(:show_credits, true) %>
 <% lines = local_assigns[:lines] || Corobook::ChordPro::Transform.section_plain_lines(section) %>
+<% repeats = local_assigns[:repeats] || (local_assigns[:lines] ? {} : Corobook::ChordPro::Transform.section_repeat_marks(section)) %>
 <% notice = Corobook::CopyrightNotice.for(song, church_license: church_license) %>
 
 <div class="projector-section" data-controller="fit" data-fit-fixed-value="<%= local_assigns.fetch(:font_size, 0).to_i %>">
   <div data-fit-target="content" class="projector-lyrics" data-role="projector-lyrics">
-    <% lines.each do |line| %>
-      <div class="projector-line"><%= line.presence || raw("&nbsp;") %></div>
+    <% lines.each_with_index do |line, i| %>
+      <div class="projector-line"><%= line.presence || raw("&nbsp;") %><% if repeats[i] %><span class="projector-repeat" data-role="repeat-mark"><%= repeats[i] %></span><% end %></div>
     <% end %>
   </div>
 
