@@ -15,8 +15,7 @@ module Corobook
     def initialize(service_set)
       @service_set = service_set
       @items = service_set.set_items.order(:position).includes(:song, :text_slide).to_a
-      @by_lines = service_set.church&.paginate_by_lines? || false
-      @lines_per_slide = service_set.church&.projector_lines_per_slide.to_i.clamp(1, 20)
+      @chunker = Corobook::SlideChunker.new(service_set.church)
     end
 
     # The flat ordered list of stops across the whole set. For a song: the title slide (index 0)
@@ -37,9 +36,9 @@ module Corobook
     end
 
     # Title slide at index 0, then one stop per ordered lyric section at index i+1, skipping
-    # any section that carries chords but no lyric text. In by_lines mode a lyric section is
-    # further split into N-line chunks (reset at the section boundary), each its own stop
-    # sharing the section_index but with an incrementing chunk_index.
+    # any section that carries chords but no lyric text. A section that is split onto several
+    # slides (N-line pagination, or too long to fit at the minimum size) yields one stop per
+    # slide, sharing the section_index with an incrementing chunk_index.
     def song_stops(item)
       stops = [ Stop.new(set_item_id: item.id, section_index: 0) ]
       ordered_sections(item.song).each_with_index do |section, i|
@@ -53,13 +52,10 @@ module Corobook
       stops
     end
 
-    # How many projector stops a lyric section yields: 1 in by_section mode, or ceil(lines / N)
-    # in by_lines mode (at least 1).
+    # How many projector slides a lyric section yields (at least 1).
     def chunk_count_for(section)
-      return 1 unless @by_lines
-
-      line_count = Corobook::ChordPro::Transform.section_plain_lines(section).length
-      [ (line_count.to_f / @lines_per_slide).ceil, 1 ].max
+      lines = Corobook::ChordPro::Transform.section_plain_lines(section)
+      @chunker.slides(lines).length
     end
 
     def first = stops.first
@@ -115,7 +111,9 @@ module Corobook
 
     # True when a section has at least one chord but no lyric text anywhere (an intro /
     # instrumental). Such a section projects as a blank screen, so it is skipped as a stop.
-    def chords_only_section?(section)
+    def chords_only_section?(section) = self.class.chords_only_section?(section)
+
+    def self.chords_only_section?(section)
       lines = section["lines"] || []
       segments = lines.flat_map { |l| l["segments"] || [] }
       return false if segments.empty? # a bare/empty section is not "chords-only"; leave it alone
