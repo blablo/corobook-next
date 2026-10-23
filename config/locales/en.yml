@@ -271,6 +271,7 @@ en:
       body: "The link may have expired or already been used. Ask whoever invited you to send a new one."
       go_to_sign_in: "Go to sign in"
     mailer:
+      footer: "© %{year} Corobook · Worship presentation & song management"
       invite:
         greeting: "Hi,"
         body_html: "%{inviter} has invited you to join %{church} on Corobook as %{role}."
