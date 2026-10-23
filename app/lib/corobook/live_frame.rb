@@ -44,11 +44,7 @@ module Corobook
     def ordered_sections_of(sections)
       return [] unless song?
 
-      arrangement = item.arrangement
-      return sections if arrangement.blank?
-
-      by_label = sections.group_by { |s| s["label"] }
-      arrangement.filter_map { |label| by_label[label]&.shift }
+      Corobook::LivePosition.resolve_arrangement(sections, item.arrangement)
     end
 
     def final_section?

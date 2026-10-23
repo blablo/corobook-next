@@ -80,15 +80,8 @@ class SongsController < ApplicationController
   # allowed — a chorus reused three times renders three times). Sections NOT named in the
   # arrangement are appended in their natural order so nothing is silently dropped from the
   # sheet. No arrangement, or one whose labels match nothing, falls back to natural order.
+  # Shared with the projector and musician view so every surface plays a set in the same order.
   def order_sections(sections, arrangement)
-    return sections if arrangement.blank?
-
-    by_label = sections.index_by { |s| s["label"] }
-    ordered = arrangement.filter_map { |label| by_label[label] }
-    return sections if ordered.empty?
-
-    referenced = arrangement.to_set
-    leftovers = sections.reject { |s| referenced.include?(s["label"]) }
-    ordered + leftovers
+    Corobook::LivePosition.resolve_arrangement(sections, arrangement, append_unreferenced: true)
   end
 end

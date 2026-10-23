@@ -72,20 +72,11 @@ module Corobook
     # Arrangement-resolved play order for the WHOLE chart (design §: arrangement controls order and
     # repetition, never visibility). A label named N times renders N times; any section NOT named in
     # the arrangement is appended in natural order so nothing is ever hidden from the musician. No
-    # arrangement — or one whose labels match nothing — falls back to natural section order. This
-    # deliberately differs from LivePosition's consuming walk: the projector steps stops one at a
-    # time, but the musician reads everything.
+    # arrangement — or one whose labels match nothing — falls back to natural section order.
+    # Shared with the projector (LivePosition/LiveFrame) and the song sheet so every surface
+    # plays a set in the same order.
     def ordered_sections(sections, arrangement)
-      sections ||= []
-      return sections if arrangement.blank?
-
-      by_label = sections.index_by { |s| s["label"] }
-      ordered = arrangement.filter_map { |label| by_label[label] }
-      return sections if ordered.empty?
-
-      referenced = arrangement.to_set
-      leftovers = sections.reject { |s| referenced.include?(s["label"]) }
-      ordered + leftovers
+      Corobook::LivePosition.resolve_arrangement(sections, arrangement, append_unreferenced: true)
     end
 
     # A section with a chord but no lyric text anywhere (intro/instrumental): shown to the
