@@ -28,8 +28,8 @@
         </p>
       <% end %>
       <% if @active_session %>
-        <p class="mt-2 inline-flex items-center gap-1 rounded bg-warning/15 text-warning px-2 py-0.5 text-xs font-semibold" data-role="live-warning">
-          ● This set is live
+        <p class="mt-2" data-role="live-warning">
+          <span class="badge badge-warning badge-sm gap-1">● This set is live</span>
         </p>
       <% end %>
     </div>
@@ -94,11 +94,12 @@
     <%# ── Library picker (editors only) ─────────────────────────── %>
     <% if can_edit? %>
       <aside class="lg:sticky lg:top-4 self-start">
-        <div class="rounded-xl ring-1 ring-base-200 bg-base-100 p-4">
+        <div class="card card-border bg-base-100">
+          <div class="card-body p-4">
           <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50 mb-3">Add to set</h2>
 
           <div class="flex items-center justify-between gap-2 mb-3">
-            <div role="tablist" class="tabs tabs-boxed tabs-sm" data-set-builder-target="tabs">
+            <div role="tablist" class="tabs tabs-box tabs-sm" data-set-builder-target="tabs">
               <button type="button" class="tab tab-active" data-set-builder-target="tab" data-kind="song" data-action="set-builder#switchTab">Songs</button>
               <button type="button" class="tab" data-set-builder-target="tab" data-kind="slide" data-action="set-builder#switchTab">Slides</button>
             </div>
@@ -137,6 +138,7 @@
                 <%= submit_tag "Add slide", class: "btn btn-sm btn-outline w-full" %>
               <% end %>
             </details>
+          </div>
           </div>
         </div>
       </aside>
