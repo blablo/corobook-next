@@ -268,6 +268,16 @@
 .musician-preview-page .musician-setlist { padding: 0; }
 @media print {
   .no-print { display: none !important; }
+
+  /* Drop the admin shell chrome so only the page content prints: no navbar, no
+     sidebar, no drawer offset, no body tint. (The shell's navbar/sidebar carry no
+     no-print class of their own, so they are hidden here by structure.) */
+  body { background: #fff !important; }
+  .drawer > .drawer-content > header.navbar,
+  .drawer > .drawer-side { display: none !important; }
+  .drawer, .drawer > .drawer-content { display: block !important; min-height: 0 !important; overflow: visible !important; }
+  .drawer > .drawer-content > main > div { padding: 0 !important; }
+
   /* Print just the set: strip the app shell chrome around the preview. */
   [data-role=set-preview] { margin: 0 !important; max-width: none !important; }
   .musician-preview-page .musician-row { break-inside: avoid; box-shadow: none; border-color: #ccc; }
