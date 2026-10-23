@@ -1,24 +1,26 @@
 <div class="mx-auto my-8 max-w-4xl px-4 sm:px-6" data-role="operator" data-controller="operator-clicker">
-  <div class="flex items-center justify-between mb-4">
-    <h1 class="text-2xl font-bold"><%= @session.service_set.name %></h1>
-    <div class="flex items-center gap-2">
+  <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+    <div class="flex items-center gap-3 min-w-0">
+      <h1 class="text-2xl font-bold truncate"><%= @session.service_set.name %></h1>
       <span class="badge <%= @session.active? ? 'badge-success' : 'badge-ghost' %>"
             data-role="live-indicator"><%= @session.active? ? "LIVE" : "ENDED" %></span>
-      <%= link_to "← Back to set", service_set_path(@session.service_set),
-            class: "btn btn-ghost btn-sm", data: { role: "back-to-set" } %>
     </div>
+    <%= link_to "← Back to set", service_set_path(@session.service_set),
+          class: "btn btn-ghost btn-sm", data: { role: "back-to-set" } %>
   </div>
 
-  <div class="flex gap-2 mb-4" data-role="operator-controls">
-    <%= button_to "← Back", operator_back_path(@session), method: :patch,
-          form: { data: { turbo: false, "operator-clicker-target": "back" } }, class: "btn" %>
-    <%= button_to "Next →", operator_advance_path(@session), method: :patch,
-          form: { data: { turbo: false, "operator-clicker-target": "next" } }, class: "btn btn-primary" %>
-    <%= button_to (@session.blanked ? "Unblank" : "Blank"), operator_blank_path(@session), method: :patch,
-          form: { data: { turbo: false, "operator-clicker-target": "blank" } }, class: "btn", data: { role: "blank-toggle" } %>
+  <div class="flex flex-wrap items-center justify-between gap-2 mb-4" data-role="operator-controls">
+    <div class="flex items-center gap-2">
+      <%= button_to "← Back", operator_back_path(@session), method: :patch,
+            form: { data: { turbo: false, "operator-clicker-target": "back" } }, class: "btn" %>
+      <%= button_to "Next →", operator_advance_path(@session), method: :patch,
+            form: { data: { turbo: false, "operator-clicker-target": "next" } }, class: "btn btn-primary" %>
+      <%= button_to (@session.blanked ? "Unblank" : "Blank"), operator_blank_path(@session), method: :patch,
+            form: { data: { turbo: false, "operator-clicker-target": "blank" } }, class: "btn", data: { role: "blank-toggle" } %>
+    </div>
     <% if @session.active? %>
       <%= button_to "End service", operator_end_path(@session), method: :delete,
-            form: { data: { turbo: false }, class: "ml-auto" }, class: "btn btn-error",
+            form: { data: { turbo: false } }, class: "btn btn-error btn-outline",
             data: { role: "end-service" } %>
     <% end %>
   </div>
