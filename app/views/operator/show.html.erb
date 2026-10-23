@@ -1,8 +1,12 @@
 <div class="mx-auto my-8 max-w-4xl px-4 sm:px-6" data-role="operator" data-controller="operator-clicker">
   <div class="flex items-center justify-between mb-4">
     <h1 class="text-2xl font-bold"><%= @session.service_set.name %></h1>
-    <span class="badge <%= @session.active? ? 'badge-success' : 'badge-ghost' %>"
-          data-role="live-indicator"><%= @session.active? ? "LIVE" : "ENDED" %></span>
+    <div class="flex items-center gap-2">
+      <span class="badge <%= @session.active? ? 'badge-success' : 'badge-ghost' %>"
+            data-role="live-indicator"><%= @session.active? ? "LIVE" : "ENDED" %></span>
+      <%= link_to "← Back to set", service_set_path(@session.service_set),
+            class: "btn btn-ghost btn-sm", data: { role: "back-to-set" } %>
+    </div>
   </div>
 
   <div class="flex gap-2 mb-4" data-role="operator-controls">
