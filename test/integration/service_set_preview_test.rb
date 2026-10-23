@@ -69,4 +69,38 @@ class ServiceSetPreviewTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "[data-role=preview-set][href='#{preview_service_set_path(@set)}']"
   end
+
+  test "the print view renders a standalone band chart with songs and slides" do
+    login(@editor)
+    get print_service_set_path(@set)
+    assert_response :success
+    # Standalone layout: no admin shell navbar/sidebar.
+    assert_select "header.navbar", count: 0
+    assert_select "[data-role=sidebar]", count: 0
+    # The song and its chords, plus the slide and its title.
+    assert_select ".song-title", text: /Himno/
+    assert_select ".musician-chord", text: "G"
+    assert_select ".slide-title", text: /Aviso/
+  end
+
+  test "the print view honors a viewer's chosen key" do
+    login(@editor)
+    get print_service_set_path(@set, key: "A")
+    assert_response :success
+    assert_select ".musician-chord", text: "A"
+  end
+
+  test "an admin can open the read-only print view" do
+    login(@admin)
+    get print_service_set_path(@set)
+    assert_response :success
+    assert_select ".song-title", text: /Himno/
+  end
+
+  test "the preview links to the print view" do
+    login(@editor)
+    get preview_service_set_path(@set)
+    assert_response :success
+    assert_select "a[href^='#{print_service_set_path(@set)}']"
+  end
 end

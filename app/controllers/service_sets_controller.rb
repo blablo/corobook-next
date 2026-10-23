@@ -1,8 +1,8 @@
 class ServiceSetsController < ApplicationController
   layout "shell"
   before_action :require_sign_in
-  before_action :require_editor, except: %i[index show preview]
-  before_action :set_service_set, only: %i[show edit update destroy add_item reorder remove_item library preview]
+  before_action :require_editor, except: %i[index show preview print]
+  before_action :set_service_set, only: %i[show edit update destroy add_item reorder remove_item library preview print]
 
   def index
     sets = church_scope(:service_sets)
@@ -37,6 +37,17 @@ class ServiceSetsController < ApplicationController
       @service_set,
       target_key: params[:key], semitones: params[:semitones].to_i, capo: params[:capo].presence
     ).rows
+  end
+
+  # A standalone, print-first band chart (its own minimal layout, no admin shell) — a
+  # compact one/two-column sheet the band prints or saves as PDF. Same rows + per-viewer
+  # transpose as #preview.
+  def print
+    @set_rows = Corobook::MusicianSetView.new(
+      @service_set,
+      target_key: params[:key], semitones: params[:semitones].to_i, capo: params[:capo].presence
+    ).rows
+    render layout: false
   end
 
   def new
