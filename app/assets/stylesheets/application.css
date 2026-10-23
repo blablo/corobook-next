@@ -278,9 +278,38 @@
   .drawer, .drawer > .drawer-content { display: block !important; min-height: 0 !important; overflow: visible !important; }
   .drawer > .drawer-content > main > div { padding: 0 !important; }
 
-  /* Print just the set: strip the app shell chrome around the preview. */
+  /* Print just the set, as a COMPACT band chart (per worship chart-print practice:
+     tight line spacing, no card chrome, minimal gaps, two columns to fit a page). */
   [data-role=set-preview] { margin: 0 !important; max-width: none !important; }
-  .musician-preview-page .musician-row { break-inside: avoid; box-shadow: none; border-color: #ccc; }
+  @page { margin: 1cm; }
+
+  /* Two newspaper-style columns so a whole service fits in far fewer pages. A song
+     never splits across a column/page break. */
+  .musician-preview-page .musician-setlist {
+    column-count: 2; column-gap: 1.5rem; padding: 0 !important; max-width: none !important;
+  }
+  .musician-preview-page .musician-row {
+    break-inside: avoid; -webkit-column-break-inside: avoid;
+    border: none !important; box-shadow: none !important; border-radius: 0 !important;
+    background: #fff !important;
+    padding: 0 0 0.35rem !important; margin: 0 0 0.6rem !important;
+  }
+
+  /* Shrink the per-song title block and section labels. */
+  .musician-preview-page .musician-chart-title { margin-bottom: 0.15rem; }
+  .musician-preview-page .musician-chart-title h2 { font-size: 1rem !important; }
+  .musician-preview-page .musician-chart-key,
+  .musician-preview-page .musician-chart-credits { font-size: 0.7rem !important; margin-top: 0.1rem !important; }
+  .musician-preview-page .musician-chart-section { margin: 0.15rem 0 0.3rem !important; }
+  .musician-preview-page .musician-chart-label,
+  .musician-preview-page .musician-section-label { font-size: 0.65rem !important; margin-bottom: 0 !important; }
+
+  /* Tighten the chord/lyric lines: smaller type, shorter line height, and a smaller
+     chord row gap above each line (kept so chords still sit above their syllable). */
+  .musician-preview-page .musician-line,
+  .musician-preview-page .musician-chart-line {
+    font-size: 0.8rem !important; line-height: 1.15 !important; padding-top: 1em !important;
+  }
 }
 
 /* ── Sidebar navigation active style ─────────────────────────────────────────
