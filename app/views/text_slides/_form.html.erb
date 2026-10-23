@@ -13,13 +13,13 @@
         <div class="flex flex-col gap-4 min-w-0">
           <%# Title %>
           <fieldset class="fieldset">
-            <legend class="fieldset-legend">Title</legend>
+            <%= f.label :title, "Title", class: "fieldset-legend" %>
             <%= f.text_field :title, class: "input w-full", placeholder: "Slide title" %>
           </fieldset>
 
           <%# Background image (projection only) %>
           <fieldset class="fieldset">
-            <legend class="fieldset-legend">Background image</legend>
+            <%= f.label :background_image, "Background image", class: "fieldset-legend" %>
             <% if text_slide.background_image? %>
               <div class="flex items-center gap-3" data-role="slide-bg-current">
                 <%= image_tag rails_blob_path(text_slide.background_image, only_path: true),
@@ -37,7 +37,7 @@
 
           <%# Font size (all pages). Auto scales the text to fit the screen. %>
           <fieldset class="fieldset">
-            <legend class="fieldset-legend">Font size</legend>
+            <%= f.label :font_size, "Font size", class: "fieldset-legend" %>
             <%= f.select :font_size,
                   [ [ "Auto — fit to screen", "" ] ] + TextSlide::FONT_SIZE_OPTIONS.map { |n| [ "#{n}% of screen height", n ] },
                   {}, class: "select w-full",
