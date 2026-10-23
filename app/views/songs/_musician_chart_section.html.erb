@@ -7,8 +7,8 @@
 <div class="musician-chart-section <%= 'is-replay' if section['replay_of'] %>" data-role="chart-section">
   <% if section["label"].present? || section["replay_of"] %>
     <div class="musician-chart-label" data-role="section-label">
-      <%= section["label"] %><%= " (repeat)" if section["replay_of"] %>
-      <% unless projected %><span class="musician-chart-tag" data-role="not-projected">instrumental</span><% end %>
+      <%= section["label"] %><%= " #{t('songs.chart.repeat')}" if section["replay_of"] %>
+      <% unless projected %><span class="musician-chart-tag" data-role="not-projected"><%= t("songs.chart.instrumental") %></span><% end %>
     </div>
   <% end %>
 

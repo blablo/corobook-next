@@ -1,15 +1,14 @@
-<p>Welcome to Corobook,</p>
+<p><%= t("auth.mailer.confirm.greeting") %></p>
 
 <p>
-  You created an account for <strong><%= @church.name %></strong>. Confirm your email
-  address to activate it and sign in.
+  <%= t("auth.mailer.confirm.body_html", church: content_tag(:strong, @church.name)) %>
 </p>
 
 <p>
-  <a href="<%= @url %>">Confirm my account</a>
+  <a href="<%= @url %>"><%= t("auth.mailer.confirm.cta") %></a>
 </p>
 
-<p>Or paste this link into your browser:</p>
+<p><%= t("auth.mailer.confirm.paste_link") %></p>
 <p><%= @url %></p>
 
-<p>This link expires in 2 days. If you didn't create this account, you can ignore this email.</p>
+<p><%= t("auth.mailer.confirm.expires") %></p>

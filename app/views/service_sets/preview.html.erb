@@ -1,4 +1,4 @@
-<% content_for :title, "#{@service_set.name} — preview" %>
+<% content_for :title, t("services.preview.page_title", name: @service_set.name) %>
 
 <div class="mx-auto my-6 max-w-3xl px-4 sm:px-6 musician-root musician-preview-page" data-role="set-preview">
   <%# ── Header (hidden when printing) ───────────────────────────── %>
@@ -6,13 +6,13 @@
     <div class="min-w-0">
       <div class="musician-setname" data-role="set-name"><%= @service_set.name %></div>
       <div class="text-xs text-base-content/60">
-        <%= @service_set.service_date&.strftime("%A, %B %-d, %Y") || "No date set" %>
-        · <%= pluralize(@set_rows.count { |r| r.kind != :title }, "stop") %>
+        <%= @service_set.service_date&.strftime("%A, %B %-d, %Y") || t("services.preview.no_date") %>
+        · <%= t("services.preview.stops", count: @set_rows.count { |r| r.kind != :title }) %>
       </div>
     </div>
     <div class="flex items-center gap-2">
-      <%= link_to "← Back to service", service_set_path(@service_set), class: "btn btn-ghost btn-sm" %>
-      <%= link_to "Print", print_service_set_path(@service_set, key: params[:key], semitones: params[:semitones], capo: params[:capo]),
+      <%= link_to t("services.preview.back"), service_set_path(@service_set), class: "btn btn-ghost btn-sm" %>
+      <%= link_to t("services.preview.print"), print_service_set_path(@service_set, key: params[:key], semitones: params[:semitones], capo: params[:capo]),
             class: "btn btn-primary btn-sm", target: "_blank", rel: "noopener" %>
     </div>
   </header>
@@ -26,7 +26,7 @@
         <% when :title %>
           <div class="musician-chart-title" data-role="chart-title">
             <h2><%= row.song.title %></h2>
-            <% if row.displayed_key %><span class="musician-chart-key" data-role="key-badge">Key <%= row.displayed_key %></span><% end %>
+            <% if row.displayed_key %><span class="musician-chart-key" data-role="key-badge"><%= t("services.preview.key", key: row.displayed_key) %></span><% end %>
             <% credits = [ row.song.author, row.song.copyright_line, (row.song.ccli_song_number.present? ? "CCLI ##{row.song.ccli_song_number}" : nil) ].compact %>
             <% if credits.any? %>
               <div class="musician-chart-credits"><% credits.each do |c| %><div><%= c %></div><% end %></div>
@@ -37,9 +37,9 @@
         <% when :slide %>
           <div class="musician-chart-title" data-role="slide-title">
             <h2>
-              <%= row.slide.title.presence || "Untitled slide" %>
+              <%= row.slide.title.presence || t("services.preview.untitled_slide") %>
               <% if row.slide.page_count > 1 %>
-                <span class="musician-chart-key" data-role="slide-page">page <%= row.page + 1 %> of <%= row.slide.page_count %></span>
+                <span class="musician-chart-key" data-role="slide-page"><%= t("services.preview.page_of", page: row.page + 1, total: row.slide.page_count) %></span>
               <% end %>
             </h2>
           </div>
@@ -49,7 +49,7 @@
     <% end %>
 
     <% if @set_rows.empty? %>
-      <p class="musician-empty" data-role="empty">This set has no items yet.</p>
+      <p class="musician-empty" data-role="empty"><%= t("services.preview.empty") %></p>
     <% end %>
   </div>
 </div>

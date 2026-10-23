@@ -5,7 +5,7 @@
 <div class="musician-section <%= 'is-replay' if section['replay_of'] %>" data-role="musician-section">
   <% if section["label"].present? || section["replay_of"] %>
     <div class="musician-section-label text-sm text-white/60" data-role="section-label">
-      <%= section["label"] %><%= " (repeat)" if section["replay_of"] %>
+      <%= section["label"] %><%= " #{t('songs.chart.repeat')}" if section["replay_of"] %>
     </div>
   <% end %>
 

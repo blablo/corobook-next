@@ -6,15 +6,15 @@
     data-role="set-item" data-item-id="<%= item.id %>" data-missing="<%= item.missing? %>"
     <%= "draggable=true" if can_edit %>>
   <% if can_edit %>
-    <span class="cursor-grab select-none text-base-content/30 shrink-0" data-drag-handle title="Drag to reorder">⠿</span>
+    <span class="cursor-grab select-none text-base-content/30 shrink-0" data-drag-handle title="<%= t('services.item.drag_to_reorder') %>">⠿</span>
   <% end %>
   <span class="text-xs text-base-content/40 w-6 text-right shrink-0" data-role="pos"><%= index + 1 %>.</span>
-  <span class="shrink-0 text-base-content/40" title="<%= item.item_type == 'song' ? 'Song' : 'Slide' %>">
+  <span class="shrink-0 text-base-content/40" title="<%= item.item_type == 'song' ? t('services.item.song') : t('services.item.slide') %>">
     <%= item.item_type == "song" ? "♪" : "▤" %>
   </span>
   <span class="flex-1 min-w-0 truncate">
     <% if item.missing? %>
-      <span class="italic text-error">Missing item (removed from library)</span>
+      <span class="italic text-error"><%= t("services.item.missing") %></span>
     <% elsif item.item_type == "song" %>
       <%= link_to item.resolved_title, song_path(item.song), class: "link link-hover font-medium", draggable: "false", data: { role: "item-link" } %>
     <% elsif item.item_type == "text_slide" && item.text_slide&.reusable? %>
@@ -31,14 +31,14 @@
       <%= button_to "↑", reorder_service_set_path(set), method: :patch,
             params: { ordered_ids: @items.map(&:id).tap { |a| a[index - 1], a[index] = a[index], a[index - 1] if index.positive? } },
             form: { data: { turbo: false }, class: index.positive? ? "" : "invisible" },
-            class: "btn btn-ghost btn-xs px-1 arrange-up", "aria-label": "Move up" %>
+            class: "btn btn-ghost btn-xs px-1 arrange-up", "aria-label": t("services.item.move_up") %>
       <%= button_to "↓", reorder_service_set_path(set), method: :patch,
             params: { ordered_ids: @items.map(&:id).tap { |a| a[index + 1], a[index] = a[index], a[index + 1] if index < count - 1 } },
             form: { data: { turbo: false }, class: index < count - 1 ? "" : "invisible" },
-            class: "btn btn-ghost btn-xs px-1 arrange-down", "aria-label": "Move down" %>
+            class: "btn btn-ghost btn-xs px-1 arrange-down", "aria-label": t("services.item.move_down") %>
       <%= button_to "✕", remove_item_service_set_path(set, item_id: item.id), method: :delete,
             form: { data: { turbo: false } },
-            class: "btn btn-ghost btn-xs px-1 text-error arrange-del", "aria-label": "Remove" %>
+            class: "btn btn-ghost btn-xs px-1 text-error arrange-del", "aria-label": t("services.item.remove") %>
     </span>
   <% end %>
 </li>

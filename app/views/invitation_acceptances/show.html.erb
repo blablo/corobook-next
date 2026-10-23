@@ -1,7 +1,7 @@
 <div class="mx-auto mt-16 max-w-sm px-4" data-role="accept-invitation">
-  <h1 class="text-2xl font-bold mb-2">Join <%= @invitation.church.name %></h1>
+  <h1 class="text-2xl font-bold mb-2"><%= t("auth.accept.title", church: @invitation.church.name) %></h1>
   <p class="text-sm text-base-content/60 mb-6">
-    You were invited as <strong><%= @invitation.role %></strong>. Set a password to finish.
+    <%= t("auth.accept.invited_as_html", role: content_tag(:strong, @invitation.role)) %>
   </p>
 
   <% if flash.now[:alert] || flash[:alert] %>
@@ -10,20 +10,20 @@
 
   <%= form_with url: accept_invitation_path(token: params[:token]), method: :post do |f| %>
     <fieldset class="fieldset">
-      <%= f.label :email, class: "fieldset-legend" %>
+      <%= f.label :email, t("auth.accept.email_label"), class: "fieldset-legend" %>
       <%= f.email_field :email, value: @invitation.email, disabled: true,
             class: "input input-bordered w-full" %>
     </fieldset>
     <fieldset class="fieldset">
-      <%= f.label :password, "Password", class: "fieldset-legend" %>
+      <%= f.label :password, t("auth.accept.password_label"), class: "fieldset-legend" %>
       <%= f.password_field :password, autocomplete: "new-password",
             class: "input input-bordered w-full" %>
     </fieldset>
     <fieldset class="fieldset mb-4">
-      <%= f.label :password_confirmation, "Confirm password", class: "fieldset-legend" %>
+      <%= f.label :password_confirmation, t("auth.accept.password_confirmation_label"), class: "fieldset-legend" %>
       <%= f.password_field :password_confirmation, autocomplete: "new-password",
             class: "input input-bordered w-full" %>
     </fieldset>
-    <%= f.submit "Join #{@invitation.church.name}", class: "btn btn-primary w-full" %>
+    <%= f.submit t("auth.accept.submit", church: @invitation.church.name), class: "btn btn-primary w-full" %>
   <% end %>
 </div>

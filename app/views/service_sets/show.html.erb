@@ -14,38 +14,38 @@
       <% if can_edit? %>
         <%= form_with model: @service_set, url: service_set_path(@service_set), method: :patch,
               data: { turbo: false }, class: "mt-1 flex items-center gap-2 flex-wrap" do |f| %>
-          <%= f.label :service_date, "Service date", class: "text-sm text-base-content/60" %>
+          <%= f.label :service_date, t("services.show.service_date"), class: "text-sm text-base-content/60" %>
           <%= f.date_field :service_date, onchange: "this.form.requestSubmit()",
                 class: "input input-bordered input-xs w-auto", data: { role: "service-date" } %>
-          <noscript><%= f.submit "Save", class: "btn btn-xs btn-outline" %></noscript>
+          <noscript><%= f.submit t("services.show.save"), class: "btn btn-xs btn-outline" %></noscript>
           <span class="text-sm text-base-content/60">
-            <%= @service_set.service_date ? "→ goes live #{@service_set.service_date.strftime('%A, %b %-d')}" : "— no date set yet" %>
+            <%= @service_set.service_date ? t("services.show.goes_live", date: @service_set.service_date.strftime('%A, %b %-d')) : t("services.show.no_date_yet") %>
           </span>
         <% end %>
       <% else %>
         <p class="mt-1 text-sm text-base-content/60">
-          <%= @service_set.service_date&.strftime("%A, %B %-d, %Y") || "No date set" %>
+          <%= @service_set.service_date&.strftime("%A, %B %-d, %Y") || t("services.show.no_date") %>
         </p>
       <% end %>
       <% if @active_session %>
         <p class="mt-2" data-role="live-warning">
-          <span class="badge badge-warning badge-sm gap-1">● This service is live</span>
+          <span class="badge badge-warning badge-sm gap-1"><%= t("services.show.live_badge") %></span>
         </p>
       <% end %>
     </div>
     <div class="flex items-center gap-2 shrink-0">
       <%= link_to preview_service_set_path(@service_set), class: "btn btn-ghost btn-sm gap-1", data: { role: "preview-set" } do %>
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-        Preview
+        <%= t("services.show.preview") %>
       <% end %>
       <% if @active_session %>
-        <%= link_to "Resume", operator_path(@active_session), class: "btn btn-primary btn-sm" %>
+        <%= link_to t("services.show.resume"), operator_path(@active_session), class: "btn btn-primary btn-sm" %>
       <% elsif can_edit? && @other_live_session %>
         <%# Another set is live — confirm ending it before taking over the screen. %>
         <button type="button" class="btn btn-primary btn-sm <%= 'btn-disabled' unless launchable %>"
-                onclick="document.getElementById('go-live-takeover').showModal()" data-role="launch-takeover">Go live</button>
+                onclick="document.getElementById('go-live-takeover').showModal()" data-role="launch-takeover"><%= t("services.show.go_live") %></button>
       <% elsif can_edit? %>
-        <%= button_to "Go live", launch_service_set_path(@service_set), method: :post,
+        <%= button_to t("services.show.go_live"), launch_service_set_path(@service_set), method: :post,
               class: "btn btn-primary btn-sm #{'btn-disabled' unless launchable}",
               form: { data: { turbo: false } }, data: { role: "launch" } %>
       <% end %>
@@ -55,19 +55,19 @@
   <% if can_edit? && @other_live_session && !@active_session %>
     <dialog id="go-live-takeover" class="modal" data-role="takeover-modal">
       <div class="modal-box">
-        <h3 class="text-lg font-bold">End the current service?</h3>
+        <h3 class="text-lg font-bold"><%= t("services.show.takeover_title") %></h3>
         <p class="py-3 text-sm">
-          <span class="font-semibold"><%= @other_live_session.service_set.name %></span> is live right now.
-          Going live with <span class="font-semibold"><%= @service_set.name %></span> will end it and move the
-          projector and musicians to this service.
+          <%= t("services.show.takeover_body_html",
+                other: tag.span(@other_live_session.service_set.name, class: "font-semibold"),
+                current: tag.span(@service_set.name, class: "font-semibold")) %>
         </p>
         <div class="flex justify-end gap-2">
-          <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('go-live-takeover').close()">Cancel</button>
-          <%= button_to "End it & go live here", launch_service_set_path(@service_set, force: 1), method: :post,
+          <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('go-live-takeover').close()"><%= t("services.show.cancel") %></button>
+          <%= button_to t("services.show.takeover_confirm"), launch_service_set_path(@service_set, force: 1), method: :post,
                 class: "btn btn-primary btn-sm", form: { data: { turbo: false } }, data: { role: "launch-confirm" } %>
         </div>
       </div>
-      <form method="dialog" class="modal-backdrop"><button aria-label="Close">close</button></form>
+      <form method="dialog" class="modal-backdrop"><button aria-label="<%= t('services.show.close') %>"><%= t("services.show.close") %></button></form>
     </dialog>
   <% end %>
 
@@ -75,8 +75,8 @@
     <%# ── Program (the set) ─────────────────────────────────────── %>
     <section>
       <div class="flex items-center justify-between mb-2">
-        <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50">Program</h2>
-        <span class="text-xs text-base-content/50" data-role="item-count"><%= @items.size %> item<%= "s" unless @items.size == 1 %></span>
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50"><%= t("services.show.program") %></h2>
+        <span class="text-xs text-base-content/50" data-role="item-count"><%= t("services.show.items", count: @items.size) %></span>
       </div>
       <ol class="flex flex-col gap-1.5" data-role="set-items" data-set-builder-target="program">
         <% @items.each_with_index do |item, i| %>
@@ -85,7 +85,7 @@
       </ol>
       <% if @items.empty? %>
         <p class="rounded-lg border border-dashed border-base-300 px-4 py-8 text-center text-sm text-base-content/50" data-role="empty">
-          No items yet. <% if can_edit? %>Add songs or slides from the library →<% end %>
+          <%= t("services.show.empty_program") %> <% if can_edit? %><%= t("services.show.empty_program_hint") %><% end %>
         </p>
       <% end %>
       <p class="sr-only" aria-live="polite" data-set-builder-target="announce"></p>
@@ -96,22 +96,22 @@
       <aside class="lg:sticky lg:top-4 self-start">
         <div class="card card-border bg-base-100">
           <div class="card-body p-4">
-          <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50 mb-3">Add to service</h2>
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50 mb-3"><%= t("services.show.add_to_service") %></h2>
 
           <div class="flex items-center justify-between gap-2 mb-3">
             <div role="tablist" class="tabs tabs-box tabs-sm" data-set-builder-target="tabs">
-              <button type="button" class="tab tab-active" data-set-builder-target="tab" data-kind="song" data-action="set-builder#switchTab">Songs</button>
-              <button type="button" class="tab" data-set-builder-target="tab" data-kind="slide" data-action="set-builder#switchTab">Slides</button>
+              <button type="button" class="tab tab-active" data-set-builder-target="tab" data-kind="song" data-action="set-builder#switchTab"><%= t("services.show.songs") %></button>
+              <button type="button" class="tab" data-set-builder-target="tab" data-kind="slide" data-action="set-builder#switchTab"><%= t("services.show.slides") %></button>
             </div>
             <% if can_edit? %>
-              <button type="button" class="btn btn-sm btn-ghost text-primary gap-1 shrink-0" data-action="set-builder#openNewSlide">+ New slide</button>
+              <button type="button" class="btn btn-sm btn-ghost text-primary gap-1 shrink-0" data-action="set-builder#openNewSlide"><%= t("services.show.new_slide") %></button>
             <% end %>
           </div>
 
           <%# Search picker (songs + slides) — enhanced; falls back to the native forms below with JS off %>
           <div data-set-builder-target="pickerPane">
-            <label class="sr-only" for="set-builder-search">Search the library</label>
-            <input id="set-builder-search" type="search" placeholder="Search…" autocomplete="off"
+            <label class="sr-only" for="set-builder-search"><%= t("services.show.search_library") %></label>
+            <input id="set-builder-search" type="search" placeholder="<%= t('services.show.search_placeholder') %>" autocomplete="off"
                    class="input input-bordered input-sm w-full mb-2"
                    data-set-builder-target="query" data-action="input->set-builder#search">
             <div class="flex flex-col gap-1 max-h-72 overflow-y-auto" data-set-builder-target="results"></div>
@@ -120,14 +120,14 @@
           <%# ── No-JS fallback forms (Req 7.3). Hidden when the controller connects. ── %>
           <div data-set-builder-target="fallback">
             <details class="mt-3">
-              <summary class="text-xs text-base-content/50 cursor-pointer">Add without search</summary>
+              <summary class="text-xs text-base-content/50 cursor-pointer"><%= t("services.show.add_without_search") %></summary>
 
               <%= form_with url: add_item_service_set_path(@service_set), method: :post, class: "mt-2" do %>
                 <%= hidden_field_tag :kind, "song" %>
                 <%= select_tag :song_id,
                       options_from_collection_for_select(@songs, :id, :title),
                       class: "select select-bordered select-sm w-full mb-1", data: { role: "song-select" } %>
-                <%= submit_tag "Add song", class: "btn btn-sm btn-outline w-full" %>
+                <%= submit_tag t("services.show.add_song"), class: "btn btn-sm btn-outline w-full" %>
               <% end %>
 
               <%= form_with url: add_item_service_set_path(@service_set), method: :post, class: "mt-3" do %>
@@ -135,7 +135,7 @@
                 <%= select_tag :text_slide_id,
                       options_from_collection_for_select(@reusable_slides, :id, :title),
                       class: "select select-bordered select-sm w-full mb-1" %>
-                <%= submit_tag "Add slide", class: "btn btn-sm btn-outline w-full" %>
+                <%= submit_tag t("services.show.add_slide"), class: "btn btn-sm btn-outline w-full" %>
               <% end %>
             </details>
           </div>
@@ -151,14 +151,14 @@
     <dialog class="modal" data-set-builder-target="newSlideModal">
       <div class="modal-box !max-w-5xl w-[92vw] max-h-[90vh]">
         <div class="flex items-center justify-between mb-3">
-          <h3 class="text-lg font-bold">New slide</h3>
-          <button type="button" class="btn btn-sm btn-circle btn-ghost" aria-label="Close" data-action="set-builder#closeNewSlide">✕</button>
+          <h3 class="text-lg font-bold"><%= t("services.show.new_slide_modal_title") %></h3>
+          <button type="button" class="btn btn-sm btn-circle btn-ghost" aria-label="<%= t('services.show.close') %>" data-action="set-builder#closeNewSlide">✕</button>
         </div>
         <div data-set-builder-target="newSlideBody">
           <%= render "text_slides/form", text_slide: @new_slide, church_tags: @church_slide_tags, modal: true %>
         </div>
       </div>
-      <form method="dialog" class="modal-backdrop"><button aria-label="Close">close</button></form>
+      <form method="dialog" class="modal-backdrop"><button aria-label="<%= t('services.show.close') %>"><%= t("services.show.close") %></button></form>
     </dialog>
   <% end %>
 </div>

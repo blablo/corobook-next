@@ -7,11 +7,11 @@
   <div class="musician-topbar">
     <div class="musician-setname" data-role="set-name"><%= @session.service_set.name %></div>
     <form class="musician-key-chooser" data-action="change->musician-key#choose">
-      <label>Key
+      <label><%= t("live.musician.key") %>
         <input type="text" name="key" value="<%= @target_key %>" data-role="key-input"
                class="musician-field" inputmode="text" autocomplete="off" />
       </label>
-      <label>Capo
+      <label><%= t("live.musician.capo") %>
         <input type="number" name="capo" value="<%= @capo %>" min="0" max="11"
                data-role="capo-input" class="musician-field musician-field-sm" />
       </label>
@@ -21,7 +21,7 @@
   <%# ── Above the fold: what the projector is on NOW + a peek at NEXT ──── %>
   <div class="musician-nowbar" data-role="now-bar">
     <div class="musician-now">
-      <span class="musician-cue musician-cue-now">Now</span>
+      <span class="musician-cue musician-cue-now"><%= t("live.musician.now") %></span>
       <%# The live frame — re-rendered by the operator broadcast so it follows the projector. %>
       <%= render "live/musician_frame", session: @session,
             target_key: @target_key, semitones: @semitones, capo: @capo %>
@@ -29,7 +29,7 @@
     <% next_row = musician_next_row(@set_rows, @session) %>
     <% if next_row %>
       <div class="musician-next" data-role="next-peek">
-        <span class="musician-cue musician-cue-next">Next</span>
+        <span class="musician-cue musician-cue-next"><%= t("live.musician.next") %></span>
         <div class="musician-next-body"><%= musician_row_peek(next_row) %></div>
       </div>
     <% end %>
@@ -49,7 +49,7 @@
         <% when :title %>
           <div class="musician-chart-title" data-role="chart-title">
             <h2><%= row.song.title %></h2>
-            <% if row.displayed_key %><span class="musician-chart-key" data-role="key-badge">Key <%= row.displayed_key %></span><% end %>
+            <% if row.displayed_key %><span class="musician-chart-key" data-role="key-badge"><%= t("live.musician.key_badge", key: row.displayed_key) %></span><% end %>
             <% credits = [ row.song.author, row.song.copyright_line, (row.song.ccli_song_number.present? ? "CCLI ##{row.song.ccli_song_number}" : nil) ].compact %>
             <% if credits.any? %>
               <div class="musician-chart-credits"><% credits.each do |c| %><div><%= c %></div><% end %></div>
@@ -64,7 +64,7 @@
     <% end %>
 
     <% if @set_rows.empty? %>
-      <p class="musician-empty" data-role="empty">This set has no items yet.</p>
+      <p class="musician-empty" data-role="empty"><%= t("live.musician.empty") %></p>
     <% end %>
   </div>
 </div>

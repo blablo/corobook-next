@@ -1,16 +1,14 @@
-<p>Hi,</p>
+<p><%= t("auth.mailer.invite.greeting") %></p>
 
 <p>
-  <%= @inviter.email %> has invited you to join
-  <strong><%= @church.name %></strong> on Corobook as
-  <strong><%= @role %></strong>.
+  <%= t("auth.mailer.invite.body_html", inviter: @inviter.email, church: content_tag(:strong, @church.name), role: content_tag(:strong, @role)) %>
 </p>
 
 <p>
-  <a href="<%= @url %>">Accept the invitation and set your password</a>
+  <a href="<%= @url %>"><%= t("auth.mailer.invite.cta") %></a>
 </p>
 
-<p>Or paste this link into your browser:</p>
+<p><%= t("auth.mailer.invite.paste_link") %></p>
 <p><%= @url %></p>
 
-<p>This invitation expires in 14 days.</p>
+<p><%= t("auth.mailer.invite.expires") %></p>

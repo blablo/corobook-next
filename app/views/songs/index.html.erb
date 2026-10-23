@@ -1,11 +1,11 @@
 <div class="mx-auto my-8 max-w-3xl px-4 sm:px-6">
   <div class="flex items-center justify-between mb-4">
-    <h1 class="text-2xl font-bold">Songs — <%= current_church.name %></h1>
-    <%= link_to "New song", new_song_path, class: "btn btn-primary btn-sm" %>
+    <h1 class="text-2xl font-bold"><%= t("songs.index.title", church: current_church.name) %></h1>
+    <%= link_to t("songs.index.new"), new_song_path, class: "btn btn-primary btn-sm" %>
   </div>
 
   <%= form_with url: songs_path, method: :get, class: "mb-4" do %>
-    <%= search_field_tag :q, @query, placeholder: "Search title, author, or lyrics…",
+    <%= search_field_tag :q, @query, placeholder: t("songs.index.search_placeholder"),
           class: "input input-bordered input-sm w-full", data: { role: "song-search" } %>
   <% end %>
 
@@ -17,16 +17,16 @@
       </li>
     <% end %>
     <% if @songs.empty? %>
-      <li class="list-row text-sm text-base-content/50">No songs found.</li>
+      <li class="list-row text-sm text-base-content/50"><%= t("songs.index.empty") %></li>
     <% end %>
   </ul>
 
   <div class="flex justify-between mt-4 text-sm">
     <% if @page > 1 %>
-      <%= link_to "← Previous", songs_path(q: @query, page: @page - 1), class: "link link-hover" %>
+      <%= link_to t("songs.index.previous"), songs_path(q: @query, page: @page - 1), class: "link link-hover" %>
     <% else %><span></span><% end %>
     <% if @has_more %>
-      <%= link_to "Next →", songs_path(q: @query, page: @page + 1), class: "link link-hover" %>
+      <%= link_to t("songs.index.next"), songs_path(q: @query, page: @page + 1), class: "link link-hover" %>
     <% end %>
   </div>
 </div>

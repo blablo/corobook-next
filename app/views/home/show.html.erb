@@ -5,13 +5,13 @@
   <%# ── Page header + global song search ────────────────────────────── %>
   <div class="flex flex-col sm:flex-row sm:items-center gap-3">
     <div class="flex-1">
-      <h1 class="text-2xl font-bold">Dashboard</h1>
-      <p class="text-sm text-base-content/60">Build services, manage your library, and go live.</p>
+      <h1 class="text-2xl font-bold"><%= t("home.dashboard.title") %></h1>
+      <p class="text-sm text-base-content/60"><%= t("home.dashboard.subtitle") %></p>
     </div>
     <%= form_with url: songs_path, method: :get, class: "join w-full sm:w-80", data: { role: "song-search" } do %>
-      <%= search_field_tag :q, nil, placeholder: "Search songs…",
-            class: "input input-bordered join-item w-full", "aria-label": "Search songs" %>
-      <button type="submit" class="btn btn-neutral join-item" aria-label="Search">
+      <%= search_field_tag :q, nil, placeholder: t("home.dashboard.search_placeholder"),
+            class: "input input-bordered join-item w-full", "aria-label": t("home.dashboard.search_aria") %>
+      <button type="submit" class="btn btn-neutral join-item" aria-label="<%= t('home.dashboard.search_aria') %>">
         <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
       </button>
     <% end %>
@@ -25,12 +25,12 @@
       <div class="h-1.5 bg-primary"></div>
       <div class="card-body gap-4">
         <% if @hero_set.nil? %>
-          <p class="text-xs font-semibold uppercase tracking-wide text-primary">Get started</p>
-          <h2 class="text-2xl font-bold">No services yet</h2>
-          <p class="text-base-content/70 max-w-prose">Create your first service to start building it — add songs and slides, then go live to the projector.</p>
+          <p class="text-xs font-semibold uppercase tracking-wide text-primary"><%= t("home.hero.get_started") %></p>
+          <h2 class="text-2xl font-bold"><%= t("home.hero.no_services") %></h2>
+          <p class="text-base-content/70 max-w-prose"><%= t("home.hero.no_services_body") %></p>
           <div class="card-actions">
             <%= link_to new_service_set_path, class: "btn btn-primary btn-lg", data: { role: "new-set" } do %>
-              Create your first service
+              <%= t("home.hero.create_first") %>
             <% end %>
           </div>
         <% else %>
@@ -38,40 +38,40 @@
           <% past = @hero_set.service_date.present? && @hero_set.service_date < Date.current %>
           <div class="flex items-center gap-2">
             <p class="text-xs font-semibold uppercase tracking-wide text-primary">
-              <%= @active_session ? "Live now" : "Next service" %>
+              <%= @active_session ? t("home.hero.live_now") : t("home.hero.next_service") %>
             </p>
             <% if @active_session %>
               <span class="inline-flex items-center gap-1.5 text-xs font-medium text-error">
                 <span class="relative flex size-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-error opacity-75"></span><span class="relative inline-flex size-2 rounded-full bg-error"></span></span>
-                ON AIR
+                <%= t("home.hero.on_air") %>
               </span>
             <% end %>
           </div>
 
           <h2 class="text-3xl font-bold leading-tight">
             <%= @hero_set.name %>
-            <% if past %><span class="badge badge-warning align-middle" data-role="past-badge">Past service</span><% end %>
+            <% if past %><span class="badge badge-warning align-middle" data-role="past-badge"><%= t("home.hero.past_service") %></span><% end %>
           </h2>
           <p class="text-base-content/70">
-            <%= @hero_set.service_date&.strftime("%A, %B %-d") || "No date set" %>
-            · <%= pluralize(item_count, "item") %>
+            <%= @hero_set.service_date&.strftime("%A, %B %-d") || t("home.hero.no_date") %>
+            · <%= t("home.hero.items", count: item_count) %>
           </p>
 
           <div class="card-actions items-center gap-3 mt-1">
             <% if @active_session %>
-              <%= link_to "Resume service", operator_path(@active_session),
+              <%= link_to t("home.hero.resume"), operator_path(@active_session),
                     class: "btn btn-primary btn-lg", data: { role: "resume" } %>
             <% elsif item_count.zero? %>
-              <%= link_to "Add items", service_set_path(@hero_set),
+              <%= link_to t("home.hero.add_items"), service_set_path(@hero_set),
                     class: "btn btn-primary btn-lg", data: { role: "add-items" } %>
-              <span class="text-sm text-base-content/60" data-role="empty-set-hint">This service has no items yet — add songs or slides first.</span>
+              <span class="text-sm text-base-content/60" data-role="empty-set-hint"><%= t("home.hero.empty_set_hint") %></span>
             <% else %>
-              <%= button_to "Go live", launch_service_set_path(@hero_set), method: :post,
+              <%= button_to t("home.hero.go_live"), launch_service_set_path(@hero_set), method: :post,
                     class: "btn btn-primary btn-lg gap-2", data: { role: "go-live" } %>
-              <%= link_to "Edit service", service_set_path(@hero_set), class: "btn btn-ghost btn-lg" %>
+              <%= link_to t("home.hero.edit_service"), service_set_path(@hero_set), class: "btn btn-ghost btn-lg" %>
             <% end %>
             <% if @hero_set.service_date.blank? && !@active_session %>
-              <%= link_to "Set a date", edit_service_set_path(@hero_set), class: "btn btn-link btn-sm px-0" %>
+              <%= link_to t("home.hero.set_date"), edit_service_set_path(@hero_set), class: "btn btn-link btn-sm px-0" %>
             <% end %>
           </div>
         <% end %>
@@ -82,8 +82,8 @@
     <section class="card bg-base-100 shadow-sm ring-1 ring-base-200">
       <div class="card-body gap-2">
         <div class="flex items-center justify-between">
-          <h3 class="font-semibold">Recent services</h3>
-          <%= link_to "All", service_sets_path, class: "link link-hover text-sm text-base-content/60" %>
+          <h3 class="font-semibold"><%= t("home.recent.title") %></h3>
+          <%= link_to t("home.recent.all"), service_sets_path, class: "link link-hover text-sm text-base-content/60" %>
         </div>
         <% if @recent_sets.any? %>
           <ul class="list -mx-2 max-h-80 overflow-y-auto" data-role="recent-sets">
@@ -97,27 +97,27 @@
                 <%= link_to service_set_path(set), class: "list-col-grow min-w-0" do %>
                   <span class="block font-medium truncate"><%= set.name %></span>
                   <span class="block text-xs text-base-content/60">
-                    <%= set.service_date&.strftime("%b %-d") || "No date" %> · <%= pluralize(set_items, "item") %>
+                    <%= set.service_date&.strftime("%b %-d") || t("home.recent.no_date") %> · <%= t("home.recent.items", count: set_items) %>
                   </span>
                 <% end %>
                 <% if set_items.positive? && @active_session.nil? %>
                   <%= button_to launch_service_set_path(set), method: :post,
                         class: "btn btn-primary btn-xs shrink-0", data: { role: "recent-go-live" },
-                        title: "Go live with #{set.name}" do %>
-                    Go live
+                        title: t("home.recent.go_live_with", name: set.name) do %>
+                    <%= t("home.recent.go_live") %>
                   <% end %>
                 <% elsif set_items.zero? %>
-                  <%= link_to "Add items", service_set_path(set),
+                  <%= link_to t("home.recent.add_items"), service_set_path(set),
                         class: "btn btn-ghost btn-xs text-base-content/60 shrink-0", data: { role: "recent-add-items" } %>
                 <% else %>
                   <%# a session is already live — open the set rather than offer a second launch %>
-                  <%= link_to "Open", service_set_path(set), class: "btn btn-ghost btn-xs text-base-content/60 shrink-0" %>
+                  <%= link_to t("home.recent.open"), service_set_path(set), class: "btn btn-ghost btn-xs text-base-content/60 shrink-0" %>
                 <% end %>
               </li>
             <% end %>
           </ul>
         <% else %>
-          <p class="text-sm text-base-content/60 py-4">No services yet.</p>
+          <p class="text-sm text-base-content/60 py-4"><%= t("home.recent.empty") %></p>
         <% end %>
       </div>
     </section>
@@ -125,7 +125,7 @@
 
   <%# ── Quick actions — real tiles ──────────────────────────────────── %>
   <section data-role="quick-actions">
-    <h3 class="text-xs font-semibold uppercase tracking-wide text-base-content/50 mb-2">Create</h3>
+    <h3 class="text-xs font-semibold uppercase tracking-wide text-base-content/50 mb-2"><%= t("home.create.heading") %></h3>
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
       <%= link_to new_service_set_path,
             class: "card bg-base-100 ring-1 ring-base-200 hover:ring-primary hover:shadow-md transition-all" do %>
@@ -133,7 +133,7 @@
           <span class="inline-grid place-items-center size-10 rounded-lg bg-primary/10 text-primary shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
           </span>
-          <span class="font-medium">New service</span>
+          <span class="font-medium"><%= t("home.create.new_service") %></span>
         </div>
       <% end %>
       <%= link_to new_song_path,
@@ -142,7 +142,7 @@
           <span class="inline-grid place-items-center size-10 rounded-lg bg-primary/10 text-primary shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9 19.5 6.75v8.25M9 9v8.25M9 9l-.75.161M9 17.25a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm10.5-2.25a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/></svg>
           </span>
-          <span class="font-medium">New song</span>
+          <span class="font-medium"><%= t("home.create.new_song") %></span>
         </div>
       <% end %>
       <%= link_to new_text_slide_path,
@@ -151,7 +151,7 @@
           <span class="inline-grid place-items-center size-10 rounded-lg bg-primary/10 text-primary shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75h16.5v12.75H3.75zM12 16.5v3.75m-3 0h6"/></svg>
           </span>
-          <span class="font-medium">New slide</span>
+          <span class="font-medium"><%= t("home.create.new_slide") %></span>
         </div>
       <% end %>
     </div>
@@ -159,26 +159,26 @@
 
   <%# ── Library at a glance — clickable stat cards ──────────────────── %>
   <section data-role="library-stats">
-    <h3 class="text-xs font-semibold uppercase tracking-wide text-base-content/50 mb-2">Library</h3>
+    <h3 class="text-xs font-semibold uppercase tracking-wide text-base-content/50 mb-2"><%= t("home.library.heading") %></h3>
     <div class="grid grid-cols-3 gap-3">
       <%= link_to songs_path,
             class: "card bg-base-100 ring-1 ring-base-200 hover:ring-primary hover:shadow-md transition-all" do %>
         <div class="card-body p-4 gap-0">
-          <span class="text-xs text-base-content/60">Songs</span>
+          <span class="text-xs text-base-content/60"><%= t("home.library.songs") %></span>
           <span class="text-3xl font-bold leading-tight"><%= @counts[:songs] %></span>
         </div>
       <% end %>
       <%= link_to text_slides_path,
             class: "card bg-base-100 ring-1 ring-base-200 hover:ring-primary hover:shadow-md transition-all" do %>
         <div class="card-body p-4 gap-0">
-          <span class="text-xs text-base-content/60">Slides</span>
+          <span class="text-xs text-base-content/60"><%= t("home.library.slides") %></span>
           <span class="text-3xl font-bold leading-tight"><%= @counts[:slides] %></span>
         </div>
       <% end %>
       <%= link_to service_sets_path,
             class: "card bg-base-100 ring-1 ring-base-200 hover:ring-primary hover:shadow-md transition-all" do %>
         <div class="card-body p-4 gap-0">
-          <span class="text-xs text-base-content/60">Services</span>
+          <span class="text-xs text-base-content/60"><%= t("home.library.services") %></span>
           <span class="text-3xl font-bold leading-tight"><%= @counts[:sets] %></span>
         </div>
       <% end %>

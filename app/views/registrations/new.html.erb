@@ -1,8 +1,8 @@
-<% content_for :title, "Create your church account" %>
+<% content_for :title, t("auth.signup.title") %>
 
 <div class="mx-auto max-w-md px-4 py-12" data-role="signup">
-  <h1 class="text-2xl font-bold mb-1">Create your church account</h1>
-  <p class="text-sm text-base-content/60 mb-6">You'll be the first admin. You can invite the rest of your team afterward.</p>
+  <h1 class="text-2xl font-bold mb-1"><%= t("auth.signup.title") %></h1>
+  <p class="text-sm text-base-content/60 mb-6"><%= t("auth.signup.subtitle") %></p>
 
   <% errors = @church.errors.full_messages + @user.errors.full_messages %>
   <% if errors.any? %>
@@ -13,48 +13,48 @@
 
   <%= form_with url: signup_path, method: :post do %>
     <fieldset class="fieldset">
-      <label class="fieldset-legend" for="church_name">Church name</label>
+      <label class="fieldset-legend" for="church_name"><%= t("auth.signup.church_name_label") %></label>
       <input type="text" id="church_name" name="church[name]" required
              value="<%= @church.name %>" autocomplete="organization"
              class="input input-bordered w-full" data-role="church-name">
     </fieldset>
 
     <fieldset class="fieldset">
-      <label class="fieldset-legend" for="church_subdomain">Subdomain <span class="font-normal text-base-content/50">(optional)</span></label>
+      <label class="fieldset-legend" for="church_subdomain"><%= t("auth.signup.subdomain_label") %> <span class="font-normal text-base-content/50"><%= t("auth.signup.subdomain_optional") %></span></label>
       <label class="input input-bordered flex items-center gap-1 w-full">
         <input type="text" id="church_subdomain" name="church[subdomain]"
-               value="<%= @church.subdomain %>" placeholder="gracia"
+               value="<%= @church.subdomain %>" placeholder="<%= t("auth.signup.subdomain_placeholder") %>"
                autocomplete="off" autocapitalize="off" spellcheck="false"
                class="grow" data-role="church-subdomain">
         <span class="text-base-content/50 text-sm whitespace-nowrap">.<%= request.domain.presence || "example.com" %></span>
       </label>
-      <p class="label text-base-content/60">Your team can sign in here and skip choosing the church. You can set this later.</p>
+      <p class="label text-base-content/60"><%= t("auth.signup.subdomain_help") %></p>
     </fieldset>
 
     <fieldset class="fieldset">
-      <label class="fieldset-legend" for="user_email">Your email</label>
+      <label class="fieldset-legend" for="user_email"><%= t("auth.signup.email_label") %></label>
       <input type="email" id="user_email" name="user[email]" required
              value="<%= @user.email %>" autocomplete="email"
              class="input input-bordered w-full" data-role="admin-email">
     </fieldset>
 
     <fieldset class="fieldset">
-      <label class="fieldset-legend" for="user_password">Password</label>
+      <label class="fieldset-legend" for="user_password"><%= t("auth.signup.password_label") %></label>
       <input type="password" id="user_password" name="user[password]" required minlength="8"
              autocomplete="new-password" class="input input-bordered w-full" data-role="admin-password">
-      <p class="label text-base-content/60">At least 8 characters.</p>
+      <p class="label text-base-content/60"><%= t("auth.signup.password_help") %></p>
     </fieldset>
 
     <fieldset class="fieldset mb-4">
-      <label class="fieldset-legend" for="user_password_confirmation">Confirm password</label>
+      <label class="fieldset-legend" for="user_password_confirmation"><%= t("auth.signup.password_confirmation_label") %></label>
       <input type="password" id="user_password_confirmation" name="user[password_confirmation]" required
              autocomplete="new-password" class="input input-bordered w-full" data-role="admin-password-confirmation">
     </fieldset>
 
-    <button type="submit" class="btn btn-primary w-full" data-role="signup-submit">Create account</button>
+    <button type="submit" class="btn btn-primary w-full" data-role="signup-submit"><%= t("auth.signup.submit") %></button>
   <% end %>
 
   <p class="mt-4 text-sm text-base-content/60 text-center">
-    Already have an account? <%= link_to "Sign in", login_path, class: "link link-primary" %>
+    <%= t("auth.signup.have_account") %> <%= link_to t("auth.signup.sign_in_link"), login_path, class: "link link-primary" %>
   </p>
 </div>
