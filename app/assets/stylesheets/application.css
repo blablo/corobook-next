@@ -42,6 +42,12 @@
   text-transform: var(--proj-lyric-case, none);
 }
 .projector-line + .projector-line { margin-top: 0.35em; }
+/* Small "×2" after a line the band repeats. em-based so it scales with the fitted lyric size;
+   kept out of the casing transform so it never reads "X2". */
+.projector-repeat {
+  margin-left: 0.5em; font-size: 0.45em; font-weight: 600; opacity: 0.7;
+  vertical-align: middle; text-transform: none; white-space: nowrap;
+}
 
 /* Operator preview: a bounded mini-stage showing the live projector frame in place, so the
    operator sees exactly what's on the screen — including the church's projector colours, which

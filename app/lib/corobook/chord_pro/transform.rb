@@ -60,6 +60,27 @@ module Corobook
           text.gsub("//", "").rstrip
         end
       end
+
+      # A {comment} that is only a repeat count: "×2", "x2", "2x", "X 3".
+      REPEAT_MARK = /\A\s*(?:[x×]\s*\d+|\d+\s*[x×])\s*\z/i
+
+      # Repeat markers for ONE section, keyed by the index (into section_plain_lines) of the last
+      # lyric line of the block being repeated, so the projector can show a small "×2" there.
+      # The value is normalised to "×N".
+      def section_repeat_marks(section)
+        marks = {}
+        index = -1
+        last_lyric = nil
+        (section["lines"] || []).each do |line|
+          if line["segments"]
+            index += 1
+            last_lyric = index unless line["segments"].map { |seg| seg["text"] }.join.strip.empty?
+          elsif last_lyric && line["annotation"].to_s.match?(REPEAT_MARK)
+            marks[last_lyric] = "×#{line['annotation'][/\d+/]}"
+          end
+        end
+        marks
+      end
     end
   end
 end

@@ -71,6 +71,19 @@ module Corobook
       lines.each_slice(n).to_a[session.current_chunk_index] || []
     end
 
+    # Repeat markers ("×2") for the lines current_section_plain_lines returns, keyed by the
+    # line's position on the slide (so a by_lines chunk gets only its own markers).
+    def current_repeat_marks(section = current_section)
+      return {} unless section
+
+      marks = Corobook::ChordPro::Transform.section_repeat_marks(section)
+      return marks unless session.church&.paginate_by_lines?
+
+      n = session.church.projector_lines_per_slide.to_i.clamp(1, 20)
+      offset = session.current_chunk_index * n
+      marks.filter_map { |i, mark| [ i - offset, mark ] if i >= offset && i < offset + n }.to_h
+    end
+
     # True when the current chunk is the LAST chunk of the LAST section — i.e. the copyright
     # notice should show. In by_section mode this is just final_section?.
     def final_chunk?
