@@ -4,11 +4,11 @@
   <%= t("auth.mailer.confirm.body_html", church: content_tag(:strong, @church.name)) %>
 </p>
 
-<p>
-  <a href="<%= @url %>"><%= t("auth.mailer.confirm.cta") %></a>
-</p>
+<div class="btn-wrap">
+  <a href="<%= @url %>" class="btn"><%= t("auth.mailer.confirm.cta") %></a>
+</div>
 
-<p><%= t("auth.mailer.confirm.paste_link") %></p>
-<p><%= @url %></p>
+<p class="muted"><%= t("auth.mailer.confirm.paste_link") %></p>
+<p><a href="<%= @url %>" class="link-fallback"><%= @url %></a></p>
 
-<p><%= t("auth.mailer.confirm.expires") %></p>
+<p class="muted"><%= t("auth.mailer.confirm.expires") %></p>

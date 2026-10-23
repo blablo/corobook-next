@@ -271,6 +271,7 @@ es:
       body: "Es posible que el enlace haya caducado o ya se haya usado. Pide a quien te invitó que te envíe uno nuevo."
       go_to_sign_in: "Ir a iniciar sesión"
     mailer:
+      footer: "© %{year} Corobook · Presentación de adoración y gestión de canciones"
       invite:
         greeting: "Hola:"
         body_html: "%{inviter} te ha invitado a unirte a %{church} en Corobook como %{role}."

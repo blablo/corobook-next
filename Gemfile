@@ -25,6 +25,10 @@ gem "bcrypt", "3.1.22"
 # Markdown rendering for text slides
 gem "commonmarker", "2.10.1"
 
+# Inline the mailer layout's CSS into each element at send time (email clients strip <style>),
+# and auto-generate the text part. [https://github.com/fphilipe/premailer-rails]
+gem "premailer-rails", "1.12.0"
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
