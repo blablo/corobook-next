@@ -2,7 +2,7 @@
   <div class="flex items-center justify-between mb-2">
     <h1 class="text-2xl font-bold"><%= @text_slide.title %></h1>
     <% if can_edit? %>
-      <%= link_to "Edit", edit_text_slide_path(@text_slide), class: "btn btn-ghost btn-sm" %>
+      <%= link_to t("slides.show.edit"), edit_text_slide_path(@text_slide), class: "btn btn-ghost btn-sm" %>
     <% end %>
   </div>
 
@@ -16,7 +16,7 @@
 
   <section class="mt-4" data-role="projector-preview">
     <h2 class="text-sm text-base-content/50 mb-2">
-      Projector preview<%= " — #{@text_slide.page_count} pages" if @text_slide.page_count > 1 %>
+      <%= @text_slide.page_count > 1 ? t("slides.show.projector_preview_pages", count: @text_slide.page_count) : t("slides.show.projector_preview") %>
     </h2>
     <div class="flex flex-col gap-3">
       <% @text_slide.page_count.times do |i| %>
@@ -30,7 +30,7 @@
   </section>
 
   <section class="mt-6" data-role="musician-preview">
-    <h2 class="text-sm text-base-content/50 mb-2">Musician view</h2>
+    <h2 class="text-sm text-base-content/50 mb-2"><%= t("slides.show.musician_view") %></h2>
     <div class="flex flex-col gap-3">
       <% @text_slide.page_count.times do |i| %>
         <%= render "musician_slide", slide: @text_slide, page: i %>

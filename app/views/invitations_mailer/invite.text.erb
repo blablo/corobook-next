@@ -1,8 +1,8 @@
-Hi,
+<%= t("auth.mailer.invite.greeting") %>
 
-<%= @inviter.email %> has invited you to join <%= @church.name %> on Corobook as <%= @role %>.
+<%= t("auth.mailer.invite.body_text", inviter: @inviter.email, church: @church.name, role: @role) %>
 
-Accept the invitation and set your password:
+<%= t("auth.mailer.invite.cta") %>:
 <%= @url %>
 
-This invitation expires in 14 days.
+<%= t("auth.mailer.invite.expires") %>

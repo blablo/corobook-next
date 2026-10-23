@@ -1,40 +1,40 @@
 <div class="mx-auto mt-16 max-w-sm px-4">
-  <h1 class="text-2xl font-bold mb-6">Sign in</h1>
+  <h1 class="text-2xl font-bold mb-6"><%= t("auth.sign_in.title") %></h1>
 
   <% if signed_in? %>
     <p class="mb-4 text-sm" data-role="signed-in">
-      Signed in as <%= current_user.email %> — <%= current_church.name %>.
+      <%= t("auth.sign_in.signed_in_as", email: current_user.email, church: current_church.name) %>
     </p>
-    <%= button_to "Sign out", logout_path, method: :delete, class: "btn btn-ghost btn-sm" %>
+    <%= button_to t("auth.sign_in.sign_out"), logout_path, method: :delete, class: "btn btn-ghost btn-sm" %>
   <% else %>
     <%= form_with url: login_path, method: :post do |f| %>
       <% if subdomain_church %>
         <p class="mb-4 text-sm text-base-content/70" data-role="subdomain-church">
-          Signing in to <span class="font-semibold"><%= subdomain_church.name %></span>.
+          <%= t("auth.sign_in.signing_in_to_html", church: content_tag(:span, subdomain_church.name, class: "font-semibold")) %>
         </p>
       <% else %>
         <fieldset class="fieldset">
-          <%= f.label :church_id, "Church", class: "fieldset-legend" %>
+          <%= f.label :church_id, t("auth.sign_in.church_label"), class: "fieldset-legend" %>
           <%= f.collection_select :church_id, @churches, :id, :name, {}, class: "select select-bordered w-full" %>
         </fieldset>
       <% end %>
       <fieldset class="fieldset">
-        <%= f.label :email, class: "fieldset-legend" %>
+        <%= f.label :email, t("auth.sign_in.email_label"), class: "fieldset-legend" %>
         <%= f.email_field :email, autocomplete: "email", class: "input input-bordered w-full" %>
       </fieldset>
       <fieldset class="fieldset mb-4">
-        <%= f.label :password, class: "fieldset-legend" %>
+        <%= f.label :password, t("auth.sign_in.password_label"), class: "fieldset-legend" %>
         <%= f.password_field :password, autocomplete: "current-password", class: "input input-bordered w-full" %>
       </fieldset>
-      <%= f.submit "Sign in", class: "btn btn-primary w-full" %>
+      <%= f.submit t("auth.sign_in.submit"), class: "btn btn-primary w-full" %>
     <% end %>
 
     <% if @unconfirmed_email.present? %>
       <div class="mt-4 rounded-lg bg-base-200 p-3 text-sm" data-role="unconfirmed-notice">
-        <p class="mb-2">Your email isn't confirmed yet.</p>
+        <p class="mb-2"><%= t("auth.sign_in.unconfirmed") %></p>
         <%= form_with url: resend_confirmation_path, method: :post do %>
           <input type="hidden" name="email" value="<%= @unconfirmed_email %>">
-          <button type="submit" class="btn btn-ghost btn-sm" data-role="resend-confirmation">Resend confirmation email</button>
+          <button type="submit" class="btn btn-ghost btn-sm" data-role="resend-confirmation"><%= t("auth.sign_in.resend") %></button>
         <% end %>
       </div>
     <% end %>

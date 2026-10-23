@@ -8,25 +8,25 @@
   <%# ── Song details ─────────────────────────────────────────────── %>
   <div class="card bg-base-100 ring-1 ring-base-200 mb-6">
     <div class="card-body gap-4">
-      <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50">Song details</h2>
+      <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50"><%= t("songs.form.details") %></h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <fieldset class="fieldset">
-          <%= f.label :title, "Title", class: "fieldset-legend" %>
-          <%= f.text_field :title, class: "input input-bordered w-full", placeholder: "Song title" %>
+          <%= f.label :title, t("songs.form.title_label"), class: "fieldset-legend" %>
+          <%= f.text_field :title, class: "input input-bordered w-full", placeholder: t("songs.form.title_placeholder") %>
         </fieldset>
         <fieldset class="fieldset">
-          <%= f.label :author, "Author", class: "fieldset-legend" %>
-          <%= f.text_field :author, class: "input input-bordered w-full", placeholder: "Author" %>
+          <%= f.label :author, t("songs.form.author_label"), class: "fieldset-legend" %>
+          <%= f.text_field :author, class: "input input-bordered w-full", placeholder: t("songs.form.author_placeholder") %>
         </fieldset>
         <fieldset class="fieldset">
-          <%= f.label :song_key, "Key", class: "fieldset-legend" %>
+          <%= f.label :song_key, t("songs.form.key_label"), class: "fieldset-legend" %>
           <%= f.select :song_key,
                 options_for_select(%w[C C# D Eb E F F# G Ab A Bb B Am Bm Cm C#m Dm Em Fm F#m Gm G#m], song.song_key),
                 { include_blank: "—" },
                 class: "select select-bordered w-full", data: { "song-editor-target": "keyField" } %>
         </fieldset>
         <fieldset class="fieldset">
-          <%= f.label :capo, "Capo", class: "fieldset-legend" %>
+          <%= f.label :capo, t("songs.form.capo_label"), class: "fieldset-legend" %>
           <%= f.number_field :capo, in: 0..11, class: "input input-bordered w-full" %>
         </fieldset>
       </div>
@@ -37,58 +37,58 @@
   <div class="card bg-base-100 ring-1 ring-base-200 mb-6">
     <div class="card-body gap-4">
       <div class="flex flex-wrap items-center gap-2">
-        <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50 flex-1">Lyrics &amp; chords</h2>
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50 flex-1"><%= t("songs.form.lyrics_chords") %></h2>
         <button type="button" class="btn btn-sm btn-outline gap-1" data-action="song-editor#openImport">
           <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/></svg>
-          Import
+          <%= t("songs.form.import") %>
         </button>
         <%# mode toggle %>
         <div class="join">
           <button type="button" class="btn btn-sm join-item btn-active" data-song-editor-target="visualBtn"
-                  data-action="song-editor#showVisual">Visual</button>
+                  data-action="song-editor#showVisual"><%= t("songs.form.visual") %></button>
           <button type="button" class="btn btn-sm join-item" data-song-editor-target="advancedBtn"
-                  data-action="song-editor#showAdvanced">Advanced (ChordPro)</button>
+                  data-action="song-editor#showAdvanced"><%= t("songs.form.advanced") %></button>
         </div>
       </div>
 
       <%# Import modal: paste chords-over-lyrics text (DaisyUI dialog) %>
       <dialog class="modal" data-song-editor-target="importModal">
         <div class="modal-box max-w-2xl">
-          <h3 class="text-lg font-bold">Import song</h3>
-          <p class="text-sm text-base-content/60 mt-1">Paste chords-over-lyrics text (chord lines above lyric lines, with section headers like <code>VERSE 1</code> / <code>CHORUS</code>). We'll convert it automatically.</p>
+          <h3 class="text-lg font-bold"><%= t("songs.form.import_modal.title") %></h3>
+          <p class="text-sm text-base-content/60 mt-1"><%= t("songs.form.import_modal.description_html", verse: tag.code("VERSE 1"), chorus: tag.code("CHORUS")) %></p>
           <textarea rows="12" class="textarea textarea-bordered w-full font-mono text-sm mt-3" data-song-editor-target="importText"
                     placeholder="VERSE 1&#10;C               F  G  C&#10;¡Al mundo paz, nació Jesús!&#10;..."></textarea>
           <label class="flex items-center gap-2 text-sm mt-2">
             <input type="checkbox" class="checkbox checkbox-sm" data-song-editor-target="importReplace" checked>
-            Replace existing sections
+            <%= t("songs.form.import_modal.replace") %>
           </label>
           <div class="modal-action">
-            <button type="button" class="btn btn-ghost btn-sm" data-action="song-editor#closeImport">Cancel</button>
-            <button type="button" class="btn btn-primary btn-sm" data-action="song-editor#runImport">Import</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-action="song-editor#closeImport"><%= t("songs.form.import_modal.cancel") %></button>
+            <button type="button" class="btn btn-primary btn-sm" data-action="song-editor#runImport"><%= t("songs.form.import_modal.import") %></button>
           </div>
         </div>
-        <button type="button" class="modal-backdrop" aria-label="Close" data-action="song-editor#closeImport"></button>
+        <button type="button" class="modal-backdrop" aria-label="<%= t('songs.form.import_modal.close') %>" data-action="song-editor#closeImport"></button>
       </dialog>
 
       <%# add-section buttons %>
       <div class="flex flex-wrap gap-2" data-song-editor-target="visual">
         <div class="flex flex-wrap gap-2 mb-1">
-          <span class="text-sm text-base-content/60 self-center mr-1">Add section:</span>
-          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="verse">+ Verse</button>
-          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="chorus">+ Chorus</button>
-          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="bridge">+ Bridge</button>
-          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="verse" data-label="Pre-chorus">+ Pre-chorus</button>
-          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="verse" data-label="Intro">+ Intro</button>
-          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="verse" data-label="Solo">+ Solo</button>
-          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="verse" data-label="Instrumental">+ Instrumental</button>
-          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="verse" data-label="Outro">+ Outro</button>
+          <span class="text-sm text-base-content/60 self-center mr-1"><%= t("songs.form.add_section") %></span>
+          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="verse"><%= t("songs.form.section.verse") %></button>
+          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="chorus"><%= t("songs.form.section.chorus") %></button>
+          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="bridge"><%= t("songs.form.section.bridge") %></button>
+          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="verse" data-label="Pre-chorus"><%= t("songs.form.section.pre_chorus") %></button>
+          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="verse" data-label="Intro"><%= t("songs.form.section.intro") %></button>
+          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="verse" data-label="Solo"><%= t("songs.form.section.solo") %></button>
+          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="verse" data-label="Instrumental"><%= t("songs.form.section.instrumental") %></button>
+          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="verse" data-label="Outro"><%= t("songs.form.section.outro") %></button>
         </div>
-        <p class="text-xs text-base-content/50 w-full">Type lyrics on the line. To add a chord, click the strip just above a line. Click a chord to change or remove it.</p>
+        <p class="text-xs text-base-content/50 w-full"><%= t("songs.form.chord_hint") %></p>
         <div class="w-full mt-1" data-role="sections"></div>
       </div>
 
       <%# advanced raw ChordPro — nameless; mirrors into the canonical hidden field via the controller %>
-      <label for="advanced_chordpro" class="sr-only">ChordPro source</label>
+      <label for="advanced_chordpro" class="sr-only"><%= t("songs.form.chordpro_source") %></label>
       <textarea id="advanced_chordpro" rows="16" class="textarea textarea-bordered w-full font-mono text-sm hidden"
                 data-song-editor-target="advanced"><%= song.chordpro_source %></textarea>
 
@@ -107,18 +107,18 @@
   <%# ── Copyright & CCLI ─────────────────────────────────────────── %>
   <div class="card bg-base-100 ring-1 ring-base-200 mb-6">
     <div class="card-body gap-4">
-      <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50">Copyright &amp; CCLI</h2>
+      <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50"><%= t("songs.form.copyright_ccli") %></h2>
       <fieldset class="fieldset">
-        <%= f.label :copyright_line, "Copyright line", class: "fieldset-legend" %>
-        <%= f.text_field :copyright_line, class: "input input-bordered w-full", placeholder: "© 2001 Author / Publisher" %>
+        <%= f.label :copyright_line, t("songs.form.copyright_line_label"), class: "fieldset-legend" %>
+        <%= f.text_field :copyright_line, class: "input input-bordered w-full", placeholder: t("songs.form.copyright_line_placeholder") %>
       </fieldset>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <fieldset class="fieldset">
-          <%= f.label :ccli_song_number, "CCLI song number", class: "fieldset-legend" %>
+          <%= f.label :ccli_song_number, t("songs.form.ccli_song_number_label"), class: "fieldset-legend" %>
           <%= f.number_field :ccli_song_number, class: "input input-bordered w-full" %>
         </fieldset>
         <fieldset class="fieldset">
-          <%= f.label :copyright_status, "Status", class: "fieldset-legend" %>
+          <%= f.label :copyright_status, t("songs.form.status_label"), class: "fieldset-legend" %>
           <%= f.select :copyright_status, Song.copyright_statuses.keys.map { |k| [k.humanize, k] },
                 {}, class: "select select-bordered w-full" %>
         </fieldset>
@@ -129,14 +129,14 @@
   <%# ── Arrangement (advanced, collapsed) ────────────────────────── %>
   <div class="collapse collapse-arrow bg-base-100 ring-1 ring-base-200 mb-6" data-song-editor-target="arrangeWrap">
     <input type="checkbox" />
-    <div class="collapse-title text-sm font-semibold text-base-content/70">Arrangement order (optional)</div>
+    <div class="collapse-title text-sm font-semibold text-base-content/70"><%= t("songs.form.arrangement.title") %></div>
     <div class="collapse-content">
-      <p class="text-xs text-base-content/50 mb-2">Click a section to add it to the play order. Drag or use the arrows to reorder; ✕ to remove. Reuse a section (e.g. a chorus) as many times as you like. Leave empty to play in section order.</p>
+      <p class="text-xs text-base-content/50 mb-2"><%= t("songs.form.arrangement.help") %></p>
 
-      <div class="text-xs font-semibold uppercase tracking-wide text-base-content/40 mb-1">Available sections</div>
+      <div class="text-xs font-semibold uppercase tracking-wide text-base-content/40 mb-1"><%= t("songs.form.arrangement.available") %></div>
       <div class="flex flex-wrap gap-2 mb-4" data-song-editor-target="arrangeAvail"></div>
 
-      <div class="text-xs font-semibold uppercase tracking-wide text-base-content/40 mb-1">Play order</div>
+      <div class="text-xs font-semibold uppercase tracking-wide text-base-content/40 mb-1"><%= t("songs.form.arrangement.play_order") %></div>
       <div class="flex flex-col gap-1 min-h-[2.5rem] rounded-lg ring-1 ring-base-200 bg-base-200/30 p-2" data-song-editor-target="arrangeOrder"></div>
 
       <%# canonical field the server parses; kept in sync by the controller %>
@@ -146,7 +146,7 @@
   </div>
 
   <div class="flex items-center gap-3">
-    <%= f.submit (song.persisted? ? "Save changes" : "Create song"), class: "btn btn-primary" %>
-    <%= link_to "Cancel", (song.persisted? ? song_path(song) : songs_path), class: "btn btn-ghost" %>
+    <%= f.submit (song.persisted? ? t("songs.form.save") : t("songs.form.create")), class: "btn btn-primary" %>
+    <%= link_to t("songs.form.cancel"), (song.persisted? ? song_path(song) : songs_path), class: "btn btn-ghost" %>
   </div>
 <% end %>

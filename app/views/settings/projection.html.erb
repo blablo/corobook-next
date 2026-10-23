@@ -1,15 +1,13 @@
-<% content_for :title, "Song projection settings" %>
+<% content_for :title, t("settings.projection.title") %>
 
 <div class="mx-auto max-w-3xl p-4" data-role="settings">
-  <h1 class="text-2xl font-semibold mb-6">Song projection settings</h1>
+  <h1 class="text-2xl font-semibold mb-6"><%= t("settings.projection.title") %></h1>
 
   <%# ── Song projection (per-church look & behaviour of song lyrics on the projector) ── %>
   <section data-role="projector-settings" data-controller="projector-preview">
-    <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/60 mb-2">Song projection</h2>
+    <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/60 mb-2"><%= t("settings.projection.heading") %></h2>
     <p class="text-sm text-base-content/60 mb-4 max-w-prose">
-      Define how song lyrics look on the projection screen for <span class="font-medium"><%= @church.name %></span>.
-      These apply to songs in every live service; custom slides keep their own look. Changes preview
-      live below and take effect on the next slide once saved.
+      <%= t("settings.projection.intro_html", church: tag.span(@church.name, class: "font-medium")) %>
     </p>
 
     <%= form_with model: @church, url: settings_path, method: :patch do |f| %>
@@ -18,27 +16,27 @@
         <%# Controls %>
         <div class="grid gap-4 sm:grid-cols-2 content-start">
           <fieldset class="fieldset">
-            <%= f.label :projector_bg_type, "Background", class: "fieldset-legend" %>
+            <%= f.label :projector_bg_type, t("settings.projection.background"), class: "fieldset-legend" %>
             <%= f.select :projector_bg_type,
-                  [ ["Solid colour", "solid"], ["Gradient", "gradient"] ],
+                  [ [t("settings.projection.bg_solid"), "solid"], [t("settings.projection.bg_gradient"), "gradient"] ],
                   {}, class: "select select-bordered w-full",
                   data: { role: "pp-bg-type", action: "change->projector-preview#update" } %>
           </fieldset>
 
           <fieldset class="fieldset">
-            <%= f.label :projector_bg_color, "Background colour", class: "fieldset-legend" %>
+            <%= f.label :projector_bg_color, t("settings.projection.background_colour"), class: "fieldset-legend" %>
             <%= f.color_field :projector_bg_color, class: "input input-bordered h-10 w-full p-1",
                   data: { role: "pp-bg", action: "input->projector-preview#update" } %>
           </fieldset>
 
           <fieldset class="fieldset" data-role="pp-bg-color2-field">
-            <%= f.label :projector_bg_color2, "Gradient second colour", class: "fieldset-legend" %>
+            <%= f.label :projector_bg_color2, t("settings.projection.gradient_second_colour"), class: "fieldset-legend" %>
             <%= f.color_field :projector_bg_color2, class: "input input-bordered h-10 w-full p-1",
                   data: { role: "pp-bg2", action: "input->projector-preview#update" } %>
           </fieldset>
 
           <fieldset class="fieldset" data-role="pp-bg-angle-field">
-            <%= f.label :projector_bg_gradient_angle, "Gradient angle", class: "fieldset-legend" %>
+            <%= f.label :projector_bg_gradient_angle, t("settings.projection.gradient_angle"), class: "fieldset-legend" %>
             <label class="input input-bordered flex items-center gap-2 w-full">
               <%= f.range_field :projector_bg_gradient_angle, min: 0, max: 360, step: 5,
                     class: "range range-sm grow",
@@ -48,95 +46,95 @@
           </fieldset>
 
           <fieldset class="fieldset">
-            <%= f.label :projector_text_color, "Text colour", class: "fieldset-legend" %>
+            <%= f.label :projector_text_color, t("settings.projection.text_colour"), class: "fieldset-legend" %>
             <%= f.color_field :projector_text_color, class: "input input-bordered h-10 w-full p-1",
                   data: { role: "pp-text", action: "input->projector-preview#update" } %>
           </fieldset>
 
           <fieldset class="fieldset">
-            <%= f.label :projector_font, "Font", class: "fieldset-legend" %>
+            <%= f.label :projector_font, t("settings.projection.font"), class: "fieldset-legend" %>
             <%= f.select :projector_font,
-                  [ ["Sans-serif", "sans"], ["Serif", "serif"], ["Condensed", "condensed"], ["Monospace", "mono"] ],
+                  [ [t("settings.projection.font_sans"), "sans"], [t("settings.projection.font_serif"), "serif"], [t("settings.projection.font_condensed"), "condensed"], [t("settings.projection.font_mono"), "mono"] ],
                   {}, class: "select select-bordered w-full",
                   data: { role: "pp-font", action: "change->projector-preview#update" } %>
           </fieldset>
 
           <fieldset class="fieldset">
-            <%= f.label :projector_line_height, "Line spacing", class: "fieldset-legend" %>
+            <%= f.label :projector_line_height, t("settings.projection.line_spacing"), class: "fieldset-legend" %>
             <%= f.select :projector_line_height,
-                  [ ["Tight", "tight"], ["Normal", "normal"], ["Relaxed", "relaxed"] ],
+                  [ [t("settings.projection.spacing_tight"), "tight"], [t("settings.projection.spacing_normal"), "normal"], [t("settings.projection.spacing_relaxed"), "relaxed"] ],
                   {}, class: "select select-bordered w-full",
                   data: { role: "pp-lh", action: "change->projector-preview#update" } %>
           </fieldset>
 
           <fieldset class="fieldset">
-            <%= f.label :projector_font_size, "Preferred size", class: "fieldset-legend" %>
+            <%= f.label :projector_font_size, t("settings.projection.preferred_size"), class: "fieldset-legend" %>
             <%= f.select :projector_font_size,
-                  [ [ "As large as fits", "" ] ] + TextSlide::FONT_SIZE_OPTIONS.map { |n| [ "#{n}% of screen height", n ] },
+                  [ [ t("settings.projection.as_large_as_fits"), "" ] ] + TextSlide::FONT_SIZE_OPTIONS.map { |n| [ t("settings.projection.percent_of_height", n: n), n ] },
                   {}, class: "select w-full",
                   data: { role: "pp-font-size", action: "change->projector-preview#update" } %>
-            <p class="label text-base-content/60 whitespace-normal">Each song uses one size on all its slides, as close to this as its longest slide allows.</p>
+            <p class="label text-base-content/60 whitespace-normal"><%= t("settings.projection.preferred_size_help") %></p>
           </fieldset>
 
           <fieldset class="fieldset">
-            <%= f.label :projector_min_font_size, "Minimum size", class: "fieldset-legend" %>
+            <%= f.label :projector_min_font_size, t("settings.projection.minimum_size"), class: "fieldset-legend" %>
             <%= f.select :projector_min_font_size,
-                  [ [ "Default (#{Corobook::ProjectorSettings::DEFAULT_MIN_FONT_SIZE}%)", "" ] ] + TextSlide::FONT_SIZE_OPTIONS.map { |n| [ "#{n}% of screen height", n ] },
+                  [ [ t("settings.projection.default_percent", n: Corobook::ProjectorSettings::DEFAULT_MIN_FONT_SIZE), "" ] ] + TextSlide::FONT_SIZE_OPTIONS.map { |n| [ t("settings.projection.percent_of_height", n: n), n ] },
                   {}, class: "select w-full", data: { role: "pp-min-font-size" } %>
-            <p class="label text-base-content/60 whitespace-normal">Text never gets smaller than this. A section that would need smaller text is split onto more slides.</p>
+            <p class="label text-base-content/60 whitespace-normal"><%= t("settings.projection.minimum_size_help") %></p>
           </fieldset>
 
           <fieldset class="fieldset">
-            <%= f.label :projector_lyric_case, "Lyric casing", class: "fieldset-legend" %>
+            <%= f.label :projector_lyric_case, t("settings.projection.lyric_casing"), class: "fieldset-legend" %>
             <%= f.select :projector_lyric_case,
-                  [ ["As written", "none"], ["UPPERCASE", "upper"], ["Title Case", "title"] ],
+                  [ [t("settings.projection.case_as_written"), "none"], [t("settings.projection.case_upper"), "upper"], [t("settings.projection.case_title"), "title"] ],
                   {}, class: "select select-bordered w-full",
                   data: { role: "pp-lyric-case", action: "change->projector-preview#update" } %>
           </fieldset>
 
           <fieldset class="fieldset">
-            <%= f.label :projector_title_case, "Title casing", class: "fieldset-legend" %>
+            <%= f.label :projector_title_case, t("settings.projection.title_casing"), class: "fieldset-legend" %>
             <%= f.select :projector_title_case,
-                  [ ["As written", "none"], ["UPPERCASE", "upper"], ["Title Case", "title"] ],
+                  [ [t("settings.projection.case_as_written"), "none"], [t("settings.projection.case_upper"), "upper"], [t("settings.projection.case_title"), "title"] ],
                   {}, class: "select select-bordered w-full",
                   data: { role: "pp-title-case", action: "change->projector-preview#update" } %>
           </fieldset>
 
           <fieldset class="fieldset">
-            <%= f.label :projector_valign, "Vertical position", class: "fieldset-legend" %>
+            <%= f.label :projector_valign, t("settings.projection.vertical_position"), class: "fieldset-legend" %>
             <%= f.select :projector_valign,
-                  [ ["Top", "top"], ["Center", "center"], ["Bottom", "bottom"] ],
+                  [ [t("settings.projection.valign_top"), "top"], [t("settings.projection.valign_center"), "center"], [t("settings.projection.valign_bottom"), "bottom"] ],
                   {}, class: "select select-bordered w-full",
                   data: { role: "pp-valign", action: "change->projector-preview#update" } %>
           </fieldset>
 
           <fieldset class="fieldset">
-            <%= f.label :projector_pagination, "Break slides by", class: "fieldset-legend" %>
+            <%= f.label :projector_pagination, t("settings.projection.break_slides_by"), class: "fieldset-legend" %>
             <%= f.select :projector_pagination,
-                  [ ["Song section", "by_section"], ["Number of lines", "by_lines"] ],
+                  [ [t("settings.projection.pagination_section"), "by_section"], [t("settings.projection.pagination_lines"), "by_lines"] ],
                   {}, class: "select select-bordered w-full",
                   data: { role: "pp-pagination", action: "change->projector-preview#update" } %>
-            <p class="label text-base-content/60">Section = one verse/chorus per slide. Lines = fixed-size slides.</p>
+            <p class="label text-base-content/60"><%= t("settings.projection.pagination_help") %></p>
           </fieldset>
 
           <fieldset class="fieldset" data-role="pp-lines-field">
-            <%= f.label :projector_lines_per_slide, "Lines per slide", class: "fieldset-legend" %>
+            <%= f.label :projector_lines_per_slide, t("settings.projection.lines_per_slide"), class: "fieldset-legend" %>
             <%= f.number_field :projector_lines_per_slide, min: 1, max: 20,
                   class: "input input-bordered w-full",
                   data: { role: "pp-lines", action: "input->projector-preview#update" } %>
-            <p class="label text-base-content/60">Chunks reset at each section boundary.</p>
+            <p class="label text-base-content/60"><%= t("settings.projection.lines_per_slide_help") %></p>
           </fieldset>
 
           <label class="fieldset-label cursor-pointer gap-3 sm:col-span-2">
             <%= f.check_box :projector_bold, class: "toggle toggle-primary",
                   data: { role: "pp-bold", action: "change->projector-preview#update" } %>
-            <span>Bold lyric text</span>
+            <span><%= t("settings.projection.bold_lyric_text") %></span>
           </label>
 
           <label class="fieldset-label cursor-pointer gap-3 sm:col-span-2">
             <%= f.check_box :projector_show_credits, class: "toggle toggle-primary",
                   data: { action: "change->projector-preview#update" } %>
-            <span>Show author / copyright / CCLI credits on screen</span>
+            <span><%= t("settings.projection.show_credits") %></span>
           </label>
         </div>
 
@@ -144,7 +142,7 @@
             SAME fit controller as the projector (auto-fit, or a fixed % of the screen height). The
             padding sits on the stage because that is the box the fit controller measures. %>
         <div class="content-start">
-          <p class="text-xs text-base-content/50 mb-1">Preview</p>
+          <p class="text-xs text-base-content/50 mb-1"><%= t("settings.projection.preview") %></p>
           <div class="projector-preview rounded overflow-hidden" data-role="pp-stage"
                data-projector-preview-target="stage" style="padding: 5% 6%;">
             <div id="pp-frame" data-projector-preview-target="frame"
@@ -158,7 +156,7 @@
       </div>
 
       <div class="mt-5">
-        <%= f.submit "Save projection settings", class: "btn btn-primary btn-sm" %>
+        <%= f.submit t("settings.projection.save"), class: "btn btn-primary btn-sm" %>
       </div>
     <% end %>
   </section>

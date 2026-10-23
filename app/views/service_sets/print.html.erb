@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title><%= @service_set.name %> — print</title>
+    <title><%= t("services.print.page_title", name: @service_set.name) %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <style>
       /* Standalone, print-first band chart. No admin shell, no screen padding —
@@ -86,11 +86,11 @@
     <div class="print-bar">
       <div>
         <span class="title"><%= @service_set.name %></span>
-        <span class="sub"><%= @service_set.service_date&.strftime("%A, %B %-d, %Y") || "No date set" %></span>
+        <span class="sub"><%= @service_set.service_date&.strftime("%A, %B %-d, %Y") || t("services.print.no_date") %></span>
       </div>
       <div class="print-actions">
-        <%= link_to "← Back", service_set_path(@service_set) %>
-        <button type="button" class="primary" onclick="window.print()">Print</button>
+        <%= link_to t("services.print.back"), service_set_path(@service_set) %>
+        <button type="button" class="primary" onclick="window.print()"><%= t("services.print.print") %></button>
       </div>
     </div>
 
@@ -114,13 +114,13 @@
 
         <% blocks.each do |block| %>
           <% if block[:kind] == :song %>
-            <% t = block[:title] %>
+            <% title_row = block[:title] %>
             <div class="song">
               <h2 class="song-title">
-                <%= t.song.title %>
-                <% if t.displayed_key %><span class="song-key">Key <%= t.displayed_key %></span><% end %>
+                <%= title_row.song.title %>
+                <% if title_row.displayed_key %><span class="song-key"><%= t("services.print.key", key: title_row.displayed_key) %></span><% end %>
               </h2>
-              <% credits = [ t.song.author, t.song.copyright_line, (t.song.ccli_song_number.present? ? "CCLI ##{t.song.ccli_song_number}" : nil) ].compact %>
+              <% credits = [ title_row.song.author, title_row.song.copyright_line, (title_row.song.ccli_song_number.present? ? "CCLI ##{title_row.song.ccli_song_number}" : nil) ].compact %>
               <% if credits.any? %><div class="song-credits"><%= credits.join(" · ") %></div><% end %>
               <% block[:sections].each do |s| %>
                 <%= render "songs/musician_chart_section", section: s.section, projected: s.projected %>
@@ -129,7 +129,7 @@
           <% else %>
             <% r = block[:row] %>
             <div class="slide">
-              <div class="slide-title"><%= r.slide.title.presence || "Untitled slide" %><% if r.slide.page_count > 1 %><span class="slide-page">page <%= r.page + 1 %> of <%= r.slide.page_count %></span><% end %></div>
+              <div class="slide-title"><%= r.slide.title.presence || t("services.print.untitled_slide") %><% if r.slide.page_count > 1 %><span class="slide-page"><%= t("services.print.page_of", page: r.page + 1, total: r.slide.page_count) %></span><% end %></div>
               <div class="slide-body"><%= raw r.slide.rendered_html(r.page) %></div>
             </div>
           <% end %>

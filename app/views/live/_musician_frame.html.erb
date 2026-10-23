@@ -19,7 +19,7 @@
     <% transposed, _capo = renderer.call %>
     <% section = frame.current_section_in(transposed.to_h["sections"]) %>
     <% if renderer.displayed_key %>
-      <span data-role="key-badge">Key <%= renderer.displayed_key %></span>
+      <span data-role="key-badge"><%= t("live.frame.key_badge", key: renderer.displayed_key) %></span>
     <% end %>
     <%= render "songs/musician_chart_section", section: section, projected: true if section %>
   <% elsif frame.text_slide? %>

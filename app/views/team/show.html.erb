@@ -1,10 +1,10 @@
 <div class="mx-auto max-w-3xl p-4" data-role="team">
-  <h1 class="text-2xl font-semibold mb-6">Team</h1>
+  <h1 class="text-2xl font-semibold mb-6"><%= t("team.show.title") %></h1>
 
   <% if flash[:accept_url] %>
     <div class="alert alert-info mb-4 text-sm" data-role="accept-url-fallback">
       <div>
-        <p class="font-medium">Invitation link (share manually if the email doesn't arrive):</p>
+        <p class="font-medium"><%= t("team.show.invite_link_fallback") %></p>
         <code class="break-all"><%= flash[:accept_url] %></code>
       </div>
     </div>
@@ -12,7 +12,7 @@
 
   <%# --- Invite form --- %>
   <section class="mb-8" data-role="invite-form">
-    <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/60 mb-2">Invite someone</h2>
+    <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/60 mb-2"><%= t("team.show.invite_someone") %></h2>
     <%= form_with model: @invitation, url: invitations_path, method: :post, class: "flex flex-wrap items-end gap-2" do |f| %>
       <div>
         <%= f.label :email, class: "block text-xs mb-1" %>
@@ -21,33 +21,33 @@
       </div>
       <div>
         <%= f.label :role, class: "block text-xs mb-1" %>
-        <%= f.select :role, [ [ "Editor", "editor" ], [ "Admin", "admin" ] ], {},
+        <%= f.select :role, [ [ t("team.show.role_editor"), "editor" ], [ t("team.show.role_admin"), "admin" ] ], {},
               class: "select select-bordered select-sm" %>
       </div>
-      <%= f.submit "Send invite", class: "btn btn-primary btn-sm" %>
+      <%= f.submit t("team.show.send_invite"), class: "btn btn-primary btn-sm" %>
     <% end %>
   </section>
 
   <%# --- Members --- %>
   <section class="mb-8" data-role="members">
-    <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/60 mb-2">Members</h2>
+    <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/60 mb-2"><%= t("team.show.members") %></h2>
     <table class="table table-sm">
-      <thead><tr><th>Email</th><th>Role</th><th class="text-right">Actions</th></tr></thead>
+      <thead><tr><th><%= t("team.show.th_email") %></th><th><%= t("team.show.th_role") %></th><th class="text-right"><%= t("team.show.th_actions") %></th></tr></thead>
       <tbody>
         <% @members.each do |member| %>
           <tr data-role="member-row" data-email="<%= member.email %>">
             <td><%= member.email %></td>
             <td>
               <%= form_with url: member_path(member), method: :patch, class: "inline" do |f| %>
-                <%= f.select :"user[role]", [ [ "Editor", "editor" ], [ "Admin", "admin" ] ],
+                <%= f.select :"user[role]", [ [ t("team.show.role_editor"), "editor" ], [ t("team.show.role_admin"), "admin" ] ],
                       { selected: member.role }, class: "select select-bordered select-xs",
                       onchange: "this.form.requestSubmit()" %>
               <% end %>
             </td>
             <td class="text-right">
-              <%= button_to "Remove", member_path(member), method: :delete,
+              <%= button_to t("team.show.remove"), member_path(member), method: :delete,
                     class: "btn btn-ghost btn-xs text-error",
-                    form: { data: { turbo_confirm: "Remove #{member.email}?" } } %>
+                    form: { data: { turbo_confirm: t("team.show.remove_confirm", email: member.email) } } %>
             </td>
           </tr>
         <% end %>
@@ -57,12 +57,12 @@
 
   <%# --- Pending invitations --- %>
   <section data-role="pending-invites">
-    <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/60 mb-2">Pending invitations</h2>
+    <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/60 mb-2"><%= t("team.show.pending_invitations") %></h2>
     <% if @invitations.empty? %>
-      <p class="text-sm text-base-content/50">No pending invitations.</p>
+      <p class="text-sm text-base-content/50"><%= t("team.show.no_pending") %></p>
     <% else %>
       <table class="table table-sm">
-        <thead><tr><th>Email</th><th>Role</th><th>Invited by</th><th>Expires</th><th class="text-right">Actions</th></tr></thead>
+        <thead><tr><th><%= t("team.show.th_email") %></th><th><%= t("team.show.th_role") %></th><th><%= t("team.show.th_invited_by") %></th><th><%= t("team.show.th_expires") %></th><th class="text-right"><%= t("team.show.th_actions") %></th></tr></thead>
         <tbody>
           <% @invitations.each do |inv| %>
             <tr data-role="invite-row" data-email="<%= inv.email %>">
@@ -71,10 +71,10 @@
               <td><%= inv.invited_by.email %></td>
               <td><%= inv.expires_at.to_date.to_fs(:long) %></td>
               <td class="text-right whitespace-nowrap">
-                <%= button_to "Resend", resend_invitation_path(inv), method: :post, class: "btn btn-ghost btn-xs" %>
-                <%= button_to "Revoke", invitation_path(inv), method: :delete,
+                <%= button_to t("team.show.resend"), resend_invitation_path(inv), method: :post, class: "btn btn-ghost btn-xs" %>
+                <%= button_to t("team.show.revoke"), invitation_path(inv), method: :delete,
                       class: "btn btn-ghost btn-xs text-error",
-                      form: { data: { turbo_confirm: "Revoke the invite to #{inv.email}?" } } %>
+                      form: { data: { turbo_confirm: t("team.show.revoke_confirm", email: inv.email) } } %>
               </td>
             </tr>
           <% end %>

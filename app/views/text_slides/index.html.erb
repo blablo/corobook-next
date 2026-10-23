@@ -1,18 +1,18 @@
 <div class="mx-auto my-8 max-w-3xl px-4 sm:px-6">
   <div class="flex items-center justify-between mb-4">
-    <h1 class="text-2xl font-bold">Slides — <%= current_church.name %></h1>
-    <%= link_to "New slide", new_text_slide_path, class: "btn btn-primary btn-sm" %>
+    <h1 class="text-2xl font-bold"><%= t("slides.index.title", church: current_church.name) %></h1>
+    <%= link_to t("slides.index.new"), new_text_slide_path, class: "btn btn-primary btn-sm" %>
   </div>
 
   <%= form_with url: text_slides_path, method: :get, class: "mb-3" do %>
     <%= hidden_field_tag :tag, @tag if @tag %>
-    <%= search_field_tag :q, @query, placeholder: "Search title, tags, or body…",
+    <%= search_field_tag :q, @query, placeholder: t("slides.index.search_placeholder"),
           class: "input input-bordered input-sm w-full", data: { role: "slide-search" } %>
   <% end %>
 
   <% if @church_tags.present? %>
     <div class="flex flex-wrap items-center gap-1.5 mb-4" data-role="tag-filter">
-      <span class="text-xs font-semibold uppercase tracking-wide text-base-content/40 mr-1">Tags</span>
+      <span class="text-xs font-semibold uppercase tracking-wide text-base-content/40 mr-1"><%= t("slides.index.tags") %></span>
       <% if @tag %>
         <%= link_to "✕ #{@tag}", text_slides_path(q: @query), class: "badge badge-primary gap-1" %>
       <% end %>
@@ -29,7 +29,7 @@
         <%= link_to slide.title, slide, class: "list-col-grow link link-hover font-medium" %>
         <span class="flex items-center gap-1.5 shrink-0">
           <% if slide.page_count > 1 %>
-            <span class="badge badge-sm badge-outline"><%= slide.page_count %> pages</span>
+            <span class="badge badge-sm badge-outline"><%= t("slides.index.pages", count: slide.page_count) %></span>
           <% end %>
           <% slide.tags.each do |tag| %>
             <span class="badge badge-sm badge-ghost"><%= tag %></span>
@@ -38,7 +38,7 @@
       </li>
     <% end %>
     <% if @text_slides.empty? %>
-      <li class="list-row text-sm text-base-content/50">No slides<%= " for ##{@tag}" if @tag %> yet.</li>
+      <li class="list-row text-sm text-base-content/50"><%= @tag ? t("slides.index.empty_for_tag", tag: @tag) : t("slides.index.empty") %></li>
     <% end %>
   </ul>
 </div>

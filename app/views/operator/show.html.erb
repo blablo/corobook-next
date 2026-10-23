@@ -3,30 +3,30 @@
     <div class="flex items-center gap-3 min-w-0">
       <h1 class="text-2xl font-bold truncate"><%= @session.service_set.name %></h1>
       <span class="badge <%= @session.active? ? 'badge-success' : 'badge-ghost' %>"
-            data-role="live-indicator"><%= @session.active? ? "LIVE" : "ENDED" %></span>
+            data-role="live-indicator"><%= @session.active? ? t("live.operator.live") : t("live.operator.ended") %></span>
     </div>
-    <%= link_to "← Back to service", service_set_path(@session.service_set),
+    <%= link_to t("live.operator.back_to_service"), service_set_path(@session.service_set),
           class: "btn btn-ghost btn-sm", data: { role: "back-to-set" } %>
   </div>
 
   <div class="flex flex-wrap items-center justify-between gap-2 mb-4" data-role="operator-controls">
     <div class="flex items-center gap-2">
-      <%= button_to "← Back", operator_back_path(@session), method: :patch,
+      <%= button_to t("live.operator.back"), operator_back_path(@session), method: :patch,
             form: { data: { turbo: false, "operator-clicker-target": "back" } }, class: "btn" %>
-      <%= button_to "Next →", operator_advance_path(@session), method: :patch,
+      <%= button_to t("live.operator.next"), operator_advance_path(@session), method: :patch,
             form: { data: { turbo: false, "operator-clicker-target": "next" } }, class: "btn btn-primary" %>
-      <%= button_to (@session.blanked ? "Unblank" : "Blank"), operator_blank_path(@session), method: :patch,
+      <%= button_to (@session.blanked ? t("live.operator.unblank") : t("live.operator.blank")), operator_blank_path(@session), method: :patch,
             form: { data: { turbo: false, "operator-clicker-target": "blank" } }, class: "btn", data: { role: "blank-toggle" } %>
     </div>
     <% if @session.active? %>
-      <%= button_to "End service", operator_end_path(@session), method: :delete,
+      <%= button_to t("live.operator.end_service"), operator_end_path(@session), method: :delete,
             form: { data: { turbo: false } }, class: "btn btn-error btn-outline",
             data: { role: "end-service" } %>
     <% end %>
   </div>
 
   <p class="text-xs text-base-content/50 mb-4" data-role="clicker-hint">
-    Tip: a presentation clicker or your keyboard arrows (← →, Page Up/Down) advance the service. Press <kbd class="kbd kbd-xs">B</kbd> to blank.
+    <%= t("live.operator.clicker_hint_html", blank_key: tag.kbd("B", class: "kbd kbd-xs")) %>
   </p>
 
   <%# A true preview of what's on the projection screen: the SAME projector frame (plain lyrics,
@@ -35,12 +35,12 @@
     <%= render "live/projector_frame", session: @session %>
   </div>
 
-  <h2 class="text-sm font-semibold mb-2">Jump to item</h2>
+  <h2 class="text-sm font-semibold mb-2"><%= t("live.operator.jump_to_item") %></h2>
   <ul class="list bg-base-100 rounded-box border border-base-200">
     <% @session.service_set.ordered_items.each do |item| %>
       <li class="list-row items-center">
         <span class="list-col-grow"><%= item.item.title %></span>
-        <%= button_to "Go", operator_goto_path(@session, set_item_id: item.id), method: :patch,
+        <%= button_to t("live.operator.go"), operator_goto_path(@session, set_item_id: item.id), method: :patch,
               class: "btn btn-ghost btn-sm", form: { data: { turbo: false } } %>
       </li>
     <% end %>
@@ -53,20 +53,20 @@
     <div class="card card-border bg-base-100 flex-row items-center gap-4 p-4" data-role="projector-join">
       <%= qr_svg(projector_url, size: 128) %>
       <div class="min-w-0">
-        <div class="text-xs font-semibold uppercase tracking-wide text-base-content/60 mb-1">Projector</div>
+        <div class="text-xs font-semibold uppercase tracking-wide text-base-content/60 mb-1"><%= t("live.operator.projector") %></div>
         <%= link_to projector_url, projector_url, target: "_blank", rel: "noopener",
               class: "link link-primary text-sm break-all", data: { role: "projector-url" } %>
-        <p class="text-xs text-base-content/50 mt-1">Open on the projection screen, or scan to join.</p>
+        <p class="text-xs text-base-content/50 mt-1"><%= t("live.operator.projector_hint") %></p>
       </div>
     </div>
 
     <div class="card card-border bg-base-100 flex-row items-center gap-4 p-4" data-role="musician-join">
       <%= qr_svg(musician_url, size: 128) %>
       <div class="min-w-0">
-        <div class="text-xs font-semibold uppercase tracking-wide text-base-content/60 mb-1">Musician</div>
+        <div class="text-xs font-semibold uppercase tracking-wide text-base-content/60 mb-1"><%= t("live.operator.musician") %></div>
         <%= link_to musician_url, musician_url, target: "_blank", rel: "noopener",
               class: "link link-primary text-sm break-all", data: { role: "musician-url" } %>
-        <p class="text-xs text-base-content/50 mt-1">Musicians scan this to follow along on their phone.</p>
+        <p class="text-xs text-base-content/50 mt-1"><%= t("live.operator.musician_hint") %></p>
       </div>
     </div>
   </div>

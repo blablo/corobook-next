@@ -1,18 +1,18 @@
 <div class="mx-auto mt-8 max-w-3xl p-4" data-role="sets-index">
   <div class="flex items-center justify-between mb-4">
-    <h1 class="text-2xl font-semibold">Services — <%= current_church.name %></h1>
-    <%= link_to "New service", new_service_set_path, class: "btn btn-primary btn-sm" %>
+    <h1 class="text-2xl font-semibold"><%= t("services.index.title", church: current_church.name) %></h1>
+    <%= link_to t("services.index.new"), new_service_set_path, class: "btn btn-primary btn-sm" %>
   </div>
 
   <% if @service_sets.empty? %>
     <div class="card bg-base-100 border border-base-200">
       <div class="card-body items-center text-center text-sm text-base-content/60" data-role="empty">
-        No services yet.
+        <%= t("services.index.empty") %>
       </div>
     </div>
   <% else %>
     <% if @upcoming_sets.any? %>
-      <h2 class="text-xs font-semibold uppercase tracking-wide text-base-content/40 mb-2">Upcoming</h2>
+      <h2 class="text-xs font-semibold uppercase tracking-wide text-base-content/40 mb-2"><%= t("services.index.upcoming") %></h2>
       <ul class="list bg-base-100 rounded-box border border-base-200 mb-6" data-role="upcoming-sets">
         <% @upcoming_sets.each do |set| %>
           <li class="list-row items-center" data-role="set-row">
@@ -24,7 +24,7 @@
     <% end %>
 
     <% if @past_sets.any? %>
-      <h2 class="text-xs font-semibold uppercase tracking-wide text-base-content/40 mb-2">Past</h2>
+      <h2 class="text-xs font-semibold uppercase tracking-wide text-base-content/40 mb-2"><%= t("services.index.past") %></h2>
       <ul class="list bg-base-100 rounded-box border border-base-200" data-role="past-sets">
         <% @past_sets.each do |set| %>
           <li class="list-row items-center" data-role="set-row">

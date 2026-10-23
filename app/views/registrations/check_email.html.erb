@@ -1,28 +1,32 @@
-<% content_for :title, "Check your email" %>
+<% content_for :title, t("auth.check_email.page_title") %>
 
 <div class="mx-auto max-w-md px-4 py-16 text-center" data-role="check-email">
   <div class="text-4xl mb-3">📬</div>
-  <h1 class="text-2xl font-bold mb-2">Confirm your email</h1>
+  <h1 class="text-2xl font-bold mb-2"><%= t("auth.check_email.title") %></h1>
   <p class="text-base-content/70 mb-6">
-    We sent a confirmation link<% if @email.present? %> to <span class="font-medium"><%= @email %></span><% end %>.
-    Click it to activate your account and sign in.
+    <% if @email.present? %>
+      <%= t("auth.check_email.sent_to_html", email: content_tag(:span, @email, class: "font-medium")) %>
+    <% else %>
+      <%= t("auth.check_email.sent") %>
+    <% end %>
+    <%= t("auth.check_email.click_to_activate") %>
   </p>
 
   <% if flash[:confirm_url] %>
     <div class="alert alert-info mb-4 text-sm text-left" data-role="confirm-url-fallback">
       <div>
-        <p class="font-medium mb-1">Dev/no-mail fallback — your confirmation link:</p>
-        <%= link_to "Confirm now", flash[:confirm_url], class: "link link-primary break-all" %>
+        <p class="font-medium mb-1"><%= t("auth.check_email.fallback_heading") %></p>
+        <%= link_to t("auth.check_email.confirm_now"), flash[:confirm_url], class: "link link-primary break-all" %>
       </div>
     </div>
   <% end %>
 
   <%= form_with url: resend_confirmation_path, method: :post, class: "flex items-end justify-center gap-2" do %>
     <input type="hidden" name="email" value="<%= @email %>">
-    <button type="submit" class="btn btn-ghost btn-sm" data-role="resend-confirmation">Resend the email</button>
+    <button type="submit" class="btn btn-ghost btn-sm" data-role="resend-confirmation"><%= t("auth.check_email.resend") %></button>
   <% end %>
 
   <p class="mt-6 text-sm text-base-content/60">
-    Already confirmed? <%= link_to "Sign in", login_path, class: "link link-primary" %>
+    <%= t("auth.check_email.already_confirmed") %> <%= link_to t("auth.check_email.sign_in_link"), login_path, class: "link link-primary" %>
   </p>
 </div>
