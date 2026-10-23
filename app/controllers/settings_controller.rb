@@ -37,7 +37,8 @@ class SettingsController < ApplicationController
       :projector_lyric_case, :projector_title_case,
       :projector_font, :projector_line_height,
       :projector_bold, :projector_show_credits,
-      :projector_valign, :projector_pagination, :projector_lines_per_slide, :projector_font_size
+      :projector_valign, :projector_pagination, :projector_lines_per_slide, :projector_font_size,
+      :projector_min_font_size
     )
   end
 end

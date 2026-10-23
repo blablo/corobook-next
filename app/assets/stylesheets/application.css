@@ -42,6 +42,12 @@
   text-transform: var(--proj-lyric-case, none);
 }
 .projector-line + .projector-line { margin-top: 0.35em; }
+/* Invisible copies of every slide of the current song. The fit controller sizes each one to find
+   the single text size that fits the whole song; never seen, never takes space. */
+.projector-measure {
+  position: absolute; left: 0; top: 0; height: 0; overflow: hidden;
+  visibility: hidden; pointer-events: none;
+}
 /* Small "×2" after a line the band repeats. em-based so it scales with the fitted lyric size;
    kept out of the casing transform so it never reads "X2". */
 .projector-repeat {

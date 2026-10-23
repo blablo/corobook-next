@@ -70,11 +70,20 @@
           </fieldset>
 
           <fieldset class="fieldset">
-            <%= f.label :projector_font_size, "Font size", class: "fieldset-legend" %>
+            <%= f.label :projector_font_size, "Preferred size", class: "fieldset-legend" %>
             <%= f.select :projector_font_size,
-                  [ [ "Auto — fit to screen", "" ] ] + TextSlide::FONT_SIZE_OPTIONS.map { |n| [ "#{n}% of screen height", n ] },
+                  [ [ "As large as fits", "" ] ] + TextSlide::FONT_SIZE_OPTIONS.map { |n| [ "#{n}% of screen height", n ] },
                   {}, class: "select w-full",
                   data: { role: "pp-font-size", action: "change->projector-preview#update" } %>
+            <p class="label text-base-content/60 whitespace-normal">Each song uses one size on all its slides, as close to this as its longest slide allows.</p>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <%= f.label :projector_min_font_size, "Minimum size", class: "fieldset-legend" %>
+            <%= f.select :projector_min_font_size,
+                  [ [ "Default (#{Corobook::ProjectorSettings::DEFAULT_MIN_FONT_SIZE}%)", "" ] ] + TextSlide::FONT_SIZE_OPTIONS.map { |n| [ "#{n}% of screen height", n ] },
+                  {}, class: "select w-full", data: { role: "pp-min-font-size" } %>
+            <p class="label text-base-content/60 whitespace-normal">Text never gets smaller than this. A section that would need smaller text is split onto more slides.</p>
           </fieldset>
 
           <fieldset class="fieldset">

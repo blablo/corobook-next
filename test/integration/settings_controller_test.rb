@@ -79,11 +79,12 @@ class SettingsControllerTest < ActionDispatch::IntegrationTest
       projector_font: "serif", projector_lyric_case: "upper",
       projector_valign: "top", projector_pagination: "by_lines",
       projector_lines_per_slide: "6", projector_bold: "0", projector_show_credits: "0",
-      projector_font_size: "12"
+      projector_font_size: "12", projector_min_font_size: "6"
     } }
     assert_redirected_to projection_settings_path
     @church.reload
     assert_equal 12, @church.projector_font_size
+    assert_equal 6, @church.projector_min_font_size
     assert_equal "#112233", @church.projector_bg_color
     assert_equal "gradient", @church.projector_bg_type
     assert_equal "#334455", @church.projector_bg_color2

@@ -8,7 +8,10 @@
     is_final_section  - true on the final slide of the song (shows the copyright notice).
     song, church_license
     show_credits      - whether the copyright/licensing notice may render (church setting; default true).
-    font_size         - fixed lyric size as % of screen height (church setting); 0 = auto-fit.
+    font_size         - preferred lyric size as % of screen height (church setting); 0 = as large as fits.
+    min_font_size     - smallest lyric size (% of screen height) before the section was split.
+    song_key          - identifies the song so the fit controller uses one size for all its slides;
+                        omitted = size this slide on its own (previews).
     show_editor_warnings (default false).
 %>
 <% show_editor_warnings = local_assigns.fetch(:show_editor_warnings, false) %>
@@ -17,7 +20,10 @@
 <% repeats = local_assigns[:repeats] || (local_assigns[:lines] ? {} : Corobook::ChordPro::Transform.section_repeat_marks(section)) %>
 <% notice = Corobook::CopyrightNotice.for(song, church_license: church_license) %>
 
-<div class="projector-section" data-controller="fit" data-fit-fixed-value="<%= local_assigns.fetch(:font_size, 0).to_i %>">
+<div class="projector-section" data-controller="fit"
+     data-fit-fixed-value="<%= local_assigns.fetch(:font_size, 0).to_i %>"
+     data-fit-min-pct-value="<%= local_assigns.fetch(:min_font_size, 0).to_i %>"
+     data-fit-song-key-value="<%= local_assigns[:song_key] %>">
   <div data-fit-target="content" class="projector-lyrics" data-role="projector-lyrics">
     <% lines.each_with_index do |line, i| %>
       <div class="projector-line"><%= line.presence || raw("&nbsp;") %><% if repeats[i] %><span class="projector-repeat" data-role="repeat-mark"><%= repeats[i] %></span><% end %></div>
