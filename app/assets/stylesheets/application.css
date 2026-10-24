@@ -181,6 +181,7 @@
 .musician-cue-next { background: #e5e7eb; color: #4a5059; }
 .musician-now #live-frame {
   display: block; padding: 0; text-align: left; align-items: stretch; /* undo stage centering */
+  background: transparent; color: #16181d; /* light lead sheet, not the dark projector stage */
 }
 .musician-now .musician-chart-section,
 .musician-now .musician-section { margin: 0; }
