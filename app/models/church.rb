@@ -15,8 +15,23 @@ class Church < ApplicationRecord
   LINE_HEIGHT_OPTIONS = %w[tight normal relaxed].freeze
   VALIGN_OPTIONS      = %w[top center bottom].freeze
   PAGINATION_OPTIONS  = %w[by_section by_lines].freeze
-  BG_TYPE_OPTIONS     = %w[solid gradient].freeze
+  BG_TYPE_OPTIONS     = %w[solid gradient image].freeze
   HEX_COLOR_FORMAT    = /\A#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})\z/
+
+  # Optional song-projection background image. When projector_bg_type is "image" and an image is
+  # attached, song lyric/title slides render it as a cover photo behind a dark scrim (custom text
+  # slides keep their own per-slide background). Stored via ActiveStorage (local disk service).
+  has_one_attached :projection_background_image
+
+  # Virtual flag: ticking "Remove current image" in the projection form purges the attachment.
+  attr_accessor :remove_projection_background_image
+
+  BACKGROUND_IMAGE_TYPES     = %w[image/png image/jpeg image/webp image/gif].freeze
+  BACKGROUND_IMAGE_MAX_BYTES = 10.megabytes
+  validate :acceptable_projection_background_image
+
+  # True when the projector is set to show an attached background image for songs.
+  def projection_background_image? = projector_bg_type == "image" && projection_background_image.attached?
 
   validates :projector_bg_color, :projector_text_color, :projector_bg_color2,
             format: { with: HEX_COLOR_FORMAT, message: "must be a hex color like #112233" }
@@ -41,6 +56,17 @@ class Church < ApplicationRecord
     return if projector_min_font_size <= projector_font_size
 
     errors.add(:projector_min_font_size, "can't be larger than the preferred size")
+  end
+
+  def acceptable_projection_background_image
+    return unless projection_background_image.attached?
+
+    unless projection_background_image.content_type.in?(BACKGROUND_IMAGE_TYPES)
+      errors.add(:projection_background_image, "must be a PNG, JPEG, WebP or GIF image")
+    end
+    if projection_background_image.byte_size > BACKGROUND_IMAGE_MAX_BYTES
+      errors.add(:projection_background_image, "must be 10 MB or smaller")
+    end
   end
 
   # A value object bundling the projection settings, for CSS-variable + casing generation.

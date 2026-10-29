@@ -10,7 +10,16 @@
 <div id="live-frame" data-controller="follower" data-follower-version-value="<%= session.position_version %>"
      data-role="projector-frame" data-font-scale="<%= session.font_scale %>"
      style="--font-scale: <%= session.font_scale %>; <%= song_style %>"
-     class="<%= 'is-blanked' if session.blanked %>">
+     class="<%= 'is-blanked' if session.blanked %> <%= 'has-song-bg' if !session.blanked && !frame.text_slide? && proj.background_image? %>">
+  <%# Song-wide background image (set in Song projection settings): a cover photo behind a dark
+      scrim, shown for the title slide and lyric slides but NOT custom text slides (they carry
+      their own background). Not shown when the stage is blanked. %>
+  <% if !session.blanked && !frame.text_slide? && proj.background_image? %>
+    <div class="projector-slide-bg" data-role="song-bg"
+         style="background-image: url('<%= rails_blob_path(proj.background_image, only_path: true) %>');">
+      <div class="projector-slide-scrim"></div>
+    </div>
+  <% end %>
   <% if session.blanked %>
     <div class="projector-blank" data-role="blank"></div>
   <% elsif frame.title_slide? %>

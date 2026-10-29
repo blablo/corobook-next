@@ -117,6 +117,16 @@
 .projector-slide.has-bg { position: relative; z-index: 1; }
 .projector-slide.has-bg .projector-slide-body { color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.6); }
 
+/* Song-wide background image (Song projection settings). The .projector-slide-bg/scrim fill the
+   whole #live-frame; lift the title/lyric content above them and add a soft shadow so the text
+   stays legible over any photo. The copyright footer rides along too. */
+#live-frame.has-song-bg > .projector-section,
+#live-frame.has-song-bg > .projector-title,
+#live-frame.has-song-bg .projector-copyright { position: relative; z-index: 1; }
+#live-frame.has-song-bg .projector-line,
+#live-frame.has-song-bg .projector-title-name,
+#live-frame.has-song-bg .projector-title-credit-line { text-shadow: 0 2px 12px rgba(0,0,0,0.65); }
+
 .live-ended { text-align: center; font-size: 1.5rem; color: #9aa0a6; }
 
 /* ── Musician view — a LIGHT, high-readability lead sheet (not the dark stage) ──

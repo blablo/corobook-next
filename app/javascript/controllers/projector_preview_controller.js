@@ -5,6 +5,7 @@ import { Controller } from "@hotwired/stimulus"
 // server-side ProjectorSettings mapping (fonts, line-heights, valign, casing, by-lines chunking).
 export default class extends Controller {
   static targets = ["stage", "frame", "lyrics"]
+  static values = { imageUrl: String }
 
   static FONTS = {
     sans: '-apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
@@ -28,6 +29,25 @@ export default class extends Controller {
 
   connect() { this.update() }
 
+  disconnect() {
+    if (this.chosenObjectUrl) { URL.revokeObjectURL(this.chosenObjectUrl); this.chosenObjectUrl = null }
+  }
+
+  // Preview a just-picked image file without uploading: swap the stage to it via an object URL.
+  previewImage(event) {
+    const file = event.target.files && event.target.files[0]
+    if (this.chosenObjectUrl) { URL.revokeObjectURL(this.chosenObjectUrl); this.chosenObjectUrl = null }
+    if (file) {
+      this.chosenObjectUrl = URL.createObjectURL(file)
+    }
+    this.update()
+  }
+
+  // The image to show in image mode: a freshly-picked file wins over the saved one.
+  currentImageUrl() {
+    return this.chosenObjectUrl || (this.hasImageUrlValue ? this.imageUrlValue : "")
+  }
+
   val(role) {
     const el = this.element.querySelector(`[data-role="${role}"]`)
     if (!el) return null
@@ -39,6 +59,8 @@ export default class extends Controller {
     const bg1 = this.val("pp-bg") || "#000000"
     const bg2 = this.val("pp-bg2") || "#1a1a2e"
     const angle = parseInt(this.val("pp-bg-angle"), 10)
+    const imageUrl = this.currentImageUrl()
+    const useImage = bgType === "image" && imageUrl
     const background = bgType === "gradient"
       ? `linear-gradient(${isNaN(angle) ? 160 : angle}deg, ${bg1}, ${bg2})`
       : bg1
@@ -55,7 +77,14 @@ export default class extends Controller {
 
     // Stage background (solid or gradient). Painted on the stage only — the frame sits inside the
     // stage padding, so a second copy of a gradient there would show a seam.
-    this.stageTarget.style.background = background
+    if (useImage) {
+      // Image mode: a dark scrim over the cover photo, so the sample lyrics stay legible — mirrors
+      // the projector's .projector-slide-bg + scrim. Falls back to black behind a not-yet-loaded image.
+      this.stageTarget.style.background =
+        `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url("${imageUrl}") center / cover no-repeat, #000`
+    } else {
+      this.stageTarget.style.background = background
+    }
 
     const frame = this.frameTarget
     frame.style.color = text
@@ -74,6 +103,7 @@ export default class extends Controller {
       div.style.lineHeight = lh
       div.style.textTransform = lyricCase
       div.style.marginTop = "0.3em"
+      div.style.textShadow = useImage ? "0 2px 12px rgba(0,0,0,0.65)" : "none"
       this.lyricsTarget.appendChild(div)
     })
 
@@ -89,10 +119,17 @@ export default class extends Controller {
 
     // Gradient colour + angle only matter in gradient mode.
     const isGradient = bgType === "gradient"
+    const isImage = bgType === "image"
     const color2Field = this.element.querySelector('[data-role="pp-bg-color2-field"]')
     const angleField = this.element.querySelector('[data-role="pp-bg-angle-field"]')
     if (color2Field) color2Field.style.display = isGradient ? "" : "none"
     if (angleField) angleField.style.display = isGradient ? "" : "none"
+    // Solid background colour only applies in solid/gradient modes (it is the gradient's first stop).
+    const bgColorField = this.element.querySelector('[data-role="pp-bg"]')?.closest("fieldset")
+    if (bgColorField) bgColorField.style.display = isImage ? "none" : ""
+    // The image upload field only applies in image mode.
+    const imageField = this.element.querySelector('[data-role="pp-bg-image-field"]')
+    if (imageField) imageField.style.display = isImage ? "" : "none"
     const angleLabel = this.element.querySelector('[data-role="pp-bg-angle-label"]')
     if (angleLabel && !isNaN(angle)) angleLabel.textContent = `${angle}°`
   }

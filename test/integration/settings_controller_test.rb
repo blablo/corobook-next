@@ -112,4 +112,42 @@ class SettingsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to settings_path
     assert_equal "gracia", @church.reload.subdomain
   end
+
+  test "an admin can upload a song-projection background image in image mode" do
+    login(@admin)
+    file = fixture_file_upload("bg.png", "image/png")
+    patch settings_path, params: { section: "projection", church: {
+      projector_bg_type: "image", projection_background_image: file
+    } }
+    assert_redirected_to projection_settings_path
+    @church.reload
+    assert_equal "image", @church.projector_bg_type
+    assert @church.projection_background_image.attached?
+    assert @church.projection_background_image?
+  end
+
+  test "ticking remove purges the projection background image" do
+    @church.update!(projector_bg_type: "image")
+    @church.projection_background_image.attach(
+      io: File.open(Rails.root.join("test/fixtures/files/bg.png")),
+      filename: "bg.png", content_type: "image/png"
+    )
+    assert @church.projection_background_image.attached?
+
+    login(@admin)
+    patch settings_path, params: { section: "projection", church: {
+      projector_bg_type: "solid", remove_projection_background_image: "1"
+    } }
+    assert_redirected_to projection_settings_path
+    perform_enqueued_jobs
+    refute @church.reload.projection_background_image.attached?
+  end
+
+  test "the projection page shows the image upload field" do
+    login(@admin)
+    get projection_settings_path
+    assert_response :success
+    assert_select "[data-role=pp-bg-image-field]"
+    assert_select "input[type=file][name='church[projection_background_image]']"
+  end
 end

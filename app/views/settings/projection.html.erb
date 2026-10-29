@@ -4,13 +4,14 @@
   <h1 class="text-2xl font-semibold mb-6"><%= t("settings.projection.title") %></h1>
 
   <%# ── Song projection (per-church look & behaviour of song lyrics on the projector) ── %>
-  <section data-role="projector-settings" data-controller="projector-preview">
+  <section data-role="projector-settings" data-controller="projector-preview"
+           data-projector-preview-image-url-value="<%= @church.projection_background_image.attached? ? rails_blob_path(@church.projection_background_image, only_path: true) : "" %>">
     <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/60 mb-2"><%= t("settings.projection.heading") %></h2>
     <p class="text-sm text-base-content/60 mb-4 max-w-prose">
       <%= t("settings.projection.intro_html", church: tag.span(@church.name, class: "font-medium")) %>
     </p>
 
-    <%= form_with model: @church, url: settings_path, method: :patch do |f| %>
+    <%= form_with model: @church, url: settings_path, method: :patch, html: { multipart: true } do |f| %>
       <%= hidden_field_tag :section, "projection" %>
       <div class="grid gap-6 lg:grid-cols-[1fr_minmax(18rem,22rem)]">
         <%# Controls %>
@@ -18,7 +19,7 @@
           <fieldset class="fieldset">
             <%= f.label :projector_bg_type, t("settings.projection.background"), class: "fieldset-legend" %>
             <%= f.select :projector_bg_type,
-                  [ [t("settings.projection.bg_solid"), "solid"], [t("settings.projection.bg_gradient"), "gradient"] ],
+                  [ [t("settings.projection.bg_solid"), "solid"], [t("settings.projection.bg_gradient"), "gradient"], [t("settings.projection.bg_image"), "image"] ],
                   {}, class: "select select-bordered w-full",
                   data: { role: "pp-bg-type", action: "change->projector-preview#update" } %>
           </fieldset>
@@ -43,6 +44,28 @@
                     data: { role: "pp-bg-angle", action: "input->projector-preview#update" } %>
               <span class="text-base-content/60 text-sm whitespace-nowrap" data-role="pp-bg-angle-label"><%= @church.projector_bg_gradient_angle %>°</span>
             </label>
+          </fieldset>
+
+          <%# Image background (songs only). The current image, an upload field, and a remove toggle.
+              Shown only when the background type is "Image" (the preview controller hides it otherwise). %>
+          <fieldset class="fieldset sm:col-span-2" data-role="pp-bg-image-field">
+            <%= f.label :projection_background_image, t("settings.projection.background_image"), class: "fieldset-legend" %>
+            <% if @church.projection_background_image.attached? %>
+              <div class="flex items-center gap-3 mb-2">
+                <%= image_tag rails_blob_path(@church.projection_background_image, only_path: true),
+                      class: "w-28 h-16 object-cover rounded border border-base-300", alt: "",
+                      data: { role: "pp-bg-image-current" } %>
+                <label class="fieldset-label cursor-pointer gap-2">
+                  <%= f.check_box :remove_projection_background_image, { class: "checkbox checkbox-sm" }, "1", "0" %>
+                  <span class="text-sm"><%= t("settings.projection.remove_image") %></span>
+                </label>
+              </div>
+            <% end %>
+            <%= f.file_field :projection_background_image,
+                  accept: "image/png,image/jpeg,image/webp,image/gif",
+                  class: "file-input file-input-bordered w-full",
+                  data: { role: "pp-bg-image", action: "change->projector-preview#previewImage" } %>
+            <p class="label text-base-content/60 whitespace-normal"><%= t("settings.projection.background_image_help") %></p>
           </fieldset>
 
           <fieldset class="fieldset">
