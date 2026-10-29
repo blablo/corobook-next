@@ -42,6 +42,39 @@ class Corobook::ProjectorSettingsTest < ActiveSupport::TestCase
     assert_equal "#123456", church.projector_settings.background_css
   end
 
+  test "image background mode keeps the base black and reports an attached image" do
+    church = Church.create!(name: "Photo", projector_bg_type: "image")
+    # No image attached yet: not active, base is black.
+    refute church.projector_settings.background_image?
+    assert_equal "#000000", church.projector_settings.background_css
+
+    church.projection_background_image.attach(
+      io: File.open(Rails.root.join("test/fixtures/files/bg.png")),
+      filename: "bg.png", content_type: "image/png"
+    )
+    assert church.projector_settings.background_image?
+    assert_equal "#000000", church.projector_settings.background_css
+  end
+
+  test "an attached image is ignored unless the background type is image" do
+    church = Church.create!(name: "SolidWithImage", projector_bg_type: "solid", projector_bg_color: "#222222")
+    church.projection_background_image.attach(
+      io: File.open(Rails.root.join("test/fixtures/files/bg.png")),
+      filename: "bg.png", content_type: "image/png"
+    )
+    refute church.projector_settings.background_image?
+    assert_equal "#222222", church.projector_settings.background_css
+  end
+
+  test "rejects an oversized or wrong-type projection background image" do
+    church = Church.create!(name: "BadImg", projector_bg_type: "image")
+    church.projection_background_image.attach(
+      io: StringIO.new("not an image"), filename: "notes.txt", content_type: "text/plain"
+    )
+    refute church.valid?
+    assert church.errors[:projection_background_image].any?
+  end
+
   test "rejects a bad gradient colour or out-of-range angle" do
     church = Church.new(name: "Bad", projector_bg_color2: "nope", projector_bg_gradient_angle: 400)
     refute church.valid?

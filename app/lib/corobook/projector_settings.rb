@@ -44,14 +44,25 @@ module Corobook
 
     # The CSS value for the projector background: a solid colour, or a linear gradient between the
     # two colours at the configured angle. Usable directly as a CSS `background` value.
+    #
+    # In image mode the base stays black: the image is drawn as a separate cover layer (with a
+    # scrim) by the frame, and black is the safe fallback if it fails to load.
     def background_css
       if church.projector_bg_type == "gradient"
         "linear-gradient(#{church.projector_bg_gradient_angle}deg, " \
           "#{church.projector_bg_color}, #{church.projector_bg_color2})"
+      elsif church.projector_bg_type == "image"
+        "#000000"
       else
         church.projector_bg_color
       end
     end
+
+    # True when song slides should show the church's attached background image.
+    def background_image? = church.projection_background_image?
+
+    # Attached background image blob for URL generation, or nil.
+    def background_image = church.projection_background_image
 
     def show_credits? = church.projector_show_credits
 

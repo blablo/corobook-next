@@ -19,6 +19,11 @@ class SettingsController < ApplicationController
     # success redirect, so each sub-page round-trips to itself.
     section = params[:section].to_s == "projection" ? :projection : :show
 
+    # Purge the song-projection background image when the admin ticked "remove".
+    if ActiveModel::Type::Boolean.new.cast(params.dig(:church, :remove_projection_background_image))
+      @church.projection_background_image.purge_later
+    end
+
     if @church.update(settings_params)
       redirect_to(section == :projection ? projection_settings_path : settings_path,
                   notice: "Settings saved.")
@@ -38,7 +43,8 @@ class SettingsController < ApplicationController
       :projector_font, :projector_line_height,
       :projector_bold, :projector_show_credits,
       :projector_valign, :projector_pagination, :projector_lines_per_slide, :projector_font_size,
-      :projector_min_font_size
+      :projector_min_font_size,
+      :projection_background_image
     )
   end
 end
