@@ -196,6 +196,23 @@ es:
       empty_for_tag: "Aún no hay diapositivas para #%{tag}."
     new:
       title: "Nueva diapositiva"
+    archive:
+      title: "Diapositivas archivadas"
+      intro: "Las diapositivas archivadas no aparecen en la biblioteca, la búsqueda ni el armado de servicios. Los servicios que ya usan una siguen funcionando. Restaura una diapositiva para traerla de vuelta."
+      back: "← Volver a diapositivas"
+      archive: "Archivar"
+      archive_title: "Archivar “%{title}”"
+      restore: "Restaurar"
+      badge: "Archivada"
+      note: "Archivada el %{date}. No aparece en la biblioteca ni en el armado de servicios."
+      archived_on: "Archivada el %{date}"
+      date_format: "%d/%m/%Y"
+      empty: "No hay diapositivas archivadas."
+      archived: "“%{title}” archivada."
+      restored: "“%{title}” restaurada en la biblioteca."
+      view_link:
+        one: "Diapositivas archivadas (%{count})"
+        other: "Diapositivas archivadas (%{count})"
     import:
       title: "Importar diapositivas desde un PDF"
       intro_html: "Trae una presentación hecha en <strong>Google Slides</strong>, PowerPoint o Keynote. En Google Slides elige <em>Archivo → Descargar → Documento PDF</em> y sube el archivo aquí. Cada página se convierte en una pantalla del proyector."

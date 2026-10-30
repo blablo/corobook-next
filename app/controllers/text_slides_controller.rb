@@ -1,19 +1,37 @@
 class TextSlidesController < ApplicationController
   layout "shell"
   before_action :require_sign_in
-  before_action :require_editor, except: %i[index show]
-  before_action :set_slide, only: %i[show edit update destroy]
+  before_action :require_editor, except: %i[index show archived]
+  before_action :set_slide, only: %i[show edit update destroy archive unarchive]
 
   def index
     @query = params[:q]
     @tag = params[:tag].presence
-    scope = church_scope(:text_slides).where(reusable: true)
+    scope = church_scope(:text_slides).library
     scope = scope.tagged(@tag) if @tag
     @text_slides = scope.search(@query).order(:title)
     @church_tags = church_tags
+    @archived_count = church_scope(:text_slides).archived.count
+  end
+
+  # Archived slides: the only place they are listed. Newest-archived first.
+  def archived
+    @query = params[:q]
+    @text_slides = church_scope(:text_slides).archived.search(@query).order(archived_at: :desc)
   end
 
   def show; end
+
+  def archive
+    @text_slide.archive!
+    redirect_to text_slides_path(q: params[:q].presence, tag: params[:tag].presence),
+                notice: t("slides.archive.archived", title: @text_slide.title)
+  end
+
+  def unarchive
+    @text_slide.unarchive!
+    redirect_to archived_text_slides_path, notice: t("slides.archive.restored", title: @text_slide.title)
+  end
 
   # Upload a PDF export (Google Slides: File → Download → PDF) to create an image slide.
   def import_form; end
@@ -78,7 +96,7 @@ class TextSlidesController < ApplicationController
 
   # The church's existing tag vocabulary, for autocomplete + the index filter.
   def church_tags
-    church_scope(:text_slides).pluck(:tags).flatten.uniq.sort
+    church_scope(:text_slides).library.pluck(:tags).flatten.uniq.sort
   end
 
   def set_slide

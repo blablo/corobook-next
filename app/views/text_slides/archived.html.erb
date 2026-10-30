@@ -1,0 +1,28 @@
+<div class="mx-auto my-8 max-w-3xl px-4 sm:px-6">
+  <div class="flex items-center justify-between mb-1">
+    <h1 class="text-2xl font-bold"><%= t("slides.archive.title") %></h1>
+    <%= link_to t("slides.archive.back"), text_slides_path, class: "btn btn-ghost btn-sm" %>
+  </div>
+  <p class="text-sm text-base-content/60 mb-4"><%= t("slides.archive.intro") %></p>
+
+  <%= form_with url: archived_text_slides_path, method: :get, class: "mb-3" do %>
+    <%= search_field_tag :q, @query, placeholder: t("slides.index.search_placeholder"),
+          class: "input input-sm w-full", data: { role: "archived-search" } %>
+  <% end %>
+
+  <ul class="list bg-base-100 rounded-box border border-base-200" data-role="archived-results">
+    <% @text_slides.each do |slide| %>
+      <li class="list-row items-center">
+        <%= link_to slide.title, slide, class: "list-col-grow link link-hover font-medium" %>
+        <span class="text-xs text-base-content/50 shrink-0"><%= t("slides.archive.archived_on", date: slide.archived_at.strftime(t("slides.archive.date_format"))) %></span>
+        <% if can_edit? %>
+          <%= button_to t("slides.archive.restore"), unarchive_text_slide_path(slide), method: :patch,
+                class: "btn btn-ghost btn-xs", form: { class: "shrink-0" }, data: { role: "unarchive-slide" } %>
+        <% end %>
+      </li>
+    <% end %>
+    <% if @text_slides.empty? %>
+      <li class="list-row text-sm text-base-content/50"><%= t("slides.archive.empty") %></li>
+    <% end %>
+  </ul>
+</div>

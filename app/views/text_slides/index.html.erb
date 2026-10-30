@@ -37,6 +37,13 @@
           <% slide.tags.each do |tag| %>
             <span class="badge badge-sm badge-ghost"><%= tag %></span>
           <% end %>
+          <% if can_edit? %>
+            <%# Archive from the list; the current search/tag filter is kept on return. %>
+            <%= button_to t("slides.archive.archive"), archive_text_slide_path(slide, q: @query.presence, tag: @tag),
+                  method: :patch, class: "btn btn-ghost btn-xs text-base-content/60",
+                  title: t("slides.archive.archive_title", title: slide.title),
+                  data: { role: "archive-slide" } %>
+          <% end %>
         </span>
       </li>
     <% end %>
@@ -44,4 +51,11 @@
       <li class="list-row text-sm text-base-content/50"><%= @tag ? t("slides.index.empty_for_tag", tag: @tag) : t("slides.index.empty") %></li>
     <% end %>
   </ul>
+
+  <% if @archived_count.positive? %>
+    <p class="mt-4 text-sm">
+      <%= link_to t("slides.archive.view_link", count: @archived_count), archived_text_slides_path,
+            class: "link link-hover text-base-content/60", data: { role: "archived-link" } %>
+    </p>
+  <% end %>
 </div>

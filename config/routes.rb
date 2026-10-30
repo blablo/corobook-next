@@ -25,6 +25,12 @@ Rails.application.routes.draw do
     # Import a deck exported as PDF (Google Slides, PowerPoint, Keynote) as an image slide.
     get  "import", on: :collection, action: :import_form
     post "import", on: :collection, action: :import
+    # Archived slides: hidden from the library and the set builder, listed only here.
+    get "archived", on: :collection
+    member do
+      patch :archive
+      patch :unarchive
+    end
   end
 
   get   "operator/:id"         => "operator#show",    as: :operator
