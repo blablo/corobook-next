@@ -206,6 +206,11 @@ en:
       title_label: "Title"
       title_placeholder: "Slide title"
       background_label: "Background"
+      appearance_label: "Appearance"
+      section_background: "Background"
+      section_text: "Text"
+      section_position: "Position"
+      font_size_auto_short: "auto size"
       background_image_label: "Background image"
       bg_type:
         solid: "Solid colour"
