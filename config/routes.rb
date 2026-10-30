@@ -22,6 +22,9 @@ Rails.application.routes.draw do
   resources :songs
   resources :text_slides do
     post "preview", on: :collection
+    # Import a deck exported as PDF (Google Slides, PowerPoint, Keynote) as an image slide.
+    get  "import", on: :collection, action: :import_form
+    post "import", on: :collection, action: :import
   end
 
   get   "operator/:id"         => "operator#show",    as: :operator

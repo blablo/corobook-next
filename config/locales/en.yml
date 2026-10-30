@@ -188,6 +188,7 @@ en:
     index:
       title: "Slides — %{church}"
       new: "New slide"
+      import: "Import PDF"
       search_placeholder: "Search title, tags, or body…"
       tags: "Tags"
       pages: "%{count} pages"
@@ -195,6 +196,29 @@ en:
       empty_for_tag: "No slides for #%{tag} yet."
     new:
       title: "New slide"
+    import:
+      title: "Import slides from a PDF"
+      intro_html: "Bring in a deck made in <strong>Google Slides</strong>, PowerPoint or Keynote. In Google Slides choose <em>File → Download → PDF document</em>, then upload the file here. Each page becomes one screen on the projector."
+      title_label: "Title"
+      title_placeholder: "e.g. Announcements"
+      title_help: "Leave empty to use the file name."
+      file_label: "PDF file"
+      file_help: "Up to %{max_mb} MB and %{max_pages} pages. Pages are shown as images: to change the text, edit the deck and import it again."
+      submit: "Import"
+      working: "Importing…"
+      done:
+        one: "Imported %{count} page."
+        other: "Imported %{count} pages."
+      errors:
+        missing_file: "Choose a PDF file to import."
+        too_large: "That file is too large. The limit is %{max_mb} MB."
+        not_pdf: "That file isn't a PDF. In Google Slides use File → Download → PDF document."
+        office_file: "PowerPoint and Keynote files can't be imported directly. Export the deck as PDF first (PowerPoint: File → Export → PDF; Keynote: File → Export To → PDF; Google Slides: File → Download → PDF document) and upload that."
+        busy: "Another import is being processed right now. Try again in a minute."
+        no_pages: "That PDF has no pages."
+        too_many_pages: "That PDF has more than %{max_pages} pages. Split it into smaller decks."
+        unreadable: "That PDF couldn't be read. Try exporting it again."
+        converter_missing: "PDF import isn't available on this server (poppler-utils is not installed)."
     edit:
       title: "Edit slide"
     show:
@@ -246,6 +270,10 @@ en:
       body_aria: "Slide body"
       preview_label: "Preview"
       preview_caption: "This is how the current page appears on the projection screen."
+      imported_note: "This slide was imported from a PDF, so its pages are images. To change them, edit the deck in Google Slides (or wherever you made it) and import it again. You can still change the title and tags here."
+      imported_pages:
+        one: "%{count} imported page"
+        other: "%{count} imported pages"
       save: "Save changes"
       create: "Create slide"
       cancel: "Cancel"

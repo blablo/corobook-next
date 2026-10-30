@@ -1,7 +1,16 @@
 <%#
   Musician rendering of a text slide (Req 3.5): same content as the projector, no chord staff.
-  Locals: slide, page (0-based, optional). Neutral style.
+  Locals: slide, page (0-based, optional). Neutral style. An imported deck page shows its image.
 %>
-<div class="musician-slide" data-role="musician-slide">
-  <%= raw slide.rendered_html(local_assigns.fetch(:page, 0)) %>
-</div>
+<% if slide.imported? %>
+  <% image = slide.page_image(local_assigns.fetch(:page, 0)) %>
+  <div class="musician-slide musician-deck-page" data-role="musician-slide">
+    <% if image %>
+      <%= image_tag rails_blob_path(image, only_path: true), alt: slide.title, loading: "lazy" %>
+    <% end %>
+  </div>
+<% else %>
+  <div class="musician-slide" data-role="musician-slide">
+    <%= raw slide.rendered_html(local_assigns.fetch(:page, 0)) %>
+  </div>
+<% end %>

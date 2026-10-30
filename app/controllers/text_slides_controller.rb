@@ -15,6 +15,19 @@ class TextSlidesController < ApplicationController
 
   def show; end
 
+  # Upload a PDF export (Google Slides: File → Download → PDF) to create an image slide.
+  def import_form; end
+
+  def import
+    slide = Corobook::PdfSlideImporter.call(church: current_church, file: params[:pdf], title: params[:title])
+    redirect_to slide, notice: t("slides.import.done", count: slide.page_count)
+  rescue Corobook::PdfSlideImporter::Error => e
+    flash.now[:alert] = t("slides.import.errors.#{e.key}",
+                          max_mb: Corobook::PdfSlideImporter::MAX_BYTES / 1.megabyte,
+                          max_pages: Corobook::PdfSlideImporter::MAX_PAGES)
+    render :import_form, status: :unprocessable_entity
+  end
+
   def new
     @text_slide = church_scope(:text_slides).build(reusable: true, pages: [ { "body_markdown" => "" } ])
     @church_tags = church_tags
