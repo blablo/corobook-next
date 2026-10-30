@@ -188,6 +188,7 @@ es:
     index:
       title: "Diapositivas — %{church}"
       new: "Nueva diapositiva"
+      import: "Importar PDF"
       search_placeholder: "Buscar por título, etiquetas o contenido…"
       tags: "Etiquetas"
       pages: "%{count} páginas"
@@ -195,6 +196,29 @@ es:
       empty_for_tag: "Aún no hay diapositivas para #%{tag}."
     new:
       title: "Nueva diapositiva"
+    import:
+      title: "Importar diapositivas desde un PDF"
+      intro_html: "Trae una presentación hecha en <strong>Google Slides</strong>, PowerPoint o Keynote. En Google Slides elige <em>Archivo → Descargar → Documento PDF</em> y sube el archivo aquí. Cada página se convierte en una pantalla del proyector."
+      title_label: "Título"
+      title_placeholder: "p. ej. Anuncios"
+      title_help: "Déjalo vacío para usar el nombre del archivo."
+      file_label: "Archivo PDF"
+      file_help: "Hasta %{max_mb} MB y %{max_pages} páginas. Las páginas se muestran como imágenes: para cambiar el texto, edita la presentación e impórtala de nuevo."
+      submit: "Importar"
+      working: "Importando…"
+      done:
+        one: "Se importó %{count} página."
+        other: "Se importaron %{count} páginas."
+      errors:
+        missing_file: "Elige un archivo PDF para importar."
+        too_large: "El archivo es demasiado grande. El límite es %{max_mb} MB."
+        not_pdf: "Ese archivo no es un PDF. En Google Slides usa Archivo → Descargar → Documento PDF."
+        office_file: "Los archivos de PowerPoint y Keynote no se pueden importar directamente. Exporta primero la presentación como PDF (PowerPoint: Archivo → Exportar → PDF; Keynote: Archivo → Exportar a → PDF; Google Slides: Archivo → Descargar → Documento PDF) y sube ese archivo."
+        busy: "Se está procesando otra importación en este momento. Inténtalo de nuevo en un minuto."
+        no_pages: "Ese PDF no tiene páginas."
+        too_many_pages: "Ese PDF tiene más de %{max_pages} páginas. Divídelo en presentaciones más pequeñas."
+        unreadable: "No se pudo leer ese PDF. Intenta exportarlo de nuevo."
+        converter_missing: "La importación de PDF no está disponible en este servidor (falta poppler-utils)."
     edit:
       title: "Editar diapositiva"
     show:
@@ -246,6 +270,10 @@ es:
       body_aria: "Cuerpo de la diapositiva"
       preview_label: "Vista previa"
       preview_caption: "Así aparece la página actual en la pantalla de proyección."
+      imported_note: "Esta diapositiva se importó de un PDF, así que sus páginas son imágenes. Para cambiarlas, edita la presentación en Google Slides (o donde la hiciste) e impórtala de nuevo. Aquí todavía puedes cambiar el título y las etiquetas."
+      imported_pages:
+        one: "%{count} página importada"
+        other: "%{count} páginas importadas"
       save: "Guardar cambios"
       create: "Crear diapositiva"
       cancel: "Cancelar"

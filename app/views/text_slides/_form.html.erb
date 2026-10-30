@@ -35,8 +35,15 @@
             <div data-slide-editor-target="tagFields"></div>
           </fieldset>
 
+          <%# Imported deck (PDF): pages are images, edited in the original app and re-imported.
+              The text editor and appearance below stay in the DOM (the slide editor needs its
+              targets and keeps submitting one page per image) but are hidden. %>
+          <% if text_slide.imported? %>
+            <div class="alert alert-info text-sm" data-role="imported-note"><%= t("slides.form.imported_note") %></div>
+          <% end %>
+
           <%# Pages %>
-          <fieldset class="fieldset">
+          <fieldset class="fieldset<%= ' hidden' if text_slide.imported? %>">
             <legend class="fieldset-legend"><%= t("slides.form.pages_label") %></legend>
 
             <%# Page thumbnail strip: click to switch, drag to reorder, ✕ to remove, + to add %>
@@ -72,7 +79,7 @@
 
           <%# Appearance (all pages): collapsed by default so writing the slide comes first. Each
               header shows the current choice; the slide editor keeps it in sync. %>
-          <div class="flex flex-col gap-2" data-role="slide-appearance">
+          <div class="flex flex-col gap-2<%= ' hidden' if text_slide.imported? %>" data-role="slide-appearance">
             <div class="text-xs font-semibold uppercase tracking-wide text-base-content/50"><%= t("slides.form.appearance_label") %></div>
             <details class="collapse collapse-arrow border border-base-300 bg-base-100" data-role="slide-section-background"<%= " open" if text_slide.errors[:bg_type].any? || text_slide.errors[:bg_color].any? || text_slide.errors[:bg_color2].any? || text_slide.errors[:bg_gradient_angle].any? || text_slide.errors[:background_image].any? %>>
               <summary class="collapse-title font-semibold text-sm">
@@ -200,7 +207,21 @@
 
         <%# ── Preview column (inside the same card) — the SAME projector mini-stage the show page
               and operator use, so what you see while editing matches what projects. ───── %>
-        <div class="lg:sticky lg:top-4 min-w-0">
+        <% if text_slide.imported? %>
+          <div class="min-w-0" data-role="imported-pages">
+            <div class="text-xs font-semibold uppercase tracking-wide text-base-content/50 mb-2"><%= t("slides.form.imported_pages", count: text_slide.page_count) %></div>
+            <div class="grid grid-cols-2 gap-2">
+              <% text_slide.page_images_attachments.sort_by(&:id).each_with_index do |image, i| %>
+                <figure class="relative">
+                  <%= image_tag rails_blob_path(image, only_path: true), alt: "#{text_slide.title} #{i + 1}",
+                        class: "w-full aspect-video object-contain bg-black rounded-box" %>
+                  <figcaption class="badge badge-neutral badge-sm absolute top-1 left-1"><%= i + 1 %></figcaption>
+                </figure>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+        <div class="lg:sticky lg:top-4 min-w-0<%= ' hidden' if text_slide.imported? %>">
           <div class="text-xs font-semibold uppercase tracking-wide text-base-content/50 mb-2"><%= t("slides.form.preview_label") %> <span data-slide-editor-target="previewLabel"></span></div>
           <div class="projector-preview rounded-box overflow-hidden" data-slide-editor-target="previewStage"
                style="<%= text_slide.projector_style %>">

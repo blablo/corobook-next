@@ -1,0 +1,33 @@
+<div class="mx-auto my-8 max-w-2xl px-4 sm:px-6">
+  <h1 class="text-2xl font-bold mb-2"><%= t("slides.import.title") %></h1>
+  <p class="text-sm text-base-content/70 mb-5"><%= t("slides.import.intro_html") %></p>
+
+  <%= form_with url: import_text_slides_path, method: :post, multipart: true,
+        data: { turbo: false, role: "slide-import-form" } do %>
+    <div class="card card-border bg-base-100">
+      <div class="card-body">
+        <fieldset class="fieldset">
+          <%= label_tag :title, t("slides.import.title_label"), class: "fieldset-legend" %>
+          <%= text_field_tag :title, params[:title], class: "input w-full",
+                placeholder: t("slides.import.title_placeholder") %>
+          <p class="label whitespace-normal"><%= t("slides.import.title_help") %></p>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <%= label_tag :pdf, t("slides.import.file_label"), class: "fieldset-legend" %>
+          <%= file_field_tag :pdf, accept: "application/pdf,.pdf", required: true, class: "file-input w-full" %>
+          <p class="label whitespace-normal">
+            <%= t("slides.import.file_help", max_mb: Corobook::PdfSlideImporter::MAX_BYTES / 1.megabyte,
+                  max_pages: Corobook::PdfSlideImporter::MAX_PAGES) %>
+          </p>
+        </fieldset>
+
+        <div class="card-actions items-center gap-3 mt-4 pt-4 border-t border-base-200">
+          <%= submit_tag t("slides.import.submit"), class: "btn btn-primary",
+                data: { disable_with: t("slides.import.working") } %>
+          <%= link_to t("slides.form.cancel"), text_slides_path, class: "btn btn-ghost" %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

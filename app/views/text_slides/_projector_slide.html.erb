@@ -3,6 +3,15 @@
   When the slide has a background image it fills the stage as a cover photo, with a dark scrim
   behind the text for legibility. Otherwise the slide renders on the church's normal background.
 %>
+<% if slide.imported? %>
+  <%# Imported deck page (PDF export): the rendered page image, letterboxed to fill the stage. %>
+  <% image = slide.page_image(local_assigns.fetch(:page, 0)) %>
+  <div class="projector-deck-page" data-role="projector-slide" data-imported="true">
+    <% if image %>
+      <%= image_tag rails_blob_path(image, only_path: true), alt: slide.title, data: { role: "deck-page-image" } %>
+    <% end %>
+  </div>
+<% else %>
 <% if slide.background_image? %>
   <div class="projector-slide-bg" data-role="slide-bg"
        style="background-image: url('<%= rails_blob_path(slide.background_image, only_path: true) %>');">
@@ -15,3 +24,4 @@
     <%= raw slide.rendered_html(local_assigns.fetch(:page, 0)) %>
   </div>
 </div>
+<% end %>
