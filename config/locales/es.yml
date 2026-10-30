@@ -206,6 +206,11 @@ es:
       title_label: "Título"
       title_placeholder: "Título de la diapositiva"
       background_label: "Fondo"
+      appearance_label: "Apariencia"
+      section_background: "Fondo"
+      section_text: "Texto"
+      section_position: "Posición"
+      font_size_auto_short: "tamaño automático"
       background_image_label: "Imagen de fondo"
       bg_type:
         solid: "Color sólido"

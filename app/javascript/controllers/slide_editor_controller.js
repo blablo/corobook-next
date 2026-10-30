@@ -184,6 +184,7 @@ export default class extends Controller {
   setFontSize(e) {
     const fitEl = this.previewTarget.closest('[data-controller~="fit"]')
     if (fitEl) fitEl.setAttribute("data-fit-fixed-value", e.target.value || "0")
+    this.updateSummaries()
   }
 
   // Projection look (background type/colours/gradient, text colour, font): repaint the preview
@@ -200,6 +201,8 @@ export default class extends Controller {
     const angle = field("bg_gradient_angle")?.value || "160"
     const angleLabel = this.element.querySelector("[data-role=slide-bg-angle-label]")
     if (angleLabel) angleLabel.textContent = `${angle}°`
+
+    this.updateSummaries()
 
     if (!this.hasPreviewStageTarget) return
     const bg = type === "gradient"
@@ -220,6 +223,24 @@ export default class extends Controller {
     if (this.hasPreviewSlideTarget) this.previewSlideTarget.dispatchEvent(new CustomEvent("fit:refit"))
   }
 
+  // Keep each collapsed appearance section's header showing the current choice, e.g.
+  // "Fondo · Degradado". Labels come from the controls themselves, so they stay translated.
+  updateSummaries() {
+    const radio = (name) => this.element.querySelector(`input[name="text_slide[${name}]"]:checked`)?.getAttribute("aria-label")
+    const option = (name) => this.element.querySelector(`select[name="text_slide[${name}]"]`)?.selectedOptions[0]
+    const set = (role, parts) => {
+      const el = this.element.querySelector(`[data-role=${role}]`)
+      const text = parts.filter(Boolean).join(", ")
+      if (el && text) el.textContent = `· ${text}`
+    }
+    set("slide-summary-background", [ radio("bg_type") ])
+    const size = option("font_size")
+    const sizeLabel = size && size.value === "" ? null : size?.textContent
+    const textSummary = this.element.querySelector("[data-role=slide-summary-text]")
+    set("slide-summary-text", [ option("font")?.textContent, sizeLabel || textSummary?.dataset.autoLabel ])
+    set("slide-summary-position", [ radio("text_align"), radio("vertical_align") ])
+  }
+
   // Preview a newly chosen background image before saving.
   previewImage(e) {
     const file = e.target.files?.[0]
@@ -235,6 +256,7 @@ export default class extends Controller {
   setAlignment(e) {
     const group = e.currentTarget
     group.querySelectorAll("input[type=radio]").forEach(r => r.classList.toggle("btn-primary", r.checked))
+    this.updateSummaries()
     if (!this.hasPreviewSlideTarget) return
 
     const checked = (field) => this.element.querySelector(`input[name="text_slide[${field}]"]:checked`)?.value || "center"

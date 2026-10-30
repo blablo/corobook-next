@@ -56,10 +56,12 @@ class TextSlideEditorTest < ApplicationSystemTestCase
     visit edit_text_slide_path(slide)
 
     assert_selector "[data-role=projector-slide].slide-align-center.slide-valign-center"
+    find("[data-role=slide-section-position] summary").click
     find("[data-role=slide-text-align] input[value=right]").click
     find("[data-role=slide-vertical-align] input[value=bottom]").click
     assert_selector "[data-role=projector-slide].slide-align-right.slide-valign-bottom"
     assert_selector "[data-role=slide-text-align] input[value=right].btn-primary"
+    assert_selector "[data-role=slide-summary-position]", text: "Right, Bottom"
 
     click_on "Save changes"
     assert_text "Slide updated."
@@ -71,6 +73,11 @@ class TextSlideEditorTest < ApplicationSystemTestCase
     slide = @church.text_slides.create!(title: "Aviso", pages: [ { "body_markdown" => "Hola" } ], reusable: true)
     visit edit_text_slide_path(slide)
 
+    # Appearance sections start collapsed, below the content, each showing its current choice.
+    assert_no_selector "[data-role=slide-bg-color]", visible: true
+    assert_selector "[data-role=slide-summary-background]", text: "Solid colour"
+    find("[data-role=slide-section-background] summary").click
+
     # Solid mode: only the background colour shows; gradient fields are hidden.
     assert_selector "[data-role=slide-bg-color]", visible: true
     assert_no_selector "[data-role=slide-bg-color2]", visible: true
@@ -81,7 +88,10 @@ class TextSlideEditorTest < ApplicationSystemTestCase
       const set = (role, v) => { const el = document.querySelector(`[data-role=${role}]`); el.value = v; el.dispatchEvent(new Event("input", { bubbles: true })) }
       set("slide-bg-color", "#112233"); set("slide-bg-color2", "#445566"); set("slide-text-color", "#ffee00")
     JS
+    assert_selector "[data-role=slide-summary-background]", text: "Gradient"
+    find("[data-role=slide-section-text] summary").click
     select "Serif", from: "Font"
+    assert_selector "[data-role=slide-summary-text]", text: "Serif, auto size"
 
     stage = find("[data-slide-editor-target=previewStage]")
     assert_includes stage[:style], "linear-gradient"
