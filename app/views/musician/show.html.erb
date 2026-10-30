@@ -1,11 +1,13 @@
-<%= turbo_stream_from [ @session, :musician ] %>
+<%# @session is nil on the permanent per-service link when the service isn't live: the chart
+    still renders, without the live Now/Next bar or the current-row highlight. %>
+<%= turbo_stream_from [ @session, :musician ] if @session %>
 <div class="musician-root" data-role="musician-root"
-     data-controller="musician-key musician-follow"
-     data-musician-key-token-value="<%= @session.musician_token %>">
+     data-controller="musician-key<%= ' musician-follow' if @session %>"
+     data-musician-key-token-value="<%= @key_scope %>">
 
   <%# ── Top bar: set name + key/capo chooser ─────────────────────────── %>
   <div class="musician-topbar">
-    <div class="musician-setname" data-role="set-name"><%= @session.service_set.name %></div>
+    <div class="musician-setname" data-role="set-name"><%= @service_set.name %></div>
     <form class="musician-key-chooser" data-action="change->musician-key#choose">
       <label><%= t("live.musician.key") %>
         <input type="text" name="key" value="<%= @target_key %>" data-role="key-input"
@@ -18,6 +20,11 @@
     </form>
   </div>
 
+  <% unless @session %>
+    <p class="musician-not-live" data-role="not-live">
+      <%= @service_set.service_date ? t("live.musician.not_live_dated", date: @service_set.service_date.strftime(t("live.musician.date_format"))) : t("live.musician.not_live") %>
+    </p>
+  <% else %>
   <%# ── Above the fold: what the projector is on NOW + a peek at NEXT ──── %>
   <div class="musician-nowbar" data-role="now-bar">
     <div class="musician-now">
@@ -34,12 +41,13 @@
       </div>
     <% end %>
   </div>
+  <% end %>
 
   <%# ── The whole set, in order, at this musician's key ───────────────── %>
   <div class="musician-setlist" data-role="set-list">
     <% last_item_id = nil %>
     <% @set_rows.each do |row| %>
-      <% current = musician_current_row?(row, @session) %>
+      <% current = @session && musician_current_row?(row, @session) %>
       <section class="musician-row<%= ' is-current' if current %>"
                id="row-<%= row.item_id %>-<%= row.section_index %>"
                data-role="set-row"

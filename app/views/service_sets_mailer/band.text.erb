@@ -1,0 +1,19 @@
+<%= t("service_sets_mailer.band.greeting") %>
+
+<%= t("service_sets_mailer.band.intro_text", sender: @sender.email, name: @service_set.name) %>
+<% if @date %><%= t("service_sets_mailer.band.date", date: @date) %>
+<% end %>
+<% if @items.empty? %>
+<%= t("service_sets_mailer.band.empty") %>
+<% else %>
+<% @items.each_with_index do |item, i| %>
+<%= i + 1 %>. <% if item.missing? %><%= t("service_sets_mailer.band.missing") %><% else %><%= item.resolved_title %><% if item.item_type == "song" && item.song.song_key.present? %> (<%= t("service_sets_mailer.band.key", key: item.song.song_key) %>)<% elsif item.item_type == "text_slide" %> (<%= t("service_sets_mailer.band.slide") %>)<% end %><% end %>
+<% end %>
+<% end %>
+
+<%= t("service_sets_mailer.band.musician_cta") %>:
+<%= @musician_url %>
+<%= t("service_sets_mailer.band.musician_hint") %>
+
+<%= t("service_sets_mailer.band.cta") %>:
+<%= @url %>

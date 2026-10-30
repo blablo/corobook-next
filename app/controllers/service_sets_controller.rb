@@ -2,7 +2,7 @@ class ServiceSetsController < ApplicationController
   layout "shell"
   before_action :require_sign_in
   before_action :require_editor, except: %i[index show preview print]
-  before_action :set_service_set, only: %i[show edit update destroy add_item reorder remove_item library preview print]
+  before_action :set_service_set, only: %i[show edit update destroy add_item reorder remove_item library preview print send_to_band]
 
   def index
     sets = church_scope(:service_sets)
@@ -27,6 +27,23 @@ class ServiceSetsController < ApplicationController
     # For the "New slide" modal, which renders the full text_slides/_form editor.
     @new_slide = church_scope(:text_slides).build(reusable: true, pages: [ { "body_markdown" => "" } ])
     @church_slide_tags = church_scope(:text_slides).pluck(:tags).flatten.uniq.sort
+    @band = church_scope(:users).band.order(:email).to_a
+  end
+
+  # Email the planned service to every Band member (Team page), one message each.
+  def send_to_band
+    band = church_scope(:users).band.to_a
+    if band.empty?
+      return redirect_to service_set_path(@service_set), alert: t("services.send_to_band.no_band")
+    end
+    if @service_set.set_items.none?
+      return redirect_to service_set_path(@service_set), alert: t("services.send_to_band.no_items")
+    end
+
+    band.each do |member|
+      ServiceSetsMailer.band(@service_set, member, current_user, I18n.locale.to_s).deliver_later
+    end
+    redirect_to service_set_path(@service_set), notice: t("services.send_to_band.sent", count: band.size)
   end
 
   # A one-page, read-through of the whole set in order — every song's sections and every slide,

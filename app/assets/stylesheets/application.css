@@ -237,6 +237,11 @@
 .musician-chart-annotation,
 .musician-annotation { font-style: italic; color: #6b7280; }
 .musician-empty { color: #6b7280; padding: 2rem 1.25rem; text-align: center; }
+/* Permanent per-service link while the service isn't live: a calm note instead of the live band. */
+.musician-not-live {
+  margin: 0 0 1.25rem; padding: 0.75rem 1.25rem;
+  background: #f4f5f7; border-bottom: 1px solid #e5e7eb; color: #4a5059; font-size: 0.95rem;
+}
 
 /* The live frame still carries dark-stage classes on the projector; keep the shared chord
    float technique working there. The musician's live frame is recolored above. */

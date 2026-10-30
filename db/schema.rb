@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_23_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_30_150000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -124,7 +124,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_23_150000) do
     t.date "service_date"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "musician_token"
     t.index ["church_id", "service_date"], name: "index_service_sets_on_church_id_and_service_date"
+    t.index ["musician_token"], name: "index_service_sets_on_musician_token", unique: true
   end
 
   create_table "set_items", force: :cascade do |t|
@@ -211,6 +213,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_23_150000) do
     t.string "confirmation_token_digest"
     t.datetime "confirmation_sent_at"
     t.string "locale"
+    t.boolean "band_member", default: false, null: false
     t.index ["church_id", "email"], name: "index_users_on_church_id_and_email", unique: true
     t.index ["confirmation_token_digest"], name: "index_users_on_confirmation_token_digest", unique: true, where: "(confirmation_token_digest IS NOT NULL)"
     t.check_constraint "locale IS NULL OR (locale::text = ANY (ARRAY['en'::character varying::text, 'es'::character varying::text]))", name: "users_locale_check"

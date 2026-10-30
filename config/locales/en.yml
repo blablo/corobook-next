@@ -126,6 +126,14 @@ en:
       no_date: "No date set"
       live_badge: "● This service is live"
       preview: "Preview"
+      send_to_band: "Send to band"
+      send_to_band_title: "Send to band"
+      send_to_band_body_html:
+        one: "%{name} will be emailed to %{count} band member:"
+        other: "%{name} will be emailed to %{count} band members:"
+      send_to_band_confirm_button: "Send email"
+      send_to_band_no_band: "No one is in the band yet. An admin can add members in Team."
+      send_to_band_no_items: "Add songs or slides before sending."
       resume: "Resume"
       go_live: "Go live"
       takeover_title: "End the current service?"
@@ -169,6 +177,12 @@ en:
       key: "Key %{key}"
       untitled_slide: "Untitled slide"
       page_of: "page %{page} of %{total}"
+    send_to_band:
+      sent:
+        one: "Service sent to %{count} band member."
+        other: "Service sent to %{count} band members."
+      no_band: "No one is in the band yet. An admin can add members in Team."
+      no_items: "Add songs or slides before sending."
 
   slides:
     index:
@@ -385,6 +399,9 @@ en:
       next: "Next"
       key_badge: "Key %{key}"
       empty: "This set has no items yet."
+      not_live: "This service isn't live right now. Reload this page when it starts to follow along."
+      not_live_dated: "This service isn't live yet (%{date}). Reload this page when it starts to follow along."
+      date_format: "%A, %B %-d"
     frame:
       service_ended: "The service has ended."
       key_badge: "Key %{key}"
@@ -475,3 +492,30 @@ en:
       resend: "Resend"
       revoke: "Revoke"
       revoke_confirm: "Revoke the invite to %{email}?"
+      band: "Band"
+      band_hint: "Members in the band will receive the planned service by email."
+      band_empty: "No one is in the band yet. Turn on Band for a member below."
+      th_band: "Band"
+      band_toggle: "%{email} is in the band"
+      save: "Save"
+  members:
+    band:
+      added: "%{email} added to the band."
+      removed: "%{email} removed from the band."
+  service_sets_mailer:
+    band:
+      subject: "%{church}: %{name}"
+      date_format: "%A, %B %-d, %Y"
+      greeting: "Hi,"
+      intro_html: "%{sender} shared the plan for %{name}."
+      intro_text: "%{sender} shared the plan for %{name}."
+      date: "Date: %{date}"
+      key: "key %{key}"
+      slide: "slide"
+      missing: "(removed item)"
+      empty: "This service has no items yet."
+      cta: "Open the full service"
+      paste_link: "Or paste this link into your browser:"
+      musician_cta: "Open the musician view"
+      musician_hint: "Use it to rehearse during the week. When the service goes live, the same link follows along with the projector. No sign-in needed."
+      preview_html: "Signed in to Corobook? %{link}."

@@ -17,6 +17,16 @@ class MembersController < ApplicationController
     end
   end
 
+  # Add a member to (or remove them from) the church's Band.
+  def band
+    member = find_in_church(:users, params[:id])
+    in_band = ActiveModel::Type::Boolean.new.cast(params[:band_member])
+
+    member.update!(band_member: in_band)
+    key = in_band ? "members.band.added" : "members.band.removed"
+    redirect_to team_path, notice: t(key, email: member.email)
+  end
+
   def destroy
     member = find_in_church(:users, params[:id])
 
