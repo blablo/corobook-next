@@ -126,6 +126,14 @@ es:
       no_date: "Sin fecha"
       live_badge: "● Este servicio está en vivo"
       preview: "Vista previa"
+      send_to_band: "Enviar a la banda"
+      send_to_band_title: "Enviar a la banda"
+      send_to_band_body_html:
+        one: "Se enviará %{name} por correo a %{count} miembro de la banda:"
+        other: "Se enviará %{name} por correo a %{count} miembros de la banda:"
+      send_to_band_confirm_button: "Enviar correo"
+      send_to_band_no_band: "Todavía no hay nadie en la banda. Un administrador puede agregar miembros en Equipo."
+      send_to_band_no_items: "Agrega canciones o diapositivas antes de enviar."
       resume: "Reanudar"
       go_live: "Transmitir en vivo"
       takeover_title: "¿Terminar el servicio actual?"
@@ -169,6 +177,12 @@ es:
       key: "Tono %{key}"
       untitled_slide: "Diapositiva sin título"
       page_of: "página %{page} de %{total}"
+    send_to_band:
+      sent:
+        one: "Servicio enviado a %{count} miembro de la banda."
+        other: "Servicio enviado a %{count} miembros de la banda."
+      no_band: "Todavía no hay nadie en la banda. Un administrador puede agregar miembros en Equipo."
+      no_items: "Agrega canciones o diapositivas antes de enviar."
 
   slides:
     index:
@@ -385,6 +399,9 @@ es:
       next: "Siguiente"
       key_badge: "Tono %{key}"
       empty: "Este servicio aún no tiene elementos."
+      not_live: "Este servicio no está en vivo ahora. Recarga esta página cuando empiece para seguirlo."
+      not_live_dated: "Este servicio todavía no está en vivo (%{date}). Recarga esta página cuando empiece para seguirlo."
+      date_format: "%d/%m/%Y"
     frame:
       service_ended: "El servicio ha finalizado."
       key_badge: "Tono %{key}"
@@ -475,3 +492,30 @@ es:
       resend: "Reenviar"
       revoke: "Revocar"
       revoke_confirm: "¿Revocar la invitación a %{email}?"
+      band: "Banda"
+      band_hint: "Los miembros de la banda recibirán el servicio planificado por correo."
+      band_empty: "Todavía no hay nadie en la banda. Activa Banda para un miembro abajo."
+      th_band: "Banda"
+      band_toggle: "%{email} está en la banda"
+      save: "Guardar"
+  members:
+    band:
+      added: "%{email} agregado a la banda."
+      removed: "%{email} quitado de la banda."
+  service_sets_mailer:
+    band:
+      subject: "%{church}: %{name}"
+      date_format: "%d/%m/%Y"
+      greeting: "Hola:"
+      intro_html: "%{sender} compartió el plan de %{name}."
+      intro_text: "%{sender} compartió el plan de %{name}."
+      date: "Fecha: %{date}"
+      key: "tono %{key}"
+      slide: "diapositiva"
+      missing: "(elemento eliminado)"
+      empty: "Este servicio todavía no tiene elementos."
+      cta: "Abrir el servicio completo"
+      paste_link: "O pega este enlace en tu navegador:"
+      musician_cta: "Abrir la vista de músico"
+      musician_hint: "Úsala para ensayar durante la semana. Cuando el servicio esté en vivo, el mismo enlace sigue al proyector. No necesitas iniciar sesión."
+      preview_html: "¿Tienes sesión en Corobook? %{link}."

@@ -28,11 +28,27 @@
     <% end %>
   </section>
 
+  <%# --- Band --- %>
+  <section class="mb-8" data-role="band">
+    <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/60 mb-1"><%= t("team.show.band") %></h2>
+    <p class="text-sm text-base-content/60 mb-2"><%= t("team.show.band_hint") %></p>
+    <% band = @members.select(&:band_member?) %>
+    <% if band.empty? %>
+      <p class="text-sm text-base-content/50" data-role="band-empty"><%= t("team.show.band_empty") %></p>
+    <% else %>
+      <div class="flex flex-wrap gap-2">
+        <% band.each do |m| %>
+          <span class="badge badge-soft badge-primary" data-role="band-member"><%= m.email %></span>
+        <% end %>
+      </div>
+    <% end %>
+  </section>
+
   <%# --- Members --- %>
   <section class="mb-8" data-role="members">
     <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/60 mb-2"><%= t("team.show.members") %></h2>
     <table class="table table-sm">
-      <thead><tr><th><%= t("team.show.th_email") %></th><th><%= t("team.show.th_role") %></th><th class="text-right"><%= t("team.show.th_actions") %></th></tr></thead>
+      <thead><tr><th><%= t("team.show.th_email") %></th><th><%= t("team.show.th_role") %></th><th><%= t("team.show.th_band") %></th><th class="text-right"><%= t("team.show.th_actions") %></th></tr></thead>
       <tbody>
         <% @members.each do |member| %>
           <tr data-role="member-row" data-email="<%= member.email %>">
@@ -42,6 +58,16 @@
                 <%= f.select :"user[role]", [ [ t("team.show.role_editor"), "editor" ], [ t("team.show.role_admin"), "admin" ] ],
                       { selected: member.role }, class: "select select-bordered select-xs",
                       onchange: "this.form.requestSubmit()" %>
+              <% end %>
+            </td>
+            <td>
+              <%= form_with url: band_member_path(member), method: :patch, class: "inline" do %>
+                <%= hidden_field_tag :band_member, "0", id: nil %>
+                <%= check_box_tag :band_member, "1", member.band_member?,
+                      id: "band-#{member.id}", class: "toggle toggle-primary toggle-sm",
+                      aria: { label: t("team.show.band_toggle", email: member.email) },
+                      data: { role: "band-toggle" }, onchange: "this.form.requestSubmit()" %>
+                <noscript><%= submit_tag t("team.show.save"), class: "btn btn-xs btn-outline" %></noscript>
               <% end %>
             </td>
             <td class="text-right">

@@ -36,6 +36,8 @@ Rails.application.routes.draw do
   patch "p/:token/advance" => "projector#advance", as: :projector_advance
   patch "p/:token/back"    => "projector#back",    as: :projector_back
   get "m/:token" => "musician#show",  as: :musician
+  # Permanent per-service musician link (emailed to the band): follows live when the service is live.
+  get "m/s/:token" => "musician#service", as: :service_musician
 
   get "reports/usage" => "reports#usage", as: :usage_report
 
@@ -45,7 +47,9 @@ Rails.application.routes.draw do
   resource  :settings, only: [ :show, :update ], controller: "settings" do
     get :projection
   end
-  resources :members, only: [ :update, :destroy ]
+  resources :members, only: [ :update, :destroy ] do
+    member { patch :band }
+  end
   resources :invitations, only: [ :create, :destroy ] do
     member { post :resend }
   end
@@ -62,6 +66,7 @@ Rails.application.routes.draw do
       patch "reorder"
       delete "items/:item_id", to: "service_sets#remove_item", as: :remove_item
       post "launch", to: "live_sessions#create", as: :launch
+      post "send_to_band"
       get "library", to: "service_sets#library", as: :library
     end
   end

@@ -1,0 +1,37 @@
+<p><%= t("service_sets_mailer.band.greeting") %></p>
+
+<p>
+  <%= t("service_sets_mailer.band.intro_html", sender: @sender.email, name: content_tag(:strong, @service_set.name)) %>
+  <% if @date %><br><%= t("service_sets_mailer.band.date", date: @date) %><% end %>
+</p>
+
+<% if @items.empty? %>
+  <p class="muted"><%= t("service_sets_mailer.band.empty") %></p>
+<% else %>
+  <ol>
+    <% @items.each do |item| %>
+      <li>
+        <% if item.missing? %>
+          <em><%= t("service_sets_mailer.band.missing") %></em>
+        <% else %>
+          <%= item.resolved_title %>
+          <% if item.item_type == "song" && item.song.song_key.present? %>
+            <span class="muted">(<%= t("service_sets_mailer.band.key", key: item.song.song_key) %>)</span>
+          <% elsif item.item_type == "text_slide" %>
+            <span class="muted">(<%= t("service_sets_mailer.band.slide") %>)</span>
+          <% end %>
+        <% end %>
+      </li>
+    <% end %>
+  </ol>
+<% end %>
+
+<div class="btn-wrap">
+  <a href="<%= @musician_url %>" class="btn"><%= t("service_sets_mailer.band.musician_cta") %></a>
+</div>
+<p class="muted"><%= t("service_sets_mailer.band.musician_hint") %></p>
+
+<p class="muted"><%= t("service_sets_mailer.band.paste_link") %></p>
+<p><a href="<%= @musician_url %>" class="link-fallback"><%= @musician_url %></a></p>
+
+<p class="muted"><%= t("service_sets_mailer.band.preview_html", link: link_to(t("service_sets_mailer.band.cta"), @url)) %></p>

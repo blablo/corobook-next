@@ -7,6 +7,9 @@ class User < ApplicationRecord
 
   normalizes :email, with: ->(e) { e.strip.downcase }
 
+  # The church's Band: members flagged here receive the planned-service email.
+  scope :band, -> { where(band_member: true) }
+
   validates :email, presence: true, uniqueness: { scope: :church_id, case_sensitive: false }
   # Enforce a minimum password length on set (has_secure_password only requires presence).
   # allow_nil lets an update that does not touch the password through unchanged.

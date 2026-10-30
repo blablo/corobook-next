@@ -12,5 +12,11 @@ class ServiceSet < ApplicationRecord
 
   validates :name, presence: true
 
+  # Permanent musician link (/m/s/:token): works before, during and after a live session, so it
+  # can go out in the band email. View-only, like the per-session musician link.
+  before_create { self.musician_token ||= SecureRandom.urlsafe_base64(24) }
+
+  def active_live_session = live_sessions.active.first
+
   def ordered_items = set_items.includes(:song, :text_slide)
 end

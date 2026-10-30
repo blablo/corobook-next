@@ -170,4 +170,44 @@ class TeamManagementTest < ActionDispatch::IntegrationTest
     delete member_path(other_user)
     assert_response :not_found
   end
+
+  # --- Band ---
+
+  test "admin adds a member to the band and removes them" do
+    login(@admin)
+    patch band_member_path(@editor), params: { band_member: "1" }
+    assert_redirected_to team_path
+    assert @editor.reload.band_member?
+    assert_equal [ @editor ], @church.users.band.to_a
+
+    get team_path
+    assert_select "[data-role=band-member]", text: "editor@example.com"
+
+    patch band_member_path(@editor), params: { band_member: "0" }
+    assert_not @editor.reload.band_member?
+    get team_path
+    assert_select "[data-role=band-empty]"
+  end
+
+  test "band toggle does not touch the member's role" do
+    login(@admin)
+    patch band_member_path(@admin), params: { band_member: "1" }
+    assert @admin.reload.band_member?
+    assert_equal "admin", @admin.role
+  end
+
+  test "editor cannot change the band" do
+    login(@editor)
+    patch band_member_path(@editor), params: { band_member: "1" }
+    assert_redirected_to login_path
+    assert_not @editor.reload.band_member?
+  end
+
+  test "cross-church band toggle is a 404" do
+    other_user = User.create!(church: @other, email: "ou2@other.com", password: "secret123", role: "editor")
+    login(@admin)
+    patch band_member_path(other_user), params: { band_member: "1" }
+    assert_response :not_found
+    assert_not other_user.reload.band_member?
+  end
 end
