@@ -5,7 +5,7 @@ import { Controller } from "@hotwired/stimulus"
 // reorder/remove work with this controller absent (Req 7.3). Native Drag and Drop API, no deps.
 export default class extends Controller {
   static targets = ["program", "query", "results", "announce", "tabs", "tab",
-    "pickerPane", "fallback", "newSlideModal", "newSlideBody"]
+    "pickerPane", "fallback", "newSlideModal", "newSlideBody", "newSlideButton"]
   static values = { reorderUrl: String, addUrl: String, libraryUrl: String, slideCreateUrl: String, canEdit: Boolean }
 
   connect() {
@@ -19,8 +19,18 @@ export default class extends Controller {
 
   // ---- tabs ----
   switchTab(e) {
-    this.kind = e.currentTarget.dataset.kind
-    this.tabTargets.forEach(t => t.classList.toggle("tab-active", t === e.currentTarget))
+    const kind = e.currentTarget.dataset.kind
+    if (!kind) return
+    this.kind = kind
+    this.tabTargets.forEach(t => {
+      const active = t === e.currentTarget
+      t.classList.toggle("tab-active", active)
+      t.setAttribute("aria-selected", active ? "true" : "false")
+    })
+    if (this.hasNewSlideButtonTarget) this.newSlideButtonTarget.classList.toggle("hidden", kind !== "slide")
+    // Clear stale results immediately so the previous tab's list can never linger
+    // if the new fetch is slow or fails.
+    if (this.hasResultsTarget) this.resultsTarget.innerHTML = ""
     this.search()
   }
 
@@ -31,10 +41,26 @@ export default class extends Controller {
   }
   async runSearch() {
     const q = this.hasQueryTarget ? this.queryTarget.value : ""
-    const url = `${this.libraryUrlValue}?kind=${this.kind}&q=${encodeURIComponent(q)}`
-    let rows = []
-    try { rows = await (await fetch(url, { headers: { Accept: "application/json" } })).json() }
-    catch { return }
+    const kind = this.kind
+    // Merge into the existing query string: the URL helper may already carry ?locale=es,
+    // and appending a second "?" made Rails read kind as part of the locale value.
+    const url = this.urlWith(this.libraryUrlValue, "", { kind, q })
+    // Tag this request so a slow earlier response can't overwrite a newer one.
+    const seq = (this._seq = (this._seq || 0) + 1)
+    let rows
+    try {
+      const res = await fetch(url, { headers: { Accept: "application/json" }, cache: "no-store" })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      rows = await res.json()
+    } catch {
+      if (seq === this._seq && kind === this.kind) {
+        this.resultsTarget.innerHTML =
+          `<p class="text-sm text-error px-1 py-2">Couldn't load ${kind === "slide" ? "slides" : "songs"}. Try again.</p>`
+      }
+      return
+    }
+    // Ignore a response that lost the race to a newer request/tab switch.
+    if (seq !== this._seq || kind !== this.kind) return
     this.renderResults(rows, q)
   }
   renderResults(rows, q) {
@@ -179,7 +205,7 @@ export default class extends Controller {
     const id = row.dataset.itemId
     const next = row.nextElementSibling, parent = row.parentNode
     row.remove(); this.renumber(); this.updateCount()
-    const res = await fetch(`${this.addUrlValue.replace(/\/items$/, "")}/items/${id}`, {
+    const res = await fetch(this.urlWith(this.addUrlValue, `/${encodeURIComponent(id)}`), {
       method: "DELETE", headers: this.headers()
     })
     if (!res.ok && res.status !== 204) {
@@ -190,6 +216,14 @@ export default class extends Controller {
   }
 
   // ---- helpers ----
+  // Append a path suffix and query params to a server-generated URL, keeping any query
+  // it already has (e.g. ?locale=es).
+  urlWith(base, pathSuffix = "", params = {}) {
+    const u = new URL(base, window.location.origin)
+    if (pathSuffix) u.pathname = u.pathname.replace(/\/$/, "") + pathSuffix
+    Object.entries(params).forEach(([k, v]) => u.searchParams.set(k, v ?? ""))
+    return u.pathname + u.search
+  }
   replaceProgram(items) {
     this.programTarget.innerHTML = ""
     items.forEach(i => this.appendRow(i))

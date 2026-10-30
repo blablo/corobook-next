@@ -98,14 +98,15 @@
           <div class="card-body p-4">
           <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50 mb-3"><%= t("services.show.add_to_service") %></h2>
 
-          <div class="flex items-center justify-between gap-2 mb-3">
-            <div role="tablist" class="tabs tabs-box tabs-sm" data-set-builder-target="tabs">
-              <button type="button" class="tab tab-active" data-set-builder-target="tab" data-kind="song" data-action="set-builder#switchTab"><%= t("services.show.songs") %></button>
-              <button type="button" class="tab" data-set-builder-target="tab" data-kind="slide" data-action="set-builder#switchTab"><%= t("services.show.slides") %></button>
-            </div>
-            <% if can_edit? %>
-              <button type="button" class="btn btn-sm btn-ghost text-primary gap-1 shrink-0" data-action="set-builder#openNewSlide"><%= t("services.show.new_slide") %></button>
-            <% end %>
+          <div role="tablist" class="tabs tabs-border w-full mb-3" data-set-builder-target="tabs">
+            <button type="button" role="tab" aria-selected="true" class="tab tab-active flex-1 gap-1.5"
+                    data-set-builder-target="tab" data-kind="song" data-action="set-builder#switchTab">
+              <span aria-hidden="true">♪</span><%= t("services.show.songs") %>
+            </button>
+            <button type="button" role="tab" aria-selected="false" class="tab flex-1 gap-1.5"
+                    data-set-builder-target="tab" data-kind="slide" data-action="set-builder#switchTab">
+              <span aria-hidden="true">▤</span><%= t("services.show.slides") %>
+            </button>
           </div>
 
           <%# Search picker (songs + slides) — enhanced; falls back to the native forms below with JS off %>
@@ -115,6 +116,9 @@
                    class="input input-bordered input-sm w-full mb-2"
                    data-set-builder-target="query" data-action="input->set-builder#search">
             <div class="flex flex-col gap-1 max-h-72 overflow-y-auto" data-set-builder-target="results"></div>
+            <%# Only relevant on the Slides tab; the controller toggles it with the tab. %>
+            <button type="button" class="btn btn-sm btn-ghost text-primary w-full mt-2 hidden"
+                    data-set-builder-target="newSlideButton" data-action="set-builder#openNewSlide"><%= t("services.show.new_slide") %></button>
           </div>
 
           <%# ── No-JS fallback forms (Req 7.3). Hidden when the controller connects. ── %>
