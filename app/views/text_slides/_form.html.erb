@@ -17,23 +17,72 @@
             <%= f.text_field :title, class: "input w-full", placeholder: t("slides.form.title_placeholder") %>
           </fieldset>
 
-          <%# Background image (projection only) %>
-          <fieldset class="fieldset">
-            <%= f.label :background_image, t("slides.form.background_label"), class: "fieldset-legend" %>
-            <% if text_slide.background_image? %>
-              <div class="flex items-center gap-3" data-role="slide-bg-current">
-                <%= image_tag rails_blob_path(text_slide.background_image, only_path: true),
-                      class: "h-14 w-24 object-cover rounded border border-base-300", alt: t("slides.form.current_background_alt") %>
-                <label class="label">
-                  <%= f.check_box :remove_background_image, { class: "checkbox checkbox-sm" }, "1", "0" %>
-                  <%= t("slides.form.remove") %>
-                </label>
+          <%# Projection look (all pages): the same options as Song projection. The slide editor
+              updates the preview live and shows only the fields the background type uses. %>
+          <div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2" data-role="slide-look">
+            <fieldset class="fieldset sm:col-span-2">
+              <legend class="fieldset-legend"><%= t("slides.form.background_label") %></legend>
+              <div class="join w-full" role="radiogroup" data-role="slide-bg-type"
+                   data-action="change->slide-editor#updateLook">
+                <% Church::BG_TYPE_OPTIONS.each do |value| %>
+                  <%= f.radio_button :bg_type, value,
+                        class: "join-item btn btn-sm flex-1 #{'btn-primary' if text_slide.bg_type == value}",
+                        aria: { label: t("slides.form.bg_type.#{value}") } %>
+                <% end %>
               </div>
-            <% end %>
-            <%= f.file_field :background_image, accept: "image/png,image/jpeg,image/webp,image/gif",
-                  class: "file-input w-full" %>
-            <p class="label whitespace-normal"><%= t("slides.form.background_help_html") %></p>
-          </fieldset>
+            </fieldset>
+
+            <fieldset class="fieldset" data-look-for="solid gradient">
+              <%= f.label :bg_color, t("slides.form.bg_color"), class: "fieldset-legend" %>
+              <%= f.color_field :bg_color, class: "input h-10 w-full p-1",
+                    data: { role: "slide-bg-color", action: "input->slide-editor#updateLook" } %>
+            </fieldset>
+
+            <fieldset class="fieldset" data-look-for="gradient">
+              <%= f.label :bg_color2, t("slides.form.bg_color2"), class: "fieldset-legend" %>
+              <%= f.color_field :bg_color2, class: "input h-10 w-full p-1",
+                    data: { role: "slide-bg-color2", action: "input->slide-editor#updateLook" } %>
+            </fieldset>
+
+            <fieldset class="fieldset sm:col-span-2" data-look-for="gradient">
+              <%= f.label :bg_gradient_angle, t("slides.form.bg_gradient_angle"), class: "fieldset-legend" %>
+              <label class="input flex items-center gap-2 w-full">
+                <%= f.range_field :bg_gradient_angle, min: 0, max: 360, step: 5, class: "range range-sm grow",
+                      data: { role: "slide-bg-angle", action: "input->slide-editor#updateLook" } %>
+                <span class="text-base-content/60 text-sm whitespace-nowrap" data-role="slide-bg-angle-label"><%= text_slide.bg_gradient_angle %>°</span>
+              </label>
+            </fieldset>
+
+            <fieldset class="fieldset sm:col-span-2" data-look-for="image">
+              <%= f.label :background_image, t("slides.form.background_image_label"), class: "fieldset-legend" %>
+              <% if text_slide.background_image.attached? %>
+                <div class="flex items-center gap-3" data-role="slide-bg-current">
+                  <%= image_tag rails_blob_path(text_slide.background_image, only_path: true),
+                        class: "h-14 w-24 object-cover rounded border border-base-300", alt: t("slides.form.current_background_alt") %>
+                  <label class="label">
+                    <%= f.check_box :remove_background_image, { class: "checkbox checkbox-sm" }, "1", "0" %>
+                    <%= t("slides.form.remove") %>
+                  </label>
+                </div>
+              <% end %>
+              <%= f.file_field :background_image, accept: "image/png,image/jpeg,image/webp,image/gif",
+                    class: "file-input w-full",
+                    data: { role: "slide-bg-image", action: "change->slide-editor#previewImage" } %>
+              <p class="label whitespace-normal"><%= t("slides.form.background_help_html") %></p>
+            </fieldset>
+
+            <fieldset class="fieldset">
+              <%= f.label :text_color, t("slides.form.text_color"), class: "fieldset-legend" %>
+              <%= f.color_field :text_color, class: "input h-10 w-full p-1",
+                    data: { role: "slide-text-color", action: "input->slide-editor#updateLook" } %>
+            </fieldset>
+
+            <fieldset class="fieldset">
+              <%= f.label :font, t("slides.form.font_label"), class: "fieldset-legend" %>
+              <%= f.select :font, Church::FONT_OPTIONS.map { |v| [ t("settings.projection.font_#{v}"), v ] }, {},
+                    class: "select w-full", data: { role: "slide-font", action: "change->slide-editor#updateLook" } %>
+            </fieldset>
+          </div>
 
           <%# Font size (all pages). Auto scales the text to fit the screen. %>
           <fieldset class="fieldset">
@@ -44,6 +93,33 @@
                   data: { role: "slide-font-size", action: "change->slide-editor#setFontSize" } %>
             <p class="label whitespace-normal"><%= t("slides.form.font_size_help") %></p>
           </fieldset>
+
+          <%# Text position on screen (all pages): two segmented radio groups, same pattern as the
+              projection background-type control. The slide editor moves the preview live. %>
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <fieldset class="fieldset">
+              <legend class="fieldset-legend"><%= t("slides.form.text_align_label") %></legend>
+              <div class="join w-full" role="radiogroup" data-role="slide-text-align"
+                   data-action="change->slide-editor#setAlignment">
+                <% TextSlide::TEXT_ALIGN_OPTIONS.each do |value| %>
+                  <%= f.radio_button :text_align, value,
+                        class: "join-item btn btn-sm flex-1 #{'btn-primary' if text_slide.text_align == value}",
+                        aria: { label: t("slides.form.text_align.#{value}") } %>
+                <% end %>
+              </div>
+            </fieldset>
+            <fieldset class="fieldset">
+              <legend class="fieldset-legend"><%= t("slides.form.vertical_align_label") %></legend>
+              <div class="join w-full" role="radiogroup" data-role="slide-vertical-align"
+                   data-action="change->slide-editor#setAlignment">
+                <% TextSlide::VERTICAL_ALIGN_OPTIONS.each do |value| %>
+                  <%= f.radio_button :vertical_align, value,
+                        class: "join-item btn btn-sm flex-1 #{'btn-primary' if text_slide.vertical_align == value}",
+                        aria: { label: t("slides.form.vertical_align.#{value}") } %>
+                <% end %>
+              </div>
+            </fieldset>
+          </div>
 
           <%# Tags %>
           <fieldset class="fieldset">
@@ -103,14 +179,18 @@
               and operator use, so what you see while editing matches what projects. ───── %>
         <div class="lg:sticky lg:top-4 min-w-0">
           <div class="text-xs font-semibold uppercase tracking-wide text-base-content/50 mb-2"><%= t("slides.form.preview_label") %> <span data-slide-editor-target="previewLabel"></span></div>
-          <div class="projector-preview rounded-box overflow-hidden" data-slide-editor-target="previewStage">
-            <% if text_slide.background_image? %>
-              <div class="projector-slide-bg" data-role="slide-bg"
-                   style="background-image: url('<%= rails_blob_path(text_slide.background_image, only_path: true) %>');">
-                <div class="projector-slide-scrim"></div>
-              </div>
-            <% end %>
-            <div class="projector-slide<%= ' has-bg' if text_slide.background_image? %>" data-controller="fit" data-role="projector-slide"
+          <div class="projector-preview rounded-box overflow-hidden" data-slide-editor-target="previewStage"
+               style="<%= text_slide.projector_style %>">
+            <%# Always present so the editor can switch to Image mode (or preview a new upload) live;
+                hidden unless the slide is showing an image. %>
+            <div class="projector-slide-bg<%= ' hidden' unless text_slide.background_image? %>" data-role="slide-bg"
+                 data-slide-editor-target="previewBg"
+                 data-current-url="<%= rails_blob_path(text_slide.background_image, only_path: true) if text_slide.background_image.attached? %>"
+                 style="<%= "background-image: url('#{rails_blob_path(text_slide.background_image, only_path: true)}');" if text_slide.background_image.attached? %>">
+              <div class="projector-slide-scrim"></div>
+            </div>
+            <div class="projector-slide <%= text_slide.alignment_classes %><%= ' has-bg' if text_slide.background_image? %>" data-controller="fit" data-role="projector-slide"
+                 data-slide-editor-target="previewSlide"
                  data-fit-fixed-value="<%= text_slide.font_size.to_i %>">
               <div class="projector-slide-body" data-fit-target="content" data-slide-editor-target="preview" data-role="slide-preview"></div>
             </div>

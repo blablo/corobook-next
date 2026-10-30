@@ -17,8 +17,22 @@ class FollowerViewsTest < ActionDispatch::IntegrationTest
     assert_select "[data-role=projector-lyrics]", text: /Hola mundo/
   end
 
+  test "a text slide's own colours and font reach the projector frame" do
+    slide = @church.text_slides.create!(title: "Aviso", bg_type: "gradient", bg_color: "#112233",
+                                        bg_color2: "#445566", bg_gradient_angle: 90, text_color: "#ffee00",
+                                        font: "serif", pages: [ { "body_markdown" => "Hola" } ])
+    item = @set.set_items.create!(position: 1, item_type: "text_slide", text_slide: slide)
+    @session.update!(current_set_item_id: item.id, current_section_index: 0)
+
+    get projector_path(@session.projector_token)
+    style = css_select("#live-frame").first["style"]
+    assert_includes style, "--proj-bg: linear-gradient(90deg, #112233, #445566)"
+    assert_includes style, "--proj-text: #ffee00"
+    assert_includes style, "Georgia"
+  end
+
   test "a text slide with a background image renders it on the projector" do
-    slide = @church.text_slides.create!(title: "Aviso", pages: [ { "body_markdown" => "Bienvenidos" } ])
+    slide = @church.text_slides.create!(title: "Aviso", bg_type: "image", pages: [ { "body_markdown" => "Bienvenidos" } ])
     slide.background_image.attach(io: File.open(Rails.root.join("test/fixtures/files/bg.png")),
                                   filename: "bg.png", content_type: "image/png")
     item = @set.set_items.create!(position: 1, item_type: "text_slide", text_slide: slide)
@@ -48,6 +62,16 @@ class FollowerViewsTest < ActionDispatch::IntegrationTest
     get projector_path(@session.projector_token)
     assert_response :success
     assert_select "[data-role=projector-slide][data-fit-fixed-value='12']"
+  end
+
+  test "a text slide's alignment reaches the projector" do
+    slide = @church.text_slides.create!(title: "Aviso", text_align: "left", vertical_align: "top",
+                                        pages: [ { "body_markdown" => "Hola" } ])
+    item = @set.set_items.create!(position: 1, item_type: "text_slide", text_slide: slide)
+    @session.update!(current_set_item_id: item.id, current_section_index: 0)
+
+    get projector_path(@session.projector_token)
+    assert_select "[data-role=projector-slide].slide-align-left.slide-valign-top"
   end
 
   test "an auto-size text slide renders fixed value 0 (auto-fit)" do

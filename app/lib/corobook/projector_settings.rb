@@ -48,15 +48,20 @@ module Corobook
     # In image mode the base stays black: the image is drawn as a separate cover layer (with a
     # scrim) by the frame, and black is the safe fallback if it fails to load.
     def background_css
-      if church.projector_bg_type == "gradient"
-        "linear-gradient(#{church.projector_bg_gradient_angle}deg, " \
-          "#{church.projector_bg_color}, #{church.projector_bg_color2})"
-      elsif church.projector_bg_type == "image"
-        "#000000"
-      else
-        church.projector_bg_color
+      self.class.background_css(church.projector_bg_type, church.projector_bg_color,
+                                church.projector_bg_color2, church.projector_bg_gradient_angle)
+    end
+
+    # Shared with text slides, which offer the same background options per slide.
+    def self.background_css(type, color, color2, angle)
+      case type
+      when "gradient" then "linear-gradient(#{angle}deg, #{color}, #{color2})"
+      when "image" then "#000000"
+      else color
       end
     end
+
+    def self.font_stack(font) = FONT_STACKS.fetch(font, FONT_STACKS["sans"])
 
     # True when song slides should show the church's attached background image.
     def background_image? = church.projection_background_image?

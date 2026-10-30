@@ -51,6 +51,50 @@ class TextSlideEditorTest < ApplicationSystemTestCase
     assert_includes slide.page_markdown(1), "Jesucristo"
   end
 
+  test "choosing text alignment moves the preview and is saved" do
+    slide = @church.text_slides.create!(title: "Aviso", pages: [ { "body_markdown" => "Hola" } ], reusable: true)
+    visit edit_text_slide_path(slide)
+
+    assert_selector "[data-role=projector-slide].slide-align-center.slide-valign-center"
+    find("[data-role=slide-text-align] input[value=right]").click
+    find("[data-role=slide-vertical-align] input[value=bottom]").click
+    assert_selector "[data-role=projector-slide].slide-align-right.slide-valign-bottom"
+    assert_selector "[data-role=slide-text-align] input[value=right].btn-primary"
+
+    click_on "Save changes"
+    assert_text "Slide updated."
+    slide.reload
+    assert_equal [ "right", "bottom" ], [ slide.text_align, slide.vertical_align ]
+  end
+
+  test "the slide look (gradient, text colour, font) previews live and is saved" do
+    slide = @church.text_slides.create!(title: "Aviso", pages: [ { "body_markdown" => "Hola" } ], reusable: true)
+    visit edit_text_slide_path(slide)
+
+    # Solid mode: only the background colour shows; gradient fields are hidden.
+    assert_selector "[data-role=slide-bg-color]", visible: true
+    assert_no_selector "[data-role=slide-bg-color2]", visible: true
+
+    find("[data-role=slide-bg-type] input[value=gradient]").click
+    assert_selector "[data-role=slide-bg-color2]", visible: true
+    page.execute_script(<<~JS)
+      const set = (role, v) => { const el = document.querySelector(`[data-role=${role}]`); el.value = v; el.dispatchEvent(new Event("input", { bubbles: true })) }
+      set("slide-bg-color", "#112233"); set("slide-bg-color2", "#445566"); set("slide-text-color", "#ffee00")
+    JS
+    select "Serif", from: "Font"
+
+    stage = find("[data-slide-editor-target=previewStage]")
+    assert_includes stage[:style], "linear-gradient"
+    assert_includes stage[:style], "#ffee00"
+    assert_includes stage[:style], "Georgia"
+
+    click_on "Save changes"
+    assert_text "Slide updated."
+    slide.reload
+    assert_equal %w[gradient #112233 #445566 #ffee00 serif],
+                 [ slide.bg_type, slide.bg_color, slide.bg_color2, slide.text_color, slide.font ]
+  end
+
   test "slides are searchable and filterable by tag" do
     @church.text_slides.create!(title: "Salmo 23", tags: [ "scripture" ], pages: [ { "body_markdown" => "Jehová" } ], reusable: true)
     @church.text_slides.create!(title: "Aviso", tags: [ "announcement" ], pages: [ { "body_markdown" => "Reunión" } ], reusable: true)

@@ -9,7 +9,7 @@
     <div class="projector-slide-scrim"></div>
   </div>
 <% end %>
-<div class="projector-slide<%= ' has-bg' if slide.background_image? %>" data-controller="fit" data-role="projector-slide"
+<div class="projector-slide <%= slide.alignment_classes %><%= ' has-bg' if slide.background_image? %>" data-controller="fit" data-role="projector-slide"
      data-fit-fixed-value="<%= slide.font_size.to_i %>">
   <div data-fit-target="content" class="projector-slide-body">
     <%= raw slide.rendered_html(local_assigns.fetch(:page, 0)) %>

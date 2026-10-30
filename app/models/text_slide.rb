@@ -15,6 +15,33 @@ class TextSlide < ApplicationRecord
 
   validates :font_size, numericality: { only_integer: true, in: 2..30 }, allow_nil: true
 
+  # Where the text sits on the projector screen (all pages). Defaults: centered both ways.
+  TEXT_ALIGN_OPTIONS = %w[left center right].freeze
+  VERTICAL_ALIGN_OPTIONS = %w[top center bottom].freeze
+
+  validates :text_align, inclusion: { in: TEXT_ALIGN_OPTIONS }
+  validates :vertical_align, inclusion: { in: VERTICAL_ALIGN_OPTIONS }
+
+  # CSS classes that place the text on the stage (see .slide-align-* / .slide-valign-*).
+  def alignment_classes = "slide-align-#{text_align} slide-valign-#{vertical_align}"
+
+  # Projection look, the same options as Song projection (Church::*_OPTIONS).
+  validates :bg_type, inclusion: { in: Church::BG_TYPE_OPTIONS }
+  validates :bg_color, :bg_color2, :text_color,
+            format: { with: Church::HEX_COLOR_FORMAT, message: "must be a hex color like #112233" }
+  validates :bg_gradient_angle, numericality: { only_integer: true, in: 0..360 }
+  validates :font, inclusion: { in: Church::FONT_OPTIONS }
+
+  # The --proj-* CSS variables for the stage this slide is shown on (projector #live-frame or a
+  # preview box). Same variables the song look uses, so the frame CSS needs no slide branch.
+  def projector_style
+    {
+      "--proj-bg" => Corobook::ProjectorSettings.background_css(bg_type, bg_color, bg_color2, bg_gradient_angle),
+      "--proj-text" => text_color,
+      "--proj-font" => Corobook::ProjectorSettings.font_stack(font)
+    }.map { |k, v| "#{k}: #{v}" }.join("; ")
+  end
+
   before_validation :normalize_tags_and_pages
   validate :acceptable_background_image
 
@@ -47,8 +74,8 @@ class TextSlide < ApplicationRecord
     Commonmarker.to_html(page_markdown(index).encode("UTF-8"))
   end
 
-  # True when a usable projection background image is attached.
-  def background_image? = background_image.attached?
+  # True when the slide shows its background image: Image mode is chosen and an image is attached.
+  def background_image? = bg_type == "image" && background_image.attached?
 
   private
 

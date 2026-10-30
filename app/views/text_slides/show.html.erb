@@ -22,7 +22,7 @@
       <% @text_slide.page_count.times do |i| %>
         <%# Bounded 16:9 mini-stage (position:relative) so an absolute background image is
             contained within the preview box rather than escaping to fill the page. %>
-        <div class="projector-preview rounded overflow-hidden">
+        <div class="projector-preview rounded overflow-hidden" style="<%= @text_slide.projector_style %>">
           <%= render "projector_slide", slide: @text_slide, page: i %>
         </div>
       <% end %>

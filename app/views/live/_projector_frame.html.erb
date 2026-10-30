@@ -4,9 +4,9 @@
 %>
 <% frame = Corobook::LiveFrame.new(session) %>
 <% proj = session.church.projector_settings %>
-<%# The church's projection settings are for SONGS. A custom text slide renders with the neutral
-    defaults (black / white / centered) plus its own background image, so no vars are injected. %>
-<% song_style = frame.text_slide? ? "" : "#{proj.style};" %>
+<%# The church's projection settings are for SONGS. A custom text slide carries its own look
+    (background, text colour, font), set per slide in the slide editor. %>
+<% song_style = frame.text_slide? ? "#{frame.item.projector_style};" : "#{proj.style};" %>
 <div id="live-frame" data-controller="follower" data-follower-version-value="<%= session.position_version %>"
      data-role="projector-frame" data-font-scale="<%= session.font_scale %>"
      style="--font-scale: <%= session.font_scale %>; <%= song_style %>"

@@ -6,9 +6,18 @@ import { Controller } from "@hotwired/stimulus"
 //    serialized to hidden pages[][body_markdown] inputs. A slide with one page is the common case.
 // The body stays WYSIWYG — HTML is converted to Markdown behind the scenes (projector renders via
 // commonmarker). An Advanced toggle exposes the raw markdown of the active page.
+
+// Same font stacks as Corobook::ProjectorSettings::FONT_STACKS (server side).
+const FONT_STACKS = {
+  sans: '-apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+  serif: 'Georgia, "Times New Roman", Times, serif',
+  condensed: '"Arial Narrow", "Roboto Condensed", "Helvetica Neue", sans-serif',
+  mono: 'ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace'
+}
+
 export default class extends Controller {
   static targets = ["rich", "source", "preview", "previewLabel", "advancedBtn", "toolbar",
-    "tagChips", "tagInput", "tagFields", "pageFields", "pageStrip", "seed"]
+    "tagChips", "tagInput", "tagFields", "pageFields", "pageStrip", "seed", "previewSlide", "previewBg", "previewStage"]
   static values = { url: String }
 
   connect() {
@@ -21,6 +30,11 @@ export default class extends Controller {
     this.loadPage()
     this.renderPageFields()
     this.renderStrip()
+    this.updateLook()
+  }
+
+  disconnect() {
+    if (this._objectUrl) URL.revokeObjectURL(this._objectUrl)
   }
 
   readSeed() {
@@ -170,6 +184,65 @@ export default class extends Controller {
   setFontSize(e) {
     const fitEl = this.previewTarget.closest('[data-controller~="fit"]')
     if (fitEl) fitEl.setAttribute("data-fit-fixed-value", e.target.value || "0")
+  }
+
+  // Projection look (background type/colours/gradient, text colour, font): repaint the preview
+  // with the same --proj-* variables the projector uses, and show only the fields in use.
+  updateLook() {
+    const field = (name) => this.element.querySelector(`[name="text_slide[${name}]"]`)
+    const type = this.element.querySelector('input[name="text_slide[bg_type]"]:checked')?.value || "solid"
+
+    this.element.querySelectorAll('[data-role=slide-bg-type] input[type=radio]')
+      .forEach(r => r.classList.toggle("btn-primary", r.checked))
+    this.element.querySelectorAll("[data-look-for]").forEach(el =>
+      el.classList.toggle("hidden", !el.dataset.lookFor.split(" ").includes(type)))
+
+    const angle = field("bg_gradient_angle")?.value || "160"
+    const angleLabel = this.element.querySelector("[data-role=slide-bg-angle-label]")
+    if (angleLabel) angleLabel.textContent = `${angle}°`
+
+    if (!this.hasPreviewStageTarget) return
+    const bg = type === "gradient"
+      ? `linear-gradient(${angle}deg, ${field("bg_color").value}, ${field("bg_color2").value})`
+      : type === "image" ? "#000000" : field("bg_color").value
+    const stage = this.previewStageTarget
+    stage.style.setProperty("--proj-bg", bg)
+    stage.style.setProperty("--proj-text", field("text_color").value)
+    stage.style.setProperty("--proj-font", FONT_STACKS[field("font").value] || FONT_STACKS.sans)
+
+    // Image mode shows the background image (current or just chosen) behind a scrim.
+    if (this.hasPreviewBgTarget) {
+      const showImage = type === "image" && this.previewBgTarget.style.backgroundImage !== ""
+      this.previewBgTarget.classList.toggle("hidden", !showImage)
+      if (this.hasPreviewSlideTarget) this.previewSlideTarget.classList.toggle("has-bg", showImage)
+    }
+    // A different font changes line widths; let the fit controller re-measure.
+    if (this.hasPreviewSlideTarget) this.previewSlideTarget.dispatchEvent(new CustomEvent("fit:refit"))
+  }
+
+  // Preview a newly chosen background image before saving.
+  previewImage(e) {
+    const file = e.target.files?.[0]
+    if (!file || !this.hasPreviewBgTarget) return
+    if (this._objectUrl) URL.revokeObjectURL(this._objectUrl)
+    this._objectUrl = URL.createObjectURL(file)
+    this.previewBgTarget.style.backgroundImage = `url('${this._objectUrl}')`
+    this.updateLook()
+  }
+
+  // Horizontal/vertical text position: move the preview text and highlight the chosen button.
+  // The radios themselves are submitted with the form (text_slide[text_align|vertical_align]).
+  setAlignment(e) {
+    const group = e.currentTarget
+    group.querySelectorAll("input[type=radio]").forEach(r => r.classList.toggle("btn-primary", r.checked))
+    if (!this.hasPreviewSlideTarget) return
+
+    const checked = (field) => this.element.querySelector(`input[name="text_slide[${field}]"]:checked`)?.value || "center"
+    const slide = this.previewSlideTarget
+    Array.from(slide.classList).forEach(c => { if (/^slide-v?align-/.test(c)) slide.classList.remove(c) })
+    slide.classList.add(`slide-align-${checked("text_align")}`, `slide-valign-${checked("vertical_align")}`)
+    // Wrapping width can change with alignment of lists; let the fit controller re-measure.
+    slide.dispatchEvent(new CustomEvent("fit:refit"))
   }
 
   schedulePreview() { clearTimeout(this._t); this._t = setTimeout(() => this.renderPreview(), 200) }
