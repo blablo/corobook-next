@@ -27,6 +27,7 @@ class SetBuilderTest < ApplicationSystemTestCase
     assert_selector "[data-role=set-item]", text: "Himno de apertura"
 
     # Add a slide via the full "New slide" modal (same editor as /text_slides/new).
+    find("[role=tab]", text: "Slides").click
     click_on "+ New slide"
     assert_selector "dialog[open]"
     within("dialog[open]") do
@@ -63,6 +64,7 @@ class SetBuilderTest < ApplicationSystemTestCase
 
   test "blank slide title in the modal shows a validation error and adds nothing" do
     visit service_set_path(@set)
+    find("[role=tab]", text: "Slides").click
     click_on "+ New slide"
     assert_selector "dialog[open]"
     within("dialog[open]") do
