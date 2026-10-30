@@ -51,6 +51,11 @@ export default class extends Controller {
   val(role) {
     const el = this.element.querySelector(`[data-role="${role}"]`)
     if (!el) return null
+    // A radiogroup container (segmented buttons): return the checked radio's value.
+    if (el.getAttribute("role") === "radiogroup") {
+      const checked = el.querySelector("input[type=radio]:checked")
+      return checked ? checked.value : null
+    }
     return el.type === "checkbox" ? el.checked : el.value
   }
 
@@ -130,6 +135,13 @@ export default class extends Controller {
     // The image upload field only applies in image mode.
     const imageField = this.element.querySelector('[data-role="pp-bg-image-field"]')
     if (imageField) imageField.style.display = isImage ? "" : "none"
+    // Highlight the chosen bg-type button (btn-primary follows the checked radio).
+    const bgTypeGroup = this.element.querySelector('[data-role="pp-bg-type"]')
+    if (bgTypeGroup) {
+      bgTypeGroup.querySelectorAll("input[type=radio]").forEach((r) => {
+        r.classList.toggle("btn-primary", r.checked)
+      })
+    }
     const angleLabel = this.element.querySelector('[data-role="pp-bg-angle-label"]')
     if (angleLabel && !isNaN(angle)) angleLabel.textContent = `${angle}°`
   }

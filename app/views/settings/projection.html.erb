@@ -16,12 +16,19 @@
       <div class="grid gap-6 lg:grid-cols-[1fr_minmax(18rem,22rem)]">
         <%# Controls %>
         <div class="grid gap-4 sm:grid-cols-2 content-start">
-          <fieldset class="fieldset">
+          <fieldset class="fieldset sm:col-span-2">
             <%= f.label :projector_bg_type, t("settings.projection.background"), class: "fieldset-legend" %>
-            <%= f.select :projector_bg_type,
-                  [ [t("settings.projection.bg_solid"), "solid"], [t("settings.projection.bg_gradient"), "gradient"], [t("settings.projection.bg_image"), "image"] ],
-                  {}, class: "select select-bordered w-full",
-                  data: { role: "pp-bg-type", action: "change->projector-preview#update" } %>
+            <%# Single-select segmented control: three radio buttons styled as DaisyUI btns, joined
+                into one bar. Radios enforce pick-one natively and submit church[projector_bg_type],
+                exactly like the select they replace. The preview controller reads the checked one. %>
+            <div class="join w-full" role="radiogroup"
+                 data-role="pp-bg-type" data-action="change->projector-preview#update">
+              <% [["solid", "bg_solid"], ["gradient", "bg_gradient"], ["image", "bg_image"]].each do |value, key| %>
+                <%= f.radio_button :projector_bg_type, value,
+                      class: "join-item btn flex-1 #{"btn-primary" if @church.projector_bg_type.to_s == value}",
+                      aria: { label: t("settings.projection.#{key}") } %>
+              <% end %>
+            </div>
           </fieldset>
 
           <fieldset class="fieldset">
