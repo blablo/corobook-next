@@ -18,18 +18,59 @@ class TextSlideTest < ActiveSupport::TestCase
     assert_not slide(reusable: true, set_id: 999).valid?
   end
 
+  test "text is centered both ways by default" do
+    s = slide
+    assert_equal [ "center", "center" ], [ s.text_align, s.vertical_align ]
+    assert_equal "slide-align-center slide-valign-center", s.alignment_classes
+  end
+
+  test "alignment accepts only the offered positions" do
+    assert slide(text_align: "left", vertical_align: "bottom").valid?
+    assert_not slide(text_align: "justify").valid?
+    assert_not slide(vertical_align: "middle").valid?
+  end
+
   test "an inline slide requires an owning set" do
     assert_not slide(reusable: false, set_id: nil).valid?
     assert slide(reusable: false, set_id: 123).valid?
   end
 
   test "accepts a valid background image and reports it attached" do
-    s = slide
+    s = slide(bg_type: "image")
     s.background_image.attach(io: File.open(Rails.root.join("test/fixtures/files/bg.png")),
                               filename: "bg.png", content_type: "image/png")
     assert s.valid?, s.errors.full_messages.to_sentence
     assert s.save
     assert s.background_image?
+  end
+
+  test "an attached image only shows in Image mode" do
+    s = slide(bg_type: "gradient")
+    s.background_image.attach(io: File.open(Rails.root.join("test/fixtures/files/bg.png")),
+                              filename: "bg.png", content_type: "image/png")
+    s.save!
+    assert_not s.background_image?
+  end
+
+  test "default look is black background, white sans-serif text" do
+    assert_equal "--proj-bg: #000000; --proj-text: #ffffff; --proj-font: #{Corobook::ProjectorSettings::FONT_STACKS['sans']}",
+                 slide.projector_style
+  end
+
+  test "gradient look uses both colours and the angle" do
+    s = slide(bg_type: "gradient", bg_color: "#112233", bg_color2: "#445566", bg_gradient_angle: 90,
+              text_color: "#ffee00", font: "serif")
+    assert_includes s.projector_style, "--proj-bg: linear-gradient(90deg, #112233, #445566)"
+    assert_includes s.projector_style, "--proj-text: #ffee00"
+    assert_includes s.projector_style, "Georgia"
+  end
+
+  test "look values are validated like the song settings" do
+    assert_not slide(bg_type: "video").valid?
+    assert_not slide(bg_color: "red").valid?
+    assert_not slide(text_color: "#12345").valid?
+    assert_not slide(bg_gradient_angle: 400).valid?
+    assert_not slide(font: "comic").valid?
   end
 
   test "rejects a background image of the wrong content type" do

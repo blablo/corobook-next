@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_30_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_30_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -181,10 +181,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_30_150000) do
     t.jsonb "tags", default: [], null: false
     t.jsonb "pages", default: [], null: false
     t.integer "font_size"
+    t.string "text_align", default: "center", null: false
+    t.string "vertical_align", default: "center", null: false
+    t.string "bg_type", default: "solid", null: false
+    t.string "bg_color", default: "#000000", null: false
+    t.string "bg_color2", default: "#1a1a2e", null: false
+    t.integer "bg_gradient_angle", default: 160, null: false
+    t.string "text_color", default: "#ffffff", null: false
+    t.string "font", default: "sans", null: false
     t.index ["church_id", "title"], name: "index_text_slides_on_church_id_and_title"
     t.index ["set_id"], name: "index_text_slides_on_set_id"
     t.index ["tags"], name: "index_text_slides_on_tags", using: :gin
+    t.check_constraint "bg_gradient_angle >= 0 AND bg_gradient_angle <= 360", name: "text_slides_bg_gradient_angle_check"
+    t.check_constraint "bg_type::text = ANY (ARRAY['solid'::character varying::text, 'gradient'::character varying::text, 'image'::character varying::text])", name: "text_slides_bg_type_check"
     t.check_constraint "font_size IS NULL OR font_size >= 2 AND font_size <= 30", name: "text_slides_font_size_check"
+    t.check_constraint "text_align::text = ANY (ARRAY['left'::character varying::text, 'center'::character varying::text, 'right'::character varying::text])", name: "text_slides_text_align_check"
+    t.check_constraint "vertical_align::text = ANY (ARRAY['top'::character varying::text, 'center'::character varying::text, 'bottom'::character varying::text])", name: "text_slides_vertical_align_check"
   end
 
   create_table "usage_events", force: :cascade do |t|
