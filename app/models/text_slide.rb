@@ -56,6 +56,16 @@ class TextSlide < ApplicationRecord
     where("title ILIKE :p OR tags::text ILIKE :p OR pages::text ILIKE :p", p: pattern)
   }
 
+  # The library: reusable slides that are not archived. Everything that lists slides to pick from
+  # (Slides page, set builder, home counts) uses this. Archived slides only appear on the Archived
+  # page; slides already placed in a service keep working there.
+  scope :library, -> { where(reusable: true, archived_at: nil) }
+  scope :archived, -> { where(reusable: true).where.not(archived_at: nil) }
+
+  def archived? = archived_at.present?
+  def archive! = update!(archived_at: Time.current)
+  def unarchive! = update!(archived_at: nil)
+
   # Slides carrying a given tag (case-insensitive; tags are stored lower-cased).
   scope :tagged, ->(tag) { where("tags @> ?", [ tag.to_s.strip.downcase ].to_json) }
 

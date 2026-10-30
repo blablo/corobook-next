@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_30_190000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_30_200000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -190,6 +190,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_30_190000) do
     t.string "text_color", default: "#ffffff", null: false
     t.string "font", default: "sans", null: false
     t.boolean "imported", default: false, null: false
+    t.datetime "archived_at"
+    t.index ["church_id", "archived_at"], name: "index_text_slides_on_church_id_and_archived_at"
     t.index ["church_id", "title"], name: "index_text_slides_on_church_id_and_title"
     t.index ["set_id"], name: "index_text_slides_on_set_id"
     t.index ["tags"], name: "index_text_slides_on_tags", using: :gin

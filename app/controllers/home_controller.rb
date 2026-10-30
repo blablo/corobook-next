@@ -18,7 +18,7 @@ class HomeController < ApplicationController
       .order(Arel.sql("service_date DESC NULLS LAST, name ASC")).limit(5)
     @counts = {
       songs: church_scope(:songs).count,
-      slides: church_scope(:text_slides).where(reusable: true).count,
+      slides: church_scope(:text_slides).library.count,
       sets: church_scope(:service_sets).count
     }
     render "home/show", layout: "shell"

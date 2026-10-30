@@ -1,10 +1,31 @@
 <div class="mx-auto my-8 max-w-3xl px-4 sm:px-6">
   <div class="flex items-center justify-between mb-2">
-    <h1 class="text-2xl font-bold"><%= @text_slide.title %></h1>
+    <h1 class="text-2xl font-bold flex items-center gap-2">
+      <%= @text_slide.title %>
+      <% if @text_slide.archived? %>
+        <span class="badge badge-warning badge-sm" data-role="archived-badge"><%= t("slides.archive.badge") %></span>
+      <% end %>
+    </h1>
     <% if can_edit? %>
-      <%= link_to t("slides.show.edit"), edit_text_slide_path(@text_slide), class: "btn btn-ghost btn-sm" %>
+      <div class="flex items-center gap-1">
+        <%= link_to t("slides.show.edit"), edit_text_slide_path(@text_slide), class: "btn btn-ghost btn-sm" %>
+        <% if @text_slide.reusable? %>
+          <% if @text_slide.archived? %>
+            <%= button_to t("slides.archive.restore"), unarchive_text_slide_path(@text_slide), method: :patch,
+                  class: "btn btn-ghost btn-sm", data: { role: "unarchive-slide" } %>
+          <% else %>
+            <%= button_to t("slides.archive.archive"), archive_text_slide_path(@text_slide), method: :patch,
+                  class: "btn btn-ghost btn-sm", data: { role: "archive-slide" } %>
+          <% end %>
+        <% end %>
+      </div>
     <% end %>
   </div>
+  <% if @text_slide.archived? %>
+    <p class="text-sm text-base-content/60 mb-3" data-role="archived-note">
+      <%= t("slides.archive.note", date: @text_slide.archived_at.strftime(t("slides.archive.date_format"))) %>
+    </p>
+  <% end %>
 
   <% if @text_slide.tags.present? %>
     <div class="flex flex-wrap gap-1.5 mb-4">

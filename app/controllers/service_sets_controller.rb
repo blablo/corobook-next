@@ -23,10 +23,10 @@ class ServiceSetsController < ApplicationController
     @other_live_session = church_scope(:live_sessions).where(status: "active")
                                                       .where.not(service_set_id: @service_set.id).first
     @songs = church_scope(:songs).order(:title)
-    @reusable_slides = church_scope(:text_slides).where(reusable: true).order(:title)
+    @reusable_slides = church_scope(:text_slides).library.order(:title)
     # For the "New slide" modal, which renders the full text_slides/_form editor.
     @new_slide = church_scope(:text_slides).build(reusable: true, pages: [ { "body_markdown" => "" } ])
-    @church_slide_tags = church_scope(:text_slides).pluck(:tags).flatten.uniq.sort
+    @church_slide_tags = church_scope(:text_slides).library.pluck(:tags).flatten.uniq.sort
     @band = church_scope(:users).band.order(:email).to_a
   end
 
@@ -201,7 +201,7 @@ class ServiceSetsController < ApplicationController
   def library_rows
     if params[:kind] == "slide"
       pattern = "%#{TextSlide.sanitize_sql_like(params[:q].to_s.strip)}%"
-      church_scope(:text_slides).where(reusable: true).where("title ILIKE ?", pattern)
+      church_scope(:text_slides).library.where("title ILIKE ?", pattern)
         .order(:title).limit(20)
         .map { |s| { id: s.id, kind: "text_slide", title: s.title } }
     else

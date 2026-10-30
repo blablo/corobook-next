@@ -196,6 +196,23 @@ en:
       empty_for_tag: "No slides for #%{tag} yet."
     new:
       title: "New slide"
+    archive:
+      title: "Archived slides"
+      intro: "Archived slides are hidden from the Slides library, search and the service builder. Services that already use one keep working. Restore a slide to bring it back."
+      back: "← Back to slides"
+      archive: "Archive"
+      archive_title: "Archive “%{title}”"
+      restore: "Restore"
+      badge: "Archived"
+      note: "Archived on %{date}. It's hidden from the library and the service builder."
+      archived_on: "Archived %{date}"
+      date_format: "%b %-d, %Y"
+      empty: "No archived slides."
+      archived: "“%{title}” archived."
+      restored: "“%{title}” restored to the library."
+      view_link:
+        one: "Archived slides (%{count})"
+        other: "Archived slides (%{count})"
     import:
       title: "Import slides from a PDF"
       intro_html: "Bring in a deck made in <strong>Google Slides</strong>, PowerPoint or Keynote. In Google Slides choose <em>File → Download → PDF document</em>, then upload the file here. Each page becomes one screen on the projector."
