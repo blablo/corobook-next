@@ -105,7 +105,7 @@ class TextSlide < ApplicationRecord
 
   # Rendered HTML for one page. commonmarker escapes raw HTML, so user markdown cannot inject markup.
   def rendered_html(index = 0)
-    Commonmarker.to_html(page_markdown(index).encode("UTF-8"))
+    Corobook::SlideCountdown.render(Commonmarker.to_html(page_markdown(index).encode("UTF-8")))
   end
 
   # The rendered image for one page of an imported deck (attachments are created in page order).
@@ -113,6 +113,9 @@ class TextSlide < ApplicationRecord
     images = page_images_attachments.sort_by(&:id)
     images[index.to_i.clamp(0, [ images.size - 1, 0 ].max)]
   end
+
+  # True when any page carries a countdown field (the operator shows a time-left badge).
+  def countdown? = !imported? && pages.any? { |p| Corobook::SlideCountdown.present?(p["body_markdown"]) }
 
   # True when the slide shows its background image: Image mode is chosen and an image is attached.
   def background_image? = bg_type == "image" && background_image.attached?

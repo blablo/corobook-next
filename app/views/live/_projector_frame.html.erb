@@ -10,7 +10,10 @@
 <%# preview: true renders a static copy (the operator's Next slide): no #live-frame id and no
     follower controller, so broadcasts and the version guard only ever touch the live frame. %>
 <% preview = local_assigns.fetch(:preview, false) %>
-<div <% unless preview %>id="live-frame" data-controller="follower" data-follower-version-value="<%= session.position_version %>"<% end %>
+<%# data-live-since: when this stop went live (ms), the start of a "for 5 minutes" countdown;
+    data-server-now lets each browser correct its clock so every screen agrees. %>
+<div <% unless preview %>id="live-frame" data-controller="follower" data-follower-version-value="<%= session.position_version %>"
+     data-live-since="<%= (session.position_since.to_f * 1000).to_i %>" data-server-now="<%= (Time.current.to_f * 1000).to_i %>"<% end %>
      data-role="<%= preview ? 'projector-frame-preview' : 'projector-frame' %>" data-font-scale="<%= session.font_scale %>"
      style="--font-scale: <%= session.font_scale %>; <%= song_style %>"
      class="live-frame <%= 'is-blanked' if session.blanked %> <%= 'has-song-bg' if !session.blanked && !frame.text_slide? && proj.background_image? %>">

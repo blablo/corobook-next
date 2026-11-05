@@ -137,6 +137,9 @@
 .projector-slide.has-bg { position: relative; z-index: 1; }
 .projector-slide.has-bg .projector-slide-body { text-shadow: 0 2px 10px rgba(0,0,0,0.6); }
 
+/* Countdown field in a slide: fixed-width digits so the line doesn't jiggle every second. */
+.slide-countdown { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
 /* Auto-advancing slide: every page stacked in ONE grid cell inside the stage's padding, so each
    keeps full layout (its own fit controller can measure it) and only the current one is visible.
    Fade cross-fades the pages; Cut switches instantly; reduced motion always cuts. */

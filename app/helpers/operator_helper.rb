@@ -41,6 +41,18 @@ module OperatorHelper
     auto_advance_badge(set_item.item)
   end
 
+  # "⏱ 04:37 left" on the Now card when the live slide has a countdown; the browser fills in the
+  # time from the slide's own countdown (countdown:tick).
+  def operator_countdown_badge(session)
+    return unless session.current_set_item&.item_type == "text_slide" && session.current_item&.countdown?
+
+    content_tag(:span, t("live.operator.countdown_badge", t: "--:--"),
+                class: "badge badge-info badge-sm", data: {
+                  role: "countdown-badge", "auto-page-label-target": "countdown",
+                  left: t("live.operator.countdown_badge", t: "%{t}"), done: t("live.operator.countdown_done")
+                })
+  end
+
   def auto_advance_badge(slide)
     content_tag(:span, t("live.operator.auto_badge", s: slide.auto_advance_seconds),
                 class: "badge badge-info badge-sm", title: t("live.operator.auto_badge_title"),
