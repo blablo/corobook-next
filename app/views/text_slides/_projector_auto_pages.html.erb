@@ -1,0 +1,26 @@
+<%#
+  An auto-advancing text slide on a projector stage. Locals: slide, since (Time the stop went live,
+  or nil for a preview that starts playing on load).
+  Every page is rendered, stacked in one grid cell; the auto-pages controller shows the page for
+  (now - since) / seconds, so every screen showing this slide is on the same page, and a screen
+  that reloads picks up where the others are. server_now lets each browser correct its own clock.
+%>
+<% if slide.background_image? && !slide.imported? %>
+  <div class="projector-slide-bg" data-role="slide-bg"
+       style="background-image: url('<%= rails_blob_path(slide.background_image, only_path: true) %>');">
+    <div class="projector-slide-scrim"></div>
+  </div>
+<% end %>
+<div class="projector-auto-pages is-<%= slide.auto_advance_transition %>" data-role="auto-pages"
+     data-controller="auto-pages"
+     data-auto-pages-seconds-value="<%= slide.auto_advance_seconds %>"
+     data-auto-pages-loop-value="<%= slide.auto_advance_loop %>"
+     data-auto-pages-since-value="<%= since ? (since.to_f * 1000).to_i : 0 %>"
+     data-auto-pages-server-now-value="<%= (Time.current.to_f * 1000).to_i %>">
+  <% slide.page_count.times do |i| %>
+    <div class="projector-auto-page<%= ' is-on' if i.zero? %>" data-auto-pages-target="page" data-role="auto-page"
+         aria-hidden="<%= i.zero? ? 'false' : 'true' %>">
+      <%= render "text_slides/projector_slide", slide: slide, page: i, show_bg: false %>
+    </div>
+  <% end %>
+</div>

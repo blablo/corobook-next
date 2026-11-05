@@ -12,9 +12,16 @@ module OperatorHelper
       elsif frame.song?
         section = frame.current_section
         section && (section["label"].presence || section["kind"]&.capitalize)
+      elsif frame.text_slide? && item.auto_advance?
+        # The page part is kept current in the browser by the auto-page-label controller.
+        safe_join([
+          content_tag(:span, t("live.operator.page", n: 1, count: item.page_count),
+                      data: { role: "auto-page-label", "auto-page-label-target": "text" }),
+          t("live.operator.auto")
+        ], " · ")
       elsif frame.text_slide? && item.page_count > 1
         t("live.operator.page", n: session.current_section_index + 1, count: item.page_count)
       end
-    [ item.title, detail ].compact_blank.join(" · ")
+    safe_join([ item.title, detail ].compact_blank, " · ")
   end
 end

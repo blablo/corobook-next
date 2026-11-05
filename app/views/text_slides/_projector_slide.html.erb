@@ -12,7 +12,9 @@
     <% end %>
   </div>
 <% else %>
-<% if slide.background_image? %>
+<%# show_bg: false when an auto-advancing slide renders its pages as layers; it draws the shared
+    background once, behind all of them. %>
+<% if slide.background_image? && local_assigns.fetch(:show_bg, true) %>
   <div class="projector-slide-bg" data-role="slide-bg"
        style="background-image: url('<%= rails_blob_path(slide.background_image, only_path: true) %>');">
     <div class="projector-slide-scrim"></div>

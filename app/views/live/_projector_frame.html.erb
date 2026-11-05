@@ -47,6 +47,10 @@
         </div>
       <% end %>
     </div>
+  <% elsif frame.text_slide? && frame.item.auto_advance? %>
+    <%# Pages turn by themselves from when this stop went live. The Next preview has no such
+        moment yet, so it plays from page load. %>
+    <%= render "text_slides/projector_auto_pages", slide: frame.item, since: (preview ? nil : session.position_since) %>
   <% elsif frame.text_slide? %>
     <%= render "text_slides/projector_slide", slide: frame.item, page: session.current_section_index %>
   <% end %>

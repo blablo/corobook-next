@@ -77,6 +77,44 @@
             <p class="label whitespace-normal"><%= t("slides.form.pages_help") %></p>
           </fieldset>
 
+          <%# Auto-advance pages: the projector turns the pages itself and the slide becomes one
+              operator step. Also offered on imported decks (announcement decks from Keynote/PDF).
+              The options stay submitted while off (inert, not disabled) so the loop checkbox keeps
+              its value; the model clears the interval when the toggle is off. %>
+          <fieldset class="fieldset rounded-box border border-base-300 bg-base-200/40 p-3" data-role="auto-advance">
+            <legend class="fieldset-legend"><%= t("slides.form.auto_advance.legend") %></legend>
+            <label class="label cursor-pointer gap-3 text-base-content">
+              <%= f.check_box :auto_advance, { class: "toggle toggle-primary toggle-sm",
+                    data: { "slide-editor-target": "autoToggle", action: "change->slide-editor#updateAutoAdvance" } }, "1", "0" %>
+              <span><%= t("slides.form.auto_advance.toggle") %></span>
+            </label>
+            <div class="grid gap-3 sm:grid-cols-3 items-end<%= ' opacity-50' unless text_slide.auto_advance %>"
+                 data-slide-editor-target="autoOptions" <%= "inert" unless text_slide.auto_advance %>>
+              <fieldset class="fieldset">
+                <%= f.label :auto_advance_seconds, t("slides.form.auto_advance.seconds"), class: "fieldset-legend" %>
+                <%= f.number_field :auto_advance_seconds, value: text_slide.auto_advance_seconds || TextSlide::AUTO_ADVANCE_DEFAULT_SECONDS,
+                      min: 2, max: 600, step: 1, class: "input w-full",
+                      data: { "slide-editor-target": "autoSeconds", action: "input->slide-editor#updateAutoAdvance" } %>
+              </fieldset>
+              <fieldset class="fieldset">
+                <%= f.label :auto_advance_transition, t("slides.form.auto_advance.transition"), class: "fieldset-legend" %>
+                <%= f.select :auto_advance_transition,
+                      TextSlide::AUTO_ADVANCE_TRANSITIONS.map { |v| [ t("slides.form.auto_advance.transitions.#{v}"), v ] }, {},
+                      class: "select w-full",
+                      data: { "slide-editor-target": "autoTransition", action: "change->slide-editor#updateAutoAdvance" } %>
+              </fieldset>
+              <label class="label cursor-pointer gap-2 text-base-content pb-2.5">
+                <%= f.check_box :auto_advance_loop, { class: "checkbox checkbox-sm",
+                      data: { "slide-editor-target": "autoLoop", action: "change->slide-editor#updateAutoAdvance" } } %>
+                <span><%= t("slides.form.auto_advance.loop") %></span>
+              </label>
+            </div>
+            <p class="label whitespace-normal" data-slide-editor-target="autoHint" data-role="auto-advance-hint"
+               data-off="<%= t('slides.form.auto_advance.hint_off') %>"
+               data-on-loop="<%= t('slides.form.auto_advance.hint_on_loop', s: '%{s}', total: '%{total}') %>"
+               data-on-stop="<%= t('slides.form.auto_advance.hint_on_stop', s: '%{s}') %>"></p>
+          </fieldset>
+
           <%# Appearance (all pages): collapsed by default so writing the slide comes first. Each
               header shows the current choice; the slide editor keeps it in sync. %>
           <div class="flex flex-col gap-2<%= ' hidden' if text_slide.imported? %>" data-role="slide-appearance">
@@ -222,7 +260,13 @@
           </div>
         <% end %>
         <div class="lg:sticky lg:top-4 min-w-0<%= ' hidden' if text_slide.imported? %>">
-          <div class="text-xs font-semibold uppercase tracking-wide text-base-content/50 mb-2"><%= t("slides.form.preview_label") %> <span data-slide-editor-target="previewLabel"></span></div>
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <div class="text-xs font-semibold uppercase tracking-wide text-base-content/50"><%= t("slides.form.preview_label") %> <span data-slide-editor-target="previewLabel"></span></div>
+            <%# Shown only while auto-advance plays the pages in the preview. %>
+            <button type="button" class="btn btn-ghost btn-xs hidden" data-slide-editor-target="autoPause" data-role="auto-pause"
+                    data-pause="<%= t('slides.form.auto_advance.pause') %>" data-play="<%= t('slides.form.auto_advance.play') %>"
+                    data-action="slide-editor#togglePause"><%= t("slides.form.auto_advance.pause") %></button>
+          </div>
           <div class="projector-preview rounded-box overflow-hidden" data-slide-editor-target="previewStage"
                style="<%= text_slide.projector_style %>">
             <%# Always present so the editor can switch to Image mode (or preview a new upload) live;
@@ -239,6 +283,9 @@
               <div class="projector-slide-body" data-fit-target="content" data-slide-editor-target="preview" data-role="slide-preview"></div>
             </div>
           </div>
+          <%# Time left on the current page while auto-advance plays (DaisyUI progress). %>
+          <progress class="progress progress-primary w-full h-1 mt-1 hidden" value="0" max="100"
+                    data-slide-editor-target="autoBar" data-role="auto-progress"></progress>
           <p class="text-xs text-base-content/40 mt-2"><%= t("slides.form.preview_caption") %></p>
         </div>
       </div>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_30_200000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_05_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -107,6 +107,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_30_200000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "current_chunk_index", default: 0, null: false
+    t.datetime "position_changed_at"
     t.index ["church_id"], name: "index_live_sessions_on_church_id"
     t.index ["church_id"], name: "index_one_active_live_session_per_church", unique: true, where: "((status)::text = 'active'::text)"
     t.index ["current_set_item_id"], name: "index_live_sessions_on_current_set_item_id"
@@ -191,11 +192,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_30_200000) do
     t.string "font", default: "sans", null: false
     t.boolean "imported", default: false, null: false
     t.datetime "archived_at"
+    t.integer "auto_advance_seconds"
+    t.boolean "auto_advance_loop", default: true, null: false
+    t.string "auto_advance_transition", default: "fade", null: false
     t.index ["church_id", "archived_at"], name: "index_text_slides_on_church_id_and_archived_at"
     t.index ["church_id", "title"], name: "index_text_slides_on_church_id_and_title"
     t.index ["set_id"], name: "index_text_slides_on_set_id"
     t.index ["tags"], name: "index_text_slides_on_tags", using: :gin
     t.check_constraint "bg_gradient_angle >= 0 AND bg_gradient_angle <= 360", name: "text_slides_bg_gradient_angle_check"
+    t.check_constraint "auto_advance_seconds IS NULL OR auto_advance_seconds >= 2 AND auto_advance_seconds <= 600", name: "text_slides_auto_advance_seconds_range"
     t.check_constraint "bg_type::text = ANY (ARRAY['solid'::character varying::text, 'gradient'::character varying::text, 'image'::character varying::text])", name: "text_slides_bg_type_check"
     t.check_constraint "font_size IS NULL OR font_size >= 2 AND font_size <= 30", name: "text_slides_font_size_check"
     t.check_constraint "text_align::text = ANY (ARRAY['left'::character varying::text, 'center'::character varying::text, 'right'::character varying::text])", name: "text_slides_text_align_check"

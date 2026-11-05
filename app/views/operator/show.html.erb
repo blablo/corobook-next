@@ -26,7 +26,9 @@
   <%# Each preview is a card: a header row (what it is + where it is in the service), the slide,
       and for Now a footer with the controls, so the buttons visibly belong to the live slide. %>
   <div class="grid gap-4 mb-6 lg:grid-cols-[3fr_2fr] lg:items-start">
-    <section class="card card-border bg-base-100 shadow-sm min-w-0" data-role="now-panel">
+    <section class="card card-border bg-base-100 shadow-sm min-w-0" data-role="now-panel"
+             data-controller="auto-page-label" data-action="auto-pages:change->auto-page-label#update"
+             data-auto-page-label-template-value="<%= t("live.operator.page", n: "%{n}", count: "%{count}") %>">
       <div class="flex flex-wrap items-center gap-x-2 gap-y-1 px-4 py-2.5 border-b border-base-200 text-sm">
         <span class="badge badge-error badge-sm font-bold uppercase"><%= t("live.operator.now") %></span>
         <span class="font-semibold min-w-0" data-role="now-label"><%= operator_stop_label(@session) %></span>
@@ -57,7 +59,9 @@
       </div>
     </section>
 
-    <section class="card card-border bg-base-100 shadow-sm min-w-0" data-role="next-panel">
+    <section class="card card-border bg-base-100 shadow-sm min-w-0" data-role="next-panel"
+             data-controller="auto-page-label" data-action="auto-pages:change->auto-page-label#update"
+             data-auto-page-label-template-value="<%= t("live.operator.page", n: "%{n}", count: "%{count}") %>">
       <div class="flex flex-wrap items-center gap-x-2 gap-y-1 px-4 py-2.5 border-b border-base-200 text-sm">
         <span class="badge badge-primary badge-outline badge-sm font-bold uppercase"><%= t("live.operator.next_up") %></span>
         <% if @next_session %>
