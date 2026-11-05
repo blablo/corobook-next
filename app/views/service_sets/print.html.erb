@@ -59,12 +59,13 @@
       }
       .musician-chart-line {
         font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-        white-space: pre-wrap; font-size: 0.8rem; line-height: 1.15; padding-top: 1em;
+        white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.8rem; line-height: 1.15;
       }
       .musician-chart-annotation { font-style: italic; color: #666; font-size: 0.75rem; }
-      .musician-seg { position: relative; display: inline-block; white-space: pre; vertical-align: bottom; }
+      .musician-seg { position: relative; display: inline-block; white-space: pre; vertical-align: baseline; }
+      .musician-seg.has-chord { padding-top: 1em; }
       .musician-chord {
-        position: absolute; bottom: 100%; left: 0; font-weight: 700; line-height: 1;
+        position: absolute; top: 0; left: 0; font-weight: 700; line-height: 1;
         white-space: pre; padding-right: 0.5rem; color: #1a56db;
       }
 

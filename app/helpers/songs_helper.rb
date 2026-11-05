@@ -14,6 +14,31 @@ module SongsHelper
     raw(ERB::Util.html_escape(text).gsub(" ", "&nbsp;"))
   end
 
+  # Render one chord/lyric segment for the musician views (live Now frame, full chart, print).
+  # Only the chord plus the first word of its text form an unbreakable anchor (the chord floats
+  # in the anchor's own top padding); the rest of the text is plain inline text so a long lyric
+  # wraps on a narrow screen instead of overflowing, and every wrapped line that carries a chord
+  # reserves its own room above the lyric.
+  def musician_segment(seg)
+    text = seg["text"].to_s
+    chord = seg["chord"].to_s
+    anchor = text[/\A\s*\S*/]
+    tail = text[anchor.length..]
+    anchor_html = anchor.empty? ? raw("&nbsp;") : ERB::Util.html_escape(anchor)
+
+    seg_class = chord.present? ? "musician-seg has-chord" : "musician-seg"
+    safe_join([
+      content_tag(:span, class: seg_class) do
+        safe_join([
+          content_tag(:span, chord, class: "musician-chord", data: { role: "chord" }),
+          content_tag(:span, anchor_html, class: "musician-text")
+        ])
+      end,
+      # empty?, not present?: a tail of just " " is the space between words and must be kept.
+      (content_tag(:span, tail, class: "musician-tail") unless tail.empty?)
+    ].compact)
+  end
+
   # True when a MusicianSetView row is the one the projector is currently on.
   def musician_current_row?(row, session)
     row.item_id == session.current_set_item_id && row.section_index == session.current_section_index

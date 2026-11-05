@@ -167,16 +167,20 @@
 }
 
 /* Chord/lyric layout: chord floats above its syllable so a wide chord never injects a space.
-   Shared by the live "Now" frame and the full chart. Monospace keeps columns honest. */
+   Shared by the live "Now" frame and the full chart. Monospace keeps columns honest.
+   Only chord + first word is an unbreakable anchor (see SongsHelper#musician_segment); the
+   rest of the lyric wraps normally, and each chorded anchor reserves its own chord row via
+   padding-top, so a wrapped line on a phone never has chords overlapping the lyric above. */
 .musician-line,
 .musician-chart-line {
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  white-space: pre-wrap; padding-top: 1.35em;
+  white-space: pre-wrap; overflow-wrap: anywhere;
   font-size: 1.15rem; line-height: 1.5;
 }
-.musician-seg { position: relative; display: inline-block; white-space: pre; vertical-align: bottom; }
+.musician-seg { position: relative; display: inline-block; white-space: pre; vertical-align: baseline; }
+.musician-seg.has-chord { padding-top: 1.35em; }
 .musician-chord {
-  position: absolute; bottom: 100%; left: 0; font-weight: 700; line-height: 1;
+  position: absolute; top: 0; left: 0; font-weight: 700; line-height: 1.35;
   white-space: pre; padding-right: 0.5rem; color: #1a56db; /* chords in a strong blue */
 }
 
