@@ -83,6 +83,10 @@ class SlideAutoAdvanceTest < ActionDispatch::IntegrationTest
     assert_select "[data-role=now-label] [data-auto-page-label-target=text]", text: "Page 1 of 3"
     assert_select "[data-role=now-position]", text: "Slide 1 of 2"
     assert_select "[data-role=now-panel][data-controller=auto-page-label]"
+
+    # Jump to item flags the auto-advancing slide only.
+    assert_select "[data-role=jump-item]", count: 2
+    assert_select "[data-role=jump-item] [data-role=auto-badge]", count: 1, text: "↻ Auto · 6s"
   end
 
   test "the Next preview of an auto slide starts its own clock (since = 0)" do

@@ -93,7 +93,10 @@
   <ul class="list bg-base-100 rounded-box border border-base-200">
     <% @session.service_set.ordered_items.each do |item| %>
       <li class="list-row items-center">
-        <span class="list-col-grow"><%= item.item.title %></span>
+        <span class="list-col-grow flex flex-wrap items-center gap-2" data-role="jump-item">
+          <span><%= item.item.title %></span>
+          <%= set_item_auto_badge(item) %>
+        </span>
         <%= button_to t("live.operator.go"), operator_goto_path(@session, set_item_id: item.id), method: :patch,
               class: "btn btn-ghost btn-sm", form: { data: { turbo: false } } %>
       </li>

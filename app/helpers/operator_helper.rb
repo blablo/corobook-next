@@ -31,7 +31,18 @@ module OperatorHelper
   def operator_auto_badge(session)
     return unless operator_auto_slide?(session)
 
-    content_tag(:span, t("live.operator.auto_badge", s: session.current_item.auto_advance_seconds),
+    auto_advance_badge(session.current_item)
+  end
+
+  # The same badge for one set item (Jump to item list). nil unless it is an auto-advancing slide.
+  def set_item_auto_badge(set_item)
+    return unless set_item.item_type == "text_slide" && set_item.item&.auto_advance?
+
+    auto_advance_badge(set_item.item)
+  end
+
+  def auto_advance_badge(slide)
+    content_tag(:span, t("live.operator.auto_badge", s: slide.auto_advance_seconds),
                 class: "badge badge-info badge-sm", title: t("live.operator.auto_badge_title"),
                 data: { role: "auto-badge" })
   end
