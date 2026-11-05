@@ -59,6 +59,21 @@ class SlideAutoAdvanceTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "advancing from the projector clicker also restarts the page clock" do
+    session = LiveSession.launch(@set)
+    travel 1.minute do
+      patch projector_advance_path(session.projector_token)
+      session.reload
+      assert_equal @i1.id, session.current_set_item_id
+      assert_in_delta Time.current, session.position_changed_at, 1
+
+      patch projector_back_path(session.projector_token)
+      session.reload
+      assert_equal @i0.id, session.current_set_item_id
+      assert_in_delta Time.current, session.position_changed_at, 1
+    end
+  end
+
   test "operator: Now is labelled auto, with a page label the browser keeps current" do
     session = LiveSession.launch(@set)
     get operator_path(session)

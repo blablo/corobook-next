@@ -43,7 +43,9 @@ class ProjectorController < ApplicationController
             current_set_item_id: target.set_item_id,
             current_section_index: target.section_index,
             current_chunk_index: target.chunk_index,
-            position_version: @session.position_version + 1
+            position_version: @session.position_version + 1,
+            # Same as the operator's move: an auto-advancing slide starts its page clock here.
+            position_changed_at: Time.current
           )
           capture_usage(@session)
         end
