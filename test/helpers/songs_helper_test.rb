@@ -14,6 +14,13 @@ class SongsHelperTest < ActionView::TestCase
     refute_includes html, "&nbsp;a"
   end
 
+  test "musician_segment keeps a whitespace-only tail so adjacent words stay apart" do
+    frag = Nokogiri::HTML.fragment(musician_segment("chord" => "A", "text" => "Tu "))
+
+    assert_equal "Tu", frag.at_css(".musician-text").text
+    assert_equal " ", frag.at_css(".musician-tail").text
+  end
+
   test "musician_segment keeps a chord-only segment as a non-empty anchor" do
     frag = Nokogiri::HTML.fragment(musician_segment("chord" => "A", "text" => ""))
 

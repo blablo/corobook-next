@@ -34,7 +34,8 @@ module SongsHelper
           content_tag(:span, anchor_html, class: "musician-text")
         ])
       end,
-      (content_tag(:span, tail, class: "musician-tail") if tail.present?)
+      # empty?, not present?: a tail of just " " is the space between words and must be kept.
+      (content_tag(:span, tail, class: "musician-tail") unless tail.empty?)
     ].compact)
   end
 
