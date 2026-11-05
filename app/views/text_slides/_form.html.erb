@@ -95,8 +95,11 @@
                     data: { "slide-editor-target": "autoToggle", action: "change->slide-editor#updateAutoAdvance" } }, "1", "0" %>
               <span><%= t("slides.form.auto_advance.toggle") %></span>
             </label>
-            <div class="grid gap-3 sm:grid-cols-3 items-end<%= ' opacity-50' unless text_slide.auto_advance %>"
+            <%# Seconds + transition side by side, the loop checkbox on its own row: this panel is
+                narrow (the preview sits beside it), so three columns would clip the loop label. %>
+            <div class="mt-2<%= ' opacity-50' unless text_slide.auto_advance %>"
                  data-slide-editor-target="autoOptions" <%= "inert" unless text_slide.auto_advance %>>
+              <div class="grid grid-cols-2 gap-3">
               <fieldset class="fieldset">
                 <%= f.label :auto_advance_seconds, t("slides.form.auto_advance.seconds"), class: "fieldset-legend" %>
                 <%= f.number_field :auto_advance_seconds, value: text_slide.auto_advance_seconds || TextSlide::AUTO_ADVANCE_DEFAULT_SECONDS,
@@ -110,7 +113,8 @@
                       class: "select w-full",
                       data: { "slide-editor-target": "autoTransition", action: "change->slide-editor#updateAutoAdvance" } %>
               </fieldset>
-              <label class="label cursor-pointer gap-2 text-base-content pb-2.5">
+              </div>
+              <label class="label cursor-pointer gap-2 text-base-content whitespace-normal mt-2">
                 <%= f.check_box :auto_advance_loop, { class: "checkbox checkbox-sm",
                       data: { "slide-editor-target": "autoLoop", action: "change->slide-editor#updateAutoAdvance" } } %>
                 <span><%= t("slides.form.auto_advance.loop") %></span>
