@@ -7,10 +7,13 @@
 <%# The church's projection settings are for SONGS. A custom text slide carries its own look
     (background, text colour, font), set per slide in the slide editor. %>
 <% song_style = frame.text_slide? ? "#{frame.item.projector_style};" : "#{proj.style};" %>
-<div id="live-frame" data-controller="follower" data-follower-version-value="<%= session.position_version %>"
-     data-role="projector-frame" data-font-scale="<%= session.font_scale %>"
+<%# preview: true renders a static copy (the operator's Next slide): no #live-frame id and no
+    follower controller, so broadcasts and the version guard only ever touch the live frame. %>
+<% preview = local_assigns.fetch(:preview, false) %>
+<div <% unless preview %>id="live-frame" data-controller="follower" data-follower-version-value="<%= session.position_version %>"<% end %>
+     data-role="<%= preview ? 'projector-frame-preview' : 'projector-frame' %>" data-font-scale="<%= session.font_scale %>"
      style="--font-scale: <%= session.font_scale %>; <%= song_style %>"
-     class="<%= 'is-blanked' if session.blanked %> <%= 'has-song-bg' if !session.blanked && !frame.text_slide? && proj.background_image? %>">
+     class="live-frame <%= 'is-blanked' if session.blanked %> <%= 'has-song-bg' if !session.blanked && !frame.text_slide? && proj.background_image? %>">
   <%# Song-wide background image (set in Song projection settings): a cover photo behind a dark
       scrim, shown for the title slide and lyric slides but NOT custom text slides (they carry
       their own background). Not shown when the stage is blanked. %>
