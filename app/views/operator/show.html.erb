@@ -20,11 +20,11 @@
   </div>
 
   <%# Presenter view (like Keynote): Now on the left, the REAL rendered next slide on the right,
-      controls under Next. On a phone it stacks Now → controls → Next, so the main slide keeps the
+      controls under Now. On a phone it stacks Now → controls → Next, so the main slide keeps the
       full width and the buttons sit under the thumb. Both previews use the same projector frame
       and fit controller as the projection screen, so they look exactly like it. %>
   <div class="grid gap-4 mb-6 lg:grid-cols-[3fr_2fr] lg:items-start">
-    <section class="min-w-0 lg:row-span-2" data-role="now-panel">
+    <section class="min-w-0 lg:col-start-1 lg:row-start-1" data-role="now-panel">
       <div class="flex flex-wrap items-center gap-x-2 text-sm mb-1">
         <span class="font-semibold"><%= t("live.operator.now") %></span>
         <span class="text-base-content/70" data-role="now-label"><%= operator_stop_label(@session) %></span>
@@ -40,7 +40,7 @@
       </div>
     </section>
 
-    <section class="min-w-0 order-last lg:order-none lg:mt-8 w-2/3 mx-auto lg:w-full" data-role="next-panel">
+    <section class="min-w-0 order-last lg:order-none lg:col-start-2 lg:row-start-1 lg:mt-8 w-2/3 mx-auto lg:w-full" data-role="next-panel">
       <div class="flex flex-wrap items-center gap-x-2 text-sm mb-1">
         <span class="font-semibold"><%= t("live.operator.next_up") %></span>
         <% if @next_session %>
@@ -56,7 +56,7 @@
       </div>
     </section>
 
-    <div class="min-w-0" data-role="operator-controls">
+    <div class="min-w-0 lg:col-start-1 lg:row-start-2" data-role="operator-controls">
       <div class="flex flex-wrap items-center gap-2">
         <%= button_to t("live.operator.back"), operator_back_path(@session), method: :patch,
               form: { data: { turbo: false, "operator-clicker-target": "back" } }, class: "btn" %>
