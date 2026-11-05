@@ -286,6 +286,8 @@ es:
       pages_help: "Escribe tu texto y usa los botones para darle formato — sin códigos que aprender. Agrega páginas cuando el texto sea demasiado largo para una pantalla."
       auto_advance:
         legend: "Avance automático de páginas"
+        summary_off: "Apagado"
+        summary_on: "Encendido, cada %{s} s"
         toggle: "Pasar las páginas automáticamente"
         seconds: "Segundos por página"
         transition: "Transición"

@@ -286,6 +286,8 @@ en:
       pages_help: "Type your text and use the buttons to format it — no codes to learn. Add pages when the text is too long for one screen."
       auto_advance:
         legend: "Auto-advance pages"
+        summary_off: "Off"
+        summary_on: "On, every %{s}s"
         toggle: "Turn the pages automatically"
         seconds: "Seconds per page"
         transition: "Transition"

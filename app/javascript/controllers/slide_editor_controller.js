@@ -18,7 +18,7 @@ const FONT_STACKS = {
 export default class extends Controller {
   static targets = ["rich", "source", "preview", "previewLabel", "advancedBtn", "toolbar",
     "tagChips", "tagInput", "tagFields", "pageFields", "pageStrip", "seed", "previewSlide", "previewBg", "previewStage",
-    "autoToggle", "autoOptions", "autoSeconds", "autoTransition", "autoLoop", "autoHint", "autoPause", "autoBar"]
+    "autoToggle", "autoOptions", "autoSeconds", "autoTransition", "autoLoop", "autoHint", "autoPause", "autoBar", "autoSummary"]
   static values = { url: String }
 
   connect() {
@@ -320,6 +320,10 @@ export default class extends Controller {
     const s = this.autoSeconds()
     const hint = !on ? d.off : (this.autoLoopTarget.checked ? d.onLoop : d.onStop)
     this.autoHintTarget.textContent = hint.replace("%{s}", s).replace("%{total}", s * this.pages.length)
+    if (this.hasAutoSummaryTarget) {
+      const sum = this.autoSummaryTarget.dataset
+      this.autoSummaryTarget.textContent = `· ${on ? sum.on.replace("%{s}", s) : sum.off}`
+    }
 
     // No preview on an imported deck (its preview column is hidden), so nothing to play there.
     const canPreview = this.hasPreviewStageTarget && this.previewStageTarget.offsetParent !== null

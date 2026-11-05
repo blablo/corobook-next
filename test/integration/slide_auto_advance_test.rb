@@ -94,6 +94,9 @@ class SlideAutoAdvanceTest < ActionDispatch::IntegrationTest
   test "the editor shows the toggle, options and preview play controls" do
     get edit_text_slide_path(@slide)
     assert_response :success
+    # Collapsed to start; the title still says whether it is on.
+    assert_select "details[data-role=auto-advance]:not([open])"
+    assert_select "[data-role=auto-advance-summary]", text: "· On, every 6s"
     assert_select "[data-role=auto-advance] input[type=checkbox].toggle[checked]"
     assert_select "[data-role=auto-advance] input[name='text_slide[auto_advance_seconds]'][value='6']"
     assert_select "[data-role=auto-advance] select[name='text_slide[auto_advance_transition]']"

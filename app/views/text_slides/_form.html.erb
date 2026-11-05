@@ -81,8 +81,15 @@
               operator step. Also offered on imported decks (announcement decks from Keynote/PDF).
               The options stay submitted while off (inert, not disabled) so the loop checkbox keeps
               its value; the model clears the interval when the toggle is off. %>
-          <fieldset class="fieldset rounded-box border border-base-300 bg-base-200/40 p-3" data-role="auto-advance">
-            <legend class="fieldset-legend"><%= t("slides.form.auto_advance.legend") %></legend>
+          <%# Collapsed by default, like the Appearance sections; the title shows whether it is on. %>
+          <details class="collapse collapse-arrow border border-base-300 bg-base-100" data-role="auto-advance"<%= " open" if text_slide.errors[:auto_advance_seconds].any? || text_slide.errors[:auto_advance_transition].any? %>>
+            <summary class="collapse-title font-semibold text-sm">
+              <%= t("slides.form.auto_advance.legend") %>
+              <span class="font-normal text-base-content/60" data-role="auto-advance-summary" data-slide-editor-target="autoSummary"
+                    data-off="<%= t('slides.form.auto_advance.summary_off') %>"
+                    data-on="<%= t('slides.form.auto_advance.summary_on', s: '%{s}') %>">· <%= text_slide.auto_advance ? t("slides.form.auto_advance.summary_on", s: text_slide.auto_advance_seconds) : t("slides.form.auto_advance.summary_off") %></span>
+            </summary>
+            <div class="collapse-content">
             <label class="label cursor-pointer gap-3 text-base-content">
               <%= f.check_box :auto_advance, { class: "toggle toggle-primary toggle-sm",
                     data: { "slide-editor-target": "autoToggle", action: "change->slide-editor#updateAutoAdvance" } }, "1", "0" %>
@@ -113,7 +120,8 @@
                data-off="<%= t('slides.form.auto_advance.hint_off') %>"
                data-on-loop="<%= t('slides.form.auto_advance.hint_on_loop', s: '%{s}', total: '%{total}') %>"
                data-on-stop="<%= t('slides.form.auto_advance.hint_on_stop', s: '%{s}') %>"></p>
-          </fieldset>
+            </div>
+          </details>
 
           <%# Appearance (all pages): collapsed by default so writing the slide comes first. Each
               header shows the current choice; the slide editor keeps it in sync. %>
