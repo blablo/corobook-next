@@ -411,7 +411,8 @@ export default class extends Controller {
   inline(node) {
     let out = ""
     node.childNodes.forEach(c => {
-      if (c.nodeType === Node.TEXT_NODE) out += c.textContent
+      // The editable box turns typed trailing spaces into non-breaking spaces; save plain ones.
+      if (c.nodeType === Node.TEXT_NODE) out += c.textContent.replace(/\u00a0/g, " ")
       else if (c.nodeType === Node.ELEMENT_NODE) {
         const t = c.tagName
         if (c.classList.contains("cd-chip")) out += c.dataset.token // countdown chip -> its marker
