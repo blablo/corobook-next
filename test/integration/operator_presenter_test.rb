@@ -21,8 +21,10 @@ class OperatorPresenterTest < ActionDispatch::IntegrationTest
 
     # Stops: title, V1, Coro, Sermón.
     assert_select "[data-role=now-label]", text: "Dos secciones · Title"
-    assert_select "[data-role=now-position]", text: "· Slide 1 of 4"
+    assert_select "[data-role=now-position]", text: "Slide 1 of 4"
     assert_select "[data-role=next-label]", text: "Dos secciones · V1"
+    assert_select "[data-role=next-position]", text: "Slide 2 of 4"
+    assert_select "[data-role=operator-controls] .join .join-item", count: 3
     assert_select "[data-role=next-frame] [data-role=projector-frame-preview] .projector-line", text: "Uno"
     assert_select "[data-role=clock][data-controller=clock]"
   end
@@ -45,7 +47,7 @@ class OperatorPresenterTest < ActionDispatch::IntegrationTest
     @session.update!(current_set_item: @i0, current_section_index: 2, current_chunk_index: 0)
     get operator_path(@session)
 
-    assert_select "[data-role=now-position]", text: "· Slide 3 of 4"
+    assert_select "[data-role=now-position]", text: "Slide 3 of 4"
     assert_select "[data-role=next-label]", text: "Sermón"
   end
 
