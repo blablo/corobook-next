@@ -506,20 +506,42 @@ export default class extends Controller {
     const end = this.countdownEndTarget.value.replace(/[{}<|]/g, "").trim()
     const html = this.chipHtml(`{{countdown ${target}${end ? ` | ${end}` : ""}}}`)
 
+    // Close FIRST: while a modal <dialog> is open the page behind it is inert, so the editor
+    // can't take focus or be edited (inserting before closing silently did nothing).
+    this.countdownDialogTarget.close()
     if (this._editingChip) {
       this._editingChip.outerHTML = html
     } else {
-      this.richTarget.focus()
-      const sel = window.getSelection()
-      let range = this._range
-      if (!range) { range = document.createRange(); range.selectNodeContents(this.richTarget); range.collapse(false) }
-      sel.removeAllRanges(); sel.addRange(range)
-      document.execCommand("insertHTML", false, `${html}&nbsp;`)
+      this.insertChip(html)
     }
     this._range = null
     this._editingChip = null
-    this.countdownDialogTarget.close()
     this.syncFromRich()
+  }
+  // Insert the chip at the cursor saved when the button was pressed (or at the end of the text),
+  // followed by a space, and leave the cursor after it.
+  insertChip(html) {
+    const tpl = document.createElement("template")
+    tpl.innerHTML = `${html}\u00a0`
+    const space = tpl.content.lastChild
+
+    let range = this._range
+    if (!range || !this.richTarget.contains(range.commonAncestorContainer)) {
+      const block = this.richTarget.lastElementChild || this.richTarget
+      range = document.createRange()
+      range.selectNodeContents(block)
+      range.collapse(false)
+    }
+    range.deleteContents()
+    range.insertNode(tpl.content)
+
+    this.richTarget.focus()
+    const after = document.createRange()
+    after.setStartAfter(space)
+    after.collapse(true)
+    const sel = window.getSelection()
+    sel.removeAllRanges()
+    sel.addRange(after)
   }
   chipHtml(token) {
     const c = this.parseCountdown(token)

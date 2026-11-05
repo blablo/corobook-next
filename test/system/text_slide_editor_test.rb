@@ -84,7 +84,8 @@ class TextSlideEditorTest < ApplicationSystemTestCase
     within("dialog[data-role=countdown-dialog]") do
       assert_equal "5", find("[data-slide-editor-target=countdownMinutes]").value
       find("input[name=countdown_mode][value=to]").click
-      find("[data-slide-editor-target=countdownTo]").set("10:30")
+      # Typing into a time field depends on the browser's 12/24-hour locale; set the value directly.
+      page.execute_script("document.querySelector('[data-slide-editor-target=countdownTo]').value = '10:30'")
       find("[data-role=countdown-save]").click
     end
     assert_selector "[data-role=countdown-chip]", text: "until 10:30"
