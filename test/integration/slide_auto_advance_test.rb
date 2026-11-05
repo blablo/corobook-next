@@ -77,7 +77,9 @@ class SlideAutoAdvanceTest < ActionDispatch::IntegrationTest
   test "operator: Now is labelled auto, with a page label the browser keeps current" do
     session = LiveSession.launch(@set)
     get operator_path(session)
-    assert_select "[data-role=now-label]", text: "Anuncios · Page 1 of 3 · auto"
+    assert_select "[data-role=now-label]", text: "Anuncios · Page 1 of 3"
+    assert_select "[data-role=now-panel] [data-role=auto-badge].badge", text: "↻ Auto · 6s"
+    assert_select "[data-role=now-panel] progress[data-role=auto-progress][data-auto-page-label-target=progress]"
     assert_select "[data-role=now-label] [data-auto-page-label-target=text]", text: "Page 1 of 3"
     assert_select "[data-role=now-position]", text: "Slide 1 of 2"
     assert_select "[data-role=now-panel][data-controller=auto-page-label]"
@@ -90,6 +92,10 @@ class SlideAutoAdvanceTest < ActionDispatch::IntegrationTest
     get operator_path(session)
 
     assert_select "[data-role=next-frame] [data-role=auto-pages][data-auto-pages-since-value='0']"
+    # The coming slide is flagged too; Now (a normal slide) has no badge or bar.
+    assert_select "[data-role=next-panel] [data-role=auto-badge]"
+    assert_select "[data-role=now-panel] [data-role=auto-badge]", count: 0
+    assert_select "[data-role=auto-progress]", count: 0
   end
 
   test "the editor saves the auto-advance options" do

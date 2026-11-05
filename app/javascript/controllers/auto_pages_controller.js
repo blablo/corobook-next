@@ -14,7 +14,7 @@ export default class extends Controller {
     this.start = this.sinceValue || this.now()
     this.current = -1
     this.tick()
-    this.timer = setInterval(() => this.tick(), 250)
+    this.timer = setInterval(() => this.tick(), 100)
   }
 
   disconnect() {
@@ -27,8 +27,13 @@ export default class extends Controller {
     const count = this.pageTargets.length
     if (count < 2 || !this.secondsValue) return
 
-    const step = Math.floor(Math.max(0, this.now() - this.start) / (this.secondsValue * 1000))
+    const ms = this.secondsValue * 1000
+    const elapsed = Math.max(0, this.now() - this.start)
+    const step = Math.floor(elapsed / ms)
     const page = this.loopValue ? step % count : Math.min(step, count - 1)
+    // How far through the current page (0..1); a finished non-looping run stays full.
+    const fraction = !this.loopValue && step >= count - 1 ? 1 : (elapsed % ms) / ms
+    this.dispatch("progress", { detail: { fraction } })
     if (page === this.current) return
 
     this.current = page
