@@ -46,6 +46,26 @@ class TextSlide < ApplicationRecord
     }.map { |k, v| "#{k}: #{v}" }.join("; ")
   end
 
+  # Auto-advance pages: the projector turns the pages by itself every N seconds, and the whole
+  # slide is a single operator step. nil seconds = off (each page is its own step).
+  AUTO_ADVANCE_DEFAULT_SECONDS = 8
+  AUTO_ADVANCE_TRANSITIONS = %w[fade cut].freeze
+
+  validates :auto_advance_seconds, numericality: { only_integer: true, in: 2..600 }, allow_nil: true
+  validates :auto_advance_transition, inclusion: { in: AUTO_ADVANCE_TRANSITIONS }
+
+  # True when the pages turn by themselves. A single page has nothing to turn.
+  def auto_advance? = auto_advance_seconds.present? && page_count > 1
+
+  # The editor's on/off toggle. Off clears the interval, so the stored seconds are the one source
+  # of truth (the seconds field still submits its value while the toggle is off).
+  def auto_advance = auto_advance_seconds.present?
+
+  def auto_advance=(value)
+    @auto_advance_off = !ActiveModel::Type::Boolean.new.cast(value)
+  end
+
+  before_validation { self.auto_advance_seconds = nil if @auto_advance_off }
   before_validation :normalize_tags_and_pages
   validate :acceptable_background_image
 

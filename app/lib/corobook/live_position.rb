@@ -30,9 +30,17 @@ module Corobook
       if item.item_type == "song"
         song_stops(item)
       else
-        pages = [ item.text_slide&.page_count.to_i, 1 ].max
-        pages.times.map { |i| Stop.new(set_item_id: item.id, section_index: i) }
+        slide_stop_count(item).times.map { |i| Stop.new(set_item_id: item.id, section_index: i) }
       end
+    end
+
+    # One stop per page, except an auto-advancing slide: its pages turn by themselves, so the
+    # whole slide is ONE stop and the operator's Next leaves it.
+    def slide_stop_count(item)
+      slide = item.text_slide
+      return 1 if slide.nil? || slide.auto_advance?
+
+      [ slide.page_count.to_i, 1 ].max
     end
 
     # Title slide at index 0, then one stop per ordered lyric section at index i+1, skipping
@@ -92,7 +100,7 @@ module Corobook
       if item.item_type == "song"
         song_stops(item).length
       else
-        [ item.text_slide&.page_count.to_i, 1 ].max
+        slide_stop_count(item)
       end
     end
 

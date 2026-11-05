@@ -17,7 +17,8 @@ const FONT_STACKS = {
 
 export default class extends Controller {
   static targets = ["rich", "source", "preview", "previewLabel", "advancedBtn", "toolbar",
-    "tagChips", "tagInput", "tagFields", "pageFields", "pageStrip", "seed", "previewSlide", "previewBg", "previewStage"]
+    "tagChips", "tagInput", "tagFields", "pageFields", "pageStrip", "seed", "previewSlide", "previewBg", "previewStage",
+    "autoToggle", "autoOptions", "autoSeconds", "autoTransition", "autoLoop", "autoHint", "autoPause", "autoBar", "autoSummary"]
   static values = { url: String }
 
   connect() {
@@ -35,6 +36,7 @@ export default class extends Controller {
 
   disconnect() {
     if (this._objectUrl) URL.revokeObjectURL(this._objectUrl)
+    this.stopPlay(false)
   }
 
   readSeed() {
@@ -70,8 +72,13 @@ export default class extends Controller {
   loadPage() {
     this.richTarget.innerHTML = this.mdToHtml(this.pages[this.active] || "")
     this.sourceTarget.value = this.pages[this.active] || ""
-    if (this.hasPreviewLabelTarget) this.previewLabelTarget.textContent = this.pages.length > 1 ? `(page ${this.active + 1})` : ""
+    // While auto-advance plays, picking a page restarts playback from it.
+    if (this.playing) { this.startPlay(this.active); return }
+    this.setPreviewLabel(this.active)
     this.renderPreview()
+  }
+  setPreviewLabel(i) {
+    if (this.hasPreviewLabelTarget) this.previewLabelTarget.textContent = this.pages.length > 1 ? `(page ${i + 1})` : ""
   }
 
   renderStrip() {
@@ -93,6 +100,7 @@ export default class extends Controller {
               aria-label="Add a page">+ Add page</button>`
     this.pageStripTarget.innerHTML = cards + addCard
     this.wireStrip()
+    this.updateAutoAdvance() // the page count may have changed
   }
   wireStrip() {
     this.pageStripTarget.querySelectorAll(".pg-card").forEach(card => {
@@ -267,21 +275,116 @@ export default class extends Controller {
     slide.dispatchEvent(new CustomEvent("fit:refit"))
   }
 
-  schedulePreview() { clearTimeout(this._t); this._t = setTimeout(() => this.renderPreview(), 200) }
-  async renderPreview() {
+  schedulePreview() {
+    clearTimeout(this._t)
+    this._t = setTimeout(() => (this.playing ? this.startPlay(this.active) : this.renderPreview()), 200)
+  }
+  // Render one page into the preview (default: the page being edited). Rendered HTML is cached by
+  // markdown so auto-advance playback doesn't refetch every page on every turn.
+  async renderPreview(index = this.active, fade = false) {
     try {
-      const res = await fetch(this.urlValue, {
-        method: "POST", headers: this.headers(),
-        body: JSON.stringify({ body_markdown: this.pages[this.active] || "" })
-      })
-      if (!res.ok) return
-      const { html } = await res.json()
+      const md = this.pages[index] || ""
+      this._html ||= new Map()
+      let html = this._html.get(md)
+      if (html === undefined) {
+        const res = await fetch(this.urlValue, {
+          method: "POST", headers: this.headers(), body: JSON.stringify({ body_markdown: md })
+        })
+        if (!res.ok) return
+        html = (await res.json()).html
+        this._html.set(md, html)
+      }
       this.previewTarget.innerHTML = html || `<p class="opacity-40">Nothing to preview yet.</p>`
+      if (fade && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        this.previewTarget.animate([ { opacity: 0 }, { opacity: 1 } ], { duration: 500, easing: "ease" })
+      }
       // The preview now lives inside the projector mini-stage; tell its fit controller to resize
       // (a content swap is invisible to the ResizeObserver).
       const fitEl = this.previewTarget.closest('[data-controller~="fit"]')
       if (fitEl) fitEl.dispatchEvent(new CustomEvent("fit:refit"))
     } catch { /* keep last good preview */ }
+  }
+
+  // ======================= AUTO-ADVANCE =======================
+  // The toggle dims the options (inert, so they still submit), rewrites the hint, and plays the
+  // pages in the preview at the chosen pace so the author can judge the timing.
+  autoOn() { return this.hasAutoToggleTarget && this.autoToggleTarget.checked }
+  autoSeconds() { return Math.max(2, parseInt(this.autoSecondsTarget.value, 10) || 8) }
+  updateAutoAdvance() {
+    if (!this.hasAutoToggleTarget) return
+    const on = this.autoOn()
+    this.autoOptionsTarget.inert = !on
+    this.autoOptionsTarget.classList.toggle("opacity-50", !on)
+
+    const d = this.autoHintTarget.dataset
+    const s = this.autoSeconds()
+    const hint = !on ? d.off : (this.autoLoopTarget.checked ? d.onLoop : d.onStop)
+    this.autoHintTarget.textContent = hint.replace("%{s}", s).replace("%{total}", s * this.pages.length)
+    if (this.hasAutoSummaryTarget) {
+      const sum = this.autoSummaryTarget.dataset
+      this.autoSummaryTarget.textContent = `· ${on ? sum.on.replace("%{s}", s) : sum.off}`
+    }
+
+    // No preview on an imported deck (its preview column is hidden), so nothing to play there.
+    const canPreview = this.hasPreviewStageTarget && this.previewStageTarget.offsetParent !== null
+    if (on && canPreview && this.pages.length > 1) this.startPlay(this.playing ? this.playIndex : this.active)
+    else this.stopPlay()
+  }
+  startPlay(i) {
+    this.stopPlay(false)
+    this.playing = true
+    this.paused = false
+    this.playIndex = Math.max(0, Math.min(i, this.pages.length - 1))
+    this.autoPauseTarget.textContent = this.autoPauseTarget.dataset.pause
+    this.autoPauseTarget.classList.remove("hidden")
+    this.autoBarTarget.classList.remove("hidden")
+    this.showPlayPage(false)
+  }
+  showPlayPage(fade = this.autoTransitionTarget.value === "fade") {
+    this.renderPreview(this.playIndex, fade)
+    this.setPreviewLabel(this.playIndex)
+    this.runBar(0)
+  }
+  // Drive the progress bar and turn the page when this page's time is up.
+  runBar(fromMs) {
+    cancelAnimationFrame(this._raf)
+    const total = this.autoSeconds() * 1000
+    const started = performance.now() - fromMs
+    const frame = (now) => {
+      this._elapsed = now - started
+      this.autoBarTarget.value = Math.min(100, (this._elapsed / total) * 100)
+      if (this._elapsed >= total) return this.advancePlay()
+      this._raf = requestAnimationFrame(frame)
+    }
+    this._raf = requestAnimationFrame(frame)
+  }
+  advancePlay() {
+    if (this.playIndex >= this.pages.length - 1 && !this.autoLoopTarget.checked) {
+      // Loop off: hold the last page; Play restarts from the first.
+      this.playIndex = -1
+      this.paused = true
+      this.autoPauseTarget.textContent = this.autoPauseTarget.dataset.play
+      return
+    }
+    this.playIndex = (this.playIndex + 1) % this.pages.length
+    this.showPlayPage()
+  }
+  togglePause(e) {
+    e.preventDefault()
+    if (!this.playing) return
+    if (this.playIndex < 0) { this.startPlay(0); return } // finished a non-looping run
+    this.paused = !this.paused
+    this.autoPauseTarget.textContent = this.paused ? this.autoPauseTarget.dataset.play : this.autoPauseTarget.dataset.pause
+    if (this.paused) cancelAnimationFrame(this._raf)
+    else this.runBar(this._elapsed || 0)
+  }
+  stopPlay(render = true) {
+    cancelAnimationFrame(this._raf)
+    const wasPlaying = this.playing
+    this.playing = false
+    if (this.hasAutoPauseTarget) this.autoPauseTarget.classList.add("hidden")
+    if (this.hasAutoBarTarget) { this.autoBarTarget.classList.add("hidden"); this.autoBarTarget.value = 0 }
+    if (render && wasPlaying) { this.setPreviewLabel(this.active); this.renderPreview() }
   }
 
   // ======================= HTML <-> Markdown (supported subset) =======================

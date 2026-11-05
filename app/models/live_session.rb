@@ -28,7 +28,8 @@ class LiveSession < ApplicationRecord
       position_version: 0,
       projector_token: SecureRandom.urlsafe_base64(24),
       musician_token: SecureRandom.urlsafe_base64(24),
-      started_at: Time.current
+      started_at: Time.current,
+      position_changed_at: Time.current
     )
     UsageEvent.capture(live_session: session, song: first_item.song) if first_item&.item_type == "song"
     session
@@ -42,4 +43,8 @@ class LiveSession < ApplicationRecord
   end
 
   def current_item = current_set_item&.item
+
+  # When the current stop went live: the shared start of an auto-advancing slide's page clock.
+  # Older sessions predate the column, so fall back to the launch time.
+  def position_since = position_changed_at || started_at || updated_at
 end
