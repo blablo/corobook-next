@@ -51,6 +51,50 @@ class TextSlideEditorTest < ApplicationSystemTestCase
     assert_includes slide.page_markdown(1), "Jesucristo"
   end
 
+  test "insert a countdown from the toolbar: a chip in the text, live in the preview, a marker when saved" do
+    slide = @church.text_slides.create!(title: "Bienvenida", pages: [ { "body_markdown" => "Empieza en" } ], reusable: true)
+    visit edit_text_slide_path(slide)
+
+    rich = find("[data-slide-editor-target=rich]")
+    rich.click
+    rich.send_keys(:end, " ")
+    find("[data-role=countdown-button]").click
+    within("dialog[data-role=countdown-dialog]") do
+      find("input[name=countdown_mode][value=for]").click
+      find("[data-slide-editor-target=countdownMinutes]").set("5")
+      find("[data-slide-editor-target=countdownEnd]").set("¡Comenzamos!")
+      find("[data-role=countdown-save]").click
+    end
+
+    assert_selector "[data-slide-editor-target=rich] [data-role=countdown-chip]", text: "5 min → ¡Comenzamos!"
+    # The preview renders it live, counting down from 5:00.
+    assert_selector "[data-role=slide-preview] span.slide-countdown", text: /\A0[45]:\d\d\z/
+
+    click_on "Save changes"
+    assert_text "Slide updated."
+    assert_equal "Empieza en {{countdown 5m | ¡Comenzamos!}}", slide.reload.page_markdown(0)
+  end
+
+  test "clicking a countdown chip edits it" do
+    slide = @church.text_slides.create!(title: "Receso", reusable: true,
+      pages: [ { "body_markdown" => "Volvemos en {{countdown 5m}}" } ])
+    visit edit_text_slide_path(slide)
+
+    find("[data-role=countdown-chip]", text: "5 min").click
+    within("dialog[data-role=countdown-dialog]") do
+      assert_equal "5", find("[data-slide-editor-target=countdownMinutes]").value
+      find("input[name=countdown_mode][value=to]").click
+      # Typing into a time field depends on the browser's 12/24-hour locale; set the value directly.
+      page.execute_script("document.querySelector('[data-slide-editor-target=countdownTo]').value = '10:30'")
+      find("[data-role=countdown-save]").click
+    end
+    assert_selector "[data-role=countdown-chip]", text: "until 10:30"
+
+    click_on "Save changes"
+    assert_text "Slide updated."
+    assert_equal "Volvemos en {{countdown 10:30}}", slide.reload.page_markdown(0)
+  end
+
   test "choosing text alignment moves the preview and is saved" do
     slide = @church.text_slides.create!(title: "Aviso", pages: [ { "body_markdown" => "Hola" } ], reusable: true)
     visit edit_text_slide_path(slide)

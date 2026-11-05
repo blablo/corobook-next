@@ -1,5 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
 
+// A countdown field's hidden marker in the page markdown (mirrors Corobook::SlideCountdown::TOKEN).
+const COUNTDOWN = /\{\{\s*countdown\s+(\d{1,2}:\d{2}|\d{1,3}m)\s*(?:\|\s*([^{}<]*?))?\s*\}\}/g
+
 // WYSIWYG slide editor with free-form TAGS and multi-PAGE support.
 //  - Tags: chips + autocomplete; serialized to hidden tags[] inputs.
 //  - Pages: an ordered array of markdown bodies; the contenteditable edits the ACTIVE page;
@@ -18,7 +21,8 @@ const FONT_STACKS = {
 export default class extends Controller {
   static targets = ["rich", "source", "preview", "previewLabel", "advancedBtn", "toolbar",
     "tagChips", "tagInput", "tagFields", "pageFields", "pageStrip", "seed", "previewSlide", "previewBg", "previewStage",
-    "autoToggle", "autoOptions", "autoSeconds", "autoTransition", "autoLoop", "autoHint", "autoPause", "autoBar", "autoSummary"]
+    "autoToggle", "autoOptions", "autoSeconds", "autoTransition", "autoLoop", "autoHint", "autoPause", "autoBar", "autoSummary",
+    "countdownDialog", "countdownMode", "countdownTo", "countdownMinutes", "countdownEnd"]
   static values = { url: String }
 
   connect() {
@@ -146,7 +150,7 @@ export default class extends Controller {
       `<textarea class="hidden" name="text_slide[pages][][body_markdown]">${this.esc(p)}</textarea>`).join("")
   }
   // Plain-text snippet of a page's markdown for the thumbnail.
-  plain(md) { return (md || "").replace(/[#*_>-]/g, "").replace(/\s+/g, " ").trim() }
+  plain(md) { return (md || "").replace(COUNTDOWN, "⏱").replace(/[#*_>-]/g, "").replace(/\s+/g, " ").trim() }
 
   // ======================= BODY (WYSIWYG) =======================
   bold(e) { e.preventDefault(); this.exec("bold") }
@@ -407,10 +411,12 @@ export default class extends Controller {
   inline(node) {
     let out = ""
     node.childNodes.forEach(c => {
-      if (c.nodeType === Node.TEXT_NODE) out += c.textContent
+      // The editable box turns typed trailing spaces into non-breaking spaces; save plain ones.
+      if (c.nodeType === Node.TEXT_NODE) out += c.textContent.replace(/\u00a0/g, " ")
       else if (c.nodeType === Node.ELEMENT_NODE) {
         const t = c.tagName
-        if (t === "B" || t === "STRONG") out += `**${this.inline(c)}**`
+        if (c.classList.contains("cd-chip")) out += c.dataset.token // countdown chip -> its marker
+        else if (t === "B" || t === "STRONG") out += `**${this.inline(c)}**`
         else if (t === "I" || t === "EM") out += `_${this.inline(c)}_`
         else if (t === "BR") out += "\n"
         else out += this.inline(c)
@@ -435,8 +441,121 @@ export default class extends Controller {
     return html.join("") || "<p><br></p>"
   }
   inlineMd(s) {
-    return this.esc(s).replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/_([^_]+)_/g, "<em>$1</em>")
+    return this.esc(s)
+      .replace(COUNTDOWN, (m) => this.chipHtml(this.unesc(m))) // markers -> ⏱ chips, before bold/italic
+      .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/_([^_]+)_/g, "<em>$1</em>")
   }
+
+  // ======================= COUNTDOWN =======================
+  // A countdown lives in the page markdown as a hidden marker ({{countdown 10:30 | text}} or
+  // {{countdown 5m}}) and shows in the editor as a non-editable ⏱ chip. The toolbar button inserts
+  // one at the cursor; clicking a chip edits it. The author never sees the marker (Advanced does).
+  saveSelection() {
+    const sel = window.getSelection()
+    if (sel.rangeCount && this.richTarget.contains(sel.anchorNode)) this._range = sel.getRangeAt(0).cloneRange()
+  }
+  openCountdown(e) {
+    e?.preventDefault()
+    this._editingChip = null
+    this.fillCountdown(null)
+    this.countdownDialogTarget.showModal()
+  }
+  onRichClick(e) {
+    const chip = e.target.closest(".cd-chip")
+    if (!chip) return
+    e.preventDefault()
+    this._editingChip = chip
+    this.fillCountdown(this.parseCountdown(chip.dataset.token))
+    this.countdownDialogTarget.showModal()
+  }
+  parseCountdown(token) {
+    const m = new RegExp(COUNTDOWN.source).exec(token || "")
+    if (!m) return null
+    const end = (m[2] || "").trim()
+    return m[1].endsWith("m")
+      ? { mode: "for", minutes: parseInt(m[1], 10), end }
+      : { mode: "to", to: m[1].padStart(5, "0"), end }
+  }
+  fillCountdown(cd) {
+    const c = cd || { mode: "to", to: this.defaultCountdownTime(), minutes: 5, end: "" }
+    this.countdownModeTargets.forEach(r => { r.checked = r.value === c.mode })
+    this.countdownToTarget.value = c.to || this.defaultCountdownTime()
+    this.countdownMinutesTarget.value = c.minutes || 5
+    this.countdownEndTarget.value = c.end || ""
+  }
+  // Default target: the next quarter hour at least 10 minutes away (e.g. 10:18 -> 10:30).
+  defaultCountdownTime() {
+    const d = new Date(Date.now() + 10 * 60 * 1000)
+    d.setMinutes(Math.ceil(d.getMinutes() / 15) * 15, 0, 0)
+    return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`
+  }
+  closeCountdown(e) {
+    e?.preventDefault()
+    this.countdownDialogTarget.close()
+  }
+  saveCountdown(e) {
+    e.preventDefault()
+    const mode = this.countdownModeTargets.find(r => r.checked)?.value || "to"
+    let target
+    if (mode === "for") {
+      target = `${Math.min(999, Math.max(1, parseInt(this.countdownMinutesTarget.value, 10) || 5))}m`
+    } else {
+      target = this.countdownToTarget.value
+      if (!/^\d{1,2}:\d{2}$/.test(target)) { this.countdownToTarget.focus(); return }
+    }
+    // The end text can't contain the marker's own delimiters.
+    const end = this.countdownEndTarget.value.replace(/[{}<|]/g, "").trim()
+    const html = this.chipHtml(`{{countdown ${target}${end ? ` | ${end}` : ""}}}`)
+
+    // Close FIRST: while a modal <dialog> is open the page behind it is inert, so the editor
+    // can't take focus or be edited (inserting before closing silently did nothing).
+    this.countdownDialogTarget.close()
+    if (this._editingChip) {
+      this._editingChip.outerHTML = html
+    } else {
+      this.insertChip(html)
+    }
+    this._range = null
+    this._editingChip = null
+    this.syncFromRich()
+  }
+  // Insert the chip at the cursor saved when the button was pressed (or at the end of the text),
+  // followed by a space, and leave the cursor after it.
+  insertChip(html) {
+    const tpl = document.createElement("template")
+    tpl.innerHTML = `${html}\u00a0`
+    const space = tpl.content.lastChild
+
+    let range = this._range
+    if (!range || !this.richTarget.contains(range.commonAncestorContainer)) {
+      const block = this.richTarget.lastElementChild || this.richTarget
+      range = document.createRange()
+      range.selectNodeContents(block)
+      range.collapse(false)
+    }
+    range.deleteContents()
+    range.insertNode(tpl.content)
+
+    this.richTarget.focus()
+    const after = document.createRange()
+    after.setStartAfter(space)
+    after.collapse(true)
+    const sel = window.getSelection()
+    sel.removeAllRanges()
+    sel.addRange(after)
+  }
+  chipHtml(token) {
+    const c = this.parseCountdown(token)
+    if (!c) return this.esc(token)
+    const d = this.hasCountdownDialogTarget ? this.countdownDialogTarget.dataset : {}
+    const label = c.mode === "for"
+      ? (d.chipFor || "%{m} min").replace("%{m}", c.minutes)
+      : (d.chipTo || "until %{t}").replace("%{t}", c.to)
+    const tail = c.end ? ` → ${c.end}` : ""
+    return `<span class="cd-chip badge badge-soft badge-primary mx-0.5 cursor-pointer align-baseline" contenteditable="false" ` +
+      `data-role="countdown-chip" data-token="${this.esc(token).replace(/"/g, "&quot;")}">⏱ ${this.esc(label + tail)}</span>`
+  }
+  unesc(s) { const t = document.createElement("textarea"); t.innerHTML = s; return t.value }
 
   headers() {
     const token = document.querySelector("meta[name=csrf-token]")?.content

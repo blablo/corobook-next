@@ -59,6 +59,8 @@
                   <button type="button" class="btn btn-ghost btn-xs" title="<%= t('slides.form.toolbar.heading') %>" data-action="slide-editor#heading">H</button>
                   <button type="button" class="btn btn-ghost btn-xs" title="<%= t('slides.form.toolbar.bullet') %>" data-action="slide-editor#bullet"><%= t("slides.form.toolbar.bullet_label") %></button>
                   <button type="button" class="btn btn-ghost btn-xs" title="<%= t('slides.form.toolbar.clear') %>" data-action="slide-editor#clearFormat"><%= t("slides.form.toolbar.clear_label") %></button>
+                  <button type="button" class="btn btn-ghost btn-xs" title="<%= t('slides.form.countdown.button_title') %>"
+                          data-action="mousedown->slide-editor#saveSelection slide-editor#openCountdown" data-role="countdown-button"><%= t("slides.form.countdown.button") %></button>
                 </div>
                 <button type="button" class="btn btn-ghost btn-xs ml-auto" title="<%= t('slides.form.toolbar.advanced') %>"
                         data-slide-editor-target="advancedBtn" data-action="slide-editor#toggleAdvanced"><%= t("slides.form.toolbar.advanced_label") %></button>
@@ -66,7 +68,7 @@
 
               <div contenteditable="true" role="textbox" aria-multiline="true" aria-label="<%= t('slides.form.body_aria') %>"
                    class="join-item border border-t-0 border-base-300 px-3 py-2 min-h-48 focus:outline-none wrap-anywhere"
-                   data-slide-editor-target="rich" data-action="input->slide-editor#onRichInput keydown->slide-editor#onKeydown"></div>
+                   data-slide-editor-target="rich" data-action="input->slide-editor#onRichInput keydown->slide-editor#onKeydown click->slide-editor#onRichClick"></div>
 
               <%= f.text_area nil, name: nil,
                     class: "join-item textarea w-full font-mono text-sm hidden",
@@ -75,6 +77,45 @@
 
             <div data-slide-editor-target="pageFields"></div>
             <p class="label whitespace-normal"><%= t("slides.form.pages_help") %></p>
+
+            <%# Countdown settings (insert or edit a ⏱ chip). It sits inside the slide form, so it
+                has NO nested <form> (a modal-backdrop form broke CI before) and its inputs have no
+                name: nothing here is submitted, the editor writes the chip into the page text. %>
+            <dialog class="modal" data-slide-editor-target="countdownDialog" data-role="countdown-dialog"
+                    data-chip-to="<%= t("slides.form.countdown.chip_to", t: "%{t}") %>" data-chip-for="<%= t("slides.form.countdown.chip_for", m: "%{m}") %>">
+              <div class="modal-box max-w-md">
+                <h3 class="font-bold text-lg mb-3"><%= t("slides.form.countdown.title") %></h3>
+                <label class="label cursor-pointer gap-2 text-base-content whitespace-normal">
+                  <%# A shared name makes the two radios exclusive; form= pointing at no form keeps
+                      them out of the slide form's submission. %>
+                  <input type="radio" class="radio radio-sm" name="countdown_mode" form="slide-countdown-unsubmitted"
+                         value="to" data-slide-editor-target="countdownMode" checked>
+                  <span><%= t("slides.form.countdown.mode_to") %></span>
+                </label>
+                <input type="time" class="input w-full mt-1 mb-3" data-slide-editor-target="countdownTo" aria-label="<%= t('slides.form.countdown.mode_to') %>">
+                <label class="label cursor-pointer gap-2 text-base-content whitespace-normal">
+                  <input type="radio" class="radio radio-sm" name="countdown_mode" form="slide-countdown-unsubmitted"
+                         value="for" data-slide-editor-target="countdownMode">
+                  <span><%= t("slides.form.countdown.mode_for") %></span>
+                </label>
+                <label class="input w-full mt-1 mb-3">
+                  <input type="number" min="1" max="999" step="1" value="5" data-slide-editor-target="countdownMinutes" aria-label="<%= t('slides.form.countdown.mode_for') %>">
+                  <span class="label"><%= t("slides.form.countdown.minutes") %></span>
+                </label>
+                <fieldset class="fieldset">
+                  <legend class="fieldset-legend"><%= t("slides.form.countdown.end_label") %></legend>
+                  <input type="text" maxlength="60" class="input w-full" data-slide-editor-target="countdownEnd"
+                         placeholder="<%= t('slides.form.countdown.end_placeholder') %>">
+                  <p class="label whitespace-normal"><%= t("slides.form.countdown.end_help") %></p>
+                </fieldset>
+                <p class="text-xs text-base-content/60 mt-2"><%= t("slides.form.countdown.clock_note") %></p>
+                <div class="modal-action">
+                  <button type="button" class="btn btn-ghost" data-action="slide-editor#closeCountdown"><%= t("slides.form.countdown.cancel") %></button>
+                  <button type="button" class="btn btn-primary" data-action="slide-editor#saveCountdown" data-role="countdown-save"><%= t("slides.form.countdown.save") %></button>
+                </div>
+              </div>
+              <div class="modal-backdrop" data-action="click->slide-editor#closeCountdown"></div>
+            </dialog>
           </fieldset>
 
           <%# Auto-advance pages: the projector turns the pages itself and the slide becomes one
