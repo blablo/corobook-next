@@ -1,38 +1,74 @@
-<div class="mx-auto my-8 max-w-4xl px-4 sm:px-6" data-role="operator" data-controller="operator-clicker">
+<div class="my-6 w-full px-4 sm:px-6" data-role="operator" data-controller="operator-clicker">
   <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
     <div class="flex items-center gap-3 min-w-0">
       <h1 class="text-2xl font-bold truncate"><%= @session.service_set.name %></h1>
       <span class="badge <%= @session.active? ? 'badge-success' : 'badge-ghost' %>"
             data-role="live-indicator"><%= @session.active? ? t("live.operator.live") : t("live.operator.ended") %></span>
     </div>
-    <%= link_to t("live.operator.back_to_service"), service_set_path(@session.service_set),
-          class: "btn btn-ghost btn-sm", data: { role: "back-to-set" } %>
-  </div>
-
-  <div class="flex flex-wrap items-center justify-between gap-2 mb-4" data-role="operator-controls">
+    <%# Keynote-style wall clock so whoever runs the service can keep time. %>
+    <span class="text-3xl font-light tabular-nums text-info" data-controller="clock" data-role="clock"
+          aria-label="<%= t('live.operator.clock') %>"></span>
     <div class="flex items-center gap-2">
-      <%= button_to t("live.operator.back"), operator_back_path(@session), method: :patch,
-            form: { data: { turbo: false, "operator-clicker-target": "back" } }, class: "btn" %>
-      <%= button_to t("live.operator.next"), operator_advance_path(@session), method: :patch,
-            form: { data: { turbo: false, "operator-clicker-target": "next" } }, class: "btn btn-primary" %>
-      <%= button_to (@session.blanked ? t("live.operator.unblank") : t("live.operator.blank")), operator_blank_path(@session), method: :patch,
-            form: { data: { turbo: false, "operator-clicker-target": "blank" } }, class: "btn", data: { role: "blank-toggle" } %>
+      <%= link_to t("live.operator.back_to_service"), service_set_path(@session.service_set),
+            class: "btn btn-ghost btn-sm", data: { role: "back-to-set" } %>
+      <% if @session.active? %>
+        <%= button_to t("live.operator.end_service"), operator_end_path(@session), method: :delete,
+              form: { data: { turbo: false } }, class: "btn btn-error btn-outline btn-sm",
+              data: { role: "end-service" } %>
+      <% end %>
     </div>
-    <% if @session.active? %>
-      <%= button_to t("live.operator.end_service"), operator_end_path(@session), method: :delete,
-            form: { data: { turbo: false } }, class: "btn btn-error btn-outline",
-            data: { role: "end-service" } %>
-    <% end %>
   </div>
 
-  <p class="text-xs text-base-content/50 mb-4" data-role="clicker-hint">
-    <%= t("live.operator.clicker_hint_html", blank_key: tag.kbd("B", class: "kbd kbd-xs")) %>
-  </p>
+  <%# Presenter view (like Keynote): Now on the left, the REAL rendered next slide on the right,
+      controls under Next. On a phone it stacks Now → controls → Next, so the main slide keeps the
+      full width and the buttons sit under the thumb. Both previews use the same projector frame
+      and fit controller as the projection screen, so they look exactly like it. %>
+  <div class="grid gap-4 mb-6 lg:grid-cols-[3fr_2fr] lg:items-start">
+    <section class="min-w-0 lg:row-span-2" data-role="now-panel">
+      <div class="flex flex-wrap items-center gap-x-2 text-sm mb-1">
+        <span class="font-semibold"><%= t("live.operator.now") %></span>
+        <span class="text-base-content/70" data-role="now-label"><%= operator_stop_label(@session) %></span>
+        <% if @stop_index %><span class="text-base-content/50" data-role="now-position"><%= t("live.operator.position", n: @stop_index + 1, count: @stop_count) %></span><% end %>
+        <% if @session.blanked %><span class="badge badge-warning badge-sm" data-role="blanked-badge"><%= t("live.operator.blanked") %></span><% end %>
+      </div>
+      <div class="rounded overflow-hidden projector-preview ring-2 ring-error" data-role="operator-frame">
+        <%= render "live/projector_frame", session: @session %>
+        <% if @session.blanked %>
+          <%# The preview stage is always black, so fixed light text (not base-content) stays legible. %>
+          <span class="absolute inset-0 z-10 flex items-center justify-center text-sm text-white/40"><%= t("live.operator.screen_blank") %></span>
+        <% end %>
+      </div>
+    </section>
 
-  <%# A true preview of what's on the projection screen: the SAME projector frame (plain lyrics,
-      no chords), on a dark mini-stage so it reads like the projector. %>
-  <div class="rounded mb-6 overflow-hidden projector-preview" data-role="operator-frame">
-    <%= render "live/projector_frame", session: @session %>
+    <section class="min-w-0 order-last lg:order-none lg:mt-8 w-2/3 mx-auto lg:w-full" data-role="next-panel">
+      <div class="flex flex-wrap items-center gap-x-2 text-sm mb-1">
+        <span class="font-semibold"><%= t("live.operator.next_up") %></span>
+        <% if @next_session %>
+          <span class="text-base-content/70" data-role="next-label"><%= operator_stop_label(@next_session) %></span>
+        <% end %>
+      </div>
+      <div class="rounded overflow-hidden projector-preview" data-role="next-frame">
+        <% if @next_session %>
+          <%= render "live/projector_frame", session: @next_session, preview: true %>
+        <% else %>
+          <span class="absolute inset-0 flex items-center justify-center text-sm text-white/50" data-role="end-of-service"><%= t("live.operator.end_of_service") %></span>
+        <% end %>
+      </div>
+    </section>
+
+    <div class="min-w-0" data-role="operator-controls">
+      <div class="flex flex-wrap items-center gap-2">
+        <%= button_to t("live.operator.back"), operator_back_path(@session), method: :patch,
+              form: { data: { turbo: false, "operator-clicker-target": "back" } }, class: "btn" %>
+        <%= button_to t("live.operator.next"), operator_advance_path(@session), method: :patch,
+              form: { data: { turbo: false, "operator-clicker-target": "next" } }, class: "btn btn-primary" %>
+        <%= button_to (@session.blanked ? t("live.operator.unblank") : t("live.operator.blank")), operator_blank_path(@session), method: :patch,
+              form: { data: { turbo: false, "operator-clicker-target": "blank" } }, class: "btn", data: { role: "blank-toggle" } %>
+      </div>
+      <p class="text-xs text-base-content/50 mt-2" data-role="clicker-hint">
+        <%= t("live.operator.clicker_hint_html", blank_key: tag.kbd("B", class: "kbd kbd-xs")) %>
+      </p>
+    </div>
   </div>
 
   <h2 class="text-sm font-semibold mb-2"><%= t("live.operator.jump_to_item") %></h2>

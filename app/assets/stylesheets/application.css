@@ -26,7 +26,7 @@
 /* The live frame is the flex stage: lyrics vertically placed per church setting, copyright
    pinned to the foot. The frame itself carries --proj-* vars so the operator-preview (which
    renders the same frame) inherits the look too. */
-#live-frame {
+:is(#live-frame, .live-frame) {
   flex: 1; display: flex; flex-direction: column;
   align-items: center; justify-content: var(--proj-valign, center);
   padding: 6vh 6vw; text-align: center; position: relative;
@@ -65,8 +65,8 @@
 /* The real projector stage is also a size container, so a slide's fixed font size (in cqh) is a
    percentage of the screen height. Scoped to .projector-root: the musician page reuses
    #live-frame as a content-sized band, which size containment would collapse. */
-.projector-root #live-frame { container-type: size; }
-.projector-preview #live-frame { position: static; inset: auto; height: 100%; padding: 4% 5%; }
+.projector-root :is(#live-frame, .live-frame) { container-type: size; }
+.projector-preview :is(#live-frame, .live-frame) { position: static; inset: auto; height: 100%; padding: 4% 5%; }
 /* Slide-show previews render a .projector-slide DIRECTLY in the preview box (no #live-frame);
    center and pad it so the slide body sits in the middle and the background image fills the box. */
 .projector-preview > .projector-slide {
@@ -140,12 +140,12 @@
 /* Song-wide background image (Song projection settings). The .projector-slide-bg/scrim fill the
    whole #live-frame; lift the title/lyric content above them and add a soft shadow so the text
    stays legible over any photo. The copyright footer rides along too. */
-#live-frame.has-song-bg > .projector-section,
-#live-frame.has-song-bg > .projector-title,
-#live-frame.has-song-bg .projector-copyright { position: relative; z-index: 1; }
-#live-frame.has-song-bg .projector-line,
-#live-frame.has-song-bg .projector-title-name,
-#live-frame.has-song-bg .projector-title-credit-line { text-shadow: 0 2px 12px rgba(0,0,0,0.65); }
+:is(#live-frame, .live-frame).has-song-bg > .projector-section,
+:is(#live-frame, .live-frame).has-song-bg > .projector-title,
+:is(#live-frame, .live-frame).has-song-bg .projector-copyright { position: relative; z-index: 1; }
+:is(#live-frame, .live-frame).has-song-bg .projector-line,
+:is(#live-frame, .live-frame).has-song-bg .projector-title-name,
+:is(#live-frame, .live-frame).has-song-bg .projector-title-credit-line { text-shadow: 0 2px 12px rgba(0,0,0,0.65); }
 
 .live-ended { text-align: center; font-size: 1.5rem; color: #9aa0a6; }
 
