@@ -460,7 +460,7 @@ en:
       go: "Go"
       now: "Now"
       next_up: "Next"
-      position: "%{n} of %{count}"
+      position: "Slide %{n} of %{count}"
       title_slide: "Title"
       page: "Page %{n} of %{count}"
       blanked: "Blanked"

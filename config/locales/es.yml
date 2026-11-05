@@ -460,7 +460,7 @@ es:
       go: "Ir"
       now: "Ahora"
       next_up: "Siguiente"
-      position: "%{n} de %{count}"
+      position: "Diapositiva %{n} de %{count}"
       title_slide: "Título"
       page: "Página %{n} de %{count}"
       blanked: "Oscurecida"

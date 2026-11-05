@@ -28,7 +28,7 @@
       <div class="flex flex-wrap items-center gap-x-2 text-sm mb-1">
         <span class="font-semibold"><%= t("live.operator.now") %></span>
         <span class="text-base-content/70" data-role="now-label"><%= operator_stop_label(@session) %></span>
-        <% if @stop_index %><span class="text-base-content/50" data-role="now-position"><%= t("live.operator.position", n: @stop_index + 1, count: @stop_count) %></span><% end %>
+        <% if @stop_index %><span class="text-base-content/50" data-role="now-position">· <%= t("live.operator.position", n: @stop_index + 1, count: @stop_count) %></span><% end %>
         <% if @session.blanked %><span class="badge badge-warning badge-sm" data-role="blanked-badge"><%= t("live.operator.blanked") %></span><% end %>
       </div>
       <div class="rounded overflow-hidden projector-preview ring-2 ring-error" data-role="operator-frame">
