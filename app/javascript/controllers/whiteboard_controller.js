@@ -16,7 +16,7 @@ const BOARD_BG = { light: "#ffffff", dark: "#0f172a" }
 
 export default class extends Controller {
   static targets = ["layer", "canvas", "surface", "start", "tools", "stop", "status", "darkToggle",
-    "color", "tool", "banner", "bannerText", "hint", "nowLabel"]
+    "color", "tool", "banner", "bannerText", "hint", "nowLabel", "nav"]
   static values = { speaker: String, viewer: String, labels: Object }
 
   connect() {
@@ -216,7 +216,14 @@ export default class extends Controller {
       this.stopTarget.textContent = this.mode === "slide" ? L.stop_slide : L.stop_board
     }
     if (this.hasDarkToggleTarget) this.darkToggleTarget.hidden = this.mode !== "board"
-    if (this.hasHintTarget) this.hintTarget.textContent = this.mode === "slide" ? L.hint_slide : this.mode === "board" ? L.hint_board : L.hint_idle
+    // While drawing, the speaker view drops Next/Back and the hint and lets the stage fill the
+    // screen (.speaker-root.is-drawing in application.css).
+    if (speaker) this.element.classList.toggle("is-drawing", on)
+    if (this.hasNavTarget) this.navTarget.hidden = on
+    if (this.hasHintTarget) {
+      this.hintTarget.hidden = speaker && on
+      this.hintTarget.textContent = this.mode === "slide" ? L.hint_slide : this.mode === "board" ? L.hint_board : L.hint_idle
+    }
     if (this.hasBannerTarget) {
       this.bannerTarget.hidden = !on
       if (this.hasBannerTextTarget && on) this.bannerTextTarget.textContent = L[`banner_${this.mode}`]
