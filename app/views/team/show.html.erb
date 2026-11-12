@@ -61,12 +61,13 @@
                         </div>
                         <div class="min-w-0 grow flex flex-col gap-0.5">
                           <%# Inline name, saved on change. The ghost input's padding is offset (-ml-2/px-2) so its
-                              text lines up with the email beneath; the focus ring hugs the box (offset 0, 1px)
-                              instead of DaisyUI's 2px outline 2px outside it, which ran into the email. %>
+                              text lines up with the email beneath. Hover tints it so it reads as editable; focus
+                              draws a thin primary ring with a soft halo on the box itself, instead of DaisyUI's
+                              dark 2px outline 2px outside it, which ran into the email. %>
                           <%= form_with url: member_path(member), method: :patch do |f| %>
                             <%= f.text_field :"user[name]", value: member.name, id: "member-name-#{member.id}", maxlength: 100, autocomplete: "off",
                                   placeholder: t("team.show.name_placeholder"),
-                                  class: "input input-ghost input-sm w-full max-w-xs -ml-2 px-2 text-sm font-medium focus:outline-1 focus:outline-offset-0",
+                                  class: "input input-ghost input-sm h-7 w-full max-w-64 -ml-2 px-2 text-sm font-medium hover:bg-base-200 focus:bg-[var(--color-base-100)] focus:outline-1 focus:outline-offset-0 focus:outline-[var(--color-primary)] focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--color-primary)_15%,transparent)]",
                                   aria: { label: t("team.show.name_for", email: member.email) },
                                   data: { role: "member-name" }, onchange: "this.form.requestSubmit()" %>
                           <% end %>
