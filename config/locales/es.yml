@@ -24,12 +24,25 @@ es:
 
   songs:
     index:
-      title: "Canciones — %{church}"
+      title: "Canciones"
+      subtitle:
+        one: "%{count} canción en la biblioteca de %{church}."
+        other: "%{count} canciones en la biblioteca de %{church}."
       new: "Nueva canción"
       search_placeholder: "Buscar por título, autor o letra…"
-      empty: "No se encontraron canciones."
-      previous: "← Anterior"
-      next: "Siguiente →"
+      search_label: "Buscar canciones"
+      empty: "Aún no hay canciones."
+      empty_for_search: "Ninguna canción coincide con “%{query}”."
+      clear_search: "Quitar búsqueda"
+      th_song: "Canción"
+      th_author: "Autor"
+      th_key: "Tono"
+      th_last_used: "Último uso"
+      never_used: "Nunca"
+      date_format: "%d/%m/%Y"
+      showing: "%{from}–%{to} de %{total}"
+      previous: "Anterior"
+      next: "Siguiente"
     new:
       title: "Nueva canción"
     edit:

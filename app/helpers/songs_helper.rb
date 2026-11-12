@@ -1,5 +1,12 @@
 module SongsHelper
   # Surfaces x_corobook_parse_warning markers the parser attached to sections, for the editor.
+  # The lyric line that matched the search, else the song's first lyric line.
+  def song_snippet(song, query)
+    lines = song.plain_text.to_s.lines.map(&:strip).reject(&:blank?)
+    match = lines.find { |line| line.downcase.include?(query.to_s.strip.downcase) } if query.present?
+    match || lines.first
+  end
+
   def parse_warnings(song)
     sections = song.parsed_lyric&.dig("sections") || []
     sections.filter_map { |s| s["x_corobook_parse_warning"] }

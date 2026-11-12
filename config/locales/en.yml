@@ -24,12 +24,25 @@ en:
 
   songs:
     index:
-      title: "Songs — %{church}"
+      title: "Songs"
+      subtitle:
+        one: "%{count} song in %{church}'s library."
+        other: "%{count} songs in %{church}'s library."
       new: "New song"
       search_placeholder: "Search title, author, or lyrics…"
-      empty: "No songs found."
-      previous: "← Previous"
-      next: "Next →"
+      search_label: "Search songs"
+      empty: "No songs yet."
+      empty_for_search: "No songs match “%{query}”."
+      clear_search: "Clear search"
+      th_song: "Song"
+      th_author: "Author"
+      th_key: "Key"
+      th_last_used: "Last used"
+      never_used: "Never"
+      date_format: "%b %-d, %Y"
+      showing: "%{from}–%{to} of %{total}"
+      previous: "Previous"
+      next: "Next"
     new:
       title: "New song"
     edit:
