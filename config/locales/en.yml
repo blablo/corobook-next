@@ -216,14 +216,19 @@ en:
 
   slides:
     index:
-      title: "Slides — %{church}"
+      title: "Slides"
+      subtitle: "Announcements, scripture and other slides %{church} can add to any service."
       new: "New slide"
       import: "Import PDF"
       search_placeholder: "Search title, tags, or body…"
-      tags: "Tags"
+      search_label: "Search slides"
+      all_tags: "All"
       pages: "%{count} pages"
       empty: "No slides yet."
+      empty_hint: "Create a slide, or import a deck exported as PDF."
       empty_for_tag: "No slides for #%{tag} yet."
+      empty_for_search: "No slides match your search."
+      clear_filters: "Clear filters"
     new:
       title: "New slide"
     archive:

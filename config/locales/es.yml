@@ -216,14 +216,19 @@ es:
 
   slides:
     index:
-      title: "Diapositivas — %{church}"
+      title: "Diapositivas"
+      subtitle: "Anuncios, escrituras y otras diapositivas que %{church} puede agregar a cualquier servicio."
       new: "Nueva diapositiva"
       import: "Importar PDF"
       search_placeholder: "Buscar por título, etiquetas o contenido…"
-      tags: "Etiquetas"
+      search_label: "Buscar diapositivas"
+      all_tags: "Todas"
       pages: "%{count} páginas"
       empty: "Aún no hay diapositivas."
+      empty_hint: "Crea una diapositiva o importa una presentación exportada como PDF."
       empty_for_tag: "Aún no hay diapositivas para #%{tag}."
+      empty_for_search: "Ninguna diapositiva coincide con tu búsqueda."
+      clear_filters: "Quitar filtros"
     new:
       title: "Nueva diapositiva"
     archive:
