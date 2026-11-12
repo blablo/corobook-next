@@ -101,22 +101,8 @@
                   <span class="block font-medium truncate"><%= set.name %></span>
                   <span class="block text-xs text-base-content/60"><%= t("home.recent.items", count: item_count) %></span>
                 <% end %>
-                <% empty_slots = set.empty_slot_count %>
-                <% if empty_slots.positive? %>
-                  <%# template slots still empty: fill them on the service page, which asks before going live %>
-                  <%= link_to t("services.index.fill_slots", count: empty_slots), service_set_path(set),
-                        class: "btn btn-soft btn-warning btn-sm", data: { role: "recent-fill-slots" } %>
-                <% elsif item_count.positive? && @active_session.nil? %>
-                  <%= button_to t("home.recent.go_live"), launch_service_set_path(set), method: :post,
-                        class: "btn btn-primary btn-sm", data: { role: "recent-go-live" },
-                        title: t("home.recent.go_live_with", name: set.name) %>
-                <% elsif item_count.zero? %>
-                  <%= link_to t("home.recent.add_items"), service_set_path(set),
-                        class: "btn btn-ghost btn-sm", data: { role: "recent-add-items" } %>
-                <% else %>
-                  <%# a session is already live: open the set rather than offer a second launch %>
-                  <%= link_to t("home.recent.open"), service_set_path(set), class: "btn btn-ghost btn-sm" %>
-                <% end %>
+                <%= render "service_sets/list_status", set: set, active_session: @active_session, count: false %>
+                <%= render "service_sets/list_action", set: set, active_session: @active_session %>
               </li>
             <% end %>
           </ul>

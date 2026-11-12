@@ -7,18 +7,10 @@
         <span class="badge badge-soft badge-primary badge-sm shrink-0" data-role="next-badge"><%= t("services.index.next") %></span>
       <% end %>
     </span>
-    <% if set.set_items.empty? %>
-      <span class="block text-xs text-warning"><%= t("services.index.no_items") %></span>
-    <% else %>
+    <% if set.set_items.any? %>
       <span class="block text-xs text-base-content/60 truncate"><%= set_items_preview(set) %></span>
     <% end %>
   <% end %>
-  <span class="badge badge-ghost badge-sm hidden sm:inline-flex whitespace-nowrap">
-    <%= t("services.index.items", count: set.set_items.size) %>
-  </span>
-  <%# A fixed-width action column (wide enough for the longest label, e.g. "Llenar 12 espacios"),
-      so the item badges line up whichever button a row has. %>
-  <div class="flex shrink-0 justify-end sm:w-40">
-    <%= render "live_action", set: set, active_session: active_session %>
-  </div>
+  <%= render "list_status", set: set, active_session: active_session %>
+  <%= render "list_action", set: set, active_session: active_session %>
 </li>

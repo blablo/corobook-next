@@ -37,7 +37,8 @@ class ServicesIndexTest < ActionDispatch::IntegrationTest
     assert_select "[data-role=tab-upcoming] .badge", text: "2"
     assert_select "[data-role=tab-past] .badge", text: "1"
     assert_select "[data-role=past-sets]", count: 0
-    assert_select "[data-role=upcoming-sets] form[action='#{launch_service_set_path(later)}']"
+    assert_select "[data-role=upcoming-sets] [data-role=set-open][href='#{service_set_path(later)}']"
+    assert_select "[data-role=upcoming-sets] form[action='#{launch_service_set_path(later)}']", count: 0
   end
 
   test "with only the next service upcoming, the Upcoming list still shows it" do
@@ -79,15 +80,21 @@ class ServicesIndexTest < ActionDispatch::IntegrationTest
     get service_sets_path
     assert_select "[data-role=live-banner] a[href='#{operator_path(session)}']"
     assert_select "[data-role=next-service] [data-role=set-resume][href='#{operator_path(session)}']"
+    assert_select "[data-role=upcoming-sets] [data-role=set-row]:first-child [data-role=set-status][data-status=live]"
+    assert_select "[data-role=upcoming-sets] [data-role=set-row]:first-child [data-role=set-resume]"
     assert_select "form[action='#{launch_service_set_path(other)}']", count: 0
   end
 
-  test "an empty service offers Add items instead of Go live" do
-    service("Soon", Date.current + 3)
-    empty = service("Empty", Date.current + 5, songs: 0)
+  test "list rows show the service's status and offer only Open (or Resume)" do
+    ready = service("Ready", Date.current + 3)
+    empty = service("Empty one", Date.current + 5, songs: 0)
 
     get service_sets_path
-    assert_select "[data-role=upcoming-sets] [data-role=set-add-items][href='#{service_set_path(empty)}']"
-    assert_select "form[action='#{launch_service_set_path(empty)}']", count: 0
+    rows = css_select("[data-role=upcoming-sets] [data-role=set-row]")
+    assert_equal [ "ready", "empty" ], rows.map { |r| r.at_css("[data-role=set-status]")["data-status"] }
+    assert_equal "Empty", rows.last.at_css("[data-role=set-status]").text.strip
+    assert_select "[data-role=upcoming-sets] [data-role=set-open][href='#{service_set_path(empty)}']"
+    assert_select "[data-role=upcoming-sets] [data-role=set-open][href='#{service_set_path(ready)}']"
+    assert_select "[data-role=upcoming-sets] form", count: 0
   end
 end

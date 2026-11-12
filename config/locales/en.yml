@@ -192,6 +192,9 @@ en:
     default:
       made: "New services now start from this template."
       cleared: "New services now start blank."
+    status:
+      live: "Live"
+      empty: "Empty"
     launch:
       nothing_to_show: "Nothing to show yet. Add a song or slide, or fill a slot."
     template:
@@ -591,10 +594,6 @@ en:
       items:
         one: "%{count} item"
         other: "%{count} items"
-      go_live: "Go live"
-      go_live_with: "Go live with %{name}"
-      add_items: "Add items"
-      open: "Open"
       empty: "No services yet."
     create:
       heading: "Create"
