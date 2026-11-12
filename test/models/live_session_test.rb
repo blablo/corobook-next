@@ -1,6 +1,7 @@
 require "test_helper"
 
 class LiveSessionTest < ActiveSupport::TestCase
+  include ActionCable::TestHelper
   setup do
     @church = Church.create!(name: "Central")
     @song = @church.songs.create!(title: "Himno", chordpro_source: "[G]Hola")
@@ -23,6 +24,17 @@ class LiveSessionTest < ActiveSupport::TestCase
     @item0.update!(position: 5)
     @set.set_items.create!(position: 0, item_type: "song", slot_label: "Opening song")
     assert_equal @item1, LiveSession.launch(@set).current_set_item
+  end
+
+  test "move_to! moves, bumps the version, records the song and broadcasts" do
+    session = LiveSession.launch(@set)
+    stop = Corobook::LivePosition.new(@set).first_stop_of(@item1.id)
+    assert_difference -> { UsageEvent.where(song: @item1.song).count }, 1 do
+      assert_broadcasts("#{session.to_gid_param}:projector", 1) do
+        assert session.move_to!(stop)
+      end
+    end
+    assert_equal [ @item1, 1 ], [ session.reload.current_set_item, session.position_version ]
   end
 
   test "launch generates both follow tokens" do

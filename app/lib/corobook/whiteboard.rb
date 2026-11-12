@@ -60,10 +60,14 @@ module Corobook
 
     def slide_strokes = session.whiteboard_slide_stop == stop_key ? session.whiteboard_slide : []
 
+    # "Romanos 11:33 · Page 2 of 4": what the projector shows, for the speaker view's Now line
+    # (so Next is visible even while the whiteboard covers the slide).
+    def stop_label = ApplicationController.helpers.stop_label_text(session)
+
     # Everything a screen needs to draw the whiteboard; sent on subscribe and after each change.
     def state
       { type: "state", mode: session.whiteboard_mode, dark: session.whiteboard_dark, blanked: session.blanked,
-        stop: stop_key, board: session.whiteboard_board, slide: slide_strokes }
+        stop: stop_key, label: stop_label, board: session.whiteboard_board, slide: slide_strokes }
     end
 
     # Put the whiteboard (or slide drawing) on the projector. Bumps position_version and
@@ -153,7 +157,7 @@ module Corobook
       # Straight in SQL: this row may have been loaded before the speaker started drawing.
       LiveSession.where(id: session.id).where.not(whiteboard_slide_stop: [ nil, stop_key ])
                  .update_all("whiteboard_slide = '[]'::jsonb, whiteboard_slide_stop = NULL")
-      broadcast({ type: "position", stop: stop_key, blanked: session.blanked })
+      broadcast({ type: "position", stop: stop_key, label: stop_label, blanked: session.blanked })
     end
 
     def broadcast_ended

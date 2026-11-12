@@ -103,7 +103,7 @@ class Corobook::WhiteboardTest < ActiveSupport::TestCase
   end
 
   test "a position broadcast tells the screens which stop is showing" do
-    assert_broadcast_on(stream, { type: "position", stop: @board.stop_key, blanked: false }) do
+    assert_broadcast_on(stream, { type: "position", stop: @board.stop_key, label: "Uno · Title", blanked: false }) do
       Corobook::LiveBroadcast.position(@session)
     end
   end

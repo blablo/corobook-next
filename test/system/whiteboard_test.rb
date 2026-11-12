@@ -39,4 +39,25 @@ class WhiteboardSystemTest < ApplicationSystemTestCase
     assert_nil @session.reload.whiteboard_mode
     assert_equal 1, @session.whiteboard_board.size, "the board is kept for next time"
   end
+
+  test "Next and Back on the speaker view move the projector" do
+    set = @church.service_sets.create!(name: "Tarde")
+    set.set_items.create!(position: 0, item_type: "song",
+                          song: @church.songs.create!(title: "Himno", chordpro_source: "{sov: V1}\nPrimera línea\n{eov}"))
+    @session.end!
+    session = LiveSession.launch(set)
+
+    using_session(:projector) do
+      visit projector_path(session.projector_token)
+      assert_selector "[data-role=projector-frame]", text: "Himno"
+    end
+
+    visit speaker_path(session.speaker_token)
+    find("[data-role=speaker-next]").click
+    assert_selector "[data-role=speaker-now]", text: /V1|Verse/i
+    using_session(:projector) { assert_selector "[data-role=projector-frame]", text: "Primera línea" }
+
+    find("[data-role=speaker-back]").click
+    using_session(:projector) { assert_selector "[data-role=projector-frame]", text: "Himno" }
+  end
 end
