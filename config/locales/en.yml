@@ -525,7 +525,10 @@ en:
       title: "Settings"
       subdomain_heading: "Church subdomain"
       subdomain_intro_html: "Pick a unique subdomain for %{church}. Once set, your team will be able to sign in at your own address and skip choosing the church."
-      subdomain_coming_soon: "(The sign-in shortcut is coming next — setting it now reserves your name.)"
+      subtitle: "Settings that apply to all of %{church}."
+      church_heading: "Church"
+      church_name: "Name"
+      church_members: "Members"
       subdomain_error: "Subdomain %{message}."
       subdomain_label: "Subdomain"
       subdomain_help: "3–63 characters, lowercase letters, numbers, and hyphens. Leave blank to remove."
@@ -537,7 +540,7 @@ en:
     projection:
       title: "Song projection settings"
       heading: "Song projection"
-      intro_html: "Define how song lyrics look on the projection screen for %{church}. These apply to songs in every live service; custom slides keep their own look. Changes preview live below and take effect on the next slide once saved."
+      intro_html: "Define how song lyrics look on the projection screen for %{church}. These apply to songs in every live service; custom slides keep their own look. Changes preview live and take effect on the next slide once saved."
       background: "Background"
       bg_solid: "Solid colour"
       bg_gradient: "Gradient"
@@ -583,6 +586,10 @@ en:
       bold_lyric_text: "Bold lyric text"
       show_credits: "Show author / copyright / CCLI credits on screen"
       preview: "Preview"
+      preview_help: "Updates as you change settings. The projector sizes lyrics the same way."
+      background_style: "Style"
+      text_heading: "Text"
+      size_heading: "Size & layout"
       save: "Save projection settings"
 
   team:

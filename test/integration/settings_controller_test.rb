@@ -19,6 +19,19 @@ class SettingsControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-role=subdomain-input]"
   end
 
+  test "the subdomain suffix and address use the configured base host, not the request's registrable domain" do
+    @church.update!(subdomain: "gracia")
+    prev = ENV["APP_HOST"]
+    ENV["APP_HOST"] = "next.corobook.com"
+    login(@admin)
+    get settings_path
+    assert_select "[data-role=subdomain-settings]", text: /\.next\.corobook\.com/
+    assert_select "[data-role=subdomain-preview-url]", text: "https://gracia.next.corobook.com/"
+    assert_select "form[data-subdomain-preview-domain-value='next.corobook.com']"
+  ensure
+    ENV["APP_HOST"] = prev
+  end
+
   test "an admin can set the subdomain" do
     login(@admin)
     patch settings_path, params: { church: { subdomain: "Gracia" } }
