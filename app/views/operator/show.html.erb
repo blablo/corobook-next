@@ -103,7 +103,7 @@
         <div class="card-body p-0">
           <h2 class="card-title text-base px-5 pt-4"><%= t("live.operator.jump_to_item") %></h2>
           <ol class="list lg:max-h-[28rem] overflow-y-auto">
-            <% @session.service_set.ordered_items.each_with_index do |item, i| %>
+            <% @session.service_set.ordered_items.filled.each_with_index do |item, i| %>
               <% current = item.id == @session.current_set_item_id %>
               <% song = item.item_type == "song" %>
               <li class="list-row items-center <%= current ? "bg-base-200" : "hover:bg-base-200" %>"

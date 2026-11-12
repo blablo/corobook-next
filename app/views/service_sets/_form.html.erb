@@ -1,3 +1,9 @@
+<%#
+  New/edit service or template. Locals: service_set; on a new service also templates (the
+  church's templates, for "Start from") and from_template_id (the one preselected).
+%>
+<% template = service_set.template? %>
+<% templates = local_assigns[:templates] || [] %>
 <%= form_with model: service_set, url: (service_set.persisted? ? service_set_path(service_set) : service_sets_path),
       class: "max-w-lg" do |f| %>
   <% if service_set.errors.any? %>
@@ -8,28 +14,52 @@
 
   <div class="card bg-base-100 ring-1 ring-base-200">
     <div class="card-body gap-4">
-      <fieldset class="fieldset">
-        <%= f.label :service_date, t("services.form.service_date"), class: "fieldset-legend" %>
-        <%= f.date_field :service_date, class: "input input-bordered w-full",
-              data: { role: "set-date" } %>
-        <p class="label"><%= t("services.form.service_date_hint") %></p>
-      </fieldset>
+      <% if template %>
+        <%= f.hidden_field :template, value: "1" unless service_set.persisted? %>
+        <fieldset class="fieldset">
+          <%= f.label :name, t("services.form.template_name"), class: "fieldset-legend" %>
+          <%= f.text_field :name, class: "input input-bordered w-full", autofocus: true,
+                placeholder: t("services.form.template_name_placeholder"), data: { role: "set-name" } %>
+        </fieldset>
+      <% else %>
+        <% if !service_set.persisted? && templates.any? %>
+          <fieldset class="fieldset">
+            <%= label_tag :from_template_id, t("services.form.start_from"), class: "fieldset-legend" %>
+            <%= select_tag :from_template_id,
+                  options_for_select(templates.map { |tpl|
+                    [ tpl.id == current_church.default_template_id ? t("services.form.default_template", name: tpl.name) : tpl.name, tpl.id ]
+                  }, local_assigns[:from_template_id]),
+                  include_blank: t("services.form.blank"), class: "select w-full", data: { role: "start-from" } %>
+            <p class="label whitespace-normal"><%= t("services.form.start_from_hint") %></p>
+          </fieldset>
+        <% end %>
 
-      <fieldset class="fieldset">
-        <%= f.label :name, t("services.form.name"), class: "fieldset-legend" %>
-        <%= f.text_field :name, class: "input input-bordered w-full",
-              data: { role: "set-name" } %>
-        <p class="label"><%= t("services.form.name_hint") %></p>
-      </fieldset>
+        <fieldset class="fieldset">
+          <%= f.label :service_date, t("services.form.service_date"), class: "fieldset-legend" %>
+          <%= f.date_field :service_date, class: "input input-bordered w-full",
+                data: { role: "set-date" } %>
+          <p class="label"><%= t("services.form.service_date_hint") %></p>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <%= f.label :name, t("services.form.name"), class: "fieldset-legend" %>
+          <%= f.text_field :name, class: "input input-bordered w-full",
+                data: { role: "set-name" } %>
+          <p class="label"><%= t("services.form.name_hint") %></p>
+        </fieldset>
+      <% end %>
 
       <div class="flex items-center gap-3">
-        <%= f.submit (service_set.persisted? ? t("services.form.save") : t("services.form.create")), class: "btn btn-primary" %>
-        <%= link_to t("services.form.cancel"), (service_set.persisted? ? service_set_path(service_set) : service_sets_path), class: "btn btn-ghost" %>
+        <% create_label = template ? t("services.form.create_template") : t("services.form.create") %>
+        <%= f.submit (service_set.persisted? ? t("services.form.save") : create_label), class: "btn btn-primary" %>
+        <%= link_to t("services.form.cancel"),
+              (service_set.persisted? ? service_set_path(service_set) : service_sets_path(tab: ("templates" if template))),
+              class: "btn btn-ghost" %>
       </div>
     </div>
   </div>
 
-  <% unless service_set.persisted? %>
+  <% unless service_set.persisted? || template %>
     <%# On a NEW set, keep the name mirroring the date until the user edits the name themselves. %>
     <script>
       (function () {

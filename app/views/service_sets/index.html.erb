@@ -4,9 +4,16 @@
       <h1 class="text-2xl font-semibold"><%= t("services.index.title") %></h1>
       <p class="text-base-content/60 mt-1"><%= t("services.index.subtitle", church: current_church.name) %></p>
     </div>
-    <%= link_to new_service_set_path, class: "btn btn-primary" do %>
-      <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-      <%= t("services.index.new") %>
+    <% if @tab == "templates" %>
+      <%= link_to new_service_set_path(template: 1), class: "btn btn-primary", data: { role: "new-template" } do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        <%= t("services.index.new_template") %>
+      <% end %>
+    <% else %>
+      <%= link_to new_service_set_path, class: "btn btn-primary" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        <%= t("services.index.new") %>
+      <% end %>
     <% end %>
   </div>
 
@@ -18,16 +25,19 @@
     </div>
   <% end %>
 
-  <% if @upcoming_count.zero? && @past_count.zero? %>
+  <% if @upcoming_count.zero? && @past_count.zero? && @template_count.zero? %>
     <div class="card card-border bg-base-100" data-role="empty">
       <div class="card-body items-center text-center">
         <h2 class="card-title text-base"><%= t("services.index.empty") %></h2>
         <p class="text-base-content/60"><%= t("services.index.empty_hint") %></p>
-        <%= link_to t("services.index.new"), new_service_set_path, class: "btn btn-primary mt-2" %>
+        <div class="flex flex-wrap justify-center gap-2 mt-2">
+          <%= link_to t("services.index.new"), new_service_set_path, class: "btn btn-primary" %>
+          <%= link_to t("services.index.new_template"), new_service_set_path(template: 1), class: "btn btn-ghost" %>
+        </div>
       </div>
     </div>
   <% else %>
-    <% if @next_set %>
+    <% if @next_set && @tab != "templates" %>
       <section class="card card-border bg-base-100" data-role="next-service">
         <div class="card-body sm:flex-row sm:items-center gap-5">
           <%= render "date_block", date: @next_set.service_date, big: true %>
@@ -74,9 +84,24 @@
                 aria: { selected: @tab == "past" }, data: { role: "tab-past" } do %>
             <%= t("services.index.past") %> <span class="badge badge-sm ml-2"><%= @past_count %></span>
           <% end %>
+          <%= link_to service_sets_path(tab: "templates"), role: "tab", class: "tab #{"tab-active" if @tab == "templates"}",
+                aria: { selected: @tab == "templates" }, data: { role: "tab-templates" } do %>
+            <%= t("services.index.templates") %> <span class="badge badge-sm ml-2"><%= @template_count %></span>
+          <% end %>
         </div>
 
-        <% if @sets.empty? %>
+        <% if @tab == "templates" && @sets.empty? %>
+          <div class="px-6 py-8 text-center text-base-content/60 space-y-1" data-role="tab-empty">
+            <p><%= t("services.index.no_templates") %></p>
+            <p class="text-sm"><%= t("services.index.no_templates_hint") %></p>
+          </div>
+        <% elsif @tab == "templates" %>
+          <ul class="list" data-role="templates">
+            <% @sets.each do |template| %>
+              <%= render "template_row", template: template %>
+            <% end %>
+          </ul>
+        <% elsif @sets.empty? %>
           <p class="px-6 py-8 text-center text-base-content/60" data-role="tab-empty">
             <%= t(@tab == "past" ? "services.index.no_past" : "services.index.no_other_upcoming") %>
           </p>

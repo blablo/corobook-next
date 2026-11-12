@@ -77,6 +77,8 @@ Rails.application.routes.draw do
       post "items", to: "service_sets#add_item", as: :add_item
       patch "reorder"
       delete "items/:item_id", to: "service_sets#remove_item", as: :remove_item
+      patch "items/:item_id/fill", to: "service_sets#fill_item", as: :fill_item
+      patch "default", to: "service_sets#toggle_default", as: :toggle_default
       post "launch", to: "live_sessions#create", as: :launch
       post "send_to_band"
       get "library", to: "service_sets#library", as: :library

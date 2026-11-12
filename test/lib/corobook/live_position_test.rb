@@ -44,6 +44,14 @@ class Corobook::LivePositionTest < ActiveSupport::TestCase
     assert_equal [ @i1.id, 0 ], [ j.set_item_id, j.section_index ]
   end
 
+  test "an empty slot is not a stop: next crosses straight over it" do
+    @i1.update!(position: 2)
+    @set.set_items.create!(position: 1, item_type: "song", slot_label: "Worship song")
+    n = pos.next_stop(@i0.id, 2)
+    assert_equal [ @i1.id, 0 ], [ n.set_item_id, n.section_index ]
+    assert_equal 4, pos.stops.length
+  end
+
   test "arrangement limits the song's section count (plus the title slide)" do
     @song.update!(arrangement: [ "V1" ]) # only the first verse, + 1 title slide
     assert_equal 2, Corobook::LivePosition.new(@set).section_count_for(@i0)

@@ -6,8 +6,11 @@ class Church < ApplicationRecord
   has_many :service_sets, dependent: :destroy
   has_many :live_sessions, dependent: :destroy
   has_many :usage_events, dependent: :destroy
+  # The template the New service form starts from. Nullified if the template is deleted.
+  belongs_to :default_template, class_name: "ServiceSet", optional: true
 
   validates :name, presence: true
+  validate :default_template_is_own_template
 
   # ── Projector settings (per-church projection look & behaviour) ──────────────
   CASE_OPTIONS        = %w[none upper title].freeze
@@ -110,5 +113,12 @@ class Church < ApplicationRecord
 
     admin_ids = admins.pluck(:id)
     admin_ids == [ user.id ]
+  end
+
+  def default_template_is_own_template
+    return if default_template.nil?
+    return if default_template.template? && default_template.church_id == id
+
+    errors.add(:default_template, "must be one of this church's templates")
   end
 end

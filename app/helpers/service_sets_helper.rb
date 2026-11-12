@@ -1,11 +1,30 @@
 module ServiceSetsHelper
   PREVIEW_ITEMS = 4
 
-  # "Way Maker · Oceans · Welcome", the first few item titles of a service.
+  # "Way Maker · Oceans · Welcome", the first few item titles of a service. An empty slot shows
+  # its label ("Worship song").
   def set_items_preview(set)
-    titles = set.set_items.filter_map(&:resolved_title)
+    titles = set.set_items.filter_map { |item| item.resolved_title || item.slot_label }
     preview = titles.first(PREVIEW_ITEMS).join(" · ")
     titles.size > PREVIEW_ITEMS ? "#{preview} …" : preview
+  end
+
+  # "9 items · 3 song slots · 4 slide slots" for a template (items: false drops the item count).
+  def template_summary(set, items: true)
+    all = set.set_items.to_a
+    song_slots = all.count { |i| i.slot? && i.song? }
+    slide_slots = all.count { |i| i.slot? && i.text_slide? }
+    parts = [ (t("services.index.items", count: all.size) if items || (song_slots + slide_slots).zero?),
+              (t("services.template.song_slots", count: song_slots) if song_slots.positive?),
+              (t("services.template.slide_slots", count: slide_slots) if slide_slots.positive?) ]
+    parts.compact.join(" · ")
+  end
+
+  # "Choose a song" / "Choose a scripture slide": what an empty slot's button says.
+  def slot_choose_label(item)
+    return t("services.slots.choose_song") if item.song?
+
+    item.slot_tag ? t("services.slots.choose_tagged_slide", tag: item.slot_tag) : t("services.slots.choose_slide")
   end
 
   # "Song · Stuart K. Hine" or "Slide · 3 pages", the line under an item's title in the program.

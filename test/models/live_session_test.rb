@@ -19,6 +19,12 @@ class LiveSessionTest < ActiveSupport::TestCase
     assert_equal @church, session.church
   end
 
+  test "launch starts at the first filled item, skipping an empty slot" do
+    @item0.update!(position: 5)
+    @set.set_items.create!(position: 0, item_type: "song", slot_label: "Opening song")
+    assert_equal @item1, LiveSession.launch(@set).current_set_item
+  end
+
   test "launch generates both follow tokens" do
     session = LiveSession.launch(@set)
     assert session.projector_token.present?

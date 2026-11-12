@@ -1,12 +1,18 @@
 <%# The live action for one service: Resume its own live session, Go live when nothing is live,
-    Add items when it is empty, else Open (another service is live; never offer a second launch). %>
+    Add items when it is empty, Fill slots when template slots are still empty (the service page
+    asks before going live with them), else Open (another service is live; never offer a second
+    launch). %>
 <% size = local_assigns.fetch(:size, "btn-sm") %>
+<% empty_slots = set.empty_slot_count %>
 <% if active_session&.service_set_id == set.id %>
   <%= link_to t("services.index.resume"), operator_path(active_session),
         class: "btn btn-primary #{size}", data: { role: "set-resume" } %>
 <% elsif set.set_items.empty? %>
   <%= link_to t("services.index.add_items"), service_set_path(set),
         class: "btn btn-ghost #{size}", data: { role: "set-add-items" } %>
+<% elsif empty_slots.positive? %>
+  <%= link_to t("services.index.fill_slots", count: empty_slots), service_set_path(set),
+        class: "btn btn-soft btn-warning #{size}", data: { role: "set-fill-slots" } %>
 <% elsif active_session.nil? %>
   <%= button_to t("services.index.go_live"), launch_service_set_path(set), method: :post,
         class: "btn btn-primary #{size}", data: { role: "set-go-live" },
