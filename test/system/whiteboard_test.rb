@@ -25,7 +25,7 @@ class WhiteboardSystemTest < ApplicationSystemTestCase
     find("[data-role=start-board]").click
     assert_selector "[data-role=speaker-status]", text: "Whiteboard on the projector"
     assert_selector "[data-role=speaker-tools]"
-    assert_no_selector "[data-role=speaker-next]", "Next/Back make room for the board"
+    assert_no_selector "[data-role=speaker-next]" # Next/Back make room for the board
 
     canvas = find("[data-role=whiteboard-canvas]")
     page.driver.browser.action.move_to(canvas.native).click_and_hold.move_by(60, 20).move_by(60, -10).release.perform
