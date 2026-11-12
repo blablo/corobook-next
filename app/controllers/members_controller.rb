@@ -4,15 +4,16 @@ class MembersController < ApplicationController
 
   def update
     member = find_in_church(:users, params[:id])
-    attrs  = params.require(:user).permit(:role, :name)
+    return rename(member) if params[:user]&.key?(:name)
 
-    if attrs.key?(:role) && demoting_last_admin?(member, attrs[:role])
+    new_role = params.dig(:user, :role)
+
+    if demoting_last_admin?(member, new_role)
       return redirect_to team_path, alert: "A church must have at least one admin."
     end
 
-    if member.update(attrs)
-      notice = attrs.key?(:role) ? "#{member.display_name} is now #{member.role}." : t("members.renamed", email: member.email)
-      redirect_to team_path, notice: notice
+    if member.update(role: new_role)
+      redirect_to team_path, notice: "#{member.display_name} is now #{member.role}."
     else
       redirect_to team_path, alert: member.errors.full_messages.to_sentence
     end
@@ -40,6 +41,15 @@ class MembersController < ApplicationController
   end
 
   private
+
+  # The Team page's inline name field. Only the name: role changes go through #update's checks.
+  def rename(member)
+    if member.update(name: params.dig(:user, :name).to_s)
+      redirect_to team_path, notice: t("members.renamed", email: member.email)
+    else
+      redirect_to team_path, alert: member.errors.full_messages.to_sentence
+    end
+  end
 
   def demoting_last_admin?(member, new_role)
     member.admin? && new_role.to_s != "admin" && current_church.only_admin?(member)
