@@ -209,6 +209,9 @@
 /* Scrolling down hides the bar (topbar_reveal_controller); the Now band takes the top edge. */
 .musician-root.topbar-hidden .musician-topbar { transform: translateY(-100%); }
 .musician-root.topbar-hidden .musician-nowbar { top: 0; }
+/* The bar and band move while the chart scrolls; never let the browser anchor scrolling to them
+   (scroll anchoring would "correct" for that movement and cut the follow scroll short). */
+.musician-topbar, .musician-nowbar { overflow-anchor: none; }
 .musician-setname { font-weight: 600; font-size: 1rem; line-height: 1.25; }
 
 /* Above the fold: the sticky Now/Next header that follows the projector. */
