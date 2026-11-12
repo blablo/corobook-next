@@ -78,7 +78,7 @@
         <div role="tablist" class="tabs tabs-border px-4 pt-2">
           <%= link_to service_sets_path, role: "tab", class: "tab #{"tab-active" if @tab == "upcoming"}",
                 aria: { selected: @tab == "upcoming" }, data: { role: "tab-upcoming" } do %>
-            <%= t("services.index.upcoming") %> <span class="badge badge-sm ml-2"><%= @upcoming_listed_count %></span>
+            <%= t("services.index.upcoming") %> <span class="badge badge-sm ml-2"><%= @upcoming_count %></span>
           <% end %>
           <%= link_to service_sets_path(tab: "past"), role: "tab", class: "tab #{"tab-active" if @tab == "past"}",
                 aria: { selected: @tab == "past" }, data: { role: "tab-past" } do %>
@@ -103,12 +103,12 @@
           </ul>
         <% elsif @sets.empty? %>
           <p class="px-6 py-8 text-center text-base-content/60" data-role="tab-empty">
-            <%= t(@tab == "past" ? "services.index.no_past" : "services.index.no_other_upcoming") %>
+            <%= t(@tab == "past" ? "services.index.no_past" : "services.index.no_upcoming") %>
           </p>
         <% else %>
           <ul class="list" data-role="<%= @tab %>-sets">
             <% @sets.each do |set| %>
-              <%= render "index_row", set: set, active_session: @active_session %>
+              <%= render "index_row", set: set, active_session: @active_session, next_service: set.id == @next_set&.id %>
             <% end %>
           </ul>
         <% end %>

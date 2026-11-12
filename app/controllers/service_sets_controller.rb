@@ -24,8 +24,6 @@ class ServiceSetsController < ApplicationController
     @template_count = templates.count
     @active_session = church_scope(:live_sessions).find_by(status: "active")
     @next_set = upcoming.first
-    # The Upcoming tab lists the services after the Next service card, so its badge counts those.
-    @upcoming_listed_count = @upcoming_count - (@next_set ? 1 : 0)
     @tab = TABS.include?(params[:tab]) ? params[:tab] : "upcoming"
     @page = [ params[:page].to_i, 1 ].max
 
@@ -36,7 +34,9 @@ class ServiceSetsController < ApplicationController
     when "templates"
       @sets = templates
     else
-      @sets = @next_set ? upcoming.where.not(id: @next_set.id) : upcoming
+      # Every upcoming service, the next one included (it is also in the card above the tabs, and
+      # its row carries a Next badge), so the list matches the tab's count.
+      @sets = upcoming
     end
   end
 

@@ -20,7 +20,7 @@ class ServicesIndexTest < ActionDispatch::IntegrationTest
     assert_select "[data-role=next-service]", count: 0
   end
 
-  test "the nearest upcoming service is the hero and is not repeated in the upcoming list" do
+  test "the nearest upcoming service is the hero and also heads the upcoming list, marked Next" do
     soon = service("Soon", Date.current + 3)
     later = service("Later", Date.current + 10)
     service("Last week", Date.current - 7)
@@ -29,20 +29,31 @@ class ServicesIndexTest < ActionDispatch::IntegrationTest
     assert_select "[data-role=next-service]", text: /Soon/
     assert_select "[data-role=next-service]", text: /in 3 days/
     assert_select "[data-role=next-service] form[action='#{launch_service_set_path(soon)}']"
-    assert_select "[data-role=upcoming-sets] [data-role=set-row]", count: 1
+    assert_select "[data-role=upcoming-sets] [data-role=set-row]", count: 2
+    assert_select "[data-role=upcoming-sets] [data-role=set-row]:first-child", text: /Soon/
+    assert_select "[data-role=upcoming-sets] [data-role=set-row]:first-child [data-role=next-badge]"
+    assert_select "[data-role=upcoming-sets] [data-role=next-badge]", count: 1
     assert_select "[data-role=upcoming-sets]", text: /Later/
-    assert_select "[data-role=tab-upcoming] .badge", text: "1"
+    assert_select "[data-role=tab-upcoming] .badge", text: "2"
     assert_select "[data-role=tab-past] .badge", text: "1"
     assert_select "[data-role=past-sets]", count: 0
     assert_select "[data-role=upcoming-sets] form[action='#{launch_service_set_path(later)}']"
   end
 
-  test "with only the next service upcoming, the Upcoming badge matches the empty list" do
+  test "with only the next service upcoming, the Upcoming list still shows it" do
     service("Soon", Date.current + 3)
     get service_sets_path
     assert_select "[data-role=next-service]", text: /Soon/
+    assert_select "[data-role=tab-upcoming] .badge", text: "1"
+    assert_select "[data-role=upcoming-sets] [data-role=set-row]", count: 1
+    assert_select "[data-role=tab-empty]", count: 0
+  end
+
+  test "with no upcoming services the Upcoming tab says so" do
+    service("Last week", Date.current - 7)
+    get service_sets_path
     assert_select "[data-role=tab-upcoming] .badge", text: "0"
-    assert_select "[data-role=tab-empty]", text: /No other upcoming services/
+    assert_select "[data-role=tab-empty]", text: /No upcoming services/
   end
 
   test "the past tab lists past services newest first, a page at a time" do
