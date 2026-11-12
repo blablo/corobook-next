@@ -648,7 +648,7 @@ export default class extends Controller {
   }
   orderRow(label, i) {
     return `
-      <div class="flex items-center gap-2 bg-base-100 px-3 py-1.5 hover:bg-base-200 arrange-row" draggable="true" data-i="${i}">
+      <div class="flex items-center gap-2 bg-base-100 px-3 py-1.5 border-b border-base-300 last:border-b-0 hover:bg-base-200 arrange-row" draggable="true" data-i="${i}">
         <span class="cursor-grab select-none text-base-content/60" data-drag-handle title="Drag to reorder">⠿</span>
         <span class="w-6 text-right text-sm tabular-nums text-base-content/60">${i + 1}.</span>
         <span class="flex-1 font-medium">${this.esc(label)}</span>

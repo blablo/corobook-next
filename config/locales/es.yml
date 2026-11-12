@@ -103,7 +103,7 @@ es:
       status_label: "Estado"
       arrangement:
         title: "Orden del arreglo (opcional)"
-        help: "Haz clic en una sección para agregarla al orden de reproducción. Arrástrala o usa las flechas para reordenar; ✕ para quitarla. Reutiliza una sección (p. ej. un coro) tantas veces como quieras. Déjalo vacío para reproducir en el orden de las secciones."
+        help: "Haz clic en una sección para agregarla al orden. Repite una, como el coro, cuantas veces necesites. Déjalo vacío para tocar las secciones en orden."
         available: "Secciones disponibles"
         play_order: "Orden de reproducción"
       save: "Guardar cambios"
