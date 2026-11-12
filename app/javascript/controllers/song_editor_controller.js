@@ -635,26 +635,26 @@ export default class extends Controller {
     this.order = this.order.filter(l => labels.includes(l))
 
     this.arrangeAvailTarget.innerHTML = labels.length
-      ? labels.map(l => `<button type="button" class="btn btn-sm btn-outline arrange-add" data-label="${this.esc(l)}">+ ${this.esc(l)}</button>`).join("")
-      : `<span class="text-sm text-base-content/40">Add sections above first.</span>`
+      ? labels.map(l => `<button type="button" class="btn btn-sm btn-soft btn-primary arrange-add" data-label="${this.esc(l)}">+ ${this.esc(l)}</button>`).join("")
+      : `<span class="text-sm text-base-content/60">Add sections above first.</span>`
     this.arrangeAvailTarget.querySelectorAll(".arrange-add").forEach(b =>
       b.addEventListener("click", () => this.addToOrder(b.dataset.label)))
 
     this.arrangeOrderTarget.innerHTML = this.order.length
       ? this.order.map((l, i) => this.orderRow(l, i)).join("")
-      : `<span class="text-sm text-base-content/40 px-1">Empty — plays in section order.</span>`
+      : `<p class="px-3 py-3 text-sm text-base-content/60">Empty, so the song plays its sections in order.</p>`
     this.wireOrderRows()
     this.syncOrderField()
   }
   orderRow(label, i) {
     return `
-      <div class="flex items-center gap-2 rounded bg-base-100 ring-1 ring-base-200 px-2 py-1 arrange-row" draggable="true" data-i="${i}">
-        <span class="cursor-grab select-none text-base-content/30" data-drag-handle>⠿</span>
-        <span class="text-base-content/40 text-xs w-5 text-right">${i + 1}.</span>
-        <span class="flex-1 text-sm">${this.esc(label)}</span>
-        <button type="button" class="btn btn-ghost btn-xs px-1 arrange-up" title="Move up" data-i="${i}">↑</button>
-        <button type="button" class="btn btn-ghost btn-xs px-1 arrange-down" title="Move down" data-i="${i}">↓</button>
-        <button type="button" class="btn btn-ghost btn-xs px-1 text-error arrange-del" title="Remove" data-i="${i}">✕</button>
+      <div class="flex items-center gap-2 bg-base-100 px-3 py-1.5 hover:bg-base-200 arrange-row" draggable="true" data-i="${i}">
+        <span class="cursor-grab select-none text-base-content/60" data-drag-handle title="Drag to reorder">⠿</span>
+        <span class="w-6 text-right text-sm tabular-nums text-base-content/60">${i + 1}.</span>
+        <span class="flex-1 font-medium">${this.esc(label)}</span>
+        <button type="button" class="btn btn-ghost btn-xs arrange-up" title="Move up" aria-label="Move up" data-i="${i}">↑</button>
+        <button type="button" class="btn btn-ghost btn-xs arrange-down" title="Move down" aria-label="Move down" data-i="${i}">↓</button>
+        <button type="button" class="btn btn-ghost btn-xs text-error arrange-del" title="Remove" data-i="${i}">Remove</button>
       </div>`
   }
   wireOrderRows() {

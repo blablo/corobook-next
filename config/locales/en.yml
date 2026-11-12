@@ -103,7 +103,7 @@ en:
       status_label: "Status"
       arrangement:
         title: "Arrangement order (optional)"
-        help: "Click a section to add it to the play order. Drag or use the arrows to reorder; ✕ to remove. Reuse a section (e.g. a chorus) as many times as you like. Leave empty to play in section order."
+        help: "Click a section to add it to the play order. Reuse one, like the chorus, as often as you need. Leave it empty to play the sections in order."
         available: "Available sections"
         play_order: "Play order"
       save: "Save changes"
