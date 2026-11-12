@@ -511,7 +511,7 @@ en:
       page_title: "Corobook — worship presentation & song management"
       eyebrow: "For worship teams"
       headline: "Build your service, project the words, play from the chords."
-      subhead: "Corobook puts your songs, slides and service order in one place — then runs the whole service live: lyrics on the screen, chords on every musician's phone, in their own key."
+      subhead: "Corobook puts your songs, slides and service order in one place — then runs the whole service live: lyrics on the screen, and the chord chart on every musician's phone, following along."
       cta_signup: "Create your church account"
       sign_in: "Sign in"
       cta_note: "Free to start · set up your church in a minute."
@@ -523,8 +523,8 @@ en:
           title: "Project the words"
           body: "A clean, high-contrast projector view your congregation reads easily, driven live from the operator or a presentation clicker."
         key:
-          title: "Every musician, their key"
-          body: "Players open the service on their phone and see the whole service as a chart — transposed to the key and capo they choose."
+          title: "The band follows along"
+          body: "Musicians open the whole service on their phone as one chord chart, intros and instrumentals included. It scrolls to wherever the projector is, and the link in the band email works all week for rehearsal."
         editor:
           title: "No-syntax song editor"
           body: "Type lyrics, click above a word to drop a chord, drag it to the right spot. No ChordPro, no markup — ever."

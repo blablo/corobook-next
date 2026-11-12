@@ -511,7 +511,7 @@ es:
       page_title: "Corobook — presentación de adoración y gestión de canciones"
       eyebrow: "Para equipos de adoración"
       headline: "Arma tu servicio, proyecta las letras, toca desde los acordes."
-      subhead: "Corobook reúne tus canciones, diapositivas y el orden del servicio en un solo lugar — y luego dirige todo el servicio en vivo: letras en la pantalla, acordes en el teléfono de cada músico, en su propio tono."
+      subhead: "Corobook reúne tus canciones, diapositivas y el orden del servicio en un solo lugar — y luego dirige todo el servicio en vivo: letras en la pantalla y el cifrado en el teléfono de cada músico, siguiendo el servicio."
       cta_signup: "Crea la cuenta de tu iglesia"
       sign_in: "Iniciar sesión"
       cta_note: "Gratis para empezar · configura tu iglesia en un minuto."
@@ -523,8 +523,8 @@ es:
           title: "Proyecta las letras"
           body: "Una vista de proyector limpia y de alto contraste que tu congregación lee con facilidad, dirigida en vivo desde el operador o un control de presentaciones."
         key:
-          title: "Cada músico, en su tono"
-          body: "Los músicos abren el servicio en su teléfono y ven todo el servicio como un cifrado — transpuesto al tono y cejilla que elijan."
+          title: "La banda sigue el servicio"
+          body: "Los músicos abren todo el servicio en su teléfono como un solo cifrado, con intros e instrumentales incluidos. Se desplaza hasta donde esté el proyector, y el enlace del correo a la banda sirve toda la semana para ensayar."
         editor:
           title: "Editor de canciones sin sintaxis"
           body: "Escribe la letra, haz clic encima de una palabra para colocar un acorde y arrástralo al lugar exacto. Sin ChordPro, sin marcado — nunca."
