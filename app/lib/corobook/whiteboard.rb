@@ -62,10 +62,7 @@ module Corobook
 
     # "Romanos 11:33 · Page 2 of 4": what the projector shows, for the speaker view's Now line
     # (so Next is visible even while the whiteboard covers the slide).
-    def stop_label
-      helpers = ApplicationController.helpers
-      helpers.strip_tags(helpers.operator_stop_label(session).to_s)
-    end
+    def stop_label = ApplicationController.helpers.stop_label_text(session)
 
     # Everything a screen needs to draw the whiteboard; sent on subscribe and after each change.
     def state

@@ -5,6 +5,15 @@ module OperatorHelper
     public_send(:"#{route}_url", token, host: request.host_with_port, protocol: request.protocol.delete_suffix("://"))
   end
 
+  # The same label as plain text, for the speaker view and its channel messages. An
+  # auto-advancing slide shows only its title, since its pages turn in the browser.
+  def stop_label_text(session)
+    item = session.current_item
+    return item.title if item.is_a?(TextSlide) && item.auto_advance?
+
+    CGI.unescapeHTML(strip_tags(operator_stop_label(session)))
+  end
+
   # "Vamos a Cantar · Chorus" / "Lectura Bíblica · Page 2 of 3": what a (live or preview)
   # session is showing, for the operator's Now / Next labels.
   def operator_stop_label(session)

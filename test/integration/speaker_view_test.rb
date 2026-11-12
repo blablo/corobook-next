@@ -35,6 +35,32 @@ class SpeakerViewTest < ActionDispatch::IntegrationTest
     assert_equal 0, @session.reload.current_section_index
   end
 
+  test "Back at the first stop and Next at the last do nothing" do
+    version = @session.position_version
+    patch speaker_back_path(@session.speaker_token)
+    assert_response :no_content
+    assert_equal version, @session.reload.position_version
+
+    2.times { patch speaker_advance_path(@session.speaker_token) }
+    assert_response :no_content
+    assert_equal version + 1, @session.reload.position_version, "only one more stop (the verse)"
+  end
+
+  test "the Now line is plain text, entities and all" do
+    @session.current_item.update!(title: %(Tom & Jerry "Live"))
+    get speaker_path(@session.speaker_token)
+    assert_select "[data-role=speaker-now]", text: %(Tom & Jerry "Live" · Title)
+    assert_equal %(Tom & Jerry "Live" · Title), Corobook::Whiteboard.new(@session.reload).stop_label
+  end
+
+  test "the Now line names an auto-advancing slide by its title only" do
+    slide = @church.text_slides.create!(title: "Anuncios", reusable: true, auto_advance_seconds: 8,
+                                        pages: [ { "body_markdown" => "a" }, { "body_markdown" => "b" } ])
+    item = @set.set_items.create!(position: 1, item_type: "text_slide", text_slide: slide)
+    @session.update!(current_set_item: item, current_section_index: 0)
+    assert_equal "Anuncios", Corobook::Whiteboard.new(@session).stop_label
+  end
+
   test "Next and Back stop working with the speaker link" do
     token = @session.speaker_token
     @session.end!

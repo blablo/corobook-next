@@ -7,19 +7,18 @@ class OperatorController < ApplicationController
   # Presenter view: the live slide (Now) beside the real rendered NEXT slide, like Keynote.
   def show
     position = Corobook::LivePosition.new(@session.service_set)
-    current = [ @session.current_set_item_id, @session.current_section_index, @session.current_chunk_index ]
-    @stop_index = position.index_of(*current)
+    @stop_index = position.index_of(*@session.current_stop)
     @stop_count = position.stops.length
-    next_stop = position.next_stop(*current)
+    next_stop = position.next_stop(*@session.current_stop)
     @next_session = preview_session_for(next_stop) if next_stop
   end
 
   def advance
-    move { |pos| pos.next_stop(@session.current_set_item_id, @session.current_section_index, @session.current_chunk_index) }
+    move { |pos| pos.next_stop(*@session.current_stop) }
   end
 
   def back
-    move { |pos| pos.prev_stop(@session.current_set_item_id, @session.current_section_index, @session.current_chunk_index) }
+    move { |pos| pos.prev_stop(*@session.current_stop) }
   end
 
   # Jump to the first section of any item already in the Set (Req 6.10).

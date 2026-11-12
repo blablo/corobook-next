@@ -6,8 +6,9 @@ class UsageEvent < ApplicationRecord
   # Capture one usage event the first time a song is shown in a session (design §7). Idempotent via
   # the unique (live_session_id, song_id) index; public-domain songs are not reportable and are
   # skipped. Fields are SNAPSHOT at show-time so a later song edit never rewrites history.
-  # Church/live_session are passed explicitly — this runs inside the operator position transaction
-  # and must never read Current off-request (§3.2.3).
+  # Church/live_session are passed explicitly — this runs inside LiveSession#move_to!'s position
+  # transaction (operator, projector clicker or speaker view) and must never read Current
+  # off-request (§3.2.3).
   def self.capture(live_session:, song:)
     return if song.nil? || song.public_domain?
     return if exists?(live_session_id: live_session.id, song_id: song.id)

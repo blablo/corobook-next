@@ -71,6 +71,9 @@ class LiveSession < ApplicationRecord
 
   def current_item = current_set_item&.item
 
+  # The current stop as LivePosition takes it: (set item, section, chunk).
+  def current_stop = [ current_set_item_id, current_section_index, current_chunk_index ]
+
   # Move the live position to a stop (a Corobook::LivePosition stop): bump the version, record
   # CCLI usage when a song comes up, and broadcast to every screen. Shared by the operator, the
   # projector's clicker and the speaker view. Returns false when another driver moved it in the

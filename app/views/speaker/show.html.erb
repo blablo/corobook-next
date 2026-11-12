@@ -56,7 +56,7 @@
     <button type="button" class="btn btn-lg" data-action="projector-clicker#back" data-role="speaker-back"><%= t("live.operator.back") %></button>
     <div class="grow min-w-0 text-center">
       <div class="text-xs text-base-content/60"><%= t("live.operator.now") %></div>
-      <div class="font-medium truncate" data-whiteboard-target="nowLabel" data-role="speaker-now"><%= strip_tags(operator_stop_label(@session)) %></div>
+      <div class="font-medium truncate" data-whiteboard-target="nowLabel" data-role="speaker-now"><%= stop_label_text(@session) %></div>
     </div>
     <button type="button" class="btn btn-lg btn-primary" data-action="projector-clicker#next" data-role="speaker-next"><%= t("live.operator.next") %></button>
   </div>
