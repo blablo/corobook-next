@@ -1,6 +1,6 @@
 <%= t("service_sets_mailer.band.greeting") %>
 
-<%= t("service_sets_mailer.band.intro_text", sender: @sender.email, name: @service_set.name) %>
+<%= t("service_sets_mailer.band.intro_text", sender: @sender.display_name, name: @service_set.name) %>
 <% if @date %><%= t("service_sets_mailer.band.date", date: @date) %>
 <% end %>
 <% if @items.empty? %>

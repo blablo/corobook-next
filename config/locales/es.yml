@@ -424,6 +424,7 @@ es:
       subdomain_optional: "(opcional)"
       subdomain_placeholder: "gracia"
       subdomain_help: "Tu equipo puede iniciar sesión aquí sin tener que elegir la iglesia. Puedes configurarlo más tarde."
+      name_label: "Tu nombre"
       email_label: "Tu correo electrónico"
       password_label: "Contraseña"
       password_help: "Al menos 8 caracteres."
@@ -445,6 +446,7 @@ es:
     accept:
       title: "Únete a %{church}"
       invited_as_html: "Se te invitó como %{role}. Establece una contraseña para terminar."
+      name_label: "Tu nombre"
       email_label: "Correo electrónico"
       password_label: "Contraseña"
       password_confirmation_label: "Confirmar contraseña"
@@ -686,6 +688,8 @@ es:
       band_hint: "Los miembros de la banda recibirán el servicio planificado por correo."
       band_empty: "Todavía no hay nadie en la banda. Activa Banda para un miembro abajo."
       th_band: "Banda"
+      name_placeholder: "Agregar un nombre"
+      name_for: "Nombre de %{email}"
       band_toggle: "%{email} está en la banda"
       save: "Guardar"
       subtitle: "Personas que pueden iniciar sesión en %{church} y quiénes tocan en la banda."
@@ -697,6 +701,7 @@ es:
       role_help: "Los editores gestionan canciones, diapositivas y servicios. Los administradores también gestionan el equipo y la configuración."
       invite_meta: "%{role} · invitado por %{by} · vence el %{date}"
   members:
+    renamed: "Se guardó el nombre de %{email}."
     band:
       added: "%{email} agregado a la banda."
       removed: "%{email} quitado de la banda."

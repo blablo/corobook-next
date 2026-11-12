@@ -3,15 +3,16 @@ class MembersController < ApplicationController
   before_action :require_admin
 
   def update
-    member   = find_in_church(:users, params[:id])
-    new_role = params.dig(:user, :role)
+    member = find_in_church(:users, params[:id])
+    attrs  = params.require(:user).permit(:role, :name)
 
-    if demoting_last_admin?(member, new_role)
+    if attrs.key?(:role) && demoting_last_admin?(member, attrs[:role])
       return redirect_to team_path, alert: "A church must have at least one admin."
     end
 
-    if member.update(role: new_role)
-      redirect_to team_path, notice: "#{member.email} is now #{member.role}."
+    if member.update(attrs)
+      notice = attrs.key?(:role) ? "#{member.display_name} is now #{member.role}." : t("members.renamed", email: member.email)
+      redirect_to team_path, notice: notice
     else
       redirect_to team_path, alert: member.errors.full_messages.to_sentence
     end

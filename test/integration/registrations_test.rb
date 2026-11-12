@@ -30,7 +30,7 @@ class RegistrationsTest < ActionDispatch::IntegrationTest
     assert_difference [ "Church.count", "User.count" ], 1 do
       post signup_path, params: {
         church: { name: "Nueva Vida", subdomain: "nueva-vida" },
-        user: { email: "pastor@example.com", password: "secret123", password_confirmation: "secret123" }
+        user: { name: "Ana Pastor", email: "pastor@example.com", password: "secret123", password_confirmation: "secret123" }
       }
     end
     assert_redirected_to signup_check_email_path(email: "pastor@example.com")
@@ -47,7 +47,7 @@ class RegistrationsTest < ActionDispatch::IntegrationTest
     assert_no_difference [ "Church.count", "User.count" ] do
       post signup_path, params: {
         church: { name: "Bad", subdomain: "www" }, # reserved
-        user: { email: "x@example.com", password: "secret123", password_confirmation: "secret123" }
+        user: { name: "Ana Pastor", email: "x@example.com", password: "secret123", password_confirmation: "secret123" }
       }
     end
     assert_response :unprocessable_entity
@@ -58,7 +58,7 @@ class RegistrationsTest < ActionDispatch::IntegrationTest
     assert_no_difference "Church.count" do
       post signup_path, params: {
         church: { name: "Mismatch" },
-        user: { email: "x@example.com", password: "secret123", password_confirmation: "nope12345" }
+        user: { name: "Ana Pastor", email: "x@example.com", password: "secret123", password_confirmation: "nope12345" }
       }
     end
     assert_response :unprocessable_entity
@@ -92,7 +92,7 @@ class RegistrationsTest < ActionDispatch::IntegrationTest
       assert_no_difference [ "Church.count", "User.count" ] do
         post signup_path, params: {
           church: { name: "Second", subdomain: "gracia" },
-          user: { email: "x@example.com", password: "secret123", password_confirmation: "secret123" }
+          user: { name: "Ana Pastor", email: "x@example.com", password: "secret123", password_confirmation: "secret123" }
         }
       end
       assert_response :unprocessable_entity
@@ -103,5 +103,21 @@ class RegistrationsTest < ActionDispatch::IntegrationTest
         remove_method :__orig_valid?
       end
     end
+  end
+
+  test "signup requires and stores the admin's name" do
+    assert_no_difference "User.count" do
+      post signup_path, params: {
+        church: { name: "Sin Nombre" },
+        user: { name: " ", email: "x@example.com", password: "secret123", password_confirmation: "secret123" }
+      }
+    end
+    assert_response :unprocessable_entity
+
+    post signup_path, params: {
+      church: { name: "Con Nombre" },
+      user: { name: "Ana Pastor", email: "ana@example.com", password: "secret123", password_confirmation: "secret123" }
+    }
+    assert_equal "Ana Pastor", Church.find_by(name: "Con Nombre").users.sole.name
   end
 end

@@ -105,7 +105,7 @@
         </p>
         <ul class="flex flex-wrap gap-2 mb-2" data-role="send-to-band-recipients">
           <% @band.each do |m| %>
-            <li class="badge badge-soft badge-primary"><%= m.email %></li>
+            <li class="badge badge-soft badge-primary" title="<%= m.email %>"><%= m.display_name %></li>
           <% end %>
         </ul>
         <div class="modal-action">

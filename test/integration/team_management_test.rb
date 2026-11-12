@@ -219,4 +219,31 @@ class TeamManagementTest < ActionDispatch::IntegrationTest
     assert_response :not_found
     assert_not other_user.reload.band_member?
   end
+
+  # --- Names ---
+
+  test "an admin sets a member's name; the team page shows it with initials, email beneath" do
+    login(@admin)
+    patch member_path(@editor), params: { user: { name: "  María   García " } }
+    assert_redirected_to team_path
+    assert_equal "María García", @editor.reload.name
+    assert_equal "editor", @editor.role, "renaming must not touch the role"
+
+    get team_path
+    assert_select "[data-role=member-row][data-email='editor@example.com']" do
+      assert_select "input[data-role=member-name][value='María García']"
+      assert_select ".avatar", text: "MG"
+      assert_select "span", text: "editor@example.com"
+    end
+    assert_select "[data-role=member-row][data-email='admin@example.com'] input[data-role=member-name][placeholder='Add a name']"
+  end
+
+  test "a member's name shows in the band list and falls back to the email" do
+    login(@admin)
+    @editor.update!(name: "María García", band_member: true)
+    @admin.update!(band_member: true)
+    get team_path
+    assert_select "[data-role=band-member]", text: "María García"
+    assert_select "[data-role=band-member]", text: "admin@example.com"
+  end
 end

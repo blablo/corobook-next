@@ -71,7 +71,7 @@ class EmailConfirmationTest < ActionDispatch::IntegrationTest
     invitation.save!
 
     post accept_invitation_path(invitation.raw_token),
-         params: { password: "secret123", password_confirmation: "secret123" }
+         params: { name: "Nuevo Miembro", password: "secret123", password_confirmation: "secret123" }
     assert_redirected_to root_path
     user = church.users.find_by(email: "new@example.com")
     assert user.confirmed?, "an invited member is confirmed by accepting the invite"

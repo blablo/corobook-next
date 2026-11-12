@@ -50,7 +50,7 @@ class InvitationAcceptancesControllerTest < ActionDispatch::IntegrationTest
     inv, raw = pending_invite(email: "joiner@example.com", role: "editor")
     assert_difference -> { @church.users.count }, 1 do
       post accept_invitation_path(token: raw),
-           params: { password: "newpass123", password_confirmation: "newpass123" }
+           params: { name: "Nuevo Miembro", password: "newpass123", password_confirmation: "newpass123" }
     end
     assert_redirected_to root_path
     user = @church.users.find_by(email: "joiner@example.com")
@@ -67,7 +67,7 @@ class InvitationAcceptancesControllerTest < ActionDispatch::IntegrationTest
     _inv, raw = pending_invite
     assert_no_difference -> { User.count } do
       post accept_invitation_path(token: raw),
-           params: { password: "newpass123", password_confirmation: "different" }
+           params: { name: "Nuevo Miembro", password: "newpass123", password_confirmation: "different" }
     end
     assert_response :unprocessable_entity
   end
@@ -76,7 +76,7 @@ class InvitationAcceptancesControllerTest < ActionDispatch::IntegrationTest
     _inv, raw = pending_invite
     assert_no_difference -> { User.count } do
       post accept_invitation_path(token: raw),
-           params: { password: "x", password_confirmation: "x" }
+           params: { name: "Nuevo Miembro", password: "x", password_confirmation: "x" }
     end
     assert_response :unprocessable_entity
   end
@@ -85,7 +85,7 @@ class InvitationAcceptancesControllerTest < ActionDispatch::IntegrationTest
     inv, raw = pending_invite(email: "dup@example.com")
     User.create!(church: @church, email: "dup@example.com", password: "secret123", role: "editor")
     post accept_invitation_path(token: raw),
-         params: { password: "newpass123", password_confirmation: "newpass123" }
+         params: { name: "Nuevo Miembro", password: "newpass123", password_confirmation: "newpass123" }
     assert_redirected_to login_path
     assert_nil inv.reload.accepted_at, "invite not consumed when member already exists"
   end
@@ -97,8 +97,19 @@ class InvitationAcceptancesControllerTest < ActionDispatch::IntegrationTest
 
     _inv, raw = pending_invite(email: "fresh@example.com", role: "admin")
     post accept_invitation_path(token: raw),
-         params: { password: "newpass123", password_confirmation: "newpass123" }
+         params: { name: "Nuevo Miembro", password: "newpass123", password_confirmation: "newpass123" }
     assert_redirected_to root_path
     assert @church.users.find_by(email: "fresh@example.com")
+  end
+
+  test "accepting requires and stores the new member's name" do
+    _inv, raw = pending_invite(email: "named@example.com")
+    assert_no_difference -> { @church.users.count } do
+      post accept_invitation_path(token: raw), params: { name: "", password: "newpass123", password_confirmation: "newpass123" }
+    end
+    assert_response :unprocessable_entity
+
+    post accept_invitation_path(token: raw), params: { name: "Juan Ruiz", password: "newpass123", password_confirmation: "newpass123" }
+    assert_equal "Juan Ruiz", @church.users.find_by(email: "named@example.com").name
   end
 end

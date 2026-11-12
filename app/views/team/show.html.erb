@@ -56,13 +56,24 @@
                       <div class="flex items-center gap-3">
                         <div class="avatar avatar-placeholder">
                           <div class="bg-primary text-primary-content w-9 rounded-full">
-                            <span class="font-medium"><%= member.email.first.upcase %></span>
+                            <span class="font-medium"><%= member_initials(member) %></span>
                           </div>
                         </div>
-                        <span class="font-medium break-all"><%= member.email %></span>
-                        <% if member == current_user %>
-                          <span class="badge badge-ghost badge-sm"><%= t("team.show.you") %></span>
-                        <% end %>
+                        <div class="min-w-0 grow">
+                          <%= form_with url: member_path(member), method: :patch do |f| %>
+                            <%= f.text_field :"user[name]", value: member.name, id: "member-name-#{member.id}", maxlength: 100, autocomplete: "off",
+                                  placeholder: t("team.show.name_placeholder"),
+                                  class: "input input-ghost input-sm w-full max-w-xs -ml-3 font-medium",
+                                  aria: { label: t("team.show.name_for", email: member.email) },
+                                  data: { role: "member-name" }, onchange: "this.form.requestSubmit()" %>
+                          <% end %>
+                          <div class="flex items-center gap-2 text-xs text-base-content/60">
+                            <span class="break-all"><%= member.email %></span>
+                            <% if member == current_user %>
+                              <span class="badge badge-ghost badge-xs"><%= t("team.show.you") %></span>
+                            <% end %>
+                          </div>
+                        </div>
                       </div>
                     </td>
                     <td>
@@ -120,7 +131,7 @@
                   <div class="list-col-grow min-w-0">
                     <div class="font-medium break-all"><%= inv.email %></div>
                     <div class="text-xs text-base-content/60">
-                      <%= t("team.show.invite_meta", role: t("team.show.role_#{inv.role}"), by: inv.invited_by.email,
+                      <%= t("team.show.invite_meta", role: t("team.show.role_#{inv.role}"), by: inv.invited_by.display_name,
                             date: inv.expires_at.to_date.to_fs(:long)) %>
                     </div>
                   </div>
@@ -168,7 +179,7 @@
           <% else %>
             <div class="flex flex-wrap gap-2">
               <% band.each do |m| %>
-                <span class="badge badge-soft badge-primary" data-role="band-member"><%= m.email %></span>
+                <span class="badge badge-soft badge-primary" data-role="band-member" title="<%= m.email %>"><%= m.display_name %></span>
               <% end %>
             </div>
           <% end %>
