@@ -673,6 +673,10 @@ en:
       connect_help: "Scan a code, or click it to copy its link."
       copy: "Copy"
       copy_join: "Copy link: %{name}"
+      enlarge: "Enlarge"
+      enlarge_join: "Enlarge code: %{name}"
+      enlarge_help: "Scan with the phone's camera, or click the code to copy its link."
+      close: "Close"
       copied: "Copied"
       stop_whiteboard: "Stop whiteboard"
     speaker:

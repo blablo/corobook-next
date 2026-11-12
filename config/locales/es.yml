@@ -673,6 +673,10 @@ es:
       connect_help: "Escanea un código o haz clic en él para copiar su enlace."
       copy: "Copiar"
       copy_join: "Copiar enlace: %{name}"
+      enlarge: "Ampliar"
+      enlarge_join: "Ampliar código: %{name}"
+      enlarge_help: "Escanéalo con la cámara del teléfono o haz clic en el código para copiar su enlace."
+      close: "Cerrar"
       copied: "Copiado"
       stop_whiteboard: "Quitar pizarra"
     speaker:

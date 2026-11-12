@@ -1,20 +1,20 @@
 <%#
-  A follow link as a QR code under its title. Phones scan it; clicking it copies the link. A hint
-  beside the title says "Copy" on hover, then "Copied" (clipboard sets data-copied meanwhile). It
-  sits outside the code, so it never blocks a scan. Locals: url, title, role (data-role prefix).
+  One device's join code (scan it or click to copy, see _join_code), with an Enlarge link that
+  shows it alone and large over the whole page, so a phone can't pick up one of the others.
+  Locals: url, title, role (data-role prefix).
 %>
-<div data-role="<%= role %>-join">
-  <button type="button" title="<%= url %>" aria-label="<%= t("live.operator.copy_join", name: title) %>"
-          class="group flex flex-col gap-1.5 rounded-box p-2 text-left cursor-pointer hover:bg-base-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          data-controller="clipboard" data-clipboard-text-value="<%= url %>" data-clipboard-done-value="✓ <%= t("live.operator.copied") %>"
-          data-action="clipboard#copy" data-role="<%= role %>-copy" data-url="<%= url %>">
-    <span class="flex items-center justify-between gap-3">
-      <span class="font-semibold"><%= title %></span>
-      <%# DaisyUI's colours come from its vendored CSS, which has no group-* variants, so these
-          use its colour variables directly. %>
-      <span class="text-xs text-primary opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 group-data-[copied]:opacity-100 group-data-[copied]:text-[var(--color-success)]"
-            data-clipboard-target="label"><%= t("live.operator.copy") %></span>
-    </span>
-    <span class="block rounded-box border border-base-300 bg-white p-2 group-hover:border-[var(--color-primary)] group-data-[copied]:border-[var(--color-success)]"><%= qr_svg(url, size: 112) %></span>
-  </button>
+<div class="flex flex-col items-start" data-role="<%= role %>-join">
+  <%= render "join_code", url: url, title: title, role: "#{role}-copy" %>
+  <button type="button" class="link link-primary link-hover text-xs ml-2"
+          aria-label="<%= t("live.operator.enlarge_join", name: title) %>" data-role="<%= role %>-enlarge"
+          onclick="document.getElementById('<%= role %>-code-modal').showModal()"><%= t("live.operator.enlarge") %></button>
+  <dialog id="<%= role %>-code-modal" class="modal" data-role="<%= role %>-code-modal">
+    <%# The box fills the page instead of sitting on DaisyUI's dimmed backdrop: a camera can still
+        read a dimmed code. Esc closes it too. %>
+    <div class="modal-box size-full max-w-none max-h-none rounded-none shadow-none flex flex-col items-center justify-center gap-3">
+      <%= render "join_code", url: url, title: title, role: "#{role}-copy-large", large: true %>
+      <p class="text-sm text-base-content/60 text-center"><%= t("live.operator.enlarge_help") %></p>
+      <form method="dialog"><button class="btn btn-ghost"><%= t("live.operator.close") %></button></form>
+    </div>
+  </dialog>
 </div>
