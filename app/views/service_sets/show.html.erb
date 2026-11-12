@@ -32,7 +32,9 @@
             <%= f.date_field :service_date, onchange: "this.form.requestSubmit()",
                   class: "input input-sm w-auto", data: { role: "service-date" } %>
             <noscript><%= f.submit t("services.show.save"), class: "btn btn-sm btn-outline" %></noscript>
-            <% if date.nil? %><span class="text-sm text-base-content/60"><%= t("services.show.no_date_yet") %></span><% end %>
+            <span class="text-sm text-base-content/60">
+              <%= date ? t("services.show.goes_live", date: date.strftime("%A, %b %-d")) : t("services.show.no_date_yet") %>
+            </span>
           <% end %>
         <% else %>
           <p class="text-sm text-base-content/60"><%= date&.strftime("%A, %B %-d, %Y") || t("services.show.no_date") %></p>
