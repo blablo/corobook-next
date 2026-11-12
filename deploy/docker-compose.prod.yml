@@ -42,7 +42,7 @@ services:
       RAILS_MASTER_KEY: ${RAILS_MASTER_KEY:?set in .env.prod}
       DATABASE_HOST: postgres
       COROBOOK_NEXT_DATABASE_PASSWORD: ${COROBOOK_NEXT_DATABASE_PASSWORD:?}
-      APP_HOST: ${APP_HOST:?set to your DuckDNS host, e.g. corobook.duckdns.org}
+      APP_HOST: ${APP_HOST:?set to your public host, e.g. next.corobook.com}
       MAIL_DOMAIN: ${MAIL_DOMAIN:-example.com}
       MAIL_FROM: ${MAIL_FROM:-Corobook <no-reply@example.com>}
       RESEND_API_KEY: ${RESEND_API_KEY:-}

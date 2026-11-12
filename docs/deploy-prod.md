@@ -79,7 +79,30 @@ The shared edge is independent — redeploying this app does not touch it.
 
 - **SSL**: TLS terminates at the shared Caddy edge; the app runs with `assume_ssl`/`force_ssl`, so
   it trusts the forwarded proto and won't redirect-loop.
-- **DuckDNS + subdomain login**: church subdomains resolve by stripping the configured `APP_HOST`
-  base, so `gracia.<APP_HOST>` works and the bare host shows the picker. (Each church subdomain you
-  actually use needs its own DNS record + an edge routing block, or a wildcard cert.)
+- **Church subdomains**: church subdomains resolve by stripping the configured `APP_HOST`
+  base, so `gracia.<APP_HOST>` works and the bare host shows the picker. With
+  `APP_HOST=next.corobook.com` you need DNS A records for `next` and `*.next` pointing at the
+  server, and the edge Caddy issues each church's cert on demand, approved by the app:
+
+  ```caddyfile
+  {
+  	on_demand_tls {
+  		ask http://corobook-web:80/internal/tls-check
+  	}
+  }
+
+  next.corobook.com {
+  	reverse_proxy corobook-web:80
+  }
+
+  *.next.corobook.com {
+  	tls {
+  		on_demand
+  	}
+  	reverse_proxy corobook-web:80
+  }
+  ```
+
+  `/internal/tls-check?domain=<host>` returns 200 only for the base host, `www`, and existing
+  church subdomains, so Caddy never requests certs for made-up names.
 - This is a **single-box** deploy: no backups/offsite yet. Add those before relying on it.
