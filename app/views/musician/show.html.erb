@@ -1,45 +1,35 @@
 <%# @session is nil on the permanent per-service link when the service isn't live: the chart
     still renders, without the live Now/Next bar or the current-row highlight. %>
 <%= turbo_stream_from [ @session, :musician ] if @session %>
-<div class="musician-root" data-role="musician-root"
-     data-controller="musician-key<%= ' musician-follow' if @session %>"
-     data-musician-key-token-value="<%= @key_scope %>">
+<div class="musician-root" data-theme="light" data-role="musician-root"
+     data-controller="header-reveal<%= ' musician-follow' if @session %>">
 
-  <%# ── Top bar: set name + key/capo chooser ─────────────────────────── %>
+  <%# ── Top bar: one slim line; it and the Now band slide away while reading down ── %>
   <div class="musician-topbar">
-    <div class="musician-setname" data-role="set-name"><%= @service_set.name %></div>
-    <form class="musician-key-chooser" data-action="change->musician-key#choose">
-      <label><%= t("live.musician.key") %>
-        <input type="text" name="key" value="<%= @target_key %>" data-role="key-input"
-               class="musician-field" inputmode="text" autocomplete="off" />
-      </label>
-      <label><%= t("live.musician.capo") %>
-        <input type="number" name="capo" value="<%= @capo %>" min="0" max="11"
-               data-role="capo-input" class="musician-field musician-field-sm" />
-      </label>
-    </form>
+    <div class="musician-setname truncate min-w-0" data-role="set-name"><%= @service_set.name %></div>
+    <div class="flex items-center gap-2 shrink-0 text-xs text-base-content/60">
+      <% if @service_set.service_date %><span class="hidden sm:inline"><%= @service_set.service_date.strftime(t("live.musician.date_format")) %></span><% end %>
+      <% if @session %>
+        <span class="badge badge-soft badge-success badge-sm gap-1.5">
+          <span class="status status-success animate-pulse" aria-hidden="true"></span><%= t("live.musician.live") %>
+        </span>
+      <% end %>
+    </div>
   </div>
 
   <% unless @session %>
-    <p class="musician-not-live" data-role="not-live">
-      <%= @service_set.service_date ? t("live.musician.not_live_dated", date: @service_set.service_date.strftime(t("live.musician.date_format"))) : t("live.musician.not_live") %>
-    </p>
+    <div role="status" class="musician-not-live alert alert-info alert-soft" data-role="not-live">
+      <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg>
+      <span><%= @service_set.service_date ? t("live.musician.not_live_dated", date: @service_set.service_date.strftime(t("live.musician.date_format"))) : t("live.musician.not_live") %></span>
+    </div>
   <% else %>
-  <%# ── Above the fold: what the projector is on NOW + a peek at NEXT ──── %>
+  <%# ── Above the fold: what the projector is on NOW + a peek at NEXT ────
+      Both live inside the frame the operator broadcast replaces, so they follow the projector. %>
   <div class="musician-nowbar" data-role="now-bar">
     <div class="musician-now">
-      <span class="musician-cue musician-cue-now"><%= t("live.musician.now") %></span>
-      <%# The live frame — re-rendered by the operator broadcast so it follows the projector. %>
       <%= render "live/musician_frame", session: @session,
             target_key: @target_key, semitones: @semitones, capo: @capo %>
     </div>
-    <% next_row = musician_next_row(@set_rows, @session) %>
-    <% if next_row %>
-      <div class="musician-next" data-role="next-peek">
-        <span class="musician-cue musician-cue-next"><%= t("live.musician.next") %></span>
-        <div class="musician-next-body"><%= musician_row_peek(next_row) %></div>
-      </div>
-    <% end %>
   </div>
   <% end %>
 

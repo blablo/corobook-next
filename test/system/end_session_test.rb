@@ -21,6 +21,7 @@ class EndSessionTest < ApplicationSystemTestCase
   test "ending the service revokes both tokens and the followers can no longer connect" do
     visit operator_path(@session)
     click_on "End service"
+    within("[data-role=end-service-modal]") { click_on "End the service" }
     assert_text "Service ended."
 
     @session.reload

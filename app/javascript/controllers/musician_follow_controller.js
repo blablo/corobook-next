@@ -3,30 +3,44 @@ import { Controller } from "@hotwired/stimulus"
 // Keeps the full-set chart in sync with the projector. The live "Now" frame is replaced by the
 // operator broadcast (Turbo Stream on #live-frame); each replacement carries the new
 // position_version. On a newer version we mark the matching row in the full set as current and
-// scroll it into view, so a musician reading ahead is snapped back to where the service is.
+// scroll it to just below the sticky Now band, so a musician reading ahead is snapped back to
+// where the service is.
 //
 // The current row is identified server-side on GET (data-current="true"); live advances happen
 // client-side here by reading the item/section the new live frame reports.
+const GAP = 12 // px between the bottom of the sticky header and the current row
+const SETTLE_MS = 800 // a smooth scroll should be done by then
+
 export default class extends Controller {
   connect() {
     this.onStream = this.onStream.bind(this)
     document.addEventListener("turbo:before-stream-render", this.onStream)
+    // A reload should land on the live row, not wherever the browser remembers we were.
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual"
     // Snap to the server-rendered current row on first paint.
-    this.scrollToCurrent()
+    const row = this.element.querySelector('[data-role=set-row][data-current="true"]')
+    if (row) this.scrollToRow(row, false)
   }
 
   disconnect() {
     document.removeEventListener("turbo:before-stream-render", this.onStream)
+    clearTimeout(this.settleTimer)
   }
 
   onStream(event) {
     const frame = event.target?.templateContent?.querySelector?.("[data-role=musician-frame]")
     if (!frame) return
-    const itemId = frame.dataset.itemId
-    const sectionIndex = frame.dataset.sectionIndex
+    const { itemId, sectionIndex } = frame.dataset
     if (itemId == null || sectionIndex == null) return
-    // Defer until the stream has applied so the DOM reflects the new frame.
-    requestAnimationFrame(() => this.markCurrent(itemId, sectionIndex))
+
+    // Turbo renders the stream one repaint after this event. Follow only once the new Now band
+    // is in place: its height is final, and swapping it in can no longer cancel the scroll. A
+    // stale frame the follower guard drops is never rendered, so it never moves the chart.
+    const render = event.detail.render
+    event.detail.render = async (stream) => {
+      await render(stream)
+      this.markCurrent(itemId, sectionIndex)
+    }
   }
 
   markCurrent(itemId, sectionIndex) {
@@ -34,16 +48,33 @@ export default class extends Controller {
       el.classList.remove("is-current")
       el.removeAttribute("data-current")
     })
-    const id = `row-${itemId}-${sectionIndex}`
-    const row = this.element.querySelector(`#${CSS.escape(id)}`)
+    const row = this.element.querySelector(`#${CSS.escape(`row-${itemId}-${sectionIndex}`)}`)
     if (!row) return
     row.classList.add("is-current")
     row.setAttribute("data-current", "true")
-    row.scrollIntoView({ behavior: "smooth", block: "start" })
+    this.scrollToRow(row, true)
   }
 
-  scrollToCurrent() {
-    const row = this.element.querySelector('[data-role=set-row][data-current="true"]')
-    row?.scrollIntoView({ block: "start" })
+  // Put the row at the top of the screen. The sticky header (top bar + Now band) hides while
+  // scrolling down and returns when scrolling up (header_reveal_controller), so it only takes
+  // room going up.
+  scrollToRow(row, smooth) {
+    const band = this.element.querySelector("[data-role=now-bar]")
+    const bar = this.element.querySelector(".musician-topbar")
+    const rowTop = row.getBoundingClientRect().top + window.scrollY
+    let top = rowTop - GAP
+    if (top < window.scrollY) top -= (band?.offsetHeight || 0) + (bar?.offsetHeight || 0)
+    top = Math.max(0, Math.round(top))
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    const behavior = smooth && !reduce ? "smooth" : "auto"
+    window.scrollTo({ top, behavior })
+
+    // Something can cut a smooth scroll short; once it should have finished, finish the job.
+    clearTimeout(this.settleTimer)
+    this.settleTimer = setTimeout(() => {
+      const off = Math.abs(window.scrollY - top)
+      if (off > 24) window.scrollTo({ top, behavior: "auto" })
+    }, SETTLE_MS)
   }
 }

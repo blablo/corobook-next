@@ -7,7 +7,6 @@ class MusicianController < ApplicationController
   def show
     @session = LiveSession.active.find_by!(musician_token: params[:token])
     load_chart(@session.service_set)
-    @key_scope = @session.musician_token
   rescue ActiveRecord::RecordNotFound
     not_found
   end
@@ -19,8 +18,6 @@ class MusicianController < ApplicationController
     service_set = ServiceSet.find_by!(musician_token: params[:token])
     @session = service_set.active_live_session
     load_chart(service_set)
-    # Key/capo choice is remembered per service, so it survives going live.
-    @key_scope = service_set.musician_token
     render :show
   rescue ActiveRecord::RecordNotFound
     not_found

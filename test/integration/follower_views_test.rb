@@ -163,4 +163,16 @@ class FollowerViewsTest < ActionDispatch::IntegrationTest
     get musician_path("nope")
     assert_response :not_found
   end
+
+  test "the live frame carries the Now line and the Next peek, so a broadcast updates both" do
+    # On the title slide, so Next is the song's first lyric section.
+    get musician_path(@session.musician_token)
+    assert_select "[data-role=musician-frame] [data-role=now-summary]", text: /Himno/
+    assert_select "[data-role=musician-frame] [data-role=next-peek]", text: /Hola mundo/
+
+    html = ApplicationController.render(partial: "live/musician_frame",
+      locals: { session: @session, target_key: nil, semitones: 0, capo: nil })
+    assert_includes html, 'data-role="now-summary"'
+    assert_includes html, 'data-role="next-peek"'
+  end
 end

@@ -20,6 +20,21 @@ class OperatorAdvanceTest < ActionDispatch::IntegrationTest
     assert_select "[data-role=back-to-set][href='#{service_set_path(@set)}']"
   end
 
+  test "the service order marks the current item and offers Go for the others" do
+    get operator_path(@session)
+    assert_select "[data-role=service-order] li[aria-current=true]", count: 1, text: /Dos secciones/
+    assert_select "[data-role=service-order] [data-role=current-item]", count: 1
+    assert_select "[data-role=service-order] form[action='#{operator_goto_path(@session, set_item_id: @i1.id)}']"
+    assert_select "[data-role=service-order] form[action='#{operator_goto_path(@session, set_item_id: @i0.id)}']", count: 0
+  end
+
+  test "End service asks for confirmation before ending" do
+    get operator_path(@session)
+    assert_select "button[data-role=end-service][onclick*='end-service-modal']"
+    assert_select "form[action='#{operator_end_path(@session)}']", count: 1
+    assert_select "dialog#end-service-modal form[action='#{operator_end_path(@session)}'] [data-role=end-service-confirm]"
+  end
+
   test "advance walks sections within a song then crosses into the next item" do
     # Section 0 is the song's title slide, 1 = V1, 2 = Coro, then the next item.
     assert_equal @i0.id, @session.current_set_item_id

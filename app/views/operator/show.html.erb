@@ -1,44 +1,51 @@
-<div class="my-6 w-full px-4 sm:px-6" data-role="operator" data-controller="operator-clicker">
-  <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-    <div class="flex items-center gap-3 min-w-0">
-      <h1 class="text-2xl font-bold truncate"><%= @session.service_set.name %></h1>
-      <span class="badge <%= @session.active? ? 'badge-success' : 'badge-ghost' %>"
-            data-role="live-indicator"><%= @session.active? ? t("live.operator.live") : t("live.operator.ended") %></span>
+<div class="space-y-6" data-role="operator" data-controller="operator-clicker">
+  <%# ── Header: service, live state, wall clock, exits ───────────── %>
+  <header class="flex flex-wrap items-center justify-between gap-4">
+    <div class="min-w-0 space-y-1">
+      <div class="flex items-center gap-2">
+        <% if @session.active? %>
+          <span class="badge badge-soft badge-success badge-sm gap-1.5" data-role="live-indicator">
+            <span class="status status-success animate-pulse" aria-hidden="true"></span><%= t("live.operator.live") %>
+          </span>
+        <% else %>
+          <span class="badge badge-ghost badge-sm" data-role="live-indicator"><%= t("live.operator.ended") %></span>
+        <% end %>
+      </div>
+      <h1 class="text-2xl font-semibold truncate"><%= @session.service_set.name %></h1>
     </div>
-    <%# Keynote-style wall clock so whoever runs the service can keep time. %>
-    <span class="text-3xl font-light tabular-nums text-info" data-controller="clock" data-role="clock"
-          aria-label="<%= t('live.operator.clock') %>"></span>
-    <div class="flex items-center gap-2">
+
+    <div class="flex flex-wrap items-center gap-3">
+      <%# Keynote-style wall clock so whoever runs the service can keep time. %>
+      <span class="rounded-box border border-base-300 bg-base-100 px-4 py-1.5 text-2xl font-semibold tabular-nums"
+            data-controller="clock" data-role="clock" aria-label="<%= t('live.operator.clock') %>"></span>
       <%= link_to t("live.operator.back_to_service"), service_set_path(@session.service_set),
-            class: "btn btn-ghost btn-sm", data: { role: "back-to-set" } %>
+            class: "btn btn-ghost", data: { role: "back-to-set" } %>
       <% if @session.active? %>
-        <%= button_to t("live.operator.end_service"), operator_end_path(@session), method: :delete,
-              form: { data: { turbo: false } }, class: "btn btn-error btn-outline btn-sm",
-              data: { role: "end-service" } %>
+        <%# Ending clears the projector and musician links, so it asks first. %>
+        <button type="button" class="btn btn-error btn-outline" data-role="end-service"
+                onclick="document.getElementById('end-service-modal').showModal()"><%= t("live.operator.end_service") %></button>
       <% end %>
     </div>
-  </div>
+  </header>
 
-  <%# Presenter view (like Keynote): Now on the left, the REAL rendered next slide on the right,
-      controls in the Now card's footer. On a phone the cards stack Now (with controls) → Next, so
-      the main slide keeps the full width and the buttons sit under the thumb. Both previews use the same projector frame
-      and fit controller as the projection screen, so they look exactly like it. %>
-  <%# Each preview is a card: a header row (what it is + where it is in the service), the slide,
-      and for Now a footer with the controls, so the buttons visibly belong to the live slide. %>
-  <div class="grid gap-4 mb-6 lg:grid-cols-[3fr_2fr] lg:items-start">
-    <section class="card card-border bg-base-100 shadow-sm min-w-0" data-role="now-panel"
+  <%# Presenter view (like Keynote): Now on the left with the controls under it; Next and the
+      service order on the right. On a phone the cards stack Now (with controls) → Next → order,
+      so the main slide keeps the full width and the buttons sit under the thumb. Both previews
+      use the same projector frame and fit controller as the projection screen. %>
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-[3fr_2fr] items-start">
+    <section class="card card-border bg-base-100 min-w-0" data-role="now-panel"
              data-controller="auto-page-label" data-action="auto-pages:change->auto-page-label#update auto-pages:progress->auto-page-label#progress countdown:tick->auto-page-label#countdown"
              data-auto-page-label-template-value="<%= t("live.operator.page", n: "%{n}", count: "%{count}") %>">
-      <div class="flex flex-wrap items-center gap-x-2 gap-y-1 px-4 py-2.5 border-b border-base-200 text-sm">
-        <span class="badge badge-error badge-sm font-bold uppercase"><%= t("live.operator.now") %></span>
+      <div class="flex flex-wrap items-center gap-x-2 gap-y-1 px-5 pt-4 pb-3">
+        <span class="badge badge-error badge-sm font-semibold"><%= t("live.operator.now") %></span>
         <span class="font-semibold min-w-0" data-role="now-label"><%= operator_stop_label(@session) %></span>
         <%= operator_auto_badge(@session) %>
         <%= operator_countdown_badge(@session) %>
         <% if @session.blanked %><span class="badge badge-warning badge-sm" data-role="blanked-badge"><%= t("live.operator.blanked") %></span><% end %>
-        <% if @stop_index %><span class="ml-auto text-base-content/60 tabular-nums" data-role="now-position"><%= t("live.operator.position", n: @stop_index + 1, count: @stop_count) %></span><% end %>
+        <% if @stop_index %><span class="ml-auto text-sm text-base-content/60 tabular-nums" data-role="now-position"><%= t("live.operator.position", n: @stop_index + 1, count: @stop_count) %></span><% end %>
       </div>
-      <div class="p-3">
-        <div class="rounded overflow-hidden projector-preview" data-role="operator-frame">
+      <div class="px-5">
+        <div class="rounded-box overflow-hidden projector-preview" data-role="operator-frame">
           <%= render "live/projector_frame", session: @session %>
           <% if @session.blanked %>
             <%# The preview stage is always black, so fixed light text (not base-content) stays legible. %>
@@ -52,80 +59,126 @@
                     aria-label="<%= t('live.operator.auto_badge_title') %>"></progress>
         <% end %>
       </div>
-      <div class="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 border-t border-base-200" data-role="operator-controls">
+      <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 px-5 py-4" data-role="operator-controls">
         <div class="join">
           <%= button_to t("live.operator.back"), operator_back_path(@session), method: :patch,
-                form: { data: { turbo: false, "operator-clicker-target": "back" } }, class: "btn join-item" %>
+                form: { data: { turbo: false, "operator-clicker-target": "back" } }, class: "btn btn-lg join-item" %>
           <%= button_to t("live.operator.next"), operator_advance_path(@session), method: :patch,
-                form: { data: { turbo: false, "operator-clicker-target": "next" } }, class: "btn btn-primary join-item px-10" %>
+                form: { data: { turbo: false, "operator-clicker-target": "next" } }, class: "btn btn-lg btn-primary join-item px-12" %>
           <%= button_to (@session.blanked ? t("live.operator.unblank") : t("live.operator.blank")), operator_blank_path(@session), method: :patch,
-                form: { data: { turbo: false, "operator-clicker-target": "blank" } }, class: "btn join-item", data: { role: "blank-toggle" } %>
+                form: { data: { turbo: false, "operator-clicker-target": "blank" } },
+                class: "btn btn-lg join-item #{"btn-warning" if @session.blanked}", data: { role: "blank-toggle" } %>
         </div>
-        <p class="text-xs text-base-content/50" data-role="clicker-hint">
+        <p class="text-xs text-base-content/60 max-w-xs" data-role="clicker-hint">
           <%= t("live.operator.clicker_hint_html", blank_key: tag.kbd("B", class: "kbd kbd-xs")) %>
         </p>
       </div>
     </section>
 
-    <section class="card card-border bg-base-100 shadow-sm min-w-0" data-role="next-panel"
-             data-controller="auto-page-label" data-action="auto-pages:change->auto-page-label#update auto-pages:progress->auto-page-label#progress countdown:tick->auto-page-label#countdown"
-             data-auto-page-label-template-value="<%= t("live.operator.page", n: "%{n}", count: "%{count}") %>">
-      <div class="flex flex-wrap items-center gap-x-2 gap-y-1 px-4 py-2.5 border-b border-base-200 text-sm">
-        <span class="badge badge-primary badge-outline badge-sm font-bold uppercase"><%= t("live.operator.next_up") %></span>
-        <% if @next_session %>
-          <span class="font-semibold min-w-0" data-role="next-label"><%= operator_stop_label(@next_session) %></span>
-          <%= operator_auto_badge(@next_session) %>
-          <span class="ml-auto text-base-content/60 tabular-nums" data-role="next-position"><%= t("live.operator.position", n: @stop_index.to_i + 2, count: @stop_count) %></span>
-        <% end %>
-      </div>
-      <div class="p-3">
-        <div class="rounded overflow-hidden projector-preview" data-role="next-frame">
+    <div class="space-y-6 min-w-0">
+      <section class="card card-border bg-base-100 min-w-0" data-role="next-panel"
+               data-controller="auto-page-label" data-action="auto-pages:change->auto-page-label#update auto-pages:progress->auto-page-label#progress countdown:tick->auto-page-label#countdown"
+               data-auto-page-label-template-value="<%= t("live.operator.page", n: "%{n}", count: "%{count}") %>">
+        <div class="flex flex-wrap items-center gap-x-2 gap-y-1 px-5 pt-4 pb-3">
+          <span class="badge badge-soft badge-primary badge-sm font-semibold"><%= t("live.operator.next_up") %></span>
           <% if @next_session %>
-            <%= render "live/projector_frame", session: @next_session, preview: true %>
-          <% else %>
-            <span class="absolute inset-0 flex items-center justify-center text-sm text-white/50" data-role="end-of-service"><%= t("live.operator.end_of_service") %></span>
+            <span class="font-semibold min-w-0" data-role="next-label"><%= operator_stop_label(@next_session) %></span>
+            <%= operator_auto_badge(@next_session) %>
+            <span class="ml-auto text-sm text-base-content/60 tabular-nums" data-role="next-position"><%= t("live.operator.position", n: @stop_index.to_i + 2, count: @stop_count) %></span>
           <% end %>
+        </div>
+        <div class="px-5 pb-5">
+          <div class="rounded-box overflow-hidden projector-preview" data-role="next-frame">
+            <% if @next_session %>
+              <%= render "live/projector_frame", session: @next_session, preview: true %>
+            <% else %>
+              <span class="absolute inset-0 flex items-center justify-center text-sm text-white/50" data-role="end-of-service"><%= t("live.operator.end_of_service") %></span>
+            <% end %>
+          </div>
+        </div>
+      </section>
+
+      <%# ── Service order: where we are, and a jump to any item ─────── %>
+      <section class="card card-border bg-base-100 min-w-0" data-role="service-order">
+        <div class="card-body p-0">
+          <h2 class="card-title text-base px-5 pt-4"><%= t("live.operator.jump_to_item") %></h2>
+          <ol class="list lg:max-h-[28rem] overflow-y-auto">
+            <% @session.service_set.ordered_items.each_with_index do |item, i| %>
+              <% current = item.id == @session.current_set_item_id %>
+              <% song = item.item_type == "song" %>
+              <li class="list-row items-center <%= current ? "bg-base-200" : "hover:bg-base-200" %>"
+                  <%= 'aria-current="true"'.html_safe if current %>>
+                <span class="w-5 text-right text-sm tabular-nums text-base-content/60"><%= i + 1 %></span>
+                <span class="inline-grid place-items-center size-8 rounded-box <%= current ? "bg-error text-error-content" : "bg-base-200 text-primary" %>">
+                  <% if song %>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9 19.5 6.75v8.25M9 9v8.25M9 9l-.75.161M9 17.25a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm10.5-2.25a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/></svg>
+                  <% else %>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75h16.5v12.75H3.75zM12 16.5v3.75m-3 0h6"/></svg>
+                  <% end %>
+                </span>
+                <span class="list-col-grow min-w-0 flex flex-wrap items-center gap-2" data-role="jump-item">
+                  <span class="truncate <%= "font-semibold" if current %>"><%= item.item.title %></span>
+                  <%= set_item_auto_badge(item) %>
+                  <% if song && item.song&.song_key.present? %>
+                    <span class="badge badge-ghost badge-sm font-mono"><%= item.song.song_key %></span>
+                  <% end %>
+                </span>
+                <% if current %>
+                  <span class="badge badge-error badge-sm" data-role="current-item"><%= t("live.operator.now") %></span>
+                <% else %>
+                  <%= button_to t("live.operator.go"), operator_goto_path(@session, set_item_id: item.id), method: :patch,
+                        class: "btn btn-ghost btn-sm", form: { data: { turbo: false } } %>
+                <% end %>
+              </li>
+            <% end %>
+          </ol>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <%# ── Join links: open the projector screen, let musicians follow along ── %>
+  <div class="grid gap-6 sm:grid-cols-2" data-role="join-links">
+    <% projector_url = projector_url(@session.projector_token, host: request.host_with_port, protocol: request.protocol.delete_suffix("://")) %>
+    <% musician_url  = musician_url(@session.musician_token,  host: request.host_with_port, protocol: request.protocol.delete_suffix("://")) %>
+
+    <section class="card card-border bg-base-100" data-role="projector-join">
+      <div class="card-body flex-row items-center gap-5">
+        <div class="shrink-0 rounded-box border border-base-300 bg-white p-2"><%= qr_svg(projector_url, size: 112) %></div>
+        <div class="min-w-0 space-y-1">
+          <h2 class="card-title text-base"><%= t("live.operator.projector") %></h2>
+          <p class="text-sm text-base-content/60"><%= t("live.operator.projector_hint") %></p>
+          <%= link_to projector_url, projector_url, target: "_blank", rel: "noopener",
+                class: "link link-primary text-sm break-all", data: { role: "projector-url" } %>
+        </div>
+      </div>
+    </section>
+
+    <section class="card card-border bg-base-100" data-role="musician-join">
+      <div class="card-body flex-row items-center gap-5">
+        <div class="shrink-0 rounded-box border border-base-300 bg-white p-2"><%= qr_svg(musician_url, size: 112) %></div>
+        <div class="min-w-0 space-y-1">
+          <h2 class="card-title text-base"><%= t("live.operator.musician") %></h2>
+          <p class="text-sm text-base-content/60"><%= t("live.operator.musician_hint") %></p>
+          <%= link_to musician_url, musician_url, target: "_blank", rel: "noopener",
+                class: "link link-primary text-sm break-all", data: { role: "musician-url" } %>
         </div>
       </div>
     </section>
   </div>
 
-  <h2 class="text-sm font-semibold mb-2"><%= t("live.operator.jump_to_item") %></h2>
-  <ul class="list bg-base-100 rounded-box border border-base-200">
-    <% @session.service_set.ordered_items.each do |item| %>
-      <li class="list-row items-center">
-        <span class="list-col-grow flex flex-wrap items-center gap-2" data-role="jump-item">
-          <span><%= item.item.title %></span>
-          <%= set_item_auto_badge(item) %>
-        </span>
-        <%= button_to t("live.operator.go"), operator_goto_path(@session, set_item_id: item.id), method: :patch,
-              class: "btn btn-ghost btn-sm", form: { data: { turbo: false } } %>
-      </li>
-    <% end %>
-  </ul>
-
-  <div class="mt-6 grid gap-4 sm:grid-cols-2" data-role="join-links">
-    <% projector_url = projector_url(@session.projector_token, host: request.host_with_port, protocol: request.protocol.delete_suffix("://")) %>
-    <% musician_url  = musician_url(@session.musician_token,  host: request.host_with_port, protocol: request.protocol.delete_suffix("://")) %>
-
-    <div class="card card-border bg-base-100 flex-row items-center gap-4 p-4" data-role="projector-join">
-      <%= qr_svg(projector_url, size: 128) %>
-      <div class="min-w-0">
-        <div class="text-xs font-semibold uppercase tracking-wide text-base-content/60 mb-1"><%= t("live.operator.projector") %></div>
-        <%= link_to projector_url, projector_url, target: "_blank", rel: "noopener",
-              class: "link link-primary text-sm break-all", data: { role: "projector-url" } %>
-        <p class="text-xs text-base-content/50 mt-1"><%= t("live.operator.projector_hint") %></p>
+  <% if @session.active? %>
+    <dialog id="end-service-modal" class="modal" data-role="end-service-modal">
+      <div class="modal-box">
+        <h3 class="text-lg font-semibold"><%= t("live.operator.end_title") %></h3>
+        <p class="py-3 text-base-content/80"><%= t("live.operator.end_body") %></p>
+        <div class="modal-action">
+          <button type="button" class="btn btn-ghost" onclick="document.getElementById('end-service-modal').close()"><%= t("live.operator.cancel") %></button>
+          <%= button_to t("live.operator.end_confirm"), operator_end_path(@session), method: :delete,
+                form: { data: { turbo: false } }, class: "btn btn-error", data: { role: "end-service-confirm" } %>
+        </div>
       </div>
-    </div>
-
-    <div class="card card-border bg-base-100 flex-row items-center gap-4 p-4" data-role="musician-join">
-      <%= qr_svg(musician_url, size: 128) %>
-      <div class="min-w-0">
-        <div class="text-xs font-semibold uppercase tracking-wide text-base-content/60 mb-1"><%= t("live.operator.musician") %></div>
-        <%= link_to musician_url, musician_url, target: "_blank", rel: "noopener",
-              class: "link link-primary text-sm break-all", data: { role: "musician-url" } %>
-        <p class="text-xs text-base-content/50 mt-1"><%= t("live.operator.musician_hint") %></p>
-      </div>
-    </div>
-  </div>
+      <form method="dialog" class="modal-backdrop"><button aria-label="<%= t('live.operator.cancel') %>"><%= t("live.operator.cancel") %></button></form>
+    </dialog>
+  <% end %>
 </div>
