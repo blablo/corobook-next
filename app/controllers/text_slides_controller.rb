@@ -20,7 +20,10 @@ class TextSlidesController < ApplicationController
     @text_slides = church_scope(:text_slides).archived.search(@query).order(archived_at: :desc)
   end
 
-  def show; end
+  def show
+    @last_service = church_scope(:service_sets).joins(:set_items).where(set_items: { text_slide_id: @text_slide.id })
+                                               .where.not(service_date: nil).order(service_date: :desc).first
+  end
 
   def archive
     @text_slide.archive!
