@@ -90,11 +90,20 @@ class OperatorAdvanceTest < ActionDispatch::IntegrationTest
   test "the operator view shows projector/musician join links to copy and QR codes" do
     get operator_path(@session)
     assert_response :success
-    # Copy link buttons carrying the follow tokens.
-    assert_select "[data-role=projector-copy][data-url*='/p/#{@session.projector_token}']"
-    assert_select "[data-role=musician-copy][data-url*='/m/#{@session.musician_token}']"
-    # A QR svg per join card.
-    assert_select "[data-role=projector-join] svg"
-    assert_select "[data-role=musician-join] svg"
+    # The QR codes are the copy buttons, carrying the follow tokens.
+    assert_select "[data-role=projector-copy][data-url*='/p/#{@session.projector_token}'] svg"
+    assert_select "[data-role=musician-copy][data-url*='/m/#{@session.musician_token}'] svg"
+    assert_select "[data-role=projector-copy][aria-label=?]", "Copy link: Projector"
+  end
+
+  test "the join codes are out front until the service first moves, then behind Connect devices" do
+    get operator_path(@session)
+    assert_select "[data-role=join-links]:not([hidden])"
+    assert_select "[data-role=connect-devices][aria-expanded=true]"
+
+    patch operator_advance_path(@session)
+    get operator_path(@session)
+    assert_select "[data-role=join-links][hidden]"
+    assert_select "[data-role=connect-devices][aria-expanded=false][aria-controls=join-links]"
   end
 end

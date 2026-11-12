@@ -1,8 +1,9 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Copy a value to the clipboard and say so on the button for a moment.
-//   <div data-controller="clipboard" data-clipboard-text-value="https://…" data-clipboard-done-value="Copied">
-//     <button data-action="clipboard#copy" data-clipboard-target="label">Copy link</button>
+// Copy a value to the clipboard and say so for a moment: the label reads the done text and the
+// element carries data-copied, for styling.
+//   <button data-controller="clipboard" data-clipboard-text-value="https://…" data-clipboard-done-value="Copied"
+//           data-action="clipboard#copy"><span data-clipboard-target="label">Copy</span></button>
 export default class extends Controller {
   static targets = ["label"]
   static values = { text: String, done: String }
@@ -13,8 +14,12 @@ export default class extends Controller {
     const label = this.labelTarget
     this.original ??= label.textContent
     label.textContent = this.doneValue
+    this.element.dataset.copied = ""
     clearTimeout(this.timer)
-    this.timer = setTimeout(() => { label.textContent = this.original }, 1500)
+    this.timer = setTimeout(() => {
+      label.textContent = this.original
+      delete this.element.dataset.copied
+    }, 1500)
   }
 
   // The async clipboard API needs a secure page (https or localhost). Elsewhere, e.g. the dev

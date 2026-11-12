@@ -1,15 +1,20 @@
 <%#
-  A follow link as a QR code and a Copy link button (projector, band view, speaker view); the
-  button's title shows the address on hover. Locals: url, title, role (data-role prefix).
+  A follow link as a QR code under its title. Phones scan it; clicking it copies the link. A hint
+  beside the title says "Copy" on hover, then "Copied" (clipboard sets data-copied meanwhile). It
+  sits outside the code, so it never blocks a scan. Locals: url, title, role (data-role prefix).
 %>
-<div class="flex flex-row items-center gap-5" data-role="<%= role %>-join">
-  <div class="shrink-0 rounded-box border border-base-300 bg-white p-2"><%= qr_svg(url, size: 112) %></div>
-  <div class="min-w-0 space-y-1">
-    <h2 class="card-title text-base"><%= title %></h2>
-    <div data-controller="clipboard" data-clipboard-text-value="<%= url %>" data-clipboard-done-value="<%= t('live.operator.copied') %>">
-      <button type="button" class="btn btn-sm btn-soft btn-primary mt-1" title="<%= url %>"
-              data-action="clipboard#copy" data-clipboard-target="label" data-role="<%= role %>-copy"
-              data-url="<%= url %>"><%= t("live.operator.copy_link") %></button>
-    </div>
-  </div>
+<div data-role="<%= role %>-join">
+  <button type="button" title="<%= url %>" aria-label="<%= t("live.operator.copy_join", name: title) %>"
+          class="group flex flex-col gap-1.5 rounded-box p-2 text-left cursor-pointer hover:bg-base-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          data-controller="clipboard" data-clipboard-text-value="<%= url %>" data-clipboard-done-value="✓ <%= t("live.operator.copied") %>"
+          data-action="clipboard#copy" data-role="<%= role %>-copy" data-url="<%= url %>">
+    <span class="flex items-center justify-between gap-3">
+      <span class="font-semibold"><%= title %></span>
+      <%# DaisyUI's colours come from its vendored CSS, which has no group-* variants, so these
+          use its colour variables directly. %>
+      <span class="text-xs text-primary opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 group-data-[copied]:opacity-100 group-data-[copied]:text-[var(--color-success)]"
+            data-clipboard-target="label"><%= t("live.operator.copy") %></span>
+    </span>
+    <span class="block rounded-box border border-base-300 bg-white p-2 group-hover:border-[var(--color-primary)] group-data-[copied]:border-[var(--color-success)]"><%= qr_svg(url, size: 112) %></span>
+  </button>
 </div>

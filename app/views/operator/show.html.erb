@@ -1,4 +1,9 @@
-<div class="space-y-6" data-role="operator" data-controller="operator-clicker whiteboard"
+<%# The join codes are for setup (projector, band, pastor), so they're out front until the service
+    first moves. After that "Connect devices" in the header shows them, and the next move (a page
+    load) hides them again. %>
+<% codes_open = @session.position_version.zero? %>
+<div class="space-y-6" data-role="operator" data-controller="operator-clicker whiteboard disclosure"
+     data-disclosure-active-class="btn-active"
      data-whiteboard-viewer-value="<%= @session.whiteboard_viewer_key %>"
      data-whiteboard-labels-value="<%= whiteboard_labels %>">
   <%# ── Header: service, live state, wall clock, exits ───────────── %>
@@ -17,6 +22,9 @@
     </div>
 
     <div class="flex flex-wrap items-center gap-3">
+      <button type="button" class="btn btn-soft btn-primary <%= "btn-active" if codes_open %>"
+              aria-controls="join-links" aria-expanded="<%= codes_open %>"
+              data-action="disclosure#toggle" data-disclosure-target="button" data-role="connect-devices"><%= t("live.operator.connect_devices") %></button>
       <%# Keynote-style wall clock so whoever runs the service can keep time. %>
       <span class="rounded-box border border-base-300 bg-base-100 px-4 py-1.5 text-2xl font-semibold tabular-nums"
             data-controller="clock" data-role="clock" aria-label="<%= t('live.operator.clock') %>"></span>
@@ -29,6 +37,30 @@
       <% end %>
     </div>
   </header>
+
+  <%# ── Connect devices: open the projector screen, let musicians follow along, give the pastor
+      the speaker view ── %>
+  <section id="join-links" class="card card-border bg-base-100" data-role="join-links"
+           data-disclosure-target="panel" <%= "hidden" unless codes_open %>>
+    <div class="card-body p-4">
+      <div class="flex flex-wrap items-start gap-5">
+        <div class="w-full sm:w-36 space-y-1 sm:pt-2">
+          <h2 class="font-semibold text-base"><%= t("live.operator.connect_devices") %></h2>
+          <p class="text-xs text-base-content/60"><%= t("live.operator.connect_help") %></p>
+          <button type="button" class="link link-hover text-xs text-base-content/70"
+                  data-action="disclosure#toggle" data-role="hide-codes"><%= t("live.operator.hide_codes") %></button>
+        </div>
+        <%= render "join_link", url: follow_url(:projector, @session.projector_token), role: "projector",
+              title: t("live.operator.projector") %>
+        <%= render "join_link", url: follow_url(:musician, @session.musician_token), role: "musician",
+              title: t("live.operator.musician") %>
+        <% if @session.active? %>
+          <%= render "join_link", url: follow_url(:speaker, @session.speaker_token!), role: "speaker",
+                title: t("live.operator.speaker_view") %>
+        <% end %>
+      </div>
+    </div>
+  </section>
 
   <%# The speaker's whiteboard is on: say so, with a way to take it off (whiteboard_controller.js
       shows this as the state changes). %>
@@ -151,31 +183,6 @@
         </div>
       </section>
     </div>
-  </div>
-
-  <%# ── Join links: open the projector screen, let musicians follow along, give the pastor
-      the speaker view ── %>
-  <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3" data-role="join-links">
-    <section class="card card-border bg-base-100">
-      <div class="card-body">
-        <%= render "join_link", url: follow_url(:projector, @session.projector_token), role: "projector",
-              title: t("live.operator.projector") %>
-      </div>
-    </section>
-    <section class="card card-border bg-base-100">
-      <div class="card-body">
-        <%= render "join_link", url: follow_url(:musician, @session.musician_token), role: "musician",
-              title: t("live.operator.musician") %>
-      </div>
-    </section>
-    <% if @session.active? %>
-      <section class="card card-border bg-base-100">
-        <div class="card-body">
-          <%= render "join_link", url: follow_url(:speaker, @session.speaker_token!), role: "speaker",
-                title: t("live.operator.speaker_view") %>
-        </div>
-      </section>
-    <% end %>
   </div>
 
   <% if @session.active? %>

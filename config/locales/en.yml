@@ -669,7 +669,11 @@ en:
       projector: "Projector"
       musician: "Band view"
       speaker_view: "Speaker view"
-      copy_link: "Copy link"
+      connect_devices: "Connect devices"
+      connect_help: "Scan a code, or click it to copy its link."
+      hide_codes: "Hide codes"
+      copy: "Copy"
+      copy_join: "Copy link: %{name}"
       copied: "Copied"
       stop_whiteboard: "Stop whiteboard"
     speaker:
