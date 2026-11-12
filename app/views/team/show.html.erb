@@ -1,111 +1,179 @@
-<div class="mx-auto max-w-3xl p-4" data-role="team">
-  <h1 class="text-2xl font-semibold mb-6"><%= t("team.show.title") %></h1>
+<% band = @members.select(&:band_member?) %>
+<div class="space-y-6" data-role="team">
+  <%# --- Header --- %>
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-semibold"><%= t("team.show.title") %></h1>
+      <p class="text-base-content/60 mt-1"><%= t("team.show.subtitle", church: current_church.name) %></p>
+    </div>
+    <div class="stats bg-base-100 border border-base-300">
+      <div class="stat py-2 px-5">
+        <div class="stat-title text-xs"><%= t("team.show.members") %></div>
+        <div class="stat-value text-xl"><%= @members.size %></div>
+      </div>
+      <div class="stat py-2 px-5">
+        <div class="stat-title text-xs"><%= t("team.show.band") %></div>
+        <div class="stat-value text-xl text-primary"><%= band.size %></div>
+      </div>
+      <div class="stat py-2 px-5">
+        <div class="stat-title text-xs"><%= t("team.show.pending") %></div>
+        <div class="stat-value text-xl"><%= @invitations.size %></div>
+      </div>
+    </div>
+  </div>
 
   <% if flash[:accept_url] %>
-    <div class="alert alert-info mb-4 text-sm" data-role="accept-url-fallback">
+    <div class="alert alert-info" data-role="accept-url-fallback">
       <div>
         <p class="font-medium"><%= t("team.show.invite_link_fallback") %></p>
-        <code class="break-all"><%= flash[:accept_url] %></code>
+        <code class="break-all text-sm"><%= flash[:accept_url] %></code>
       </div>
     </div>
   <% end %>
 
-  <%# --- Invite form --- %>
-  <section class="mb-8" data-role="invite-form">
-    <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/60 mb-2"><%= t("team.show.invite_someone") %></h2>
-    <%= form_with model: @invitation, url: invitations_path, method: :post, class: "flex flex-wrap items-end gap-2" do |f| %>
-      <div>
-        <%= f.label :email, class: "block text-xs mb-1" %>
-        <%= f.email_field :email, placeholder: "person@example.com", required: true,
-              class: "input input-bordered input-sm w-64" %>
-      </div>
-      <div>
-        <%= f.label :role, class: "block text-xs mb-1" %>
-        <%= f.select :role, [ [ t("team.show.role_editor"), "editor" ], [ t("team.show.role_admin"), "admin" ] ], {},
-              class: "select select-bordered select-sm" %>
-      </div>
-      <%= f.submit t("team.show.send_invite"), class: "btn btn-primary btn-sm" %>
-    <% end %>
-  </section>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+    <div class="lg:col-span-2 space-y-6">
+      <%# --- Members --- %>
+      <section class="card card-border bg-base-100" data-role="members">
+        <div class="card-body p-0">
+          <div class="px-6 pt-5">
+            <h2 class="card-title text-base"><%= t("team.show.members") %></h2>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th class="pl-6"><%= t("team.show.th_member") %></th>
+                  <th><%= t("team.show.th_role") %></th>
+                  <th class="text-center"><%= t("team.show.th_band") %></th>
+                  <th class="pr-6"><span class="sr-only"><%= t("team.show.th_actions") %></span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @members.each do |member| %>
+                  <tr class="hover:bg-base-200/50" data-role="member-row" data-email="<%= member.email %>">
+                    <td class="pl-6">
+                      <div class="flex items-center gap-3">
+                        <div class="avatar avatar-placeholder">
+                          <div class="bg-primary/10 text-primary w-9 rounded-full">
+                            <span class="font-medium"><%= member.email.first.upcase %></span>
+                          </div>
+                        </div>
+                        <span class="font-medium break-all"><%= member.email %></span>
+                        <% if member == current_user %>
+                          <span class="badge badge-ghost badge-sm"><%= t("team.show.you") %></span>
+                        <% end %>
+                      </div>
+                    </td>
+                    <td>
+                      <%= form_with url: member_path(member), method: :patch do |f| %>
+                        <%= f.select :"user[role]", [ [ t("team.show.role_editor"), "editor" ], [ t("team.show.role_admin"), "admin" ] ],
+                              { selected: member.role }, class: "select select-sm w-32",
+                              aria: { label: t("team.show.role_for", email: member.email) },
+                              onchange: "this.form.requestSubmit()" %>
+                      <% end %>
+                    </td>
+                    <td class="text-center">
+                      <%= form_with url: band_member_path(member), method: :patch do %>
+                        <%= hidden_field_tag :band_member, "0", id: nil %>
+                        <%= check_box_tag :band_member, "1", member.band_member?,
+                              id: "band-#{member.id}", class: "toggle toggle-primary toggle-sm",
+                              aria: { label: t("team.show.band_toggle", email: member.email) },
+                              data: { role: "band-toggle" }, onchange: "this.form.requestSubmit()" %>
+                        <noscript><%= submit_tag t("team.show.save"), class: "btn btn-xs btn-outline" %></noscript>
+                      <% end %>
+                    </td>
+                    <td class="pr-6 text-right">
+                      <%= button_to member_path(member), method: :delete,
+                            class: "btn btn-ghost btn-sm text-error",
+                            form: { data: { turbo_confirm: t("team.show.remove_confirm", email: member.email) } } do %>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+                        <%= t("team.show.remove") %>
+                      <% end %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
-  <%# --- Band --- %>
-  <section class="mb-8" data-role="band">
-    <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/60 mb-1"><%= t("team.show.band") %></h2>
-    <p class="text-sm text-base-content/60 mb-2"><%= t("team.show.band_hint") %></p>
-    <% band = @members.select(&:band_member?) %>
-    <% if band.empty? %>
-      <p class="text-sm text-base-content/50" data-role="band-empty"><%= t("team.show.band_empty") %></p>
-    <% else %>
-      <div class="flex flex-wrap gap-2">
-        <% band.each do |m| %>
-          <span class="badge badge-soft badge-primary" data-role="band-member"><%= m.email %></span>
-        <% end %>
-      </div>
-    <% end %>
-  </section>
-
-  <%# --- Members --- %>
-  <section class="mb-8" data-role="members">
-    <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/60 mb-2"><%= t("team.show.members") %></h2>
-    <table class="table table-sm">
-      <thead><tr><th><%= t("team.show.th_email") %></th><th><%= t("team.show.th_role") %></th><th><%= t("team.show.th_band") %></th><th class="text-right"><%= t("team.show.th_actions") %></th></tr></thead>
-      <tbody>
-        <% @members.each do |member| %>
-          <tr data-role="member-row" data-email="<%= member.email %>">
-            <td><%= member.email %></td>
-            <td>
-              <%= form_with url: member_path(member), method: :patch, class: "inline" do |f| %>
-                <%= f.select :"user[role]", [ [ t("team.show.role_editor"), "editor" ], [ t("team.show.role_admin"), "admin" ] ],
-                      { selected: member.role }, class: "select select-bordered select-xs",
-                      onchange: "this.form.requestSubmit()" %>
+      <%# --- Pending invitations --- %>
+      <section class="card card-border bg-base-100" data-role="pending-invites">
+        <div class="card-body">
+          <h2 class="card-title text-base"><%= t("team.show.pending_invitations") %></h2>
+          <% if @invitations.empty? %>
+            <p class="text-base-content/60">
+              <%= t("team.show.no_pending") %>
+              <a href="#invitation_email" class="link link-primary"><%= t("team.show.invite_someone") %></a>
+            </p>
+          <% else %>
+            <ul class="list -mx-4">
+              <% @invitations.each do |inv| %>
+                <li class="list-row items-center" data-role="invite-row" data-email="<%= inv.email %>">
+                  <div class="avatar avatar-placeholder">
+                    <div class="bg-base-200 text-base-content/60 w-9 rounded-full">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/></svg>
+                    </div>
+                  </div>
+                  <div class="list-col-grow min-w-0">
+                    <div class="font-medium break-all"><%= inv.email %></div>
+                    <div class="text-xs text-base-content/60">
+                      <%= t("team.show.invite_meta", role: t("team.show.role_#{inv.role}"), by: inv.invited_by.email,
+                            date: inv.expires_at.to_date.to_fs(:long)) %>
+                    </div>
+                  </div>
+                  <div class="flex gap-1">
+                    <%= button_to t("team.show.resend"), resend_invitation_path(inv), method: :post, class: "btn btn-ghost btn-sm" %>
+                    <%= button_to t("team.show.revoke"), invitation_path(inv), method: :delete,
+                          class: "btn btn-ghost btn-sm text-error",
+                          form: { data: { turbo_confirm: t("team.show.revoke_confirm", email: inv.email) } } %>
+                  </div>
+                </li>
               <% end %>
-            </td>
-            <td>
-              <%= form_with url: band_member_path(member), method: :patch, class: "inline" do %>
-                <%= hidden_field_tag :band_member, "0", id: nil %>
-                <%= check_box_tag :band_member, "1", member.band_member?,
-                      id: "band-#{member.id}", class: "toggle toggle-primary toggle-sm",
-                      aria: { label: t("team.show.band_toggle", email: member.email) },
-                      data: { role: "band-toggle" }, onchange: "this.form.requestSubmit()" %>
-                <noscript><%= submit_tag t("team.show.save"), class: "btn btn-xs btn-outline" %></noscript>
-              <% end %>
-            </td>
-            <td class="text-right">
-              <%= button_to t("team.show.remove"), member_path(member), method: :delete,
-                    class: "btn btn-ghost btn-xs text-error",
-                    form: { data: { turbo_confirm: t("team.show.remove_confirm", email: member.email) } } %>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  </section>
-
-  <%# --- Pending invitations --- %>
-  <section data-role="pending-invites">
-    <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/60 mb-2"><%= t("team.show.pending_invitations") %></h2>
-    <% if @invitations.empty? %>
-      <p class="text-sm text-base-content/50"><%= t("team.show.no_pending") %></p>
-    <% else %>
-      <table class="table table-sm">
-        <thead><tr><th><%= t("team.show.th_email") %></th><th><%= t("team.show.th_role") %></th><th><%= t("team.show.th_invited_by") %></th><th><%= t("team.show.th_expires") %></th><th class="text-right"><%= t("team.show.th_actions") %></th></tr></thead>
-        <tbody>
-          <% @invitations.each do |inv| %>
-            <tr data-role="invite-row" data-email="<%= inv.email %>">
-              <td><%= inv.email %></td>
-              <td><%= inv.role %></td>
-              <td><%= inv.invited_by.email %></td>
-              <td><%= inv.expires_at.to_date.to_fs(:long) %></td>
-              <td class="text-right whitespace-nowrap">
-                <%= button_to t("team.show.resend"), resend_invitation_path(inv), method: :post, class: "btn btn-ghost btn-xs" %>
-                <%= button_to t("team.show.revoke"), invitation_path(inv), method: :delete,
-                      class: "btn btn-ghost btn-xs text-error",
-                      form: { data: { turbo_confirm: t("team.show.revoke_confirm", email: inv.email) } } %>
-              </td>
-            </tr>
+            </ul>
           <% end %>
-        </tbody>
-      </table>
-    <% end %>
-  </section>
+        </div>
+      </section>
+    </div>
+
+    <div class="space-y-6">
+      <%# --- Invite --- %>
+      <section class="card card-border bg-base-100" data-role="invite-form">
+        <div class="card-body">
+          <h2 class="card-title text-base"><%= t("team.show.invite_someone") %></h2>
+          <p class="text-sm text-base-content/60"><%= t("team.show.invite_hint", church: current_church.name) %></p>
+          <%= form_with model: @invitation, url: invitations_path, method: :post do |f| %>
+            <fieldset class="fieldset">
+              <%= f.label :email, class: "label" %>
+              <%= f.email_field :email, placeholder: "person@example.com", required: true, class: "input w-full" %>
+              <%= f.label :role, class: "label mt-2" %>
+              <%= f.select :role, [ [ t("team.show.role_editor"), "editor" ], [ t("team.show.role_admin"), "admin" ] ], {},
+                    class: "select w-full" %>
+              <p class="label whitespace-normal"><%= t("team.show.role_help") %></p>
+            </fieldset>
+            <%= f.submit t("team.show.send_invite"), class: "btn btn-primary w-full mt-3" %>
+          <% end %>
+        </div>
+      </section>
+
+      <%# --- Band --- %>
+      <section class="card card-border bg-base-100" data-role="band">
+        <div class="card-body">
+          <h2 class="card-title text-base"><%= t("team.show.band") %></h2>
+          <p class="text-sm text-base-content/60"><%= t("team.show.band_hint") %></p>
+          <% if band.empty? %>
+            <p class="text-sm text-base-content/60" data-role="band-empty"><%= t("team.show.band_empty") %></p>
+          <% else %>
+            <div class="flex flex-wrap gap-2">
+              <% band.each do |m| %>
+                <span class="badge badge-soft badge-primary" data-role="band-member"><%= m.email %></span>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </section>
+    </div>
+  </div>
 </div>

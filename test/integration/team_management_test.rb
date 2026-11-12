@@ -30,6 +30,15 @@ class TeamManagementTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "editor@example.com"
   end
 
+  test "the team page marks the signed-in member and points an empty invite list at the invite form" do
+    login(@admin)
+    get team_path
+    assert_select "[data-role=member-row][data-email='admin@example.com'] .badge", text: "You"
+    assert_select "[data-role=member-row][data-email='editor@example.com'] .badge", count: 0
+    assert_select "[data-role=pending-invites] a[href='#invitation_email']"
+    assert_select "#invitation_email"
+  end
+
   test "editor is denied the team page" do
     login(@editor)
     get team_path
