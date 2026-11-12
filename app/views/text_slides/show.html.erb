@@ -50,7 +50,9 @@
           <h2 class="card-title text-base">
             <%= slide.page_count > 1 ? t("slides.show.projector_preview_pages", count: slide.page_count) : t("slides.show.projector_preview") %>
           </h2>
-          <div class="grid gap-4 <%= "md:grid-cols-2" if slide.page_count > 1 %>">
+          <%# grid-cols-1 (not an implicit auto column): the preview is a size container with no
+              intrinsic width, so an auto column would shrink it to nothing. %>
+          <div class="grid grid-cols-1 gap-4 <%= "md:grid-cols-2" if slide.page_count > 1 %>">
             <% slide.page_count.times do |i| %>
               <figure class="relative">
                 <%# Bounded 16:9 mini-stage (position:relative) so an absolute background image is
