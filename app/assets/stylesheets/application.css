@@ -338,30 +338,17 @@
 }
 
 /* ── Sidebar navigation active style ─────────────────────────────────────────
-   The shared sidebar used DaisyUI's default near-black `menu-active` pill, which
-   reads as a heavy black slab. Replace it everywhere (top-level items AND the
-   nested Settings submenu) with a soft base-200 fill and a primary left accent.
-   DaisyUI loads after this file, so the active override needs !important. */
-.sidebar-menu > li > a.menu-active,
-.sidebar-submenu > li > a.menu-active {
-  background: var(--color-base-200) !important;
-  color: var(--color-base-content) !important;
-  border-left: 3px solid var(--color-primary);
-  font-weight: 500;
+   DaisyUI's menu draws `menu-active` (and the pressed :active state) from
+   --menu-active-bg / --menu-active-fg, defaulting to the near-black neutral with a depth
+   shadow. The sidebar sets them to a soft primary tint with primary text and icon instead.
+   `.menu.sidebar-menu` outranks DaisyUI's `.menu`, which loads after this file. */
+.menu.sidebar-menu {
+  --menu-active-bg: color-mix(in oklab, var(--color-primary) 12%, var(--color-base-100));
+  --menu-active-fg: var(--color-primary);
 }
-
-/* Hover, keyboard focus, and the pressed (:active) state all use the same soft fill — never the
-   DaisyUI near-black flash. The label/background stay base-content/base-200 on press. */
-.sidebar-menu > li > a:hover,
-.sidebar-menu > li > a:focus,
-.sidebar-menu > li > a:active,
-.sidebar-menu > li > a:focus-visible,
-.sidebar-submenu > li > a:hover,
-.sidebar-submenu > li > a:focus,
-.sidebar-submenu > li > a:active,
-.sidebar-submenu > li > a:focus-visible {
-  background: var(--color-base-200) !important;
-  color: var(--color-base-content) !important;
+.menu.sidebar-menu .menu-active {
+  box-shadow: none;
+  font-weight: 600;
 }
 
 /* Nested submenu: indent and slightly mute the sub-item labels. */
@@ -370,3 +357,4 @@
   font-size: 0.875rem;
   color: color-mix(in oklab, var(--color-base-content) 70%, transparent);
 }
+.sidebar-submenu > li > a.menu-active { color: var(--menu-active-fg); }
