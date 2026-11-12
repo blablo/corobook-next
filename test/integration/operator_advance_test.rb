@@ -111,6 +111,17 @@ class OperatorAdvanceTest < ActionDispatch::IntegrationTest
   test "the join codes stay under the header after the service moves" do
     patch operator_advance_path(@session)
     get operator_path(@session)
-    assert_select "[data-role=join-links]:not([hidden]) [data-role=projector-copy]"
+    assert_select "details[data-role=join-links][open] [data-role=projector-copy]"
+  end
+
+  test "Connect devices stays closed for this service once closed, and the next service starts open" do
+    cookies[:join_links_closed] = @session.id.to_s
+    get operator_path(@session)
+    assert_select "details[data-role=join-links]:not([open]) summary[data-role=join-links-toggle]", text: /Connect devices/
+    assert_select "details[data-role=join-links][data-remember-open-key-value=?]", @session.id.to_s
+
+    cookies[:join_links_closed] = (@session.id + 1).to_s
+    get operator_path(@session)
+    assert_select "details[data-role=join-links][open]"
   end
 end
