@@ -1,8 +1,7 @@
-<%# A calendar-style date tile. `big` renders the filled hero version; `live` colours it as on air. %>
+<%# A calendar-style date tile. `big` renders the filled hero version. %>
 <% big = local_assigns.fetch(:big, false) %>
-<% fill = local_assigns.fetch(:live, false) ? "bg-success text-success-content" : "bg-primary text-primary-content" %>
 <% if date %>
-  <div class="flex flex-col items-center justify-center rounded-box shrink-0 <%= big ? "#{fill} size-20" : "border border-base-300 size-12" %>">
+  <div class="flex flex-col items-center justify-center rounded-box shrink-0 <%= big ? "bg-primary text-primary-content size-20" : "border border-base-300 size-12" %>">
     <span class="<%= big ? "text-xs" : "text-[10px] text-base-content/60" %> font-semibold uppercase"><%= date.strftime("%b") %></span>
     <span class="<%= big ? "text-3xl" : "text-lg" %> font-bold leading-none"><%= date.day %></span>
     <% if big %><span class="text-xs"><%= date.strftime("%a") %></span><% end %>

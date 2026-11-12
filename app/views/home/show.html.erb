@@ -31,7 +31,7 @@
         <% date = @hero_set.service_date %>
         <% live = @active_session.present? %>
         <div class="card-body sm:flex-row sm:items-center gap-5">
-          <%= render "service_sets/date_block", date: date, big: true, live: live %>
+          <%= render "service_sets/date_block", date: date, big: true %>
           <div class="grow min-w-0 space-y-2">
             <div class="flex flex-wrap items-center gap-2">
               <% if live %>
