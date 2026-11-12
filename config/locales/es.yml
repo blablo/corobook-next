@@ -570,8 +570,6 @@ es:
       musician: "Músico"
       musician_hint: "Los músicos escanean esto para seguir la letra en su teléfono."
     musician:
-      key: "Tono"
-      capo: "Cejilla"
       live: "En vivo"
       now: "Ahora"
       next: "Siguiente"

@@ -2,10 +2,9 @@
     still renders, without the live Now/Next bar or the current-row highlight. %>
 <%= turbo_stream_from [ @session, :musician ] if @session %>
 <div class="musician-root" data-theme="light" data-role="musician-root"
-     data-controller="musician-key<%= ' musician-follow' if @session %>"
-     data-musician-key-token-value="<%= @key_scope %>">
+     <%= 'data-controller="musician-follow"'.html_safe if @session %>>
 
-  <%# ── Top bar: set name + key/capo chooser ─────────────────────────── %>
+  <%# ── Top bar: set name, live state, date ─────────────────────────── %>
   <div class="musician-topbar">
     <div class="min-w-0">
       <div class="musician-setname truncate" data-role="set-name"><%= @service_set.name %></div>
@@ -18,21 +17,6 @@
         <% if @service_set.service_date %><span><%= @service_set.service_date.strftime(t("live.musician.date_format")) %></span><% end %>
       </div>
     </div>
-    <form class="musician-key-chooser" data-action="change->musician-key#choose">
-      <label class="input input-sm w-24">
-        <span class="label"><%= t("live.musician.key") %></span>
-        <input type="text" name="key" value="<%= @target_key %>" data-role="key-input" list="musician-keys"
-               inputmode="text" autocomplete="off" autocapitalize="characters" placeholder="—" />
-      </label>
-      <label class="input input-sm w-28">
-        <span class="label"><%= t("live.musician.capo") %></span>
-        <input type="number" name="capo" value="<%= @capo %>" min="0" max="11" placeholder="0"
-               data-role="capo-input" />
-      </label>
-      <datalist id="musician-keys">
-        <% %w[C C# Db D Eb E F F# Gb G Ab A Bb B].each do |k| %><option value="<%= k %>"></option><% end %>
-      </datalist>
-    </form>
   </div>
 
   <% unless @session %>

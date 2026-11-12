@@ -570,8 +570,6 @@ en:
       musician: "Musician"
       musician_hint: "Musicians scan this to follow along on their phone."
     musician:
-      key: "Key"
-      capo: "Capo"
       live: "Live"
       now: "Now"
       next: "Next"
