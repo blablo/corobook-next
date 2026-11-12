@@ -86,4 +86,18 @@ class SlideArchiveTest < ActionDispatch::IntegrationTest
     assert_redirected_to login_path
     assert_not @active.reload.archived?
   end
+
+  test "the slide page shows its details and the latest service that used it" do
+    login
+    @active.update!(pages: [ { "body_markdown" => "Hola" }, { "body_markdown" => "Adiós" } ], auto_advance_seconds: 6)
+    older = @church.service_sets.create!(name: "Octubre", service_date: Date.new(2026, 10, 4))
+    newer = @church.service_sets.create!(name: "Noviembre", service_date: Date.new(2026, 11, 1))
+    [ older, newer ].each { |set| set.set_items.create!(item_type: "text_slide", text_slide: @active, position: 0) }
+
+    get text_slide_path(@active)
+    assert_select "[data-role=projector-preview] .projector-preview", count: 2
+    assert_select "[data-role=slide-details] [data-role=auto-advance-detail]", text: /Every 6s/
+    assert_select "[data-role=slide-details] [data-role=last-used] a[href='#{service_set_path(newer)}']", text: "Noviembre"
+    assert_select "[data-role=musician-preview]", text: /Adiós/
+  end
 end
