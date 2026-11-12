@@ -9,11 +9,14 @@ import { Controller } from "@hotwired/stimulus"
 // The current row is identified server-side on GET (data-current="true"); live advances happen
 // client-side here by reading the item/section the new live frame reports.
 const GAP = 12 // px between the bottom of the sticky header and the current row
+const SETTLE_MS = 800 // a smooth scroll should be done by then
 
 export default class extends Controller {
   connect() {
     this.onStream = this.onStream.bind(this)
     document.addEventListener("turbo:before-stream-render", this.onStream)
+    // A reload should land on the live row, not wherever the browser remembers we were.
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual"
     // Snap to the server-rendered current row on first paint.
     const row = this.element.querySelector('[data-role=set-row][data-current="true"]')
     if (row) this.scrollToRow(row, false)
@@ -21,6 +24,7 @@ export default class extends Controller {
 
   disconnect() {
     document.removeEventListener("turbo:before-stream-render", this.onStream)
+    clearTimeout(this.settleTimer)
   }
 
   onStream(event) {
@@ -59,8 +63,17 @@ export default class extends Controller {
     const rowTop = row.getBoundingClientRect().top + window.scrollY
     let top = rowTop - (band?.offsetHeight || 0) - GAP
     if (top < window.scrollY) top -= bar?.offsetHeight || 0
+    top = Math.max(0, Math.round(top))
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    window.scrollTo({ top: Math.max(0, top), behavior: smooth && !reduce ? "smooth" : "auto" })
+    const behavior = smooth && !reduce ? "smooth" : "auto"
+    window.scrollTo({ top, behavior })
+
+    // Something can cut a smooth scroll short; once it should have finished, finish the job.
+    clearTimeout(this.settleTimer)
+    this.settleTimer = setTimeout(() => {
+      const off = Math.abs(window.scrollY - top)
+      if (off > 24) window.scrollTo({ top, behavior: "auto" })
+    }, SETTLE_MS)
   }
 }
