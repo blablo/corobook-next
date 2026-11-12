@@ -42,11 +42,15 @@ Rails.application.routes.draw do
   patch "operator/:id/goto"    => "operator#goto",    as: :operator_goto
   patch "operator/:id/blank"   => "operator#blank",   as: :operator_blank
   patch "operator/:id/font"    => "operator#font",    as: :operator_font
+  patch "operator/:id/whiteboard/stop" => "operator#stop_whiteboard", as: :operator_whiteboard_stop
   delete "operator/:id"        => "operator#end_session", as: :operator_end
 
   get   "p/:token"         => "projector#show",    as: :projector
   patch "p/:token/advance" => "projector#advance", as: :projector_advance
   patch "p/:token/back"    => "projector#back",    as: :projector_back
+  # Speaker view (the pastor's tablet): whiteboard and drawing on the slide. Token-gated like
+  # the projector; the drawing itself goes over WhiteboardChannel.
+  get "s/:token" => "speaker#show", as: :speaker
   get "m/:token" => "musician#show",  as: :musician
   # Permanent per-service musician link (emailed to the band): follows live when the service is live.
   get "m/s/:token" => "musician#service", as: :service_musician

@@ -28,6 +28,7 @@ class LiveSession < ApplicationRecord
       position_version: 0,
       projector_token: SecureRandom.urlsafe_base64(24),
       musician_token: SecureRandom.urlsafe_base64(24),
+      speaker_token: SecureRandom.urlsafe_base64(24),
       started_at: Time.current,
       position_changed_at: Time.current
     )
@@ -39,8 +40,30 @@ class LiveSession < ApplicationRecord
   end
 
   def end!
-    update!(status: "ended", projector_token: nil, musician_token: nil, ended_at: Time.current)
+    update!(status: "ended", projector_token: nil, musician_token: nil, speaker_token: nil, ended_at: Time.current)
+    # Written directly: the speaker may have switched the whiteboard on since this row was loaded,
+    # and update! only writes attributes that changed in memory.
+    update_columns(whiteboard_mode: nil)
   end
+
+  # The speaker view link (/s/:token). Sessions launched before the whiteboard existed get one
+  # the first time the operator asks for it.
+  def speaker_token!
+    update_column(:speaker_token, SecureRandom.urlsafe_base64(24)) if speaker_token.blank?
+    speaker_token
+  end
+
+  # A signed key that lets a screen (projector, operator) watch this session's whiteboard
+  # without being able to draw; see WhiteboardChannel.
+  def whiteboard_viewer_key
+    Rails.application.message_verifier(:whiteboard_viewer).generate(id, purpose: :viewer, expires_in: 1.day)
+  end
+
+  def self.whiteboard_viewer_id(key)
+    Rails.application.message_verifier(:whiteboard_viewer).verified(key.to_s, purpose: :viewer)
+  end
+
+  def whiteboard_on? = whiteboard_mode.present?
 
   def current_item = current_set_item&.item
 

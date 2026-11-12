@@ -20,6 +20,8 @@ module Corobook
         partial: "live/musician_frame",
         locals: { session: session, target_key: nil, semitones: 0, capo: nil }
       )
+      # Drawings on a slide belong to that slide: the screens drop them once the service moves.
+      Corobook::Whiteboard.new(session).broadcast_position
     end
 
     def ended(session)
@@ -31,6 +33,7 @@ module Corobook
           locals: {}
         )
       end
+      Corobook::Whiteboard.new(session).broadcast_ended
     end
   end
 end

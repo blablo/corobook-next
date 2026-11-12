@@ -36,6 +36,13 @@ class OperatorController < ApplicationController
     update_projector_state { @session.font_scale = @session.font_scale.clamp(50, 400) + delta }
   end
 
+  # Take the speaker's whiteboard (or slide drawing) off the projector, e.g. when the pastor
+  # walks away with it still up.
+  def stop_whiteboard
+    Corobook::Whiteboard.new(@session).stop!
+    redirect_to operator_path(@session)
+  end
+
   def end_session
     @session.end!
     Corobook::LiveBroadcast.ended(@session)
