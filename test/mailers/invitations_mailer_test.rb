@@ -25,4 +25,11 @@ class InvitationsMailerTest < ActionMailer::TestCase
     mail = InvitationsMailer.invite(@inv, @raw)
     assert_match %r{https?://[^/]+/invitations/#{Regexp.escape(@raw)}/accept}, mail.body.encoded
   end
+
+  test "the invitation greets the invitee by name when the admin gave one" do
+    @inv.update!(name: "Juan Ruiz")
+    mail = InvitationsMailer.invite(@inv, @raw)
+    assert_includes mail.text_part.body.to_s, "Hi Juan Ruiz,"
+    assert_includes mail.html_part.body.to_s, "Hi Juan Ruiz,"
+  end
 end

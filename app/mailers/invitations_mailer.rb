@@ -5,6 +5,7 @@ class InvitationsMailer < ApplicationMailer
     @invitation = invitation
     @church     = invitation.church
     @inviter    = invitation.invited_by
+    @name       = invitation.name
     @role       = invitation.role
     @url        = accept_invitation_url(token: raw_token)
 

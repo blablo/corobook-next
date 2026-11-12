@@ -7,8 +7,13 @@ class Invitation < ApplicationRecord
   enum :role, { admin: "admin", editor: "editor" }, validate: true
 
   normalizes :email, with: ->(e) { e.to_s.strip.downcase }
+  normalizes :name, with: ->(n) { n.squish }
 
   validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates :name, length: { maximum: 100 }
+  # The invite form asks for a name; invitations made before names existed have none.
+  attr_accessor :name_required
+  validates :name, presence: true, if: :name_required
 
   EXPIRY = 14.days
 

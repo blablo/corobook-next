@@ -18,6 +18,7 @@ class TeamInvitationTest < ApplicationSystemTestCase
     assert_selector "[data-role=team]"
 
     within "[data-role=invite-form]" do
+      fill_in "Name", with: "Nuevo Miembro"
       fill_in "Email", with: "newmember@example.com"
       select "Editor", from: "Role"
       click_on "Send invite"

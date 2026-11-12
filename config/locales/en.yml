@@ -458,6 +458,7 @@ en:
     mailer:
       footer: "© %{year} Corobook · Worship presentation & song management"
       invite:
+        greeting_name: "Hi %{name},"
         greeting: "Hi,"
         body_html: "%{inviter} has invited you to join %{church} on Corobook as %{role}."
         body_text: "%{inviter} has invited you to join %{church} on Corobook as %{role}."
@@ -688,6 +689,8 @@ en:
       band_hint: "Members in the band will receive the planned service by email."
       band_empty: "No one is in the band yet. Turn on Band for a member below."
       th_band: "Band"
+      invite_name_label: "Name"
+      invite_name_placeholder: "María García"
       name_placeholder: "Add a name"
       name_for: "Name for %{email}"
       band_toggle: "%{email} is in the band"

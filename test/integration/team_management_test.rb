@@ -55,7 +55,7 @@ class TeamManagementTest < ActionDispatch::IntegrationTest
   test "admin creates a pending invitation" do
     login(@admin)
     assert_difference -> { @church.invitations.pending.count }, 1 do
-      post invitations_path, params: { invitation: { email: "new@example.com", role: "editor" } }
+      post invitations_path, params: { invitation: { name: "Nuevo Miembro", email: "new@example.com", role: "editor" } }
     end
     assert_redirected_to team_path
   end
@@ -63,7 +63,7 @@ class TeamManagementTest < ActionDispatch::IntegrationTest
   test "inviting an existing member is rejected" do
     login(@admin)
     assert_no_difference -> { Invitation.count } do
-      post invitations_path, params: { invitation: { email: @editor.email, role: "editor" } }
+      post invitations_path, params: { invitation: { name: "Nuevo Miembro", email: @editor.email, role: "editor" } }
     end
     assert_redirected_to team_path
     assert_equal "That person is already a member.", flash[:alert]
@@ -71,13 +71,13 @@ class TeamManagementTest < ActionDispatch::IntegrationTest
 
   test "inviting an email with a pending invite refreshes it, not duplicates" do
     login(@admin)
-    post invitations_path, params: { invitation: { email: "dup@example.com", role: "editor" } }
+    post invitations_path, params: { invitation: { name: "Nuevo Miembro", email: "dup@example.com", role: "editor" } }
     inv = @church.invitations.pending.find_by(email: "dup@example.com")
     old_expiry = inv.expires_at
     old_digest = inv.token_digest
 
     assert_no_difference -> { @church.invitations.pending.count } do
-      post invitations_path, params: { invitation: { email: "dup@example.com", role: "admin" } }
+      post invitations_path, params: { invitation: { name: "Nuevo Miembro", email: "dup@example.com", role: "admin" } }
     end
     inv.reload
     assert_not_equal old_digest, inv.token_digest, "token refreshed"
@@ -88,7 +88,7 @@ class TeamManagementTest < ActionDispatch::IntegrationTest
   test "invalid email is rejected" do
     login(@admin)
     assert_no_difference -> { Invitation.count } do
-      post invitations_path, params: { invitation: { email: "not-an-email", role: "editor" } }
+      post invitations_path, params: { invitation: { name: "Nuevo Miembro", email: "not-an-email", role: "editor" } }
     end
     assert_redirected_to team_path
   end
@@ -96,7 +96,7 @@ class TeamManagementTest < ActionDispatch::IntegrationTest
   test "editor cannot create an invitation" do
     login(@editor)
     assert_no_difference -> { Invitation.count } do
-      post invitations_path, params: { invitation: { email: "x@example.com", role: "editor" } }
+      post invitations_path, params: { invitation: { name: "Nuevo Miembro", email: "x@example.com", role: "editor" } }
     end
     assert_redirected_to login_path
   end
@@ -245,5 +245,20 @@ class TeamManagementTest < ActionDispatch::IntegrationTest
     get team_path
     assert_select "[data-role=band-member]", text: "María García"
     assert_select "[data-role=band-member]", text: "admin@example.com"
+  end
+
+  test "inviting requires a name; the pending row shows it with the email beneath" do
+    login(@admin)
+    assert_no_difference "Invitation.count" do
+      post invitations_path, params: { invitation: { name: " ", email: "noname@example.com", role: "editor" } }
+    end
+    assert_redirected_to team_path
+
+    post invitations_path, params: { invitation: { name: "Juan Ruiz", email: "juan@example.com", role: "editor" } }
+    assert_equal "Juan Ruiz", @church.invitations.find_by(email: "juan@example.com").name
+
+    get team_path
+    assert_select "[data-role=invite-row][data-email='juan@example.com'] [data-role=invite-name]", text: "Juan Ruiz"
+    assert_select "[data-role=invite-row][data-email='juan@example.com']", text: /juan@example\.com/
   end
 end

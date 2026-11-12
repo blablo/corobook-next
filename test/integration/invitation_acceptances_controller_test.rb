@@ -112,4 +112,11 @@ class InvitationAcceptancesControllerTest < ActionDispatch::IntegrationTest
     post accept_invitation_path(token: raw), params: { name: "Juan Ruiz", password: "newpass123", password_confirmation: "newpass123" }
     assert_equal "Juan Ruiz", @church.users.find_by(email: "named@example.com").name
   end
+
+  test "the acceptance form is pre-filled with the name the admin typed" do
+    inv, raw = pending_invite(email: "prefill@example.com")
+    inv.update!(name: "Juan Ruiz")
+    get accept_invitation_path(token: raw)
+    assert_select "input[name=name][value='Juan Ruiz']"
+  end
 end
