@@ -42,9 +42,9 @@
           </thead>
           <tbody>
             <% @songs.each do |song| %>
-              <tr class="hover:bg-base-200" data-role="song-row">
+              <tr class="relative hover:bg-base-200 focus-within:bg-base-200" data-role="song-row">
                 <td class="pl-6 max-w-0 w-full">
-                  <%= link_to song.title, song, class: "block font-medium link link-hover truncate" %>
+                  <%= link_to song.title, song, class: "block font-medium truncate outline-none after:absolute after:inset-0" %>
                   <span class="block text-xs text-base-content/60 truncate md:hidden"><%= song.author %></span>
                   <span class="hidden md:block text-xs text-base-content/60 truncate" data-role="song-snippet"><%= song_snippet(song, @query) %></span>
                 </td>
