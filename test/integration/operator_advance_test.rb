@@ -96,11 +96,11 @@ class OperatorAdvanceTest < ActionDispatch::IntegrationTest
     assert_select "[data-role=projector-copy][aria-label=?]", "Copy link: Projector"
   end
 
-  test "each join code can be enlarged on its own, in a dialog that fills the page" do
+  test "each join code can be enlarged on its own, in a dialog over a blurred page" do
     get operator_path(@session)
     %w[projector musician speaker].each do |role|
       assert_select "[data-role=#{role}-enlarge][onclick*='#{role}-code-modal']"
-      assert_select "dialog##{role}-code-modal .modal-box.size-full [data-role=#{role}-copy-large] svg"
+      assert_select "dialog##{role}-code-modal.backdrop-blur-sm .modal-box [data-role=#{role}-copy-large] svg"
     end
     assert_select "#projector-code-modal [data-role=projector-copy-large][data-url*='/p/#{@session.projector_token}']"
   end
