@@ -537,16 +537,20 @@ es:
 
   live:
     operator:
-      live: "EN VIVO"
-      ended: "FINALIZADO"
+      live: "En vivo"
+      ended: "Finalizado"
       back_to_service: "← Volver al servicio"
       back: "← Atrás"
       next: "Siguiente →"
       blank: "Oscurecer"
       unblank: "Mostrar"
       end_service: "Finalizar servicio"
+      end_title: "¿Finalizar este servicio?"
+      end_body: "El proyector se apaga y los músicos dejan de seguirlo. Sus enlaces dejan de funcionar, así que al volver a transmitir se generan nuevos."
+      end_confirm: "Finalizar el servicio"
+      cancel: "Cancelar"
       clicker_hint_html: "Consejo: un control de presentación o las flechas del teclado (← →, Re Pág/Av Pág) avanzan el servicio. Presiona %{blank_key} para oscurecer la pantalla."
-      jump_to_item: "Ir a un elemento"
+      jump_to_item: "Orden del servicio"
       go: "Ir"
       now: "Ahora"
       next_up: "Siguiente"

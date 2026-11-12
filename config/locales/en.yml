@@ -537,16 +537,20 @@ en:
 
   live:
     operator:
-      live: "LIVE"
-      ended: "ENDED"
+      live: "Live"
+      ended: "Ended"
       back_to_service: "← Back to service"
       back: "← Back"
       next: "Next →"
       blank: "Blank"
       unblank: "Unblank"
       end_service: "End service"
+      end_title: "End this service?"
+      end_body: "The projector goes dark and musicians stop following. Their links stop working, so going live again gives new ones."
+      end_confirm: "End the service"
+      cancel: "Cancel"
       clicker_hint_html: "Tip: a presentation clicker or your keyboard arrows (← →, Page Up/Down) advance the service. Press %{blank_key} to blank."
-      jump_to_item: "Jump to item"
+      jump_to_item: "Service order"
       go: "Go"
       now: "Now"
       next_up: "Next"
