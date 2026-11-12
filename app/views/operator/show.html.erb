@@ -23,10 +23,6 @@
       <%= link_to t("live.operator.back_to_service"), service_set_path(@session.service_set),
             class: "btn btn-ghost", data: { role: "back-to-set" } %>
       <% if @session.active? %>
-        <button type="button" class="btn btn-soft btn-primary" data-role="speaker-view"
-                onclick="document.getElementById('speaker-modal').showModal()">✎ <%= t("live.operator.speaker_view") %></button>
-      <% end %>
-      <% if @session.active? %>
         <%# Ending clears the projector and musician links, so it asks first. %>
         <button type="button" class="btn btn-error btn-outline" data-role="end-service"
                 onclick="document.getElementById('end-service-modal').showModal()"><%= t("live.operator.end_service") %></button>
@@ -157,8 +153,9 @@
     </div>
   </div>
 
-  <%# ── Join links: open the projector screen, let musicians follow along ── %>
-  <div class="grid gap-6 sm:grid-cols-2" data-role="join-links">
+  <%# ── Join links: open the projector screen, let musicians follow along, give the pastor
+      the speaker view ── %>
+  <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3" data-role="join-links">
     <section class="card card-border bg-base-100">
       <div class="card-body">
         <%= render "join_link", url: follow_url(:projector, @session.projector_token), role: "projector",
@@ -171,21 +168,17 @@
               title: t("live.operator.musician"), hint: t("live.operator.musician_hint") %>
       </div>
     </section>
+    <% if @session.active? %>
+      <section class="card card-border bg-base-100">
+        <div class="card-body">
+          <%= render "join_link", url: follow_url(:speaker, @session.speaker_token!), role: "speaker",
+                title: t("live.operator.speaker_view"), hint: t("live.operator.speaker_hint") %>
+        </div>
+      </section>
+    <% end %>
   </div>
 
   <% if @session.active? %>
-    <dialog id="speaker-modal" class="modal" data-role="speaker-modal">
-      <div class="modal-box space-y-3">
-        <%= render "join_link", url: follow_url(:speaker, @session.speaker_token!), role: "speaker", copy: true,
-              title: t("live.operator.speaker_view"), hint: t("live.operator.speaker_hint") %>
-        <p class="text-xs text-base-content/60"><%= t("live.operator.speaker_expires") %></p>
-        <div class="modal-action">
-          <button type="button" class="btn btn-ghost" onclick="document.getElementById('speaker-modal').close()"><%= t("live.operator.close") %></button>
-        </div>
-      </div>
-      <form method="dialog" class="modal-backdrop"><button aria-label="<%= t('live.operator.close') %>"><%= t("live.operator.close") %></button></form>
-    </dialog>
-
     <dialog id="end-service-modal" class="modal" data-role="end-service-modal">
       <div class="modal-box">
         <h3 class="text-lg font-semibold"><%= t("live.operator.end_title") %></h3>

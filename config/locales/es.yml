@@ -671,11 +671,9 @@ es:
       musician: "Vista de la banda"
       musician_hint: "La banda escanea esto para seguir el servicio en sus teléfonos."
       speaker_view: "Vista del orador"
-      speaker_hint: "Ábrelo en la tableta del pastor. Desde ahí puede poner una pizarra en el proyector o dibujar sobre la diapositiva actual."
-      speaker_expires: "No hace falta iniciar sesión. El enlace deja de funcionar cuando termina el servicio."
+      speaker_hint: "Ábrelo en la tableta del pastor: Siguiente y Atrás, una pizarra y dibujar sobre la diapositiva."
       copy_link: "Copiar enlace"
       copied: "Copiado"
-      close: "Cerrar"
       stop_whiteboard: "Quitar pizarra"
     speaker:
       title: "Orador"

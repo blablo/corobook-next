@@ -671,11 +671,9 @@ en:
       musician: "Band view"
       musician_hint: "The band scans this to follow along on their phones."
       speaker_view: "Speaker view"
-      speaker_hint: "Open this on the pastor's tablet. From there he can put a whiteboard on the projector, or draw on the current slide."
-      speaker_expires: "No sign-in needed. The link stops working when the service ends."
+      speaker_hint: "Open on the pastor's tablet: Next and Back, a whiteboard, and drawing on the slide."
       copy_link: "Copy link"
       copied: "Copied"
-      close: "Close"
       stop_whiteboard: "Stop whiteboard"
     speaker:
       title: "Speaker"
