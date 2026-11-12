@@ -31,10 +31,18 @@ class ServicesIndexTest < ActionDispatch::IntegrationTest
     assert_select "[data-role=next-service] form[action='#{launch_service_set_path(soon)}']"
     assert_select "[data-role=upcoming-sets] [data-role=set-row]", count: 1
     assert_select "[data-role=upcoming-sets]", text: /Later/
-    assert_select "[data-role=tab-upcoming] .badge", text: "2"
+    assert_select "[data-role=tab-upcoming] .badge", text: "1"
     assert_select "[data-role=tab-past] .badge", text: "1"
     assert_select "[data-role=past-sets]", count: 0
     assert_select "[data-role=upcoming-sets] form[action='#{launch_service_set_path(later)}']"
+  end
+
+  test "with only the next service upcoming, the Upcoming badge matches the empty list" do
+    service("Soon", Date.current + 3)
+    get service_sets_path
+    assert_select "[data-role=next-service]", text: /Soon/
+    assert_select "[data-role=tab-upcoming] .badge", text: "0"
+    assert_select "[data-role=tab-empty]", text: /No other upcoming services/
   end
 
   test "the past tab lists past services newest first, a page at a time" do
