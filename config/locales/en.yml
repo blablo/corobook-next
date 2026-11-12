@@ -572,6 +572,7 @@ en:
     musician:
       key: "Key"
       capo: "Capo"
+      live: "Live"
       now: "Now"
       next: "Next"
       key_badge: "Key %{key}"

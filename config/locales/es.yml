@@ -572,6 +572,7 @@ es:
     musician:
       key: "Tono"
       capo: "Cejilla"
+      live: "En vivo"
       now: "Ahora"
       next: "Siguiente"
       key_badge: "Tono %{key}"
