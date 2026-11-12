@@ -29,22 +29,22 @@
       <% else %>
         <% items = @hero_set.set_items.to_a %>
         <% date = @hero_set.service_date %>
-        <% past = date.present? && date < Date.current %>
-        <div class="card-body sm:flex-row gap-5">
-          <%= render "service_sets/date_block", date: date, big: true %>
+        <% live = @active_session.present? %>
+        <div class="card-body sm:flex-row sm:items-center gap-5">
+          <%= render "service_sets/date_block", date: date, big: true, live: live %>
           <div class="grow min-w-0 space-y-2">
             <div class="flex flex-wrap items-center gap-2">
-              <% if @active_session %>
+              <% if live %>
                 <span class="badge badge-soft badge-success badge-sm gap-1.5">
                   <span class="status status-success animate-pulse" aria-hidden="true"></span><%= t("home.hero.live_now") %>
                 </span>
               <% else %>
                 <span class="badge badge-soft badge-primary badge-sm"><%= t("home.hero.next_service") %></span>
-              <% end %>
-              <% if past %>
-                <span class="badge badge-warning badge-sm" data-role="past-badge"><%= t("home.hero.past_service") %></span>
-              <% elsif date %>
-                <span class="text-xs text-base-content/60"><%= days_until(date) %></span>
+                <% if date && date < Date.current %>
+                  <span class="badge badge-soft badge-warning badge-sm" data-role="past-badge"><%= t("home.hero.past_service") %></span>
+                <% elsif date %>
+                  <span class="text-xs text-base-content/60"><%= days_until(date) %></span>
+                <% end %>
               <% end %>
             </div>
             <h2 class="text-2xl font-semibold leading-tight">
@@ -61,21 +61,21 @@
                 <% end %>
               </div>
             <% end %>
+          </div>
 
-            <div class="flex flex-wrap items-center gap-2 pt-2">
-              <% if @active_session %>
-                <%= link_to t("home.hero.resume"), operator_path(@active_session), class: "btn btn-primary", data: { role: "resume" } %>
-              <% elsif items.empty? %>
-                <%= link_to t("home.hero.add_items"), service_set_path(@hero_set), class: "btn btn-primary", data: { role: "add-items" } %>
-              <% else %>
-                <%= button_to t("home.hero.go_live"), launch_service_set_path(@hero_set), method: :post,
-                      class: "btn btn-primary", data: { role: "go-live" } %>
-                <%= link_to t("home.hero.edit_service"), service_set_path(@hero_set), class: "btn btn-ghost" %>
-              <% end %>
-              <% if date.blank? && !@active_session %>
-                <%= link_to t("home.hero.set_date"), edit_service_set_path(@hero_set), class: "btn btn-link btn-sm" %>
-              <% end %>
-            </div>
+          <div class="flex flex-wrap sm:flex-col sm:items-end items-center gap-2 shrink-0">
+            <% if live %>
+              <%= link_to t("home.hero.resume"), operator_path(@active_session), class: "btn btn-success", data: { role: "resume" } %>
+            <% elsif items.empty? %>
+              <%= link_to t("home.hero.add_items"), service_set_path(@hero_set), class: "btn btn-primary", data: { role: "add-items" } %>
+            <% else %>
+              <%= button_to t("home.hero.go_live"), launch_service_set_path(@hero_set), method: :post,
+                    class: "btn btn-primary", data: { role: "go-live" } %>
+              <%= link_to t("home.hero.edit_service"), service_set_path(@hero_set), class: "btn btn-ghost btn-sm" %>
+            <% end %>
+            <% if date.blank? && !live %>
+              <%= link_to t("home.hero.set_date"), edit_service_set_path(@hero_set), class: "btn btn-link btn-sm" %>
+            <% end %>
           </div>
         </div>
       <% end %>

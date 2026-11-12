@@ -13,7 +13,8 @@ class HomeController < ApplicationController
 
   def render_dashboard
     @active_session = church_scope(:live_sessions).find_by(status: "active")
-    @hero_set = HeroSet.for(Current.church)
+    # While a service is live the hero is that service, so Resume always matches what is shown.
+    @hero_set = @active_session&.service_set || HeroSet.for(Current.church)
     @recent_sets = church_scope(:service_sets).includes(:set_items)
       .order(Arel.sql("service_date DESC NULLS LAST, name ASC")).limit(5)
     @counts = {
