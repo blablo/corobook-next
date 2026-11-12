@@ -103,12 +103,12 @@
           </ul>
         <% elsif @sets.empty? %>
           <p class="px-6 py-8 text-center text-base-content/60" data-role="tab-empty">
-            <%= t(@tab == "past" ? "services.index.no_past" : "services.index.no_other_upcoming") %>
+            <%= t(@tab == "past" ? "services.index.no_past" : "services.index.no_upcoming") %>
           </p>
         <% else %>
           <ul class="list" data-role="<%= @tab %>-sets">
             <% @sets.each do |set| %>
-              <%= render "index_row", set: set, active_session: @active_session %>
+              <%= render "index_row", set: set, active_session: @active_session, next_service: set.id == @next_set&.id %>
             <% end %>
           </ul>
         <% end %>

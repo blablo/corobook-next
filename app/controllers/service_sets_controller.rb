@@ -34,7 +34,9 @@ class ServiceSetsController < ApplicationController
     when "templates"
       @sets = templates
     else
-      @sets = @next_set ? upcoming.where.not(id: @next_set.id) : upcoming
+      # Every upcoming service, the next one included (it is also in the card above the tabs, and
+      # its row carries a Next badge), so the list matches the tab's count.
+      @sets = upcoming
     end
   end
 

@@ -274,11 +274,13 @@ class ServiceTemplatesTest < ActionDispatch::IntegrationTest
     service = service_from_template
     get service_sets_path
     assert_select "[data-role=next-service] [data-role=set-fill-slots]", text: "Fill 2 slots"
+    assert_select "[data-role=upcoming-sets] [data-role=set-status][data-status=slots]", text: "2 slots to fill"
     assert_select "form[action='#{launch_service_set_path(service)}']", count: 0
 
     get root_path
     assert_select "[data-role=fill-slots]", text: "Fill 2 slots"
-    assert_select "[data-role=recent-fill-slots]", text: "Fill 2 slots"
+    assert_select "[data-role=recent-sets] [data-role=set-status][data-status=slots]", text: "2 slots to fill"
+    assert_select "[data-role=recent-sets] [data-role=set-open][href='#{service_set_path(service)}']"
     assert_select "form[action='#{launch_service_set_path(service)}']", count: 0
   end
 

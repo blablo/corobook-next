@@ -1,0 +1,21 @@
+<%#
+  A service's state in a list (Services page, Home Recent services): Live, Empty, "2 slots to
+  fill", or else its item count (left out with count: false, where the row already says it).
+  Locals: set, active_session, count (default true).
+%>
+<% empty_slots = set.empty_slot_count %>
+<% if active_session&.service_set_id == set.id %>
+  <span class="badge badge-soft badge-success badge-sm gap-1.5 whitespace-nowrap" data-role="set-status" data-status="live">
+    <span class="status status-success animate-pulse" aria-hidden="true"></span><%= t("services.status.live") %>
+  </span>
+<% elsif set.set_items.empty? %>
+  <span class="badge badge-soft badge-warning badge-sm whitespace-nowrap" data-role="set-status" data-status="empty"><%= t("services.status.empty") %></span>
+<% elsif empty_slots.positive? %>
+  <span class="badge badge-soft badge-warning badge-sm whitespace-nowrap" data-role="set-status" data-status="slots">
+    <%= t("services.slots.to_fill", count: empty_slots) %>
+  </span>
+<% elsif local_assigns.fetch(:count, true) %>
+  <span class="badge badge-ghost badge-sm hidden sm:inline-flex whitespace-nowrap" data-role="set-status" data-status="ready">
+    <%= t("services.index.items", count: set.set_items.size) %>
+  </span>
+<% end %>

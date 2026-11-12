@@ -146,7 +146,8 @@ es:
       go_live: "Transmitir en vivo"
       go_live_with: "Poner en vivo %{name}"
       add_items: "Agregar elementos"
-      no_other_upcoming: "No hay otros servicios próximos."
+      no_upcoming: "No hay servicios próximos."
+      next: "Próximo"
       no_past: "Aún no hay servicios pasados."
       older: "Anteriores"
       newer: "Más recientes"
@@ -191,6 +192,9 @@ es:
     default:
       made: "Los nuevos servicios ahora empiezan desde esta plantilla."
       cleared: "Los nuevos servicios ahora empiezan en blanco."
+    status:
+      live: "En vivo"
+      empty: "Vacío"
     launch:
       nothing_to_show: "Aún no hay nada que mostrar. Agrega una canción o diapositiva, o llena un espacio."
     template:
@@ -590,10 +594,6 @@ es:
       items:
         one: "%{count} elemento"
         other: "%{count} elementos"
-      go_live: "Transmitir en vivo"
-      go_live_with: "Transmitir en vivo con %{name}"
-      add_items: "Agregar elementos"
-      open: "Abrir"
       empty: "Aún no hay servicios."
     create:
       heading: "Crear"

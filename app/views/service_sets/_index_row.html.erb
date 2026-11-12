@@ -1,15 +1,17 @@
 <li class="list-row items-center hover:bg-base-200" data-role="set-row">
   <%= render "date_block", date: set.service_date %>
-  <%= link_to service_set_path(set), class: "list-col-grow min-w-0" do %>
-    <span class="block font-medium truncate"><%= set.name %></span>
-    <% if set.set_items.empty? %>
-      <span class="block text-xs text-warning"><%= t("services.index.no_items") %></span>
-    <% else %>
+  <%# The link's ::after covers the whole row (padding and date included), so any spot opens it. %>
+  <%= link_to service_set_path(set), class: "list-col-grow min-w-0 after:absolute after:inset-0" do %>
+    <span class="flex items-center gap-2 min-w-0">
+      <span class="font-medium truncate"><%= set.name %></span>
+      <% if local_assigns[:next_service] %>
+        <span class="badge badge-soft badge-primary badge-sm shrink-0" data-role="next-badge"><%= t("services.index.next") %></span>
+      <% end %>
+    </span>
+    <% if set.set_items.any? %>
       <span class="block text-xs text-base-content/60 truncate"><%= set_items_preview(set) %></span>
     <% end %>
   <% end %>
-  <span class="badge badge-ghost badge-sm hidden sm:inline-flex whitespace-nowrap">
-    <%= t("services.index.items", count: set.set_items.size) %>
-  </span>
-  <%= render "live_action", set: set, active_session: active_session %>
+  <%= render "list_status", set: set, active_session: active_session %>
+  <%= render "list_action", set: set, active_session: active_session %>
 </li>
