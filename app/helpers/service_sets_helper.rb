@@ -8,6 +8,16 @@ module ServiceSetsHelper
     titles.size > PREVIEW_ITEMS ? "#{preview} …" : preview
   end
 
+  # "Song · Stuart K. Hine" or "Slide · 3 pages", the line under an item's title in the program.
+  def set_item_subtitle(item)
+    if item.item_type == "song"
+      [ t("services.item.song"), item.song&.author.presence ].compact.join(" · ")
+    else
+      pages = item.text_slide&.page_count.to_i
+      [ t("services.item.slide"), (t("slides.index.pages", count: pages) if pages > 1) ].compact.join(" · ")
+    end
+  end
+
   def set_song_count(set) = set.set_items.to_a.count(&:song_id)
   def set_slide_count(set) = set.set_items.to_a.count(&:text_slide_id)
 
