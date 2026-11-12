@@ -231,7 +231,9 @@ class TeamManagementTest < ActionDispatch::IntegrationTest
 
     get team_path
     assert_select "[data-role=member-row][data-email='editor@example.com']" do
-      assert_select "input[data-role=member-name][value='María García']"
+      assert_select "[data-role=member-display-name]", text: "María García"
+      assert_select "button[data-role=edit-name][onclick*='name-modal-#{@editor.id}']"
+      assert_select "dialog#name-modal-#{@editor.id} input[data-role=member-name][value='María García']"
       assert_select ".avatar", text: "MG"
       assert_select "span", text: "editor@example.com"
     end
