@@ -50,20 +50,20 @@
           <h2 class="card-title text-base">
             <%= slide.page_count > 1 ? t("slides.show.projector_preview_pages", count: slide.page_count) : t("slides.show.projector_preview") %>
           </h2>
-          <%# grid-cols-1 (not an implicit auto column): the preview is a size container with no
-              intrinsic width, so an auto column would shrink it to nothing. %>
+          <%# The preview is a size container with no width of its own, so it must sit in a plain
+              block (a <figure> inside a DaisyUI card is a centred flex box and shrinks it to 0). %>
           <div class="grid grid-cols-1 gap-4 <%= "md:grid-cols-2" if slide.page_count > 1 %>">
             <% slide.page_count.times do |i| %>
-              <figure class="relative">
+              <div class="relative" data-role="preview-page">
                 <%# Bounded 16:9 mini-stage (position:relative) so an absolute background image is
                     contained within the preview box rather than escaping to fill the page. %>
                 <div class="projector-preview rounded-box overflow-hidden" style="<%= slide.projector_style %>">
                   <%= render "projector_slide", slide: slide, page: i %>
                 </div>
                 <% if slide.page_count > 1 %>
-                  <figcaption class="badge badge-neutral badge-sm absolute top-2 left-2 z-10"><%= i + 1 %></figcaption>
+                  <span class="badge badge-neutral badge-sm absolute top-2 left-2 z-10"><%= i + 1 %></span>
                 <% end %>
-              </figure>
+              </div>
             <% end %>
           </div>
         </div>
