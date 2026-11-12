@@ -300,7 +300,7 @@ es:
       edit: "Editar"
       projector_preview: "Vista previa del proyector"
       projector_preview_pages: "Vista previa del proyector — %{count} páginas"
-      musician_view: "Vista del músico"
+      musician_view: "Vista de la banda"
     form:
       title_label: "Título"
       title_placeholder: "Título de la diapositiva"
@@ -567,8 +567,8 @@ es:
       countdown_done: "⏱ Se acabó el tiempo"
       projector: "Proyector"
       projector_hint: "Ábrelo en la pantalla de proyección o escanéalo para unirte."
-      musician: "Músico"
-      musician_hint: "Los músicos escanean esto para seguir la letra en su teléfono."
+      musician: "Vista de la banda"
+      musician_hint: "La banda escanea esto para seguir el servicio en sus teléfonos."
     musician:
       live: "En vivo"
       now: "Ahora"
@@ -704,6 +704,6 @@ es:
       empty: "Este servicio todavía no tiene elementos."
       cta: "Abrir el servicio completo"
       paste_link: "O pega este enlace en tu navegador:"
-      musician_cta: "Abrir la vista de músico"
+      musician_cta: "Abrir la vista de la banda"
       musician_hint: "Úsala para ensayar durante la semana. Cuando el servicio esté en vivo, el mismo enlace sigue al proyector. No necesitas iniciar sesión."
       preview_html: "¿Tienes sesión en Corobook? %{link}."

@@ -300,7 +300,7 @@ en:
       edit: "Edit"
       projector_preview: "Projector preview"
       projector_preview_pages: "Projector preview — %{count} pages"
-      musician_view: "Musician view"
+      musician_view: "Band view"
     form:
       title_label: "Title"
       title_placeholder: "Slide title"
@@ -567,8 +567,8 @@ en:
       countdown_done: "⏱ Time is up"
       projector: "Projector"
       projector_hint: "Open on the projection screen, or scan to join."
-      musician: "Musician"
-      musician_hint: "Musicians scan this to follow along on their phone."
+      musician: "Band view"
+      musician_hint: "The band scans this to follow along on their phones."
     musician:
       live: "Live"
       now: "Now"
@@ -704,6 +704,6 @@ en:
       empty: "This service has no items yet."
       cta: "Open the full service"
       paste_link: "Or paste this link into your browser:"
-      musician_cta: "Open the musician view"
+      musician_cta: "Open the band view"
       musician_hint: "Use it to rehearse during the week. When the service goes live, the same link follows along with the projector. No sign-in needed."
       preview_html: "Signed in to Corobook? %{link}."
