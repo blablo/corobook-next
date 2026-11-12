@@ -1,5 +1,5 @@
 <% template = @service_set.template? %>
-<% empty_slots = @items.count(&:empty_slot?) %>
+<% empty_slots = @service_set.empty_slot_count %>
 <% has_content = @items.any? { |i| i.item.present? } %>
 <% launchable = has_content && @items.none?(&:missing?) %>
 <%# "4 slots to fill": the badge and the Go live warnings share these, so the builder can recount
@@ -29,7 +29,11 @@
             <% end %>
           </div>
           <h1 class="text-2xl font-semibold leading-tight truncate"><%= @service_set.name %></h1>
-          <p class="text-sm text-base-content/60" data-role="template-summary"><%= template_summary(@service_set) %></p>
+          <%= tag.p template_summary(@service_set), class: "text-sm text-base-content/60",
+                data: { role: "template-summary",
+                        items_one: t("services.index.items.one"), items_other: t("services.index.items.other"),
+                        song_one: t("services.template.song_slots.one"), song_other: t("services.template.song_slots.other"),
+                        slide_one: t("services.template.slide_slots.one"), slide_other: t("services.template.slide_slots.other") } %>
         </div>
       </div>
 
@@ -186,7 +190,8 @@
       <div class="card-body p-0">
         <div class="flex items-center justify-between px-5 pt-4 pb-2">
           <h2 class="card-title text-base"><%= t("services.show.program") %></h2>
-          <span class="badge badge-ghost" data-role="item-count"><%= t("services.show.items", count: @items.size) %></span>
+          <%= tag.span t("services.show.items", count: @items.size), class: "badge badge-ghost",
+                data: { role: "item-count", count_one: t("services.show.items.one"), count_other: t("services.show.items.other") } %>
         </div>
         <ol class="list" data-role="set-items" data-set-builder-target="program">
           <% @items.each_with_index do |item, i| %>
@@ -329,6 +334,11 @@
         <div data-set-builder-target="newSlideBody">
           <%= render "text_slides/form", text_slide: @new_slide, church_tags: @church_slide_tags, modal: true %>
         </div>
+        <%# A blank copy of the editor, so a slide for another place (the Slides tab, or a slot and
+            its tag) never starts with the previous slide's text and tags. %>
+        <template data-set-builder-target="newSlideBlank">
+          <%= render "text_slides/form", text_slide: @new_slide, church_tags: @church_slide_tags, modal: true %>
+        </template>
       </div>
       <form method="dialog" class="modal-backdrop"><button aria-label="<%= t('services.show.close') %>"><%= t("services.show.close") %></button></form>
     </dialog>

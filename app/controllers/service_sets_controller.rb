@@ -301,32 +301,35 @@ class ServiceSetsController < ApplicationController
   end
 
   # ≤20 church-scoped matches for the picker; song search covers title/author, slides by title.
-  # A slot picker narrows slides to its tag and shows when each match was last used.
+  # The slot picker (slot=1) narrows slides to the slot's tag and adds a subtitle with when each
+  # match was last used.
   def library_rows
     if params[:kind] == "slide"
       pattern = "%#{TextSlide.sanitize_sql_like(params[:q].to_s.strip)}%"
       scope = church_scope(:text_slides).library.where("title ILIKE ?", pattern)
       scope = scope.tagged(params[:tag]) if params[:tag].present?
-      slides = scope.order(:title).limit(20).to_a
-      used = last_used_dates(:text_slide_id, slides.map(&:id))
-      slides.map do |s|
-        pages = (t("slides.index.pages", count: s.page_count) if s.page_count > 1)
-        { id: s.id, kind: "text_slide", title: s.title, subtitle: [ pages, last_used_label(used[s.id]) ].compact.join(" · ") }
-      end
+      rows = scope.order(:title).limit(20).map { |s| { id: s.id, kind: "text_slide", title: s.title, record: s } }
     else
-      songs = church_scope(:songs).search(params[:q]).order(:title).limit(20).to_a
-      used = last_used_dates(:song_id, songs.map(&:id))
-      songs.map do |s|
-        { id: s.id, kind: "song", title: s.title, key: s.song_key,
-          subtitle: [ s.author.presence, last_used_label(used[s.id]) ].compact.join(" · ") }
-      end
+      rows = church_scope(:songs).search(params[:q]).order(:title).limit(20)
+                                 .map { |s| { id: s.id, kind: "song", title: s.title, key: s.song_key, record: s } }
     end
+    add_slot_subtitles(rows) if params[:slot].present?
+    rows.each { |row| row.delete(:record) }
   end
 
-  # The latest service date each song/slide appears in (templates have no date).
-  def last_used_dates(column, ids)
-    SetItem.joins(:service_set).merge(church_scope(:service_sets).services)
-           .where(column => ids).group(column).maximum("service_sets.service_date")
+  # "Sinach · last used Oct 26" for a song, "2 pages · never used" for a slide.
+  def add_slot_subtitles(rows)
+    column = params[:kind] == "slide" ? :text_slide_id : :song_id
+    used = SetItem.last_service_dates(column, rows.map { |r| r[:id] })
+    rows.each do |row|
+      record = row[:record]
+      detail = if column == :song_id
+        record.author.presence
+      elsif record.page_count > 1
+        t("slides.index.pages", count: record.page_count)
+      end
+      row[:subtitle] = [ detail, last_used_label(used[row[:id]]) ].compact.join(" · ")
+    end
   end
 
   def last_used_label(date)

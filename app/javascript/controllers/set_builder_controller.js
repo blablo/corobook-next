@@ -16,7 +16,7 @@ const ICON = {
 // slot's tag, and fills the slot in place.
 export default class extends Controller {
   static targets = ["program", "query", "results", "announce", "tabs", "tab",
-    "pickerPane", "fallback", "newSlideModal", "newSlideBody", "newSlideButton",
+    "pickerPane", "fallback", "newSlideModal", "newSlideBody", "newSlideBlank", "newSlideButton",
     "slotPane", "slotLabel", "slotNewTag", "slotTags",
     "slotModal", "slotTitle", "slotHint", "slotQuery", "slotResults", "slotNewSlide", "launchModal"]
   static values = { reorderUrl: String, addUrl: String, libraryUrl: String, slideCreateUrl: String, canEdit: Boolean }
@@ -106,19 +106,20 @@ export default class extends Controller {
   // ---- template slots ----
   addSongSlot() { this.addSlot({ kind: "song_slot" }) }
   addSlideSlot(e) { this.addSlot({ kind: "slide_slot", slot_tag: e.currentTarget.dataset.tag }) }
-  addNewTagSlot() {
+  async addNewTagSlot() {
     const tag = this.slotNewTagTarget.value.trim().toLowerCase()
     if (!tag) { this.slotNewTagTarget.focus(); return }
-    this.addSlot({ kind: "slide_slot", slot_tag: tag })
+    if (!(await this.addSlot({ kind: "slide_slot", slot_tag: tag }))) return
     this.slotNewTagTarget.value = ""
     this.addTagChip(tag)
   }
   async addSlot(body) {
     const label = this.hasSlotLabelTarget ? this.slotLabelTarget.value.trim() : ""
     const item = await this.postAdd({ ...body, slot_label: label })
-    if (!item) return
+    if (!item) return false
     this.appendRow(item)
     if (this.hasSlotLabelTarget) this.slotLabelTarget.value = ""
+    return true
   }
   // A tag typed for a new slot becomes a chip, so the next slot with it is one click.
   addTagChip(tag) {
@@ -157,7 +158,7 @@ export default class extends Controller {
     if (!this.slot) return
     const { kind, tag } = this.slot
     const q = this.slotQueryTarget.value
-    const url = this.urlWith(this.libraryUrlValue, "", { kind, q, tag })
+    const url = this.urlWith(this.libraryUrlValue, "", { kind, q, tag, slot: 1 })
     const seq = (this._slotSeq = (this._slotSeq || 0) + 1)
     let rows
     try {
@@ -194,11 +195,13 @@ export default class extends Controller {
   }
   // "+ New slide (tagged scripture)": the full slide editor, tag already added; saving it fills
   // the slot instead of appending a row.
-  newSlideForSlot() {
-    this.slotFill = { ...this.slot }
+  async newSlideForSlot() {
+    const slot = { ...this.slot }
     this.closeSlot()
-    this.presetSlideTag(this.slot.tag)
-    this.openNewSlide()
+    await this.prepareNewSlide(`slot:${slot.tag}`)
+    this.presetSlideTag(slot.tag)
+    this.slotFill = slot
+    this.newSlideModalTarget.showModal()
   }
   presetSlideTag(tag) {
     const input = this.hasNewSlideBodyTarget && this.newSlideBodyTarget.querySelector("[data-slide-editor-target=tagInput]")
@@ -232,19 +235,35 @@ export default class extends Controller {
   }
 
   // ---- New slide modal (same editor as /text_slides/new) ----
-  openNewSlide() {
-    if (this.hasNewSlideModalTarget) this.newSlideModalTarget.showModal()
+  async openNewSlide() {
+    if (!this.hasNewSlideModalTarget) return
+    await this.prepareNewSlide("library")
+    this.newSlideModalTarget.showModal()
   }
   closeNewSlide() {
     if (this.hasNewSlideModalTarget) this.newSlideModalTarget.close()
+  }
+  // A draft survives closing and reopening for the same place. Opened for another place (the
+  // Slides tab, or a slot with another tag), the editor starts blank again.
+  async prepareNewSlide(context) {
+    if (this._slideContext && this._slideContext !== context) await this.resetNewSlide()
+    this._slideContext = context
+  }
+  async resetNewSlide() {
+    this._slideContext = null
+    if (!this.hasNewSlideBlankTarget) return
+    this.newSlideBodyTarget.replaceChildren(this.newSlideBlankTarget.content.cloneNode(true))
+    // Let Stimulus connect the fresh slide-editor before anything types into it.
+    await new Promise((r) => setTimeout(r, 0))
   }
   wireNewSlideModal() {
     if (!this.hasNewSlideBodyTarget) return
     // Closing the editor (saved, ✕, Esc or backdrop) ends any slot it was opened for.
     this.newSlideModalTarget.addEventListener("close", () => { this.slotFill = null })
-    const form = this.newSlideBodyTarget.querySelector("form")
-    if (!form) return
-    form.addEventListener("submit", async (e) => {
+    // Listen on the body, not the form: resetNewSlide swaps the form for a blank one.
+    this.newSlideBodyTarget.addEventListener("submit", async (e) => {
+      const form = e.target.closest("form")
+      if (!form) return
       e.preventDefault()
       const fill = this.slotFill
       // The slide-editor controller serializes tags + pages into hidden fields on submit;
@@ -263,6 +282,7 @@ export default class extends Controller {
         if (item) this.appendRow(item)
       }
       this.closeNewSlide()
+      this.resetNewSlide()
     })
   }
   csrf() {
@@ -389,20 +409,35 @@ export default class extends Controller {
       r.querySelector(".arrange-down")?.closest("form")?.classList.toggle("invisible", i === rows.length - 1)
     })
   }
+  // "%{count} items" from the localized one/other strings the element carries.
+  plural(el, key, n) {
+    const tpl = n === 1 ? el.dataset[`${key}One`] : el.dataset[`${key}Other`]
+    return (tpl || "").replace("%{count}", n)
+  }
   updateCount() {
-    const el = document.querySelector("[data-role=item-count]")
-    if (el) { const n = this.rows().length; el.textContent = `${n} item${n === 1 ? "" : "s"}` }
+    const el = this.element.querySelector("[data-role=item-count]")
+    if (el) el.textContent = this.plural(el, "count", this.rows().length)
   }
   emptySlotCount() { return this.rows().filter(r => r.dataset.emptySlot === "true").length }
-  // Recount "N slots to fill" (badge + Go live warnings) and enable Go live once something
-  // can be shown.
+  // Recount "N slots to fill" (badge + Go live warnings) and a template's "9 items · 3 song
+  // slots" line, and enable Go live once something can be shown.
   updateState() {
     const rows = this.rows()
     const empty = this.emptySlotCount()
     this.element.querySelectorAll("[data-slot-count-one]").forEach(el => {
-      el.textContent = (empty === 1 ? el.dataset.slotCountOne : el.dataset.slotCountOther).replace("%{count}", empty)
+      el.textContent = this.plural(el, "slotCount", empty)
       el.classList.toggle("hidden", empty === 0)
     })
+    const summary = this.element.querySelector("[data-role=template-summary]")
+    if (summary) {
+      const songs = rows.filter(r => r.dataset.slotKind === "song").length
+      const slides = rows.filter(r => r.dataset.slotKind === "slide").length
+      summary.textContent = [
+        this.plural(summary, "items", rows.length),
+        songs && this.plural(summary, "song", songs),
+        slides && this.plural(summary, "slide", slides),
+      ].filter(Boolean).join(" · ")
+    }
     const launchable = rows.some(r => r.dataset.emptySlot !== "true" && r.dataset.missing !== "true") &&
       !rows.some(r => r.dataset.missing === "true")
     this.element.querySelectorAll("[data-role=launch], [data-role=launch-takeover]")

@@ -15,8 +15,7 @@ class SongsController < ApplicationController
     @first_index = (@page - 1) * per + 1
     @has_more = @total > @page * per
     # Most recent service date each listed song appears in, for the "Last used" column.
-    @last_used = SetItem.joins(:service_set).merge(ServiceSet.services).where(song_id: @songs.map(&:id))
-                        .group(:song_id).maximum("service_sets.service_date")
+    @last_used = SetItem.last_service_dates(:song_id, @songs.map(&:id))
   end
 
   def show

@@ -11,7 +11,7 @@
 <% template_slot = set.template? && item.slot? %>
 <li class="list-row items-center hover:bg-base-200 <%= 'opacity-70' if item.missing? %>"
     data-role="set-item" data-item-id="<%= item.id %>" data-missing="<%= item.missing? %>"
-    data-empty-slot="<%= empty_slot %>"
+    data-empty-slot="<%= empty_slot %>" <%= tag.attributes(data: { slot_kind: (song ? "song" : "slide") }) if item.slot? %>
     <%= "draggable=true" if can_edit %>>
   <% if can_edit %>
     <span class="cursor-grab select-none text-base-content/40" data-drag-handle title="<%= t('services.item.drag_to_reorder') %>">

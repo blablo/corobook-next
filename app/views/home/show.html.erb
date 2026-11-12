@@ -68,7 +68,7 @@
               <%= link_to t("home.hero.resume"), operator_path(@active_session), class: "btn btn-success", data: { role: "resume" } %>
             <% elsif items.empty? %>
               <%= link_to t("home.hero.add_items"), service_set_path(@hero_set), class: "btn btn-primary", data: { role: "add-items" } %>
-            <% elsif (empty_slots = items.count(&:empty_slot?)).positive? %>
+            <% elsif (empty_slots = @hero_set.empty_slot_count).positive? %>
               <%= link_to t("services.index.fill_slots", count: empty_slots), service_set_path(@hero_set),
                     class: "btn btn-primary", data: { role: "fill-slots" } %>
             <% else %>
@@ -101,7 +101,12 @@
                   <span class="block font-medium truncate"><%= set.name %></span>
                   <span class="block text-xs text-base-content/60"><%= t("home.recent.items", count: item_count) %></span>
                 <% end %>
-                <% if item_count.positive? && @active_session.nil? %>
+                <% empty_slots = set.empty_slot_count %>
+                <% if empty_slots.positive? %>
+                  <%# template slots still empty: fill them on the service page, which asks before going live %>
+                  <%= link_to t("services.index.fill_slots", count: empty_slots), service_set_path(set),
+                        class: "btn btn-soft btn-warning btn-sm", data: { role: "recent-fill-slots" } %>
+                <% elsif item_count.positive? && @active_session.nil? %>
                   <%= button_to t("home.recent.go_live"), launch_service_set_path(set), method: :post,
                         class: "btn btn-primary btn-sm", data: { role: "recent-go-live" },
                         title: t("home.recent.go_live_with", name: set.name) %>

@@ -3,7 +3,7 @@
     asks before going live with them), else Open (another service is live; never offer a second
     launch). %>
 <% size = local_assigns.fetch(:size, "btn-sm") %>
-<% empty_slots = set.set_items.to_a.count(&:empty_slot?) %>
+<% empty_slots = set.empty_slot_count %>
 <% if active_session&.service_set_id == set.id %>
   <%= link_to t("services.index.resume"), operator_path(active_session),
         class: "btn btn-primary #{size}", data: { role: "set-resume" } %>

@@ -13,6 +13,13 @@ class SetItem < ApplicationRecord
 
   scope :filled, -> { where("set_items.song_id IS NOT NULL OR set_items.text_slide_id IS NOT NULL") }
 
+  # The latest service date each song or slide appears in, keyed by id; column is :song_id or
+  # :text_slide_id. Templates have no date and are left out.
+  def self.last_service_dates(column, ids)
+    joins(:service_set).merge(ServiceSet.services).where(column => ids)
+                       .group(column).maximum("service_sets.service_date")
+  end
+
   validates :position, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :slot_label, length: { maximum: 60 }
   validate :item_matches_kind
@@ -27,7 +34,9 @@ class SetItem < ApplicationRecord
   def resolved_title = item&.title
 
   def slot? = slot_label.present?
-  def empty_slot? = slot? && item.nil?
+  # Checks the ids, not the records, so lists can count empty slots without loading songs/slides
+  # (the FKs are RESTRICT, so a set id always has its record).
+  def empty_slot? = slot? && song_id.nil? && text_slide_id.nil?
 
   # True when a regular item's song/slide no longer exists (a dangling reference the builder
   # renders as a removable "missing" placeholder and treats as not launchable). An empty slot is

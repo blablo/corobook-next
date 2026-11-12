@@ -210,10 +210,30 @@ class ServiceTemplatesTest < ActionDispatch::IntegrationTest
     past = @church.service_sets.create!(name: "Pasado", service_date: Date.new(2026, 10, 26))
     past.set_items.create!(position: 0, item_type: "text_slide", text_slide: @psalm)
 
-    get library_service_set_path(@template), params: { kind: "slide", q: "salmo", tag: "scripture" }
+    get library_service_set_path(@template), params: { kind: "slide", q: "salmo", tag: "scripture", slot: 1 }
     rows = JSON.parse(response.body)
     assert_equal [ "Salmo 23" ], rows.map { |r| r["title"] }
     assert_equal "last used Oct 26", rows.first["subtitle"]
+
+    get library_service_set_path(@template), params: { kind: "song", slot: 1 }
+    assert_equal "never used", JSON.parse(response.body).first["subtitle"]
+
+    get library_service_set_path(@template), params: { kind: "slide", q: "salmo" }
+    assert_equal [ "Salmo 1", "Salmo 23" ], JSON.parse(response.body).map { |r| r["title"] }
+    assert_nil JSON.parse(response.body).first["subtitle"], "the main picker skips the last-used lookup"
+  end
+
+  test "another church's template cannot be made the default, and another service's slot cannot be filled" do
+    foreign = @other.service_sets.create!(name: "Ajena", template: true)
+    patch toggle_default_service_set_path(foreign)
+    assert_response :not_found
+
+    service = service_from_template
+    other_service = service_from_template
+    slot = other_service.set_items.order(:position).first
+    patch fill_item_service_set_path(service, item_id: slot.id), params: { song_id: @song.id }, as: :json
+    assert_response :not_found
+    assert slot.reload.empty_slot?
   end
 
   test "removing an empty slot from a service" do
@@ -255,6 +275,17 @@ class ServiceTemplatesTest < ActionDispatch::IntegrationTest
     get service_sets_path
     assert_select "[data-role=next-service] [data-role=set-fill-slots]", text: "Fill 2 slots"
     assert_select "form[action='#{launch_service_set_path(service)}']", count: 0
+
+    get root_path
+    assert_select "[data-role=fill-slots]", text: "Fill 2 slots"
+    assert_select "[data-role=recent-fill-slots]", text: "Fill 2 slots"
+    assert_select "form[action='#{launch_service_set_path(service)}']", count: 0
+  end
+
+  test "home leaves templates out of the hero, recent services and the count" do
+    get root_path
+    assert_response :success
+    assert_select "body", text: /Domingo base/, count: 0
   end
 
   test "a template is not sent to the band" do
