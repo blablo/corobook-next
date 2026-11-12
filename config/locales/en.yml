@@ -45,12 +45,20 @@ en:
       next: "Next"
     new:
       title: "New song"
+      subtitle: "Type the lyrics, then click above a word to place a chord."
     edit:
       title: "Edit song"
     show:
       edit: "Edit"
       key: "Key"
       capo: "Capo"
+      details: "Details"
+      author: "Author"
+      original_key: "Original key"
+      ccli_number: "CCLI song number"
+      copyright: "Copyright"
+      last_used: "Last used"
+      flow: "Song flow"
       autoscroll:
         group: "Auto-scroll"
         play: "Play auto-scroll"
@@ -75,7 +83,8 @@ en:
         cancel: "Cancel"
         import: "Import"
         close: "Close"
-      add_section: "Add section:"
+      add_section: "Add section"
+      more_sections: "More"
       section:
         verse: "+ Verse"
         chorus: "+ Chorus"
@@ -94,7 +103,7 @@ en:
       status_label: "Status"
       arrangement:
         title: "Arrangement order (optional)"
-        help: "Click a section to add it to the play order. Drag or use the arrows to reorder; ✕ to remove. Reuse a section (e.g. a chorus) as many times as you like. Leave empty to play in section order."
+        help: "Click a section to add it to the play order. Reuse one, like the chorus, as often as you need. Leave it empty to play the sections in order."
         available: "Available sections"
         play_order: "Play order"
       save: "Save changes"
@@ -244,6 +253,7 @@ en:
       clear_filters: "Clear filters"
     new:
       title: "New slide"
+      subtitle: "Write it once, then add it to any service."
     archive:
       title: "Archived slides"
       intro: "Archived slides are hidden from the Slides library, search and the service builder. Services that already use one keep working. Restore a slide to bring it back."

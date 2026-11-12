@@ -48,7 +48,7 @@ class SetBuilderTest < ApplicationSystemTestCase
 
     # Move the slide up with the ↑ arrow.
     within all("[data-role=set-item]").last do
-      click_on "↑"
+      click_on "Move up"
     end
     assert_match "Punto 1", all("[data-role=set-item]").first.text
 
@@ -84,7 +84,7 @@ class SetBuilderTest < ApplicationSystemTestCase
     visit service_set_path(@set)
     assert_selector "[data-role=set-item]", count: 1
     within all("[data-role=set-item]").first do
-      click_on "✕"
+      click_on "Remove"
     end
     assert_no_selector "[data-role=set-item]"
   end

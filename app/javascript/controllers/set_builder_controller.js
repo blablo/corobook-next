@@ -1,5 +1,16 @@
 import { Controller } from "@hotwired/stimulus"
 
+// Heroicons (outline), shared by the program rows and picker results. Must match _set_item_row.
+const svg = (d, w = "1.8") => `<svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="${w}" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="${d}"/></svg>`
+const ICON = {
+  song: svg("M9 9 19.5 6.75v8.25M9 9v8.25M9 9l-.75.161M9 17.25a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm10.5-2.25a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"),
+  slide: svg("M3.75 3.75h16.5v12.75H3.75zM12 16.5v3.75m-3 0h6"),
+  up: svg("m4.5 15.75 7.5-7.5 7.5 7.5", "2"),
+  down: svg("m19.5 8.25-7.5 7.5-7.5-7.5", "2"),
+  remove: svg("M6 18 18 6M6 6l12 12", "2"),
+  grip: `<svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>`,
+}
+
 // Set Builder: searchable library picker + optimistic, drag-and-drop program list over the
 // existing JSON endpoints. Progressive enhancement — the server-rendered forms + button_to
 // reorder/remove work with this controller absent (Req 7.3). Native Drag and Drop API, no deps.
@@ -70,11 +81,11 @@ export default class extends Controller {
       return
     }
     r.innerHTML = rows.map(row => `
-      <button type="button" class="flex items-center gap-2 text-left rounded px-2 py-1.5 hover:bg-base-200 result"
+      <button type="button" class="flex items-center gap-3 text-left rounded-box px-2 py-2 hover:bg-base-200 result"
               data-kind="${row.kind}" data-id="${row.id}">
-        <span class="text-base-content/40">${row.kind === "song" ? "♪" : "▤"}</span>
+        <span class="inline-grid place-items-center size-8 rounded-box bg-base-200 text-primary shrink-0">${row.kind === "song" ? ICON.song : ICON.slide}</span>
         <span class="flex-1 truncate">${this.esc(row.title)}</span>
-        ${row.key ? `<span class="badge badge-ghost badge-sm">${this.esc(row.key)}</span>` : ""}
+        ${row.key ? `<span class="badge badge-ghost badge-sm font-mono">${this.esc(row.key)}</span>` : ""}
       </button>`).join("") +
       (rows.length >= 20 ? `<p class="text-xs text-base-content/40 px-1 py-1">Refine your search to see more.</p>` : "")
     r.querySelectorAll(".result").forEach(b =>
@@ -132,21 +143,24 @@ export default class extends Controller {
   appendRow(item) {
     const count = this.rows().length + 1
     const li = document.createElement("li")
-    li.className = "flex items-center gap-2 rounded-lg bg-base-100 ring-1 ring-base-200 px-3 py-2"
+    li.className = "list-row items-center hover:bg-base-200"
     li.setAttribute("data-role", "set-item")
     li.setAttribute("data-item-id", item.id)
     li.setAttribute("data-missing", "false")
     li.setAttribute("draggable", "true")
     li.innerHTML = `
-      <span class="cursor-grab select-none text-base-content/30 shrink-0" data-drag-handle title="Drag to reorder">⠿</span>
-      <span class="text-xs text-base-content/40 w-6 text-right shrink-0" data-role="pos">${count}.</span>
-      <span class="shrink-0 text-base-content/40">${item.kind === "song" ? "♪" : "▤"}</span>
-      <span class="flex-1 min-w-0 truncate">${this.esc(item.title || "")}</span>
-      ${item.key ? `<span class="badge badge-ghost badge-sm shrink-0">${this.esc(item.key)}</span>` : ""}
-      <span class="flex items-center gap-0.5 shrink-0">
-        <button type="button" class="btn btn-ghost btn-xs px-1 arrange-up" aria-label="Move up">↑</button>
-        <button type="button" class="btn btn-ghost btn-xs px-1 arrange-down" aria-label="Move down">↓</button>
-        <button type="button" class="btn btn-ghost btn-xs px-1 text-error arrange-del" aria-label="Remove">✕</button>
+      <span class="cursor-grab select-none text-base-content/40" data-drag-handle title="Drag to reorder">${ICON.grip}</span>
+      <span class="w-6 text-right text-sm tabular-nums text-base-content/60" data-role="pos">${count}.</span>
+      <span class="inline-grid place-items-center size-9 rounded-box bg-base-200 text-primary">${item.kind === "song" ? ICON.song : ICON.slide}</span>
+      <div class="list-col-grow min-w-0">
+        <span class="block font-medium truncate">${this.esc(item.title || "")}</span>
+        <span class="block text-xs text-base-content/60 truncate">${this.esc(item.subtitle || "")}</span>
+      </div>
+      ${item.key ? `<span class="badge badge-ghost badge-sm font-mono">${this.esc(item.key)}</span>` : ""}
+      <span class="flex items-center">
+        <button type="button" class="btn btn-ghost btn-sm btn-square arrange-up" title="Move up" aria-label="Move up">${ICON.up}</button>
+        <button type="button" class="btn btn-ghost btn-sm btn-square arrange-down" title="Move down" aria-label="Move down">${ICON.down}</button>
+        <button type="button" class="btn btn-ghost btn-sm btn-square text-error arrange-del" title="Remove" aria-label="Remove">${ICON.remove}</button>
       </span>`
     this.programTarget.appendChild(li)
     this.wireRow(li)

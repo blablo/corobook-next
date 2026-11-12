@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 
+
 // No-syntax ChordPro editor.
 //
 // Two modes over ONE canonical field (the hidden `source` input bound to
@@ -255,20 +256,19 @@ export default class extends Controller {
       const label = this.esc(s.label || this.kindName(s.kind))
       const lines = s.lines.map((ln, li) => this.renderLine(si, ln, li)).join("")
       return `
-        <div class="rounded-lg ring-1 ring-base-200 bg-base-100 mb-3" data-si="${si}">
-          <div class="flex items-center gap-2 px-3 py-2 border-b border-base-200">
-            <span class="badge badge-neutral badge-sm">${label}</span>
-            <div class="flex-1"></div>
-            <button type="button" class="btn btn-ghost btn-xs" data-action="song-editor#addLine" data-si="${si}">+ line</button>
-            <button type="button" class="btn btn-ghost btn-xs" data-action="song-editor#addComment" data-si="${si}">+ note</button>
-            <button type="button" class="btn btn-ghost btn-xs" data-action="song-editor#relabel" data-si="${si}">rename</button>
-            <button type="button" class="btn btn-ghost btn-xs text-error" data-action="song-editor#removeSection" data-si="${si}">✕</button>
+        <div class="rounded-box border border-base-300 bg-base-100 mb-3" data-si="${si}">
+          <div class="flex flex-wrap items-center gap-1 rounded-t-box bg-base-200 px-3 py-1.5">
+            <span class="badge badge-neutral badge-sm mr-auto">${label}</span>
+            <button type="button" class="btn btn-ghost btn-xs" data-action="song-editor#addLine" data-si="${si}">+ Line</button>
+            <button type="button" class="btn btn-ghost btn-xs" data-action="song-editor#addComment" data-si="${si}">+ Note</button>
+            <button type="button" class="btn btn-ghost btn-xs" data-action="song-editor#relabel" data-si="${si}">Rename</button>
+            <button type="button" class="btn btn-ghost btn-xs text-error" data-action="song-editor#removeSection" data-si="${si}" aria-label="Remove section">Remove</button>
           </div>
-          <div class="p-3">${lines || '<span class="text-base-content/40 text-sm">Empty — click “+ line” to add lyrics.</span>'}</div>
+          <div class="p-3">${lines || '<p class="rounded-box border border-dashed border-base-300 px-3 py-4 text-center text-sm text-base-content/60">Empty. Click <b>+ Line</b> to add lyrics.</p>'}</div>
         </div>`
     }
     this.visualTarget.querySelector("[data-role=sections]").innerHTML =
-      this.model.length ? this.model.map(sec).join("") : `<p class="text-base-content/50 text-sm mb-3">No sections yet. Add a verse or chorus to begin.</p>`
+      this.model.length ? this.model.map(sec).join("") : `<p class="rounded-box border border-dashed border-base-300 px-4 py-8 text-center text-base-content/60">No sections yet. Add a verse or chorus below to begin.</p>`
     // Chord pills: DRAG to reposition along the line, CLICK (no movement) to remove.
     // Dynamic nodes aren't reliably bound by Stimulus actions, so wire directly.
     this.visualTarget.querySelectorAll(".chord-pill").forEach(pill => {
@@ -635,26 +635,26 @@ export default class extends Controller {
     this.order = this.order.filter(l => labels.includes(l))
 
     this.arrangeAvailTarget.innerHTML = labels.length
-      ? labels.map(l => `<button type="button" class="btn btn-sm btn-outline arrange-add" data-label="${this.esc(l)}">+ ${this.esc(l)}</button>`).join("")
-      : `<span class="text-sm text-base-content/40">Add sections above first.</span>`
+      ? labels.map(l => `<button type="button" class="btn btn-sm btn-soft btn-primary arrange-add" data-label="${this.esc(l)}">+ ${this.esc(l)}</button>`).join("")
+      : `<span class="text-sm text-base-content/60">Add sections above first.</span>`
     this.arrangeAvailTarget.querySelectorAll(".arrange-add").forEach(b =>
       b.addEventListener("click", () => this.addToOrder(b.dataset.label)))
 
     this.arrangeOrderTarget.innerHTML = this.order.length
       ? this.order.map((l, i) => this.orderRow(l, i)).join("")
-      : `<span class="text-sm text-base-content/40 px-1">Empty — plays in section order.</span>`
+      : `<p class="px-3 py-3 text-sm text-base-content/60">Empty, so the song plays its sections in order.</p>`
     this.wireOrderRows()
     this.syncOrderField()
   }
   orderRow(label, i) {
     return `
-      <div class="flex items-center gap-2 rounded bg-base-100 ring-1 ring-base-200 px-2 py-1 arrange-row" draggable="true" data-i="${i}">
-        <span class="cursor-grab select-none text-base-content/30" data-drag-handle>⠿</span>
-        <span class="text-base-content/40 text-xs w-5 text-right">${i + 1}.</span>
-        <span class="flex-1 text-sm">${this.esc(label)}</span>
-        <button type="button" class="btn btn-ghost btn-xs px-1 arrange-up" title="Move up" data-i="${i}">↑</button>
-        <button type="button" class="btn btn-ghost btn-xs px-1 arrange-down" title="Move down" data-i="${i}">↓</button>
-        <button type="button" class="btn btn-ghost btn-xs px-1 text-error arrange-del" title="Remove" data-i="${i}">✕</button>
+      <div class="flex items-center gap-2 bg-base-100 px-3 py-1.5 border-b border-base-300 last:border-b-0 hover:bg-base-200 arrange-row" draggable="true" data-i="${i}">
+        <span class="cursor-grab select-none text-base-content/60" data-drag-handle title="Drag to reorder">⠿</span>
+        <span class="w-6 text-right text-sm tabular-nums text-base-content/60">${i + 1}.</span>
+        <span class="flex-1 font-medium">${this.esc(label)}</span>
+        <button type="button" class="btn btn-ghost btn-xs arrange-up" title="Move up" aria-label="Move up" data-i="${i}">↑</button>
+        <button type="button" class="btn btn-ghost btn-xs arrange-down" title="Move down" aria-label="Move down" data-i="${i}">↓</button>
+        <button type="button" class="btn btn-ghost btn-xs text-error arrange-del" title="Remove" data-i="${i}">Remove</button>
       </div>`
   }
   wireOrderRows() {

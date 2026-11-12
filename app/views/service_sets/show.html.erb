@@ -1,5 +1,5 @@
 <% launchable = @items.any? && @items.none?(&:missing?) %>
-<div class="mx-auto my-8 max-w-5xl px-4 sm:px-6"
+<div class="space-y-6"
      data-controller="set-builder"
      data-set-builder-reorder-url-value="<%= reorder_service_set_path(@service_set) %>"
      data-set-builder-add-url-value="<%= add_item_service_set_path(@service_set) %>"
@@ -8,60 +8,69 @@
      data-set-builder-can-edit-value="<%= can_edit? %>">
 
   <%# ── Header ──────────────────────────────────────────────────── %>
-  <header class="mb-5 pb-4 border-b border-base-300 flex flex-wrap items-start justify-between gap-3">
-    <div class="min-w-0">
-      <h1 class="text-2xl sm:text-3xl font-bold leading-tight truncate"><%= @service_set.name %></h1>
-      <% if can_edit? %>
-        <%= form_with model: @service_set, url: service_set_path(@service_set), method: :patch,
-              data: { turbo: false }, class: "mt-1 flex items-center gap-2 flex-wrap" do |f| %>
-          <%= f.label :service_date, t("services.show.service_date"), class: "text-sm text-base-content/60" %>
-          <%= f.date_field :service_date, onchange: "this.form.requestSubmit()",
-                class: "input input-bordered input-xs w-auto", data: { role: "service-date" } %>
-          <noscript><%= f.submit t("services.show.save"), class: "btn btn-xs btn-outline" %></noscript>
-          <span class="text-sm text-base-content/60">
-            <%= @service_set.service_date ? t("services.show.goes_live", date: @service_set.service_date.strftime('%A, %b %-d')) : t("services.show.no_date_yet") %>
-          </span>
+  <% date = @service_set.service_date %>
+  <header class="flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-4 min-w-0">
+      <%= render "date_block", date: date, big: true %>
+      <div class="min-w-0 space-y-1">
+        <div class="flex flex-wrap items-center gap-2">
+          <% if @active_session %>
+            <span class="badge badge-soft badge-success badge-sm gap-1.5" data-role="live-warning">
+              <span class="status status-success animate-pulse" aria-hidden="true"></span><%= t("services.show.live_badge") %>
+            </span>
+          <% elsif date && date < Date.current %>
+            <span class="badge badge-soft badge-warning badge-sm"><%= t("home.hero.past_service") %></span>
+          <% elsif date %>
+            <span class="text-xs text-base-content/60"><%= days_until(date) %></span>
+          <% end %>
+        </div>
+        <h1 class="text-2xl font-semibold leading-tight truncate"><%= @service_set.name %></h1>
+        <% if can_edit? %>
+          <%= form_with model: @service_set, url: service_set_path(@service_set), method: :patch,
+                data: { turbo: false }, class: "flex flex-wrap items-center gap-2" do |f| %>
+            <%= f.label :service_date, t("services.show.service_date"), class: "text-sm text-base-content/60" %>
+            <%= f.date_field :service_date, onchange: "this.form.requestSubmit()",
+                  class: "input input-sm w-auto", data: { role: "service-date" } %>
+            <noscript><%= f.submit t("services.show.save"), class: "btn btn-sm btn-outline" %></noscript>
+            <span class="text-sm text-base-content/60">
+              <%= date ? t("services.show.goes_live", date: date.strftime("%A, %b %-d")) : t("services.show.no_date_yet") %>
+            </span>
+          <% end %>
+        <% else %>
+          <p class="text-sm text-base-content/60"><%= date&.strftime("%A, %B %-d, %Y") || t("services.show.no_date") %></p>
         <% end %>
-      <% else %>
-        <p class="mt-1 text-sm text-base-content/60">
-          <%= @service_set.service_date&.strftime("%A, %B %-d, %Y") || t("services.show.no_date") %>
-        </p>
-      <% end %>
-      <% if @active_session %>
-        <p class="mt-2" data-role="live-warning">
-          <span class="badge badge-warning badge-sm gap-1"><%= t("services.show.live_badge") %></span>
-        </p>
-      <% end %>
+      </div>
     </div>
-    <div class="flex items-center gap-2 shrink-0">
-      <%= link_to preview_service_set_path(@service_set), class: "btn btn-ghost btn-sm gap-1", data: { role: "preview-set" } do %>
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+
+    <div class="flex flex-wrap items-center gap-2">
+      <%= link_to preview_service_set_path(@service_set), class: "btn btn-ghost", data: { role: "preview-set" } do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
         <%= t("services.show.preview") %>
       <% end %>
       <% if can_edit? %>
-        <% send_icon = capture do %><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg><% end %>
+        <% send_icon = capture do %><svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg><% end %>
         <% if @band.empty? || @items.empty? %>
           <div class="tooltip tooltip-bottom" data-tip="<%= @band.empty? ? t('services.show.send_to_band_no_band') : t('services.show.send_to_band_no_items') %>">
-            <button type="button" class="btn btn-ghost btn-sm gap-1 btn-disabled" aria-disabled="true" tabindex="-1" data-role="send-to-band">
+            <button type="button" class="btn btn-ghost btn-disabled" aria-disabled="true" tabindex="-1" data-role="send-to-band">
               <%= send_icon %><%= t("services.show.send_to_band") %>
             </button>
           </div>
         <% else %>
-          <button type="button" class="btn btn-ghost btn-sm gap-1" data-role="send-to-band"
+          <button type="button" class="btn btn-ghost" data-role="send-to-band"
                   onclick="document.getElementById('send-to-band-modal').showModal()">
             <%= send_icon %><%= t("services.show.send_to_band") %>
           </button>
         <% end %>
       <% end %>
       <% if @active_session %>
-        <%= link_to t("services.show.resume"), operator_path(@active_session), class: "btn btn-primary btn-sm" %>
+        <%= link_to t("services.show.resume"), operator_path(@active_session), class: "btn btn-success" %>
       <% elsif can_edit? && @other_live_session %>
         <%# Another set is live — confirm ending it before taking over the screen. %>
-        <button type="button" class="btn btn-primary btn-sm <%= 'btn-disabled' unless launchable %>"
+        <button type="button" class="btn btn-primary <%= 'btn-disabled' unless launchable %>"
                 onclick="document.getElementById('go-live-takeover').showModal()" data-role="launch-takeover"><%= t("services.show.go_live") %></button>
       <% elsif can_edit? %>
         <%= button_to t("services.show.go_live"), launch_service_set_path(@service_set), method: :post,
-              class: "btn btn-primary btn-sm #{'btn-disabled' unless launchable}",
+              class: "btn btn-primary #{'btn-disabled' unless launchable}",
               form: { data: { turbo: false } }, data: { role: "launch" } %>
       <% end %>
     </div>
@@ -109,51 +118,56 @@
     </dialog>
   <% end %>
 
-  <div class="grid gap-6 lg:grid-cols-[1fr_22rem]">
+  <div class="grid grid-cols-1 lg:grid-cols-[1fr_24rem] gap-6 items-start">
     <%# ── Program (the set) ─────────────────────────────────────── %>
-    <section>
-      <div class="flex items-center justify-between mb-2">
-        <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50"><%= t("services.show.program") %></h2>
-        <span class="text-xs text-base-content/50" data-role="item-count"><%= t("services.show.items", count: @items.size) %></span>
-      </div>
-      <ol class="flex flex-col gap-1.5" data-role="set-items" data-set-builder-target="program">
-        <% @items.each_with_index do |item, i| %>
-          <%= render "set_item_row", item: item, set: @service_set, index: i, count: @items.size, can_edit: can_edit? %>
+    <section class="card card-border bg-base-100">
+      <div class="card-body p-0">
+        <div class="flex items-center justify-between px-5 pt-4 pb-2">
+          <h2 class="card-title text-base"><%= t("services.show.program") %></h2>
+          <span class="badge badge-ghost" data-role="item-count"><%= t("services.show.items", count: @items.size) %></span>
+        </div>
+        <ol class="list" data-role="set-items" data-set-builder-target="program">
+          <% @items.each_with_index do |item, i| %>
+            <%= render "set_item_row", item: item, set: @service_set, index: i, count: @items.size, can_edit: can_edit? %>
+          <% end %>
+        </ol>
+        <% if @items.empty? %>
+          <p class="mx-5 mb-5 rounded-box border border-dashed border-base-300 px-4 py-10 text-center text-base-content/60" data-role="empty">
+            <%= t("services.show.empty_program") %> <% if can_edit? %><%= t("services.show.empty_program_hint") %><% end %>
+          </p>
         <% end %>
-      </ol>
-      <% if @items.empty? %>
-        <p class="rounded-lg border border-dashed border-base-300 px-4 py-8 text-center text-sm text-base-content/50" data-role="empty">
-          <%= t("services.show.empty_program") %> <% if can_edit? %><%= t("services.show.empty_program_hint") %><% end %>
-        </p>
-      <% end %>
-      <p class="sr-only" aria-live="polite" data-set-builder-target="announce"></p>
+        <p class="sr-only" aria-live="polite" data-set-builder-target="announce"></p>
+      </div>
     </section>
 
     <%# ── Library picker (editors only) ─────────────────────────── %>
     <% if can_edit? %>
-      <aside class="lg:sticky lg:top-4 self-start">
-        <div class="card card-border bg-base-100">
-          <div class="card-body p-4">
-          <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/50 mb-3"><%= t("services.show.add_to_service") %></h2>
+      <aside class="card card-border bg-base-100 lg:sticky lg:top-20">
+          <div class="card-body">
+          <h2 class="card-title text-base"><%= t("services.show.add_to_service") %></h2>
 
-          <div role="tablist" class="tabs tabs-border w-full mb-3" data-set-builder-target="tabs">
-            <button type="button" role="tab" aria-selected="true" class="tab tab-active flex-1 gap-1.5"
+          <div role="tablist" class="tabs tabs-border w-full" data-set-builder-target="tabs">
+            <button type="button" role="tab" aria-selected="true" class="tab tab-active flex-1 gap-2"
                     data-set-builder-target="tab" data-kind="song" data-action="set-builder#switchTab">
-              <span aria-hidden="true">♪</span><%= t("services.show.songs") %>
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9 19.5 6.75v8.25M9 9v8.25M9 9l-.75.161M9 17.25a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm10.5-2.25a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/></svg>
+              <%= t("services.show.songs") %>
             </button>
-            <button type="button" role="tab" aria-selected="false" class="tab flex-1 gap-1.5"
+            <button type="button" role="tab" aria-selected="false" class="tab flex-1 gap-2"
                     data-set-builder-target="tab" data-kind="slide" data-action="set-builder#switchTab">
-              <span aria-hidden="true">▤</span><%= t("services.show.slides") %>
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75h16.5v12.75H3.75zM12 16.5v3.75m-3 0h6"/></svg>
+              <%= t("services.show.slides") %>
             </button>
           </div>
 
           <%# Search picker (songs + slides) — enhanced; falls back to the native forms below with JS off %>
           <div data-set-builder-target="pickerPane">
-            <label class="sr-only" for="set-builder-search"><%= t("services.show.search_library") %></label>
-            <input id="set-builder-search" type="search" placeholder="<%= t('services.show.search_placeholder') %>" autocomplete="off"
-                   class="input input-bordered input-sm w-full mb-2"
-                   data-set-builder-target="query" data-action="input->set-builder#search">
-            <div class="flex flex-col gap-1 max-h-72 overflow-y-auto" data-set-builder-target="results"></div>
+            <label class="input w-full mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+              <input id="set-builder-search" type="search" placeholder="<%= t('services.show.search_placeholder') %>" autocomplete="off"
+                     class="grow" aria-label="<%= t('services.show.search_library') %>"
+                     data-set-builder-target="query" data-action="input->set-builder#search">
+            </label>
+            <div class="flex flex-col gap-0.5 max-h-96 overflow-y-auto -mx-2" data-set-builder-target="results"></div>
             <%# Only relevant on the Slides tab; the controller toggles it with the tab. %>
             <button type="button" class="btn btn-sm btn-ghost text-primary w-full mt-2 hidden"
                     data-set-builder-target="newSlideButton" data-action="set-builder#openNewSlide"><%= t("services.show.new_slide") %></button>
@@ -182,7 +196,6 @@
             </details>
           </div>
           </div>
-        </div>
       </aside>
     <% end %>
   </div>

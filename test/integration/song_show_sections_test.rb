@@ -23,6 +23,22 @@ class SongShowSectionsTest < ActionDispatch::IntegrationTest
     assert_equal [ "Verse 1", "Chorus", "Verse 1", "Intro" ], labels_in(response.body)
   end
 
+  test "the details card shows credits, the song flow and the latest service that used the song" do
+    song = @church.songs.create!(title: "Detalle", author: "Hine", song_key: "G", ccli_song_number: 14181,
+      copyright_line: "© 1953 Hine", arrangement: [ "Verse 1", "Chorus" ],
+      chordpro_source: "{key: G}\n{start_of_verse: Verse 1}\n[G]Uno\n{end_of_verse}\n{start_of_chorus: Chorus}\n[C]Dos\n{end_of_chorus}")
+    older = @church.service_sets.create!(name: "Octubre", service_date: Date.new(2026, 10, 4))
+    newer = @church.service_sets.create!(name: "Noviembre", service_date: Date.new(2026, 11, 1))
+    [ older, newer ].each { |set| set.set_items.create!(item_type: "song", song: song, position: 0) }
+
+    get song_path(song)
+    assert_select "[data-role=key-badge]", text: "Key G"
+    assert_select "dd", text: "14181"
+    assert_select "dd", text: "© 1953 Hine"
+    assert_select "[data-role=last-used] a[href='#{service_set_path(newer)}']", text: "Noviembre"
+    assert_select "[data-role=song-flow] li", count: 2
+  end
+
   test "no arrangement renders sections in natural order" do
     song = @church.songs.create!(
       title: "Natural",

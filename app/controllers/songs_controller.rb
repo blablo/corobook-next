@@ -30,6 +30,8 @@ class SongsController < ApplicationController
     @musician_sections = transposed.sections
     @displayed_key = render.displayed_key
     @ordered_sections = order_sections(@musician_sections, @song.arrangement)
+    @last_service = church_scope(:service_sets).joins(:set_items).where(set_items: { song_id: @song.id })
+                                               .where.not(service_date: nil).order(service_date: :desc).first
   end
 
   def new

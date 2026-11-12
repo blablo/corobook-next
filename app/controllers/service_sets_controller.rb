@@ -203,6 +203,7 @@ class ServiceSetsController < ApplicationController
   def item_json(item)
     {
       id: item.id, kind: item.item_type, title: item.resolved_title,
+      subtitle: helpers.set_item_subtitle(item),
       key: (item.song&.song_key if item.item_type == "song"), missing: item.missing?
     }
   end
