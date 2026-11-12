@@ -90,9 +90,11 @@ class OperatorAdvanceTest < ActionDispatch::IntegrationTest
   test "the operator view shows projector/musician join links to copy and QR codes" do
     get operator_path(@session)
     assert_response :success
-    # The QR codes are the copy buttons, carrying the follow tokens.
-    assert_select "[data-role=projector-copy][data-url*='/p/#{@session.projector_token}'] svg"
-    assert_select "[data-role=musician-copy][data-url*='/m/#{@session.musician_token}'] svg"
+    # The QR codes open the follow pages; the chain buttons copy them.
+    assert_select "a[data-role=projector-open][target=_blank][href$='/p/#{@session.projector_token}'] svg"
+    assert_select "a[data-role=musician-open][target=_blank][href$='/m/#{@session.musician_token}'] svg"
+    assert_select "[data-role=projector-copy][data-url*='/p/#{@session.projector_token}']"
+    assert_select "[data-role=musician-copy][data-url*='/m/#{@session.musician_token}']"
     assert_select "[data-role=projector-copy][aria-label=?]", "Copy link: Projector"
   end
 
@@ -100,7 +102,8 @@ class OperatorAdvanceTest < ActionDispatch::IntegrationTest
     get operator_path(@session)
     %w[projector musician speaker].each do |role|
       assert_select "[data-role=#{role}-enlarge][onclick*='#{role}-code-modal']"
-      assert_select "dialog##{role}-code-modal.backdrop-blur-sm .modal-box [data-role=#{role}-copy-large] svg"
+      assert_select "dialog##{role}-code-modal.backdrop-blur-sm .modal-box a[data-role=#{role}-open-large] svg"
+      assert_select "dialog##{role}-code-modal [data-role=#{role}-copy-large]"
     end
     assert_select "#projector-code-modal [data-role=projector-copy-large][data-url*='/p/#{@session.projector_token}']"
   end

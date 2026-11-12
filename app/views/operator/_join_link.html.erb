@@ -1,13 +1,26 @@
 <%#
-  One device's join code (scan it or click to copy, see _join_code), with an Enlarge link that
-  shows it large in a dialog over the blurred page, so a phone can't pick up one of the others.
-  Locals: url, title, role (data-role prefix).
+  One device's join tile: its name, the QR code (scan it, or click to open the page), and under
+  the code's two corners Copy link (left) and Enlarge (right), apart so neither is hit by mistake.
+  Enlarge shows the code large in a dialog over the blurred page, so a phone can't pick up one of
+  the others. Locals: url, title, role (data-role prefix), icon (OperatorHelper::ICON_PATHS key).
 %>
-<div class="flex flex-col items-start" data-role="<%= role %>-join">
-  <%= render "join_code", url: url, title: title, role: "#{role}-copy" %>
-  <button type="button" class="link link-primary link-hover text-xs ml-2"
-          aria-label="<%= t("live.operator.enlarge_join", name: title) %>" data-role="<%= role %>-enlarge"
-          onclick="document.getElementById('<%= role %>-code-modal').showModal()"><%= t("live.operator.enlarge") %></button>
+<div class="rounded-box bg-base-200 p-4 flex flex-col gap-2" data-role="<%= role %>-join">
+  <div class="flex items-center justify-center gap-2">
+    <span class="inline-grid place-items-center size-7 rounded-box bg-base-100 text-primary"><%= operator_icon(icon) %></span>
+    <span class="font-semibold"><%= title %></span>
+  </div>
+  <div class="mx-auto w-fit flex flex-col gap-1.5">
+    <%= render "join_code", url: url, title: title, role: "#{role}-open" %>
+    <div class="flex items-center justify-between">
+      <%= render "copy_link_button", url: url, title: title, role: "#{role}-copy" %>
+      <div class="tooltip" data-tip="<%= t("live.operator.enlarge") %>">
+        <button type="button" class="btn btn-ghost btn-sm btn-square text-base-content/70 hover:text-base-content"
+                aria-label="<%= t("live.operator.enlarge_join", name: title) %>" data-role="<%= role %>-enlarge"
+                onclick="document.getElementById('<%= role %>-code-modal').showModal()"><%= operator_icon(:arrows_out) %></button>
+      </div>
+    </div>
+  </div>
+
   <dialog id="<%= role %>-code-modal" class="modal backdrop-blur-sm" data-role="<%= role %>-code-modal">
     <%# The blur behind the box keeps a phone from reading the small codes on the page; a
         dimmed but sharp code can still scan. Esc, ✕ or a click outside closes it. %>
@@ -21,8 +34,9 @@
           <button class="btn btn-sm btn-circle btn-ghost" aria-label="<%= t("live.operator.close") %>">✕</button>
         </form>
       </div>
-      <div class="mt-4 flex justify-center">
-        <%= render "join_code", url: url, title: title, role: "#{role}-copy-large", large: true %>
+      <div class="mt-4 flex flex-col items-center gap-2">
+        <%= render "join_code", url: url, title: title, role: "#{role}-open-large", large: true %>
+        <%= render "copy_link_button", url: url, title: title, role: "#{role}-copy-large" %>
       </div>
     </div>
     <form method="dialog" class="modal-backdrop"><button><%= t("live.operator.close") %></button></form>

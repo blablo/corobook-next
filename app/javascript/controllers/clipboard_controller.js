@@ -1,24 +1,26 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Copy a value to the clipboard and say so for a moment: the label reads the done text and the
-// element carries data-copied, for styling.
-//   <button data-controller="clipboard" data-clipboard-text-value="https://…" data-clipboard-done-value="Copied"
-//           data-action="clipboard#copy"><span data-clipboard-target="label">Copy</span></button>
+// Copy a value to the clipboard and say so for a moment: the element carries data-copied and the
+// copied classes, and a DaisyUI tooltip on it (data-tip) reads the done text meanwhile.
+//   <div class="tooltip" data-tip="Copy link" data-controller="clipboard" data-clipboard-text-value="https://…"
+//        data-clipboard-done-value="Copied" data-clipboard-copied-class="tooltip-open">
+//     <button data-action="clipboard#copy">…</button></div>
 export default class extends Controller {
-  static targets = ["label"]
   static values = { text: String, done: String }
+  static classes = ["copied"]
 
   async copy() {
     if (!(await this.write(this.textValue))) return
-    if (!this.hasLabelTarget) return
-    const label = this.labelTarget
-    this.original ??= label.textContent
-    label.textContent = this.doneValue
-    this.element.dataset.copied = ""
+    const el = this.element
+    this.tip ??= el.dataset.tip
+    el.dataset.copied = ""
+    el.classList.add(...this.copiedClasses)
+    if (this.tip != null) el.dataset.tip = this.doneValue
     clearTimeout(this.timer)
     this.timer = setTimeout(() => {
-      label.textContent = this.original
-      delete this.element.dataset.copied
+      delete el.dataset.copied
+      el.classList.remove(...this.copiedClasses)
+      if (this.tip != null) el.dataset.tip = this.tip
     }, 1500)
   }
 

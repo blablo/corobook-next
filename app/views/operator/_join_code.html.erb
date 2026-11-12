@@ -1,26 +1,13 @@
 <%#
-  A follow link's QR code as a button: phones scan it, clicking copies the link. The hint says
-  "Copy" on hover (always shown when large), then "Copied" while clipboard sets data-copied. It
-  sits outside the code, so it never blocks a scan.
-  Locals: url, title, role (data-role), large (the Enlarge dialog: no title row, hint below).
+  A follow link's QR code: phones scan it, and clicking it opens the page in a new tab (e.g. the
+  projector, to drag to the second screen). Locals: url, title, role (data-role), large (sized
+  for the Enlarge dialog).
 %>
 <% large = local_assigns[:large] %>
-<%# DaisyUI's colours come from its vendored CSS, which has no group-* variants, so the copied
-    state uses its colour variables directly. %>
-<% hint = capture do %>
-  <span class="<%= large ? "text-sm text-base-content/60" : "text-xs text-primary opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 group-data-[copied]:opacity-100" %> group-data-[copied]:text-[var(--color-success)]"
-        data-clipboard-target="label"><%= t(large ? "live.operator.click_to_copy" : "live.operator.copy") %></span>
-<% end %>
-<button type="button" title="<%= url %>" aria-label="<%= t("live.operator.copy_join", name: title) %>"
-        class="group flex flex-col <%= "items-center" if large %> gap-1.5 rounded-box p-2 text-left cursor-pointer hover:bg-base-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-        data-controller="clipboard" data-clipboard-text-value="<%= url %>" data-clipboard-done-value="✓ <%= t("live.operator.copied") %>"
-        data-action="clipboard#copy" data-role="<%= role %>" data-url="<%= url %>">
-  <% unless large %>
-    <span class="flex items-center justify-between gap-3">
-      <span class="font-semibold"><%= title %></span>
-      <%= hint %>
-    </span>
+<div class="tooltip" data-tip="<%= t("live.operator.open") %>">
+  <%= link_to url, target: "_blank", rel: "noopener", aria: { label: t("live.operator.open_join", name: title) },
+        class: "block rounded-box border border-base-300 bg-white transition hover:border-primary hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary #{large ? "p-3 w-[min(20rem,75vw,55dvh)] [&_svg]:size-full" : "p-2"}",
+        data: { role: role } do %>
+    <%= qr_svg(url, size: large ? 320 : 112) %>
   <% end %>
-  <span class="block rounded-box border border-base-300 bg-white group-hover:border-[var(--color-primary)] group-data-[copied]:border-[var(--color-success)] <%= large ? "p-3 w-[min(20rem,75vw,55dvh)] [&_svg]:size-full" : "p-2" %>"><%= qr_svg(url, size: large ? 320 : 112) %></span>
-  <%= hint if large %>
-</button>
+</div>

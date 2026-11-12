@@ -34,18 +34,18 @@
       the speaker view ── %>
   <section class="card card-border bg-base-100" data-role="join-links">
     <div class="card-body p-4">
-      <div class="flex flex-wrap items-start gap-5">
-        <div class="w-full sm:w-36 space-y-1 sm:pt-2">
+      <div class="grid gap-4 sm:grid-cols-3 lg:grid-cols-[9rem_repeat(3,minmax(0,1fr))]">
+        <div class="space-y-1 pt-1 sm:col-span-3 lg:col-span-1">
           <h2 class="font-semibold text-base"><%= t("live.operator.connect_devices") %></h2>
           <p class="text-xs text-base-content/60"><%= t("live.operator.connect_help") %></p>
         </div>
         <%= render "join_link", url: follow_url(:projector, @session.projector_token), role: "projector",
-              title: t("live.operator.projector") %>
+              title: t("live.operator.projector"), icon: :tv %>
         <%= render "join_link", url: follow_url(:musician, @session.musician_token), role: "musician",
-              title: t("live.operator.musician") %>
+              title: t("live.operator.musician"), icon: :musical_note %>
         <% if @session.active? %>
           <%= render "join_link", url: follow_url(:speaker, @session.speaker_token!), role: "speaker",
-                title: t("live.operator.speaker_view") %>
+                title: t("live.operator.speaker_view"), icon: :microphone %>
         <% end %>
       </div>
     </div>

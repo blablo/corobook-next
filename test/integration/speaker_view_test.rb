@@ -90,9 +90,8 @@ class SpeakerViewTest < ActionDispatch::IntegrationTest
     get operator_path(@session)
     copy = css_select("[data-role=join-links] [data-role=speaker-join] [data-role=speaker-copy]").first
     assert copy["data-url"].end_with?(speaker_path(@session.speaker_token))
-    assert_select "[data-role=speaker-join] svg"
+    assert_select "[data-role=speaker-join] a[data-role=speaker-open][target=_blank][href$='#{speaker_path(@session.speaker_token)}'] svg"
     %w[projector musician speaker].each { |role| assert_select "[data-role=#{role}-copy]" }
-    assert_select "[data-role=join-links] a", count: 0, message: "the links are copied, not shown"
     assert_select "[data-role=speaker-modal]", count: 0
     assert_select "[data-role=whiteboard-banner][hidden] [data-role=stop-whiteboard]"
 

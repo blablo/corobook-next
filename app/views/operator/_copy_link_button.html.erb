@@ -1,0 +1,16 @@
+<%#
+  Chain icon that copies a follow link. While "Copied" shows, the tooltip opens in green and the
+  chain becomes a check (clipboard sets data-copied and the copied classes).
+  Locals: url, title, role (data-role).
+%>
+<div class="tooltip group" data-tip="<%= t("live.operator.copy_link") %>"
+     data-controller="clipboard" data-clipboard-text-value="<%= url %>" data-clipboard-done-value="<%= t("live.operator.copied") %>"
+     data-clipboard-copied-class="tooltip-open tooltip-success">
+  <button type="button" class="btn btn-ghost btn-sm btn-square text-base-content/70 hover:text-base-content"
+          aria-label="<%= t("live.operator.copy_join", name: title) %>"
+          data-action="clipboard#copy" data-role="<%= role %>" data-url="<%= url %>">
+    <%= operator_icon(:link, "size-4 group-data-[copied]:hidden") %>
+    <%# DaisyUI's colours have no group-* variants (vendored CSS), so the check uses its variable. %>
+    <%= operator_icon(:check, "size-4 hidden group-data-[copied]:block text-[var(--color-success)]") %>
+  </button>
+</div>

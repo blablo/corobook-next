@@ -1,4 +1,20 @@
 module OperatorHelper
+  # Heroicons (outline, 24px) used by the operator's join tiles.
+  ICON_PATHS = {
+    tv: "M6 20.25h12m-7.5-3v3m3-3v3m-10.125-3h17.25c.621 0 1.125-.504 1.125-1.125V4.875c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125Z",
+    musical_note: "m9 9 10.5-3m0 6.553v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 1 1-.99-3.467l2.31-.66a2.25 2.25 0 0 0 1.632-2.163Zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 0 1-.99-3.467l2.31-.66A2.25 2.25 0 0 0 9 15.553Z",
+    microphone: "M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z",
+    link: "M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244",
+    check: "m4.5 12.75 6 6 9-13.5",
+    arrows_out: "M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"
+  }.freeze
+
+  def operator_icon(name, css = "size-4")
+    tag.svg(xmlns: "http://www.w3.org/2000/svg", class: css, fill: "none", viewBox: "0 0 24 24",
+            stroke: "currentColor", "stroke-width": "1.8", "aria-hidden": "true") do
+      tag.path("stroke-linecap": "round", "stroke-linejoin": "round", d: ICON_PATHS.fetch(name))
+    end
+  end
   # A follow link (projector, band view, speaker view) on the host the operator is using, so it
   # works from a church subdomain or the bare domain alike.
   def follow_url(route, token)
