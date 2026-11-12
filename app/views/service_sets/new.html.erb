@@ -1,4 +1,9 @@
 <div class="mx-auto mt-8 max-w-3xl">
-  <h1 class="text-2xl font-semibold mb-4"><%= t("services.new.title") %></h1>
-  <%= render "form", service_set: @service_set %>
+  <h1 class="text-2xl font-semibold mb-1"><%= t(@service_set.template? ? "services.new.template_title" : "services.new.title") %></h1>
+  <% if @service_set.template? %>
+    <p class="text-base-content/60 mb-4 max-w-lg"><%= t("services.new.template_intro") %></p>
+  <% else %>
+    <div class="mb-4"></div>
+  <% end %>
+  <%= render "form", service_set: @service_set, templates: @templates, from_template_id: @from_template_id %>
 </div>

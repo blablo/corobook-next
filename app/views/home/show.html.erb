@@ -68,6 +68,9 @@
               <%= link_to t("home.hero.resume"), operator_path(@active_session), class: "btn btn-success", data: { role: "resume" } %>
             <% elsif items.empty? %>
               <%= link_to t("home.hero.add_items"), service_set_path(@hero_set), class: "btn btn-primary", data: { role: "add-items" } %>
+            <% elsif (empty_slots = items.count(&:empty_slot?)).positive? %>
+              <%= link_to t("services.index.fill_slots", count: empty_slots), service_set_path(@hero_set),
+                    class: "btn btn-primary", data: { role: "fill-slots" } %>
             <% else %>
               <%= button_to t("home.hero.go_live"), launch_service_set_path(@hero_set), method: :post,
                     class: "btn btn-primary", data: { role: "go-live" } %>

@@ -1,11 +1,17 @@
 <%#
   One program row. Locals: item (SetItem), set (ServiceSet), index (0-based), count, can_edit.
-  Server-rendered; the Stimulus controller enhances drag/reorder/remove on top of this.
-  set_builder_controller.js#appendRow builds the same markup for rows added without a reload.
+  Server-rendered; the Stimulus controller enhances drag/reorder/remove on top of this. Rows added
+  or filled without a reload are rendered by this same partial (ServiceSetsController#item_row_html).
+
+  A slot in a template shows what each service will fill it with. In a service, an empty slot
+  is a dashed box with a Choose button; a filled one is a normal row with Change.
 %>
 <% song = item.item_type == "song" %>
+<% empty_slot = item.empty_slot? %>
+<% template_slot = set.template? && item.slot? %>
 <li class="list-row items-center hover:bg-base-200 <%= 'opacity-70' if item.missing? %>"
     data-role="set-item" data-item-id="<%= item.id %>" data-missing="<%= item.missing? %>"
+    data-empty-slot="<%= empty_slot %>"
     <%= "draggable=true" if can_edit %>>
   <% if can_edit %>
     <span class="cursor-grab select-none text-base-content/40" data-drag-handle title="<%= t('services.item.drag_to_reorder') %>">
@@ -13,7 +19,7 @@
     </span>
   <% end %>
   <span class="w-6 text-right text-sm tabular-nums text-base-content/60" data-role="pos"><%= index + 1 %>.</span>
-  <span class="inline-grid place-items-center size-9 rounded-box bg-base-200 text-primary"
+  <span class="inline-grid place-items-center size-9 rounded-box <%= empty_slot ? 'border border-dashed border-base-300 text-base-content/50' : 'bg-base-200 text-primary' %>"
         title="<%= song ? t('services.item.song') : t('services.item.slide') %>">
     <% if song %>
       <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9 19.5 6.75v8.25M9 9v8.25M9 9l-.75.161M9 17.25a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm10.5-2.25a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/></svg>
@@ -21,20 +27,52 @@
       <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75h16.5v12.75H3.75zM12 16.5v3.75m-3 0h6"/></svg>
     <% end %>
   </span>
-  <div class="list-col-grow min-w-0">
-    <% if item.missing? %>
-      <span class="italic text-error"><%= t("services.item.missing") %></span>
-    <% elsif song %>
-      <%= link_to item.resolved_title, song_path(item.song), class: "block font-medium truncate link link-hover", draggable: "false", data: { role: "item-link" } %>
-    <% elsif item.text_slide&.reusable? %>
-      <%= link_to item.resolved_title, text_slide_path(item.text_slide), class: "block font-medium truncate link link-hover", draggable: "false", data: { role: "item-link" } %>
-    <% else %>
-      <span class="block font-medium truncate"><%= item.resolved_title %></span>
+  <% choose_data = { action: "set-builder#chooseSlot", role: "choose-slot", item_id: item.id,
+                     slot_kind: song ? "song" : "slide", slot_tag: item.slot_tag.to_s,
+                     slot_title: slot_choose_label(item),
+                     slot_hint: (t("services.slots.showing_tagged", tag: item.slot_tag) if item.slot_tag),
+                     slot_new: (t("services.slots.new_tagged_slide", tag: item.slot_tag) if item.slot_tag) } %>
+  <% if template_slot %>
+    <div class="list-col-grow min-w-0">
+      <span class="block font-medium truncate"><%= item.slot_label %></span>
+      <span class="block text-xs text-base-content/60 truncate">
+        <% if song %>
+          <%= t("services.slots.chosen_each_week") %>
+        <% else %>
+          <%= t("services.slots.any_slide_tagged") %> <span class="badge badge-ghost badge-xs"><%= item.slot_tag %></span>
+        <% end %>
+      </span>
+    </div>
+    <span class="badge badge-outline badge-sm whitespace-nowrap" data-role="slot-badge">
+      <%= song ? t("services.slots.song_slot") : t("services.slots.slide_slot") %>
+    </span>
+  <% elsif empty_slot %>
+    <div class="list-col-grow min-w-0 flex items-center justify-between gap-2 rounded-box border border-dashed border-base-300 px-3 py-1.5">
+      <span class="truncate text-base-content/70" data-role="slot-label"><%= item.slot_label %></span>
+      <% if can_edit %>
+        <%= tag.button slot_choose_label(item), type: "button", class: "btn btn-soft btn-primary btn-xs shrink-0", data: choose_data %>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="list-col-grow min-w-0">
+      <% if item.missing? %>
+        <span class="italic text-error"><%= t("services.item.missing") %></span>
+      <% elsif song %>
+        <%= link_to item.resolved_title, song_path(item.song), class: "block font-medium truncate link link-hover", draggable: "false", data: { role: "item-link" } %>
+      <% elsif item.text_slide&.reusable? %>
+        <%= link_to item.resolved_title, text_slide_path(item.text_slide), class: "block font-medium truncate link link-hover", draggable: "false", data: { role: "item-link" } %>
+      <% else %>
+        <span class="block font-medium truncate"><%= item.resolved_title %></span>
+      <% end %>
+      <span class="block text-xs text-base-content/60 truncate"><%= set_item_subtitle(item) %></span>
+    </div>
+    <% if song && item.song&.song_key.present? %>
+      <span class="badge badge-ghost badge-sm font-mono"><%= item.song.song_key %></span>
     <% end %>
-    <span class="block text-xs text-base-content/60 truncate"><%= set_item_subtitle(item) %></span>
-  </div>
-  <% if song && item.song&.song_key.present? %>
-    <span class="badge badge-ghost badge-sm font-mono"><%= item.song.song_key %></span>
+    <% if can_edit && item.slot? %>
+      <%= tag.button t("services.slots.change"), type: "button", class: "btn btn-ghost btn-xs",
+            title: item.slot_label, data: choose_data.merge(role: "change-slot") %>
+    <% end %>
   <% end %>
   <% if can_edit %>
     <span class="flex items-center">

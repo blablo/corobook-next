@@ -8,6 +8,10 @@ class LiveSessionsController < ApplicationController
   # With force=1 (the confirm-modal path) end the church's other active service first.
   def create
     service_set = find_in_church(:service_sets, params[:id])
+    # A template never goes live, and there must be something to show (empty slots are skipped).
+    if service_set.template? || service_set.set_items.filled.none?
+      return redirect_to service_set_path(service_set), alert: t("services.launch.nothing_to_show")
+    end
 
     if params[:force].present?
       church_scope(:live_sessions).where(status: "active")

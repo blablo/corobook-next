@@ -15,7 +15,7 @@ class SongsController < ApplicationController
     @first_index = (@page - 1) * per + 1
     @has_more = @total > @page * per
     # Most recent service date each listed song appears in, for the "Last used" column.
-    @last_used = SetItem.joins(:service_set).where(song_id: @songs.map(&:id))
+    @last_used = SetItem.joins(:service_set).merge(ServiceSet.services).where(song_id: @songs.map(&:id))
                         .group(:song_id).maximum("service_sets.service_date")
   end
 
@@ -30,7 +30,7 @@ class SongsController < ApplicationController
     @musician_sections = transposed.sections
     @displayed_key = render.displayed_key
     @ordered_sections = order_sections(@musician_sections, @song.arrangement)
-    @last_service = church_scope(:service_sets).joins(:set_items).where(set_items: { song_id: @song.id })
+    @last_service = church_scope(:service_sets).services.joins(:set_items).where(set_items: { song_id: @song.id })
                                                .where.not(service_date: nil).order(service_date: :desc).first
   end
 
