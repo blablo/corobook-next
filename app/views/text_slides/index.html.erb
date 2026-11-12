@@ -1,61 +1,105 @@
-<div class="mx-auto my-8 max-w-3xl px-4 sm:px-6">
-  <div class="flex items-center justify-between mb-4">
-    <h1 class="text-2xl font-bold"><%= t("slides.index.title", church: current_church.name) %></h1>
+<div class="space-y-6" data-role="slides-index">
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-semibold"><%= t("slides.index.title") %></h1>
+      <p class="text-base-content/60 mt-1"><%= t("slides.index.subtitle", church: current_church.name) %></p>
+    </div>
     <div class="flex items-center gap-2">
-      <%= link_to t("slides.index.import"), import_text_slides_path, class: "btn btn-ghost btn-sm", data: { role: "import-slides" } %>
-      <%= link_to t("slides.index.new"), new_text_slide_path, class: "btn btn-primary btn-sm" %>
+      <%= link_to import_text_slides_path, class: "btn btn-ghost", data: { role: "import-slides" } do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/></svg>
+        <%= t("slides.index.import") %>
+      <% end %>
+      <%= link_to new_text_slide_path, class: "btn btn-primary" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        <%= t("slides.index.new") %>
+      <% end %>
     </div>
   </div>
 
-  <%= form_with url: text_slides_path, method: :get, class: "mb-3" do %>
-    <%= hidden_field_tag :tag, @tag if @tag %>
-    <%= search_field_tag :q, @query, placeholder: t("slides.index.search_placeholder"),
-          class: "input input-bordered input-sm w-full", data: { role: "slide-search" } %>
-  <% end %>
+  <%# Search + tag filter %>
+  <div class="flex flex-col gap-3">
+    <%= form_with url: text_slides_path, method: :get do %>
+      <%= hidden_field_tag :tag, @tag if @tag %>
+      <label class="input w-full max-w-xl">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+        <%= search_field_tag :q, @query, placeholder: t("slides.index.search_placeholder"),
+              class: "grow", aria: { label: t("slides.index.search_label") }, data: { role: "slide-search" } %>
+      </label>
+    <% end %>
 
-  <% if @church_tags.present? %>
-    <div class="flex flex-wrap items-center gap-1.5 mb-4" data-role="tag-filter">
-      <span class="text-xs font-semibold uppercase tracking-wide text-base-content/40 mr-1"><%= t("slides.index.tags") %></span>
-      <% if @tag %>
-        <%= link_to "✕ #{@tag}", text_slides_path(q: @query), class: "badge badge-primary gap-1" %>
-      <% end %>
-      <% @church_tags.each do |tag| %>
-        <% next if tag == @tag %>
-        <%= link_to tag, text_slides_path(tag: tag, q: @query), class: "badge badge-ghost hover:badge-neutral" %>
-      <% end %>
+    <% if @church_tags.present? %>
+      <div class="flex flex-wrap items-center gap-2" data-role="tag-filter">
+        <%= link_to t("slides.index.all_tags"), text_slides_path(q: @query.presence),
+              class: "badge #{@tag ? "badge-ghost" : "badge-primary"}" %>
+        <% @church_tags.each do |tag| %>
+          <%= link_to tag, text_slides_path(tag: (tag == @tag ? nil : tag), q: @query.presence),
+                class: "badge #{tag == @tag ? "badge-primary" : "badge-ghost"}",
+                aria: { current: (tag == @tag) || nil } %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @text_slides.empty? %>
+    <div class="card card-border bg-base-100" data-role="slide-results">
+      <div class="card-body items-center text-center">
+        <% if @tag || @query.present? %>
+          <p class="text-base-content/60"><%= @tag ? t("slides.index.empty_for_tag", tag: @tag) : t("slides.index.empty_for_search") %></p>
+          <%= link_to t("slides.index.clear_filters"), text_slides_path, class: "btn btn-ghost btn-sm" %>
+        <% else %>
+          <h2 class="card-title text-base"><%= t("slides.index.empty") %></h2>
+          <p class="text-base-content/60"><%= t("slides.index.empty_hint") %></p>
+          <div class="flex gap-2 mt-2">
+            <%= link_to t("slides.index.import"), import_text_slides_path, class: "btn btn-ghost" %>
+            <%= link_to t("slides.index.new"), new_text_slide_path, class: "btn btn-primary" %>
+          </div>
+        <% end %>
+      </div>
     </div>
+  <% else %>
+    <ul class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4" data-role="slide-results">
+      <% @text_slides.each do |slide| %>
+        <li class="card card-border bg-base-100 overflow-hidden hover:border-primary transition-colors" data-role="slide-card">
+          <%# Page 1, rendered by the projector partial in a bounded 16:9 stage (same as the slide page). %>
+          <%= link_to slide, class: "block", tabindex: -1, aria: { hidden: true } do %>
+            <div class="projector-preview pointer-events-none" style="<%= slide.projector_style %>">
+              <%= render "projector_slide", slide: slide, page: 0 %>
+            </div>
+          <% end %>
+          <div class="card-body p-4 gap-2">
+            <div class="flex items-start gap-2">
+              <%= link_to slide.title, slide, class: "font-medium link link-hover grow min-w-0 truncate" %>
+              <% if can_edit? %>
+                <%# Archive from the list; the current search/tag filter is kept on return. %>
+                <%= button_to archive_text_slide_path(slide, q: @query.presence, tag: @tag), method: :patch,
+                      class: "btn btn-ghost btn-xs btn-square -mr-1 -mt-0.5",
+                      title: t("slides.archive.archive_title", title: slide.title),
+                      aria: { label: t("slides.archive.archive_title", title: slide.title) },
+                      data: { role: "archive-slide" } do %>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0-3-3m3 3 3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/></svg>
+                <% end %>
+              <% end %>
+            </div>
+            <% if slide.page_count > 1 || slide.tags.any? %>
+              <div class="flex flex-wrap gap-1.5">
+                <% if slide.page_count > 1 %>
+                  <span class="badge badge-sm badge-outline"><%= t("slides.index.pages", count: slide.page_count) %></span>
+                <% end %>
+                <% slide.tags.each do |tag| %>
+                  <%= link_to tag, text_slides_path(tag: tag), class: "badge badge-sm badge-ghost" %>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </li>
+      <% end %>
+    </ul>
   <% end %>
-
-  <ul class="list bg-base-100 rounded-box border border-base-200" data-role="slide-results">
-    <% @text_slides.each do |slide| %>
-      <li class="list-row items-center">
-        <%= link_to slide.title, slide, class: "list-col-grow link link-hover font-medium" %>
-        <span class="flex items-center gap-1.5 shrink-0">
-          <% if slide.page_count > 1 %>
-            <span class="badge badge-sm badge-outline"><%= t("slides.index.pages", count: slide.page_count) %></span>
-          <% end %>
-          <% slide.tags.each do |tag| %>
-            <span class="badge badge-sm badge-ghost"><%= tag %></span>
-          <% end %>
-          <% if can_edit? %>
-            <%# Archive from the list; the current search/tag filter is kept on return. %>
-            <%= button_to t("slides.archive.archive"), archive_text_slide_path(slide, q: @query.presence, tag: @tag),
-                  method: :patch, class: "btn btn-ghost btn-xs text-base-content/60",
-                  title: t("slides.archive.archive_title", title: slide.title),
-                  data: { role: "archive-slide" } %>
-          <% end %>
-        </span>
-      </li>
-    <% end %>
-    <% if @text_slides.empty? %>
-      <li class="list-row text-sm text-base-content/50"><%= @tag ? t("slides.index.empty_for_tag", tag: @tag) : t("slides.index.empty") %></li>
-    <% end %>
-  </ul>
 
   <% if @archived_count.positive? %>
-    <p class="mt-4 text-sm">
+    <p>
       <%= link_to t("slides.archive.view_link", count: @archived_count), archived_text_slides_path,
-            class: "link link-hover text-base-content/60", data: { role: "archived-link" } %>
+            class: "link link-hover text-sm", data: { role: "archived-link" } %>
     </p>
   <% end %>
 </div>

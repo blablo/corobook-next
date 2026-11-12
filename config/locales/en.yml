@@ -24,12 +24,25 @@ en:
 
   songs:
     index:
-      title: "Songs — %{church}"
+      title: "Songs"
+      subtitle:
+        one: "%{count} song in %{church}'s library."
+        other: "%{count} songs in %{church}'s library."
       new: "New song"
       search_placeholder: "Search title, author, or lyrics…"
-      empty: "No songs found."
-      previous: "← Previous"
-      next: "Next →"
+      search_label: "Search songs"
+      empty: "No songs yet."
+      empty_for_search: "No songs match “%{query}”."
+      clear_search: "Clear search"
+      th_song: "Song"
+      th_author: "Author"
+      th_key: "Key"
+      th_last_used: "Last used"
+      never_used: "Never"
+      date_format: "%b %-d, %Y"
+      showing: "%{from}–%{to} of %{total}"
+      previous: "Previous"
+      next: "Next"
     new:
       title: "New song"
     edit:
@@ -93,11 +106,41 @@ en:
 
   services:
     index:
-      title: "Services — %{church}"
+      title: "Services"
+      subtitle: "Plan what %{church} sings and shows each week."
       new: "New service"
       empty: "No services yet."
+      empty_hint: "Create one to start planning songs and slides."
       upcoming: "Upcoming"
       past: "Past"
+      live_now_html: "%{name} is live now."
+      open_operator: "Open operator"
+      next_service: "Next service"
+      today: "Today"
+      tomorrow: "Tomorrow"
+      in_days:
+        one: "in %{count} day"
+        other: "in %{count} days"
+      no_date: "No date"
+      no_items: "No items yet"
+      items:
+        one: "%{count} item"
+        other: "%{count} items"
+      songs:
+        one: "%{count} song"
+        other: "%{count} songs"
+      slides:
+        one: "%{count} slide"
+        other: "%{count} slides"
+      open: "Open"
+      resume: "Resume"
+      go_live: "Go live"
+      go_live_with: "Go live with %{name}"
+      add_items: "Add items"
+      no_other_upcoming: "No other upcoming services."
+      no_past: "No past services yet."
+      older: "Older"
+      newer: "Newer"
     new:
       title: "New service"
     edit:
@@ -186,14 +229,19 @@ en:
 
   slides:
     index:
-      title: "Slides — %{church}"
+      title: "Slides"
+      subtitle: "Announcements, scripture and other slides %{church} can add to any service."
       new: "New slide"
       import: "Import PDF"
       search_placeholder: "Search title, tags, or body…"
-      tags: "Tags"
+      search_label: "Search slides"
+      all_tags: "All"
       pages: "%{count} pages"
       empty: "No slides yet."
+      empty_hint: "Create a slide, or import a deck exported as PDF."
       empty_for_tag: "No slides for #%{tag} yet."
+      empty_for_search: "No slides match your search."
+      clear_filters: "Clear filters"
     new:
       title: "New slide"
     archive:
@@ -443,6 +491,7 @@ en:
       new_service: "New service"
       new_song: "New song"
       new_slide: "New slide"
+      new: "New"
     library:
       heading: "Library"
       songs: "Songs"

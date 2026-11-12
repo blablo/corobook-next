@@ -1,32 +1,88 @@
-<div class="mx-auto my-8 max-w-3xl px-4 sm:px-6">
-  <div class="flex items-center justify-between mb-4">
-    <h1 class="text-2xl font-bold"><%= t("songs.index.title", church: current_church.name) %></h1>
-    <%= link_to t("songs.index.new"), new_song_path, class: "btn btn-primary btn-sm" %>
+<div class="space-y-6" data-role="songs-index">
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-semibold"><%= t("songs.index.title") %></h1>
+      <p class="text-base-content/60 mt-1"><%= t("songs.index.subtitle", count: @library_total, church: current_church.name) %></p>
+    </div>
+    <%= link_to new_song_path, class: "btn btn-primary" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+      <%= t("songs.index.new") %>
+    <% end %>
   </div>
 
-  <%= form_with url: songs_path, method: :get, class: "mb-4" do %>
-    <%= search_field_tag :q, @query, placeholder: t("songs.index.search_placeholder"),
-          class: "input input-bordered input-sm w-full", data: { role: "song-search" } %>
+  <%= form_with url: songs_path, method: :get do %>
+    <label class="input w-full max-w-xl">
+      <svg xmlns="http://www.w3.org/2000/svg" class="size-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+      <%= search_field_tag :q, @query, placeholder: t("songs.index.search_placeholder"),
+            class: "grow", aria: { label: t("songs.index.search_label") }, data: { role: "song-search" } %>
+    </label>
   <% end %>
 
-  <ul class="list bg-base-100 rounded-box border border-base-200" data-role="song-results">
-    <% @songs.each do |song| %>
-      <li class="list-row items-center">
-        <%= link_to song.title, song, class: "list-col-grow link link-hover font-medium" %>
-        <span class="text-sm text-base-content/60"><%= song.author %></span>
-      </li>
-    <% end %>
+  <section class="card card-border bg-base-100" data-role="song-results">
     <% if @songs.empty? %>
-      <li class="list-row text-sm text-base-content/50"><%= t("songs.index.empty") %></li>
-    <% end %>
-  </ul>
+      <div class="card-body items-center text-center">
+        <% if @query.present? %>
+          <p class="text-base-content/60"><%= t("songs.index.empty_for_search", query: @query) %></p>
+          <%= link_to t("songs.index.clear_search"), songs_path, class: "btn btn-ghost btn-sm" %>
+        <% else %>
+          <h2 class="card-title text-base"><%= t("songs.index.empty") %></h2>
+          <%= link_to t("songs.index.new"), new_song_path, class: "btn btn-primary mt-2" %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="pl-6"><%= t("songs.index.th_song") %></th>
+              <th class="hidden md:table-cell"><%= t("songs.index.th_author") %></th>
+              <th class="text-center"><%= t("songs.index.th_key") %></th>
+              <th class="hidden sm:table-cell pr-6"><%= t("songs.index.th_last_used") %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @songs.each do |song| %>
+              <tr class="relative hover:bg-base-200" data-role="song-row">
+                <td class="pl-6 max-w-0 w-full">
+                  <%= link_to song.title, song, class: "block font-medium truncate after:absolute after:inset-0" %>
+                  <span class="block text-xs text-base-content/60 truncate md:hidden"><%= song.author %></span>
+                  <% if (snippet = song_snippet(song, @query)) %>
+                    <span class="block text-xs text-base-content/60 truncate" data-role="song-snippet">“<%= snippet %>”</span>
+                  <% end %>
+                </td>
+                <td class="hidden md:table-cell whitespace-nowrap"><%= song.author %></td>
+                <td class="text-center">
+                  <% if song.song_key.present? %>
+                    <span class="badge badge-ghost badge-sm font-mono"><%= song.song_key %></span>
+                  <% end %>
+                </td>
+                <td class="hidden sm:table-cell pr-6 whitespace-nowrap text-base-content/60">
+                  <% if (date = @last_used[song.id]) %>
+                    <%= date.strftime(t("songs.index.date_format")) %>
+                  <% else %>
+                    <span class="text-xs"><%= t("songs.index.never_used") %></span>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
 
-  <div class="flex justify-between mt-4 text-sm">
-    <% if @page > 1 %>
-      <%= link_to t("songs.index.previous"), songs_path(q: @query, page: @page - 1), class: "link link-hover" %>
-    <% else %><span></span><% end %>
-    <% if @has_more %>
-      <%= link_to t("songs.index.next"), songs_path(q: @query, page: @page + 1), class: "link link-hover" %>
+      <div class="flex flex-wrap items-center justify-between gap-3 border-t border-base-300 px-6 py-3">
+        <span class="text-sm text-base-content/60">
+          <%= t("songs.index.showing", from: @first_index, to: @first_index + @songs.size - 1, total: @total) %>
+        </span>
+        <% if @page > 1 || @has_more %>
+          <div class="join">
+            <%= link_to t("songs.index.previous"), songs_path(q: @query.presence, page: @page - 1),
+                  class: "join-item btn btn-sm #{"btn-disabled" if @page == 1}", aria: { disabled: @page == 1 } %>
+            <span class="join-item btn btn-sm pointer-events-none"><%= @page %></span>
+            <%= link_to t("songs.index.next"), songs_path(q: @query.presence, page: @page + 1),
+                  class: "join-item btn btn-sm #{"btn-disabled" unless @has_more}", aria: { disabled: !@has_more } %>
+          </div>
+        <% end %>
+      </div>
     <% end %>
-  </div>
+  </section>
 </div>

@@ -39,6 +39,21 @@ class HomePageTest < ActionDispatch::IntegrationTest
     assert_select "[data-role=nav-usage]", false
   end
 
+  test "while a service is live the hero shows that service, not the next one, without a past badge" do
+    song = @church.songs.create!(title: "Way Maker", chordpro_source: "[C]Way maker")
+    live = @church.service_sets.create!(name: "Last Sunday", service_date: Date.current - 3)
+    live.set_items.create!(item_type: "song", song: song, position: 0)
+    @church.service_sets.create!(name: "Next Sunday", service_date: Date.current + 4)
+    session = LiveSession.launch(live)
+
+    sign_in
+    get root_path
+    assert_select "[data-role=hero]", text: /Last Sunday/
+    assert_select "[data-role=hero]", text: /Next Sunday/, count: 0
+    assert_select "[data-role=hero] [data-role=resume][href='#{operator_path(session)}']"
+    assert_select "[data-role=hero] [data-role=past-badge]", count: 0
+  end
+
   test "library counts reflect church data and exclude inline slides and other churches" do
     @church.songs.create!(title: "A", chordpro_source: "x")
     @church.songs.create!(title: "B", chordpro_source: "y")

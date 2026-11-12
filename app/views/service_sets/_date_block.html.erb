@@ -1,0 +1,14 @@
+<%# A calendar-style date tile. `big` renders the filled hero version. %>
+<% big = local_assigns.fetch(:big, false) %>
+<% if date %>
+  <div class="flex flex-col items-center justify-center rounded-box shrink-0 <%= big ? "bg-primary text-primary-content size-20" : "border border-base-300 size-12" %>">
+    <span class="<%= big ? "text-xs" : "text-[10px] text-base-content/60" %> font-semibold uppercase"><%= date.strftime("%b") %></span>
+    <span class="<%= big ? "text-3xl" : "text-lg" %> font-bold leading-none"><%= date.day %></span>
+    <% if big %><span class="text-xs"><%= date.strftime("%a") %></span><% end %>
+  </div>
+<% else %>
+  <div class="flex flex-col items-center justify-center rounded-box border border-dashed border-base-300 shrink-0 text-center <%= big ? "size-20 text-sm" : "size-12 text-[10px] leading-tight" %>"
+       data-role="no-date">
+    <%= t("services.index.no_date") %>
+  </div>
+<% end %>

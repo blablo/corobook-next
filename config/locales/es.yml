@@ -24,12 +24,25 @@ es:
 
   songs:
     index:
-      title: "Canciones — %{church}"
+      title: "Canciones"
+      subtitle:
+        one: "%{count} canción en la biblioteca de %{church}."
+        other: "%{count} canciones en la biblioteca de %{church}."
       new: "Nueva canción"
       search_placeholder: "Buscar por título, autor o letra…"
-      empty: "No se encontraron canciones."
-      previous: "← Anterior"
-      next: "Siguiente →"
+      search_label: "Buscar canciones"
+      empty: "Aún no hay canciones."
+      empty_for_search: "Ninguna canción coincide con “%{query}”."
+      clear_search: "Quitar búsqueda"
+      th_song: "Canción"
+      th_author: "Autor"
+      th_key: "Tono"
+      th_last_used: "Último uso"
+      never_used: "Nunca"
+      date_format: "%d/%m/%Y"
+      showing: "%{from}–%{to} de %{total}"
+      previous: "Anterior"
+      next: "Siguiente"
     new:
       title: "Nueva canción"
     edit:
@@ -93,11 +106,41 @@ es:
 
   services:
     index:
-      title: "Servicios — %{church}"
+      title: "Servicios"
+      subtitle: "Planea lo que %{church} canta y proyecta cada semana."
       new: "Nuevo servicio"
       empty: "Aún no hay servicios."
+      empty_hint: "Crea uno para empezar a planear canciones y diapositivas."
       upcoming: "Próximos"
       past: "Pasados"
+      live_now_html: "%{name} está en vivo."
+      open_operator: "Abrir operador"
+      next_service: "Próximo servicio"
+      today: "Hoy"
+      tomorrow: "Mañana"
+      in_days:
+        one: "en %{count} día"
+        other: "en %{count} días"
+      no_date: "Sin fecha"
+      no_items: "Aún sin elementos"
+      items:
+        one: "%{count} elemento"
+        other: "%{count} elementos"
+      songs:
+        one: "%{count} canción"
+        other: "%{count} canciones"
+      slides:
+        one: "%{count} diapositiva"
+        other: "%{count} diapositivas"
+      open: "Abrir"
+      resume: "Reanudar"
+      go_live: "Transmitir en vivo"
+      go_live_with: "Poner en vivo %{name}"
+      add_items: "Agregar elementos"
+      no_other_upcoming: "No hay otros servicios próximos."
+      no_past: "Aún no hay servicios pasados."
+      older: "Anteriores"
+      newer: "Más recientes"
     new:
       title: "Nuevo servicio"
     edit:
@@ -186,14 +229,19 @@ es:
 
   slides:
     index:
-      title: "Diapositivas — %{church}"
+      title: "Diapositivas"
+      subtitle: "Anuncios, escrituras y otras diapositivas que %{church} puede agregar a cualquier servicio."
       new: "Nueva diapositiva"
       import: "Importar PDF"
       search_placeholder: "Buscar por título, etiquetas o contenido…"
-      tags: "Etiquetas"
+      search_label: "Buscar diapositivas"
+      all_tags: "Todas"
       pages: "%{count} páginas"
       empty: "Aún no hay diapositivas."
+      empty_hint: "Crea una diapositiva o importa una presentación exportada como PDF."
       empty_for_tag: "Aún no hay diapositivas para #%{tag}."
+      empty_for_search: "Ninguna diapositiva coincide con tu búsqueda."
+      clear_filters: "Quitar filtros"
     new:
       title: "Nueva diapositiva"
     archive:
@@ -443,6 +491,7 @@ es:
       new_service: "Nuevo servicio"
       new_song: "Nueva canción"
       new_slide: "Nueva diapositiva"
+      new: "Nuevo"
     library:
       heading: "Biblioteca"
       songs: "Canciones"

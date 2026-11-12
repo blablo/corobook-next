@@ -8,8 +8,15 @@ class SongsController < ApplicationController
     @query = params[:q]
     @page = [ params[:page].to_i, 1 ].max
     per = 25
-    @songs = church_scope(:songs).search(@query).order(:title).limit(per).offset((@page - 1) * per)
-    @has_more = church_scope(:songs).search(@query).count > @page * per
+    found = church_scope(:songs).search(@query)
+    @songs = found.order(:title).limit(per).offset((@page - 1) * per)
+    @total = found.count
+    @library_total = @query.present? ? church_scope(:songs).count : @total
+    @first_index = (@page - 1) * per + 1
+    @has_more = @total > @page * per
+    # Most recent service date each listed song appears in, for the "Last used" column.
+    @last_used = SetItem.joins(:service_set).where(song_id: @songs.map(&:id))
+                        .group(:song_id).maximum("service_sets.service_date")
   end
 
   def show
