@@ -85,11 +85,14 @@ class SpeakerViewTest < ActionDispatch::IntegrationTest
     assert_not_includes response.body, @session.speaker_token
   end
 
-  test "the operator offers the speaker link and can stop the whiteboard" do
+  test "the operator lists the speaker link beside the projector and band links, and can stop the whiteboard" do
     sign_in
     get operator_path(@session)
-    assert_select "[data-role=speaker-view]"
-    assert_select "[data-role=speaker-modal] [data-role=speaker-url]", text: /#{Regexp.escape(speaker_path(@session.speaker_token))}/
+    copy = css_select("[data-role=join-links] [data-role=speaker-join] [data-role=speaker-copy]").first
+    assert copy["data-url"].end_with?(speaker_path(@session.speaker_token))
+    assert_select "[data-role=speaker-join] a[data-role=speaker-open][target=_blank][href$='#{speaker_path(@session.speaker_token)}'] svg"
+    %w[projector musician speaker].each { |role| assert_select "[data-role=#{role}-copy]" }
+    assert_select "[data-role=speaker-modal]", count: 0
     assert_select "[data-role=whiteboard-banner][hidden] [data-role=stop-whiteboard]"
 
     Corobook::Whiteboard.new(@session).start!("board")

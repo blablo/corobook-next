@@ -1,0 +1,13 @@
+<%#
+  A follow link's QR code: phones scan it, and clicking it opens the page in a new tab (e.g. the
+  projector, to drag to the second screen). Locals: url, title, role (data-role), large (sized
+  for the Enlarge dialog).
+%>
+<% large = local_assigns[:large] %>
+<div class="tooltip" data-tip="<%= t("live.operator.open") %>">
+  <%= link_to url, target: "_blank", rel: "noopener", aria: { label: t("live.operator.open_join", name: title) },
+        class: "block rounded-box border border-base-300 bg-white transition hover:border-primary hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary #{large ? "p-3 w-[min(20rem,75vw,55dvh)] [&_svg]:size-full" : "p-2"}",
+        data: { role: role } do %>
+    <%= qr_svg(url, size: large ? 320 : 112) %>
+  <% end %>
+</div>

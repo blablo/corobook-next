@@ -87,14 +87,41 @@ class OperatorAdvanceTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "the operator view shows clickable projector/musician join URLs and QR codes" do
+  test "the operator view shows projector/musician join links to copy and QR codes" do
     get operator_path(@session)
     assert_response :success
-    # Clickable join URLs carrying the follow tokens.
-    assert_select "[data-role=projector-url][href*='/p/#{@session.projector_token}']"
-    assert_select "[data-role=musician-url][href*='/m/#{@session.musician_token}']"
-    # A QR svg per join card.
-    assert_select "[data-role=projector-join] svg"
-    assert_select "[data-role=musician-join] svg"
+    # The QR codes open the follow pages; the chain buttons copy them.
+    assert_select "a[data-role=projector-open][target=_blank][href$='/p/#{@session.projector_token}'] svg"
+    assert_select "a[data-role=musician-open][target=_blank][href$='/m/#{@session.musician_token}'] svg"
+    assert_select "[data-role=projector-copy][data-url*='/p/#{@session.projector_token}']"
+    assert_select "[data-role=musician-copy][data-url*='/m/#{@session.musician_token}']"
+    assert_select "[data-role=projector-copy][aria-label=?]", "Copy link: Projector"
+  end
+
+  test "each join code can be enlarged on its own, in a dialog over a blurred page" do
+    get operator_path(@session)
+    %w[projector musician speaker].each do |role|
+      assert_select "[data-role=#{role}-enlarge][onclick*='#{role}-code-modal']"
+      assert_select "dialog##{role}-code-modal.backdrop-blur-sm .modal-box a[data-role=#{role}-open-large] svg"
+      assert_select "dialog##{role}-code-modal [data-role=#{role}-copy-large]"
+    end
+    assert_select "#projector-code-modal [data-role=projector-copy-large][data-url*='/p/#{@session.projector_token}']"
+  end
+
+  test "the join codes stay under the header after the service moves" do
+    patch operator_advance_path(@session)
+    get operator_path(@session)
+    assert_select "details[data-role=join-links][open] [data-role=projector-copy]"
+  end
+
+  test "Connect devices stays closed for this service once closed, and the next service starts open" do
+    cookies[:join_links_closed] = @session.id.to_s
+    get operator_path(@session)
+    assert_select "details[data-role=join-links]:not([open]) summary[data-role=join-links-toggle]", text: /Connect devices/
+    assert_select "details[data-role=join-links][data-remember-open-key-value=?]", @session.id.to_s
+
+    cookies[:join_links_closed] = (@session.id + 1).to_s
+    get operator_path(@session)
+    assert_select "details[data-role=join-links][open]"
   end
 end
