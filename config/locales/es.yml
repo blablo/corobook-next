@@ -83,7 +83,8 @@ es:
         cancel: "Cancelar"
         import: "Importar"
         close: "Cerrar"
-      add_section: "Agregar sección:"
+      add_section: "Agregar sección"
+      more_sections: "Más"
       section:
         verse: "+ Estrofa"
         chorus: "+ Coro"

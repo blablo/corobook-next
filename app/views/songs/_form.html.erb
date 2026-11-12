@@ -72,21 +72,31 @@
         <button type="button" class="modal-backdrop" aria-label="<%= t('songs.form.import_modal.close') %>" data-action="song-editor#closeImport"></button>
       </dialog>
 
-      <%# add-section buttons %>
-      <div class="flex flex-wrap gap-2" data-song-editor-target="visual">
-        <div class="flex flex-wrap gap-2 mb-1">
-          <span class="text-sm text-base-content/60 self-center mr-1"><%= t("songs.form.add_section") %></span>
-          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="verse"><%= t("songs.form.section.verse") %></button>
-          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="chorus"><%= t("songs.form.section.chorus") %></button>
-          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="bridge"><%= t("songs.form.section.bridge") %></button>
-          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="verse" data-label="Pre-chorus"><%= t("songs.form.section.pre_chorus") %></button>
-          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="verse" data-label="Intro"><%= t("songs.form.section.intro") %></button>
-          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="verse" data-label="Solo"><%= t("songs.form.section.solo") %></button>
-          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="verse" data-label="Instrumental"><%= t("songs.form.section.instrumental") %></button>
-          <button type="button" class="btn btn-sm btn-outline" data-action="song-editor#addSection" data-kind="verse" data-label="Outro"><%= t("songs.form.section.outro") %></button>
+      <%# Sections, then the add-section bar beneath them (new sections are appended at the end). %>
+      <div class="flex flex-col gap-3" data-song-editor-target="visual">
+        <p class="flex items-start gap-2 text-sm text-base-content/60">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0 mt-0.5 text-info" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg>
+          <span><%= t("songs.form.chord_hint") %></span>
+        </p>
+        <div class="w-full" data-role="sections"></div>
+        <div class="flex flex-wrap items-center gap-2 rounded-box border border-dashed border-base-300 px-3 py-2">
+          <span class="text-sm font-medium mr-1"><%= t("songs.form.add_section") %></span>
+          <button type="button" class="btn btn-sm btn-soft btn-primary" data-action="song-editor#addSection" data-kind="verse"><%= t("songs.form.section.verse") %></button>
+          <button type="button" class="btn btn-sm btn-soft btn-primary" data-action="song-editor#addSection" data-kind="chorus"><%= t("songs.form.section.chorus") %></button>
+          <button type="button" class="btn btn-sm btn-soft btn-primary" data-action="song-editor#addSection" data-kind="bridge"><%= t("songs.form.section.bridge") %></button>
+          <details class="dropdown">
+            <summary class="btn btn-sm btn-ghost"><%= t("songs.form.more_sections") %>
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+            </summary>
+            <ul class="dropdown-content menu bg-base-100 rounded-box border border-base-300 shadow z-20 w-48 p-2">
+              <li><button type="button" data-action="song-editor#addSection" data-kind="verse" data-label="Pre-chorus" onclick="this.closest('details').removeAttribute('open')"><%= t("songs.form.section.pre_chorus") %></button></li>
+              <li><button type="button" data-action="song-editor#addSection" data-kind="verse" data-label="Intro" onclick="this.closest('details').removeAttribute('open')"><%= t("songs.form.section.intro") %></button></li>
+              <li><button type="button" data-action="song-editor#addSection" data-kind="verse" data-label="Solo" onclick="this.closest('details').removeAttribute('open')"><%= t("songs.form.section.solo") %></button></li>
+              <li><button type="button" data-action="song-editor#addSection" data-kind="verse" data-label="Instrumental" onclick="this.closest('details').removeAttribute('open')"><%= t("songs.form.section.instrumental") %></button></li>
+              <li><button type="button" data-action="song-editor#addSection" data-kind="verse" data-label="Outro" onclick="this.closest('details').removeAttribute('open')"><%= t("songs.form.section.outro") %></button></li>
+            </ul>
+          </details>
         </div>
-        <p class="text-xs text-base-content/50 w-full"><%= t("songs.form.chord_hint") %></p>
-        <div class="w-full mt-1" data-role="sections"></div>
       </div>
 
       <%# advanced raw ChordPro — nameless; mirrors into the canonical hidden field via the controller %>

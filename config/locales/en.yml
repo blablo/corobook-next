@@ -83,7 +83,8 @@ en:
         cancel: "Cancel"
         import: "Import"
         close: "Close"
-      add_section: "Add section:"
+      add_section: "Add section"
+      more_sections: "More"
       section:
         verse: "+ Verse"
         chorus: "+ Chorus"
