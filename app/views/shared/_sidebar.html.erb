@@ -1,14 +1,14 @@
-<aside class="w-64 min-h-full bg-base-100 border-r border-base-200 flex flex-col" data-role="sidebar">
+<aside class="w-64 min-h-full bg-base-100 border-r border-base-300 flex flex-col" data-role="sidebar">
   <%# Brand %>
-  <%= link_to root_path, class: "flex items-center gap-2 px-4 h-16 border-b border-base-200 shrink-0" do %>
+  <%= link_to root_path, class: "flex items-center gap-2 px-4 h-16 border-b border-base-300 shrink-0" do %>
     <span class="inline-grid place-items-center size-8 rounded-lg bg-primary text-primary-content font-bold">C</span>
     <span class="text-lg font-semibold">Corobook</span>
   <% end %>
 
   <%# Primary nav %>
   <nav class="flex-1 overflow-y-auto p-3">
-    <p class="px-2 pb-1 text-xs font-medium uppercase tracking-wide text-base-content/50"><%= t("nav.library_heading") %></p>
     <ul class="menu sidebar-menu w-full gap-0.5 p-0">
+      <li class="menu-title text-xs"><%= t("nav.library_heading") %></li>
       <li>
         <%= link_to root_path, class: nav_active_class("/") do %>
           <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955a1.126 1.126 0 0 1 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75"/></svg>
@@ -36,8 +36,8 @@
     </ul>
 
     <% if respond_to?(:current_user) && current_user&.admin? %>
-      <p class="px-2 pb-1 pt-4 text-xs font-medium uppercase tracking-wide text-base-content/50"><%= t("nav.admin_heading") %></p>
-      <ul class="menu sidebar-menu w-full gap-0.5 p-0">
+      <ul class="menu sidebar-menu w-full gap-0.5 p-0 mt-4">
+        <li class="menu-title text-xs"><%= t("nav.admin_heading") %></li>
         <li>
           <%= link_to team_path, class: nav_active_class("/team"), data: { role: "nav-team" } do %>
             <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>
