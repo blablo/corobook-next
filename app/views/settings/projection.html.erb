@@ -171,7 +171,7 @@
                       [ [t("settings.projection.pagination_section"), "by_section"], [t("settings.projection.pagination_lines"), "by_lines"] ],
                       {}, class: "select select-bordered w-full",
                       data: { role: "pp-pagination", action: "change->projector-preview#update" } %>
-                <p class="label text-base-content/60"><%= t("settings.projection.pagination_help") %></p>
+                <p class="label text-base-content/60 whitespace-normal"><%= t("settings.projection.pagination_help") %></p>
               </fieldset>
 
               <fieldset class="fieldset" data-role="pp-lines-field">
@@ -179,7 +179,7 @@
                 <%= f.number_field :projector_lines_per_slide, min: 1, max: 20,
                       class: "input input-bordered w-full",
                       data: { role: "pp-lines", action: "input->projector-preview#update" } %>
-                <p class="label text-base-content/60"><%= t("settings.projection.lines_per_slide_help") %></p>
+                <p class="label text-base-content/60 whitespace-normal"><%= t("settings.projection.lines_per_slide_help") %></p>
               </fieldset>
 
               <label class="fieldset-label cursor-pointer gap-3 sm:col-span-2">
