@@ -8,17 +8,33 @@ export default class extends Controller {
   static values = { text: String, done: String }
 
   async copy() {
-    try {
-      await navigator.clipboard.writeText(this.textValue)
-    } catch {
-      return // no clipboard access (e.g. not https): the link is on screen to copy by hand
-    }
+    if (!(await this.write(this.textValue))) return
     if (!this.hasLabelTarget) return
     const label = this.labelTarget
     this.original ??= label.textContent
     label.textContent = this.doneValue
     clearTimeout(this.timer)
     this.timer = setTimeout(() => { label.textContent = this.original }, 1500)
+  }
+
+  // The async clipboard API needs a secure page (https or localhost). Elsewhere, e.g. the dev
+  // server opened by its LAN address, fall back to the old select-and-copy.
+  async write(text) {
+    try {
+      await navigator.clipboard.writeText(text)
+      return true
+    } catch {
+      const area = document.createElement("textarea")
+      area.value = text
+      area.style.position = "fixed"
+      area.style.opacity = "0"
+      document.body.appendChild(area)
+      area.select()
+      let ok = false
+      try { ok = document.execCommand("copy") } catch { ok = false }
+      area.remove()
+      return ok
+    }
   }
 
   disconnect() { clearTimeout(this.timer) }

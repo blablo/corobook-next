@@ -87,12 +87,12 @@ class OperatorAdvanceTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "the operator view shows clickable projector/musician join URLs and QR codes" do
+  test "the operator view shows projector/musician join links to copy and QR codes" do
     get operator_path(@session)
     assert_response :success
-    # Clickable join URLs carrying the follow tokens.
-    assert_select "[data-role=projector-url][href*='/p/#{@session.projector_token}']"
-    assert_select "[data-role=musician-url][href*='/m/#{@session.musician_token}']"
+    # Copy link buttons carrying the follow tokens.
+    assert_select "[data-role=projector-copy][data-url*='/p/#{@session.projector_token}']"
+    assert_select "[data-role=musician-copy][data-url*='/m/#{@session.musician_token}']"
     # A QR svg per join card.
     assert_select "[data-role=projector-join] svg"
     assert_select "[data-role=musician-join] svg"

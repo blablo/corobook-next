@@ -88,10 +88,11 @@ class SpeakerViewTest < ActionDispatch::IntegrationTest
   test "the operator lists the speaker link beside the projector and band links, and can stop the whiteboard" do
     sign_in
     get operator_path(@session)
-    assert_select "[data-role=join-links] [data-role=speaker-join] [data-role=speaker-url]",
-                  text: /#{Regexp.escape(speaker_path(@session.speaker_token))}/
+    copy = css_select("[data-role=join-links] [data-role=speaker-join] [data-role=speaker-copy]").first
+    assert copy["data-url"].end_with?(speaker_path(@session.speaker_token))
     assert_select "[data-role=speaker-join] svg"
     %w[projector musician speaker].each { |role| assert_select "[data-role=#{role}-copy]" }
+    assert_select "[data-role=join-links] a", count: 0, message: "the links are copied, not shown"
     assert_select "[data-role=speaker-modal]", count: 0
     assert_select "[data-role=whiteboard-banner][hidden] [data-role=stop-whiteboard]"
 
