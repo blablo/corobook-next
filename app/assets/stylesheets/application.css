@@ -202,10 +202,10 @@
 .musician-topbar {
   position: sticky; top: 0; z-index: 30;
   display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-  padding: 0.6rem 1.25rem;
+  height: 3.5rem; padding: 0 1.25rem; box-sizing: border-box;
   background: var(--color-base-100); border-bottom: 1px solid var(--color-base-300);
 }
-.musician-setname { font-weight: 600; font-size: 1.05rem; }
+.musician-setname { font-weight: 600; font-size: 1rem; line-height: 1.25; }
 .musician-key-chooser { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
 
 /* Above the fold: the sticky Now/Next header that follows the projector. */
@@ -216,7 +216,10 @@
   border-bottom: 1px solid var(--color-base-300);
   box-shadow: 0 4px 12px -8px color-mix(in oklab, var(--color-base-content) 35%, transparent);
 }
-.musician-cue { margin-bottom: 0.5rem; font-weight: 600; }
+.musician-cue { font-weight: 600; flex-shrink: 0; }
+/* "NOW  Way Maker · Verse 1": the band's head line, inside the broadcast frame so it follows. */
+.musician-now-head { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; min-width: 0; }
+.musician-now-summary { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .musician-now #live-frame {
   display: block; padding: 0; text-align: left; align-items: stretch; /* undo stage centering */
   background: transparent; color: var(--color-base-content); /* light lead sheet, not the dark stage */
@@ -231,10 +234,8 @@
 }
 .musician-now [data-role=key-badge] { margin: 0 0 0.5rem 0.4rem; }
 .musician-next { margin-top: 0.75rem; padding-top: 0.6rem; border-top: 1px dashed var(--color-base-300); display: flex; align-items: baseline; gap: 0.5rem; }
-.musician-next .musician-cue { margin-bottom: 0; }
-.musician-next-body { font-size: 0.95rem; min-width: 0; }
+.musician-next-body { font-size: 0.95rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .musician-peek-label { font-weight: 600; margin-right: 0.4rem; }
-.musician-peek-title { font-weight: 600; }
 .musician-peek-lyric { color: color-mix(in oklab, var(--color-base-content) 60%, transparent); }
 
 /* The whole-set chart. */
@@ -243,6 +244,16 @@
   padding: 1rem 1.25rem; margin-bottom: 0.75rem;
   background: var(--color-base-100); border: 1px solid var(--color-base-300); border-radius: var(--radius-box);
   scroll-margin-top: 8rem; /* clear the sticky Now/Next header when scrolled to */
+}
+/* Phones: the band is just the Now and Next lines, so it never covers half the screen. The
+   highlighted row in the chart carries the chords, scrolled to just below the band. */
+@media (max-width: 47.99rem) {
+  .musician-nowbar { padding: 0.6rem 1rem 0.7rem; margin-bottom: 1rem; }
+  .musician-now-body { display: none; }
+  .musician-now-head { margin-bottom: 0; }
+  .musician-next { margin-top: 0.5rem; padding-top: 0.5rem; }
+  .musician-setlist { padding: 0 0.75rem; }
+  .musician-row { scroll-margin-top: 9.5rem; padding: 0.9rem 1rem; }
 }
 /* The row the projector is on: an on-air left edge, like the operator's Now marker. */
 .musician-row.is-current { border-color: var(--color-error); box-shadow: inset 4px 0 0 var(--color-error); }

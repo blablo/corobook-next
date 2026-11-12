@@ -1,28 +1,49 @@
 <%#
   Musician live frame. Locals: session, target_key, semitones, capo. Renders the current item at
   THIS follower's chosen key (server-side, §6.3). Carries position_version for the guard.
+  The whole frame (head line, chart and the Next peek) is replaced by the operator broadcast, so
+  everything in it follows the projector. On a phone only the head line and Next show (CSS); the
+  highlighted row in the chart below carries the chords.
 %>
 <% frame = Corobook::LiveFrame.new(session) %>
 <div id="live-frame" data-controller="follower" data-follower-version-value="<%= session.position_version %>"
      data-role="musician-frame"
      data-item-id="<%= session.current_set_item_id %>" data-section-index="<%= session.current_section_index %>">
-  <% if frame.title_slide? %>
-    <div class="musician-chart-title" data-role="chart-title">
-      <h2><%= frame.item.title %></h2>
-      <% credits = [ frame.item.author, frame.item.copyright_line, (frame.item.ccli_song_number.present? ? "CCLI ##{frame.item.ccli_song_number}" : nil) ].compact %>
-      <% if credits.any? %>
-        <div class="musician-chart-credits"><% credits.each do |c| %><div><%= c %></div><% end %></div>
+  <div class="musician-now-head">
+    <span class="musician-cue badge badge-error badge-sm"><%= t("live.musician.now") %></span>
+    <span class="musician-now-summary" data-role="now-summary"><%= operator_stop_label(session) %></span>
+  </div>
+
+  <div class="musician-now-body">
+    <% if frame.title_slide? %>
+      <div class="musician-chart-title" data-role="chart-title">
+        <h2><%= frame.item.title %></h2>
+        <% credits = [ frame.item.author, frame.item.copyright_line, (frame.item.ccli_song_number.present? ? "CCLI ##{frame.item.ccli_song_number}" : nil) ].compact %>
+        <% if credits.any? %>
+          <div class="musician-chart-credits"><% credits.each do |c| %><div><%= c %></div><% end %></div>
+        <% end %>
+      </div>
+    <% elsif frame.song? && frame.current_section %>
+      <% renderer = Corobook::MusicianRender.new(frame.item, target_key: target_key, semitones: semitones.to_i, follower_capo: capo) %>
+      <% transposed, _capo = renderer.call %>
+      <% section = frame.current_section_in(transposed.to_h["sections"]) %>
+      <% if renderer.displayed_key %>
+        <span data-role="key-badge"><%= t("live.frame.key_badge", key: renderer.displayed_key) %></span>
       <% end %>
-    </div>
-  <% elsif frame.song? && frame.current_section %>
-    <% renderer = Corobook::MusicianRender.new(frame.item, target_key: target_key, semitones: semitones.to_i, follower_capo: capo) %>
-    <% transposed, _capo = renderer.call %>
-    <% section = frame.current_section_in(transposed.to_h["sections"]) %>
-    <% if renderer.displayed_key %>
-      <span data-role="key-badge"><%= t("live.frame.key_badge", key: renderer.displayed_key) %></span>
+      <%= render "songs/musician_chart_section", section: section, projected: true if section %>
+    <% elsif frame.text_slide? %>
+      <%= render "text_slides/musician_slide", slide: frame.item, page: session.current_section_index %>
     <% end %>
-    <%= render "songs/musician_chart_section", section: section, projected: true if section %>
-  <% elsif frame.text_slide? %>
-    <%= render "text_slides/musician_slide", slide: frame.item, page: session.current_section_index %>
+  </div>
+
+  <% next_label, next_lyric = musician_next_peek(session) %>
+  <% if next_label %>
+    <div class="musician-next" data-role="next-peek">
+      <span class="musician-cue badge badge-ghost badge-sm"><%= t("live.musician.next") %></span>
+      <div class="musician-next-body">
+        <span class="musician-peek-label"><%= next_label %></span>
+        <% if next_lyric %><span class="musician-peek-lyric"><%= next_lyric %></span><% end %>
+      </div>
+    </div>
   <% end %>
 </div>

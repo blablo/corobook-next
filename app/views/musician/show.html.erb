@@ -41,21 +41,13 @@
       <span><%= @service_set.service_date ? t("live.musician.not_live_dated", date: @service_set.service_date.strftime(t("live.musician.date_format"))) : t("live.musician.not_live") %></span>
     </div>
   <% else %>
-  <%# ── Above the fold: what the projector is on NOW + a peek at NEXT ──── %>
+  <%# ── Above the fold: what the projector is on NOW + a peek at NEXT ────
+      Both live inside the frame the operator broadcast replaces, so they follow the projector. %>
   <div class="musician-nowbar" data-role="now-bar">
     <div class="musician-now">
-      <span class="musician-cue badge badge-error badge-sm"><%= t("live.musician.now") %></span>
-      <%# The live frame — re-rendered by the operator broadcast so it follows the projector. %>
       <%= render "live/musician_frame", session: @session,
             target_key: @target_key, semitones: @semitones, capo: @capo %>
     </div>
-    <% next_row = musician_next_row(@set_rows, @session) %>
-    <% if next_row %>
-      <div class="musician-next" data-role="next-peek">
-        <span class="musician-cue badge badge-ghost badge-sm"><%= t("live.musician.next") %></span>
-        <div class="musician-next-body"><%= musician_row_peek(next_row) %></div>
-      </div>
-    <% end %>
   </div>
   <% end %>
 

@@ -52,33 +52,21 @@ module SongsHelper
     row.item_id == session.current_set_item_id && row.section_index == session.current_section_index
   end
 
-  # The NEXT projector stop after the current position (what Next will land on), resolved as a
-  # MusicianSetView row so the "sneak peek" header matches what the operator will advance to.
-  # Returns nil at the end of the set.
-  def musician_next_row(rows, session)
-    position = Corobook::LivePosition.new(session.service_set)
-    nxt = position.next_stop(session.current_set_item_id, session.current_section_index)
-    return nil unless nxt
+  # [label, first lyric] for the stop after the live one ("Way Maker · Chorus", "You are here…"),
+  # or nil at the end of the set. Built from the session alone, so the broadcast frame can carry
+  # it and the peek follows the projector.
+  def musician_next_peek(session)
+    nxt = Corobook::LivePosition.new(session.service_set)
+            .next_stop(session.current_set_item_id, session.current_section_index, session.current_chunk_index)
+    return unless nxt
 
-    rows.find { |r| r.item_id == nxt.set_item_id && r.section_index == nxt.section_index }
-  end
-
-  # A compact one/two-line preview of a row for the "Next" peek: the section label + first lyric
-  # line for a song, the title for a title slide, or the slide title for a slide.
-  def musician_row_peek(row)
-    case row.kind
-    when :title
-      content_tag(:span, row.song.title, class: "musician-peek-title")
-    when :slide
-      content_tag(:span, row.slide.title, class: "musician-peek-title")
-    when :section
-      label = row.section["label"].presence
-      first_line = (row.section["lines"] || []).find { |l| !l["annotation"] }
-      text = (first_line&.dig("segments") || []).map { |s| s["text"] }.join.strip
-      safe_join([
-        (content_tag(:span, label, class: "musician-peek-label") if label),
-        (content_tag(:span, text.truncate(60), class: "musician-peek-lyric") if text.present?)
-      ].compact, " ")
+    peek = session.dup.tap do |s|
+      s.assign_attributes(current_set_item_id: nxt.set_item_id, current_section_index: nxt.section_index,
+                          current_chunk_index: nxt.chunk_index)
+      s.readonly!
     end
+    frame = Corobook::LiveFrame.new(peek)
+    lyric = frame.current_section_plain_lines.first.to_s.strip if frame.song? && !frame.title_slide? && frame.current_section
+    [ operator_stop_label(peek), lyric.presence&.truncate(60) ]
   end
 end
