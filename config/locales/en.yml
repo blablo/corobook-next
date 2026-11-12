@@ -689,6 +689,8 @@ en:
       slide: "Drawing on the projector"
       blanked: "The operator blanked the screen"
       ended: "This service has ended"
+      connecting: "Connecting…"
+      unavailable: "Can't connect to the projector. Reload this page."
       stop_board: "■ Stop · back to slide"
       stop_slide: "■ Stop drawing"
       hint_idle: "The service keeps its place. Stop and the projector is back on this slide."

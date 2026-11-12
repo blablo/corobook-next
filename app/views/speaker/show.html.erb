@@ -11,7 +11,7 @@
   <header class="flex flex-wrap items-center justify-between gap-2">
     <div class="min-w-0 space-y-1">
       <div class="text-xs text-base-content/60 truncate"><%= t("live.speaker.title") %> · <%= @session.service_set.name %></div>
-      <span class="badge badge-soft badge-ghost" data-whiteboard-target="status" data-role="speaker-status"><%= t("live.whiteboard.idle") %></span>
+      <span class="badge badge-soft badge-ghost" data-whiteboard-target="status" data-role="speaker-status"><%= t("live.whiteboard.connecting") %></span>
     </div>
     <button type="button" class="btn btn-error" hidden data-whiteboard-target="stop" data-action="whiteboard#stopDrawing"
             data-role="speaker-stop"><%= t("live.whiteboard.stop_board") %></button>
@@ -47,12 +47,12 @@
   </div>
 
   <div class="grid grid-cols-2 gap-3" data-whiteboard-target="start">
-    <button type="button" class="btn btn-primary h-auto min-h-20 flex-col gap-0 py-3" data-role="start-board"
+    <button type="button" class="btn btn-primary h-auto min-h-20 flex-col gap-0 py-3" data-role="start-board" disabled
             data-action="whiteboard#start" data-whiteboard-mode-param="board">
       <span class="text-lg">▢ <%= t("live.speaker.whiteboard") %></span>
       <span class="text-xs font-normal opacity-80 whitespace-normal"><%= t("live.speaker.whiteboard_hint") %></span>
     </button>
-    <button type="button" class="btn btn-soft btn-primary h-auto min-h-20 flex-col gap-0 py-3" data-role="start-slide"
+    <button type="button" class="btn btn-soft btn-primary h-auto min-h-20 flex-col gap-0 py-3" data-role="start-slide" disabled
             data-action="whiteboard#start" data-whiteboard-mode-param="slide">
       <span class="text-lg">✎ <%= t("live.speaker.draw_on_slide") %></span>
       <span class="text-xs font-normal opacity-80 whitespace-normal"><%= t("live.speaker.draw_on_slide_hint") %></span>

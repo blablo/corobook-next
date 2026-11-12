@@ -1,6 +1,6 @@
 module WhiteboardHelper
-  LABELS = %w[idle board slide blanked ended stop_board stop_slide hint_idle hint_board hint_slide
-              banner_board banner_slide clear_confirm].freeze
+  LABELS = %w[idle board slide blanked ended connecting unavailable stop_board stop_slide hint_idle
+              hint_board hint_slide banner_board banner_slide clear_confirm].freeze
 
   # The texts whiteboard_controller.js switches between, in the page's language.
   def whiteboard_labels = LABELS.index_with { |key| t("live.whiteboard.#{key}") }.to_json

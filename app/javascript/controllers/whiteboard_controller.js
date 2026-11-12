@@ -27,6 +27,8 @@ export default class extends Controller {
     this.dark = false
     this.blanked = false
     this.ended = false
+    this.online = false   // subscribed; until then the speaker's buttons can't do anything
+    this.refused = false  // the server turned the subscription down
     this.stopKey = ""
     this.board = []
     this.slide = []
@@ -41,7 +43,12 @@ export default class extends Controller {
     const channel = this.speakerValue
       ? { channel: "WhiteboardChannel", speaker: this.speakerValue }
       : { channel: "WhiteboardChannel", viewer: this.viewerValue }
-    cable.subscribeTo(channel, { received: (message) => this.receive(message) }).then((sub) => {
+    cable.subscribeTo(channel, {
+      received: (message) => this.receive(message),
+      connected: () => { this.online = true; this.render() },
+      disconnected: () => { this.online = false; this.render() },
+      rejected: () => { this.refused = true; this.render() },
+    }).then((sub) => {
       if (this.isDisconnected) sub.unsubscribe()
       else this.sub = sub
     })
@@ -190,11 +197,15 @@ export default class extends Controller {
     }
     const L = this.labelsValue
     if (this.hasStatusTarget) {
-      this.statusTarget.textContent = this.ended ? L.ended : on ? (this.blanked ? L.blanked : L[this.mode]) : L.idle
-      this.statusTarget.classList.toggle("badge-error", on)
-      this.statusTarget.classList.toggle("badge-ghost", !on)
+      this.statusTarget.textContent = this.ended ? L.ended : this.refused ? L.unavailable : !this.online ? L.connecting
+        : on ? (this.blanked ? L.blanked : L[this.mode]) : L.idle
+      this.statusTarget.classList.toggle("badge-error", on || this.refused)
+      this.statusTarget.classList.toggle("badge-ghost", !on && !this.refused)
     }
-    if (this.hasStartTarget) this.startTarget.hidden = on || this.ended
+    if (this.hasStartTarget) {
+      this.startTarget.hidden = on || this.ended
+      this.startTarget.querySelectorAll("button").forEach(b => { b.disabled = !this.online })
+    }
     if (this.hasToolsTarget) this.toolsTarget.hidden = !on
     if (this.hasStopTarget) {
       this.stopTarget.hidden = !on

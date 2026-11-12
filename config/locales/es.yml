@@ -689,6 +689,8 @@ es:
       slide: "Dibujando en el proyector"
       blanked: "El operador oscureció la pantalla"
       ended: "Este servicio terminó"
+      connecting: "Conectando…"
+      unavailable: "No se puede conectar con el proyector. Recarga la página."
       stop_board: "■ Quitar · volver a la diapositiva"
       stop_slide: "■ Dejar de dibujar"
       hint_idle: "El servicio no pierde su lugar. Al quitarla, el proyector vuelve a esta diapositiva."
