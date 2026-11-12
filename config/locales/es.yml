@@ -51,6 +51,13 @@ es:
       edit: "Editar"
       key: "Tono"
       capo: "Cejilla"
+      details: "Detalles"
+      author: "Autor"
+      original_key: "Tono original"
+      ccli_number: "Número de canción CCLI"
+      copyright: "Derechos de autor"
+      last_used: "Último uso"
+      flow: "Orden de la canción"
       autoscroll:
         group: "Desplazamiento automático"
         play: "Iniciar desplazamiento automático"

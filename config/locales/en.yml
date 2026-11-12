@@ -51,6 +51,13 @@ en:
       edit: "Edit"
       key: "Key"
       capo: "Capo"
+      details: "Details"
+      author: "Author"
+      original_key: "Original key"
+      ccli_number: "CCLI song number"
+      copyright: "Copyright"
+      last_used: "Last used"
+      flow: "Song flow"
       autoscroll:
         group: "Auto-scroll"
         play: "Play auto-scroll"
