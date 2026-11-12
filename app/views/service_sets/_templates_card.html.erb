@@ -1,0 +1,45 @@
+<%#
+  The church's templates, beside the services list (below it on narrow screens). Each row opens
+  the template editor; Use starts a new service from it. Locals: templates.
+%>
+<aside class="card card-border bg-base-100 lg:sticky lg:top-20" data-role="templates-card">
+  <div class="card-body p-4 gap-1">
+    <h2 class="card-title text-base mb-1"><%= t("services.templates_card.title") %></h2>
+
+    <% if templates.empty? %>
+      <div class="rounded-box border border-dashed border-base-300 p-3 space-y-2" data-role="templates-empty">
+        <p class="text-xs text-base-content/70"><%= t("services.templates_card.empty") %></p>
+        <%= link_to t("services.templates_card.new"), new_service_set_path(template: 1),
+              class: "btn btn-soft btn-primary btn-sm w-full", data: { role: "new-template" } %>
+      </div>
+    <% else %>
+      <ul class="-mx-2">
+        <% templates.each do |template| %>
+          <li class="relative flex items-center gap-2 rounded-box px-2 py-2 hover:bg-base-200" data-role="template-row">
+            <div class="grow min-w-0">
+              <div class="text-sm">
+                <%# The link's ::after covers the row, so any spot but Use opens the template. %>
+                <%= link_to template.name, service_set_path(template),
+                      class: "font-medium break-words after:absolute after:inset-0", data: { role: "template-link" } %>
+                <% if template.id == current_church.default_template_id %>
+                  <span class="badge badge-soft badge-primary badge-xs align-middle" data-role="default-badge"><%= t("services.template.default") %></span>
+                <% end %>
+              </div>
+              <div class="text-xs text-base-content/60 truncate">
+                <%= template.set_items.empty? ? t("services.index.no_items") : template_summary(template, items: false) %>
+              </div>
+            </div>
+            <%= link_to t("services.templates_card.use"), new_service_set_path(from_template_id: template.id),
+                  class: "btn btn-soft btn-primary btn-xs relative z-10 shrink-0",
+                  title: t("services.templates_card.use_title", name: template.name),
+                  data: { role: "use-template" } %>
+          </li>
+        <% end %>
+      </ul>
+      <div class="divider my-1"></div>
+      <%= link_to t("services.templates_card.new"), new_service_set_path(template: 1),
+            class: "btn btn-ghost btn-sm justify-start", data: { role: "new-template" } %>
+      <p class="text-xs text-base-content/60 mt-1"><%= t("services.templates_card.help") %></p>
+    <% end %>
+  </div>
+</aside>

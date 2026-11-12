@@ -151,10 +151,6 @@ es:
       no_past: "Aún no hay servicios pasados."
       older: "Anteriores"
       newer: "Más recientes"
-      new_template: "Nueva plantilla"
-      templates: "Plantillas"
-      no_templates: "Aún no hay plantillas."
-      no_templates_hint: "Una plantilla guarda el orden habitual de tu iglesia: las canciones y diapositivas fijas, y espacios para llenar cada semana."
       fill_slots:
         one: "Llenar %{count} espacio"
         other: "Llenar %{count} espacios"
@@ -195,6 +191,13 @@ es:
     status:
       live: "En vivo"
       empty: "Vacío"
+    templates_card:
+      title: "Plantillas"
+      use: "Usar"
+      use_title: "Nuevo servicio con %{name}"
+      new: "+ Nueva plantilla"
+      help: "Usar crea un servicio con las canciones y diapositivas de la plantilla, y espacios vacíos para llenar. Haz clic en un nombre para editarla."
+      empty: "Guarda una vez tu orden habitual: las canciones y diapositivas que se repiten, y espacios para las que cambian cada semana."
     launch:
       nothing_to_show: "Aún no hay nada que mostrar. Agrega una canción o diapositiva, o llena un espacio."
     template:
@@ -206,7 +209,6 @@ es:
       delete: "Eliminar"
       delete_confirm: "¿Eliminar la plantilla %{name}? Los servicios creados con ella se conservan."
       new_service_from: "Nuevo servicio con esta plantilla"
-      new_service: "Nuevo servicio"
       song_slots:
         one: "%{count} espacio de canción"
         other: "%{count} espacios de canción"
