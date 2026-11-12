@@ -1,9 +1,9 @@
 <%#
   Chain icon that copies a follow link. While "Copied" shows, the tooltip opens in green and the
   chain becomes a check (clipboard sets data-copied and the copied classes).
-  Locals: url, title, role (data-role).
+  Locals: url, title, role (data-role), tip (extra tooltip classes, e.g. placement).
 %>
-<div class="tooltip group" data-tip="<%= t("live.operator.copy_link") %>"
+<div class="tooltip group <%= local_assigns[:tip] %>" data-tip="<%= t("live.operator.copy_link") %>"
      data-controller="clipboard" data-clipboard-text-value="<%= url %>" data-clipboard-done-value="<%= t("live.operator.copied") %>"
      data-clipboard-copied-class="tooltip-open tooltip-success">
   <button type="button" class="btn btn-ghost btn-sm btn-square text-base-content/70 hover:text-base-content"

@@ -1,6 +1,6 @@
 <%#
-  One device's join tile: its name, the QR code (scan it, or click to open the page), Copy link
-  and Enlarge on either side of it. Enlarge shows the code large in a dialog over the blurred
+  One device's join tile: its name, the QR code (scan it, or click to open the page), and Copy
+  link and Enlarge beside it. Enlarge shows the code large in a dialog over the blurred
   page, so a phone can't pick up one of the others.
   Locals: url, title, role (data-role prefix), icon (OperatorHelper::ICON_PATHS key).
 %>
@@ -9,19 +9,17 @@
     <span class="inline-grid place-items-center size-7 rounded-box bg-base-100 text-primary"><%= operator_icon(icon) %></span>
     <span class="font-semibold"><%= title %></span>
   </div>
-  <%# Copy link left of the code and Enlarge right of it, apart so neither is hit by mistake. A
-      tile is too narrow for that below xl, so there they sit under the code's two corners. %>
-  <div class="mx-auto w-fit grid grid-cols-2 gap-1.5 xl:grid-cols-[auto_auto_auto] xl:items-center xl:gap-3">
-    <div class="col-span-2 xl:col-span-1 xl:col-start-2 xl:row-start-1">
-      <%= render "join_code", url: url, title: title, role: "#{role}-open" %>
-    </div>
-    <div class="justify-self-start xl:col-start-1 xl:row-start-1">
-      <%= render "copy_link_button", url: url, title: title, role: "#{role}-copy" %>
-    </div>
-    <div class="tooltip justify-self-end xl:col-start-3 xl:row-start-1" data-tip="<%= t("live.operator.enlarge") %>">
-      <button type="button" class="btn btn-ghost btn-sm btn-square text-base-content/70 hover:text-base-content"
-              aria-label="<%= t("live.operator.enlarge_join", name: title) %>" data-role="<%= role %>-enlarge"
-              onclick="document.getElementById('<%= role %>-code-modal').showModal()"><%= operator_icon(:arrows_out) %></button>
+  <%# Copy link and Enlarge stacked just right of the code, which stays centred under the name.
+      A tile is too narrow for that below xl, so there they sit side by side under the code. %>
+  <div class="relative mx-auto w-fit">
+    <%= render "join_code", url: url, title: title, role: "#{role}-open" %>
+    <div class="mt-1.5 flex justify-center gap-1 xl:mt-0 xl:absolute xl:left-full xl:top-1/2 xl:-translate-y-1/2 xl:ml-2 xl:flex-col">
+      <%= render "copy_link_button", url: url, title: title, role: "#{role}-copy", tip: "xl:tooltip-right" %>
+      <div class="tooltip xl:tooltip-right" data-tip="<%= t("live.operator.enlarge") %>">
+        <button type="button" class="btn btn-ghost btn-sm btn-square text-base-content/70 hover:text-base-content"
+                aria-label="<%= t("live.operator.enlarge_join", name: title) %>" data-role="<%= role %>-enlarge"
+                onclick="document.getElementById('<%= role %>-code-modal').showModal()"><%= operator_icon(:arrows_out) %></button>
+      </div>
     </div>
   </div>
 
