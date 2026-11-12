@@ -159,20 +159,20 @@
     <section class="card card-border bg-base-100">
       <div class="card-body">
         <%= render "join_link", url: follow_url(:projector, @session.projector_token), role: "projector",
-              title: t("live.operator.projector"), hint: t("live.operator.projector_hint") %>
+              title: t("live.operator.projector") %>
       </div>
     </section>
     <section class="card card-border bg-base-100">
       <div class="card-body">
         <%= render "join_link", url: follow_url(:musician, @session.musician_token), role: "musician",
-              title: t("live.operator.musician"), hint: t("live.operator.musician_hint") %>
+              title: t("live.operator.musician") %>
       </div>
     </section>
     <% if @session.active? %>
       <section class="card card-border bg-base-100">
         <div class="card-body">
           <%= render "join_link", url: follow_url(:speaker, @session.speaker_token!), role: "speaker",
-                title: t("live.operator.speaker_view"), hint: t("live.operator.speaker_hint") %>
+                title: t("live.operator.speaker_view") %>
         </div>
       </section>
     <% end %>
