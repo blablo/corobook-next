@@ -5,9 +5,9 @@
 # church's association.
 class HeroSet
   def self.for(church)
-    upcoming = church.service_sets
+    upcoming = church.service_sets.services
                  .where("service_date >= ?", Date.current)
                  .order(:service_date).first
-    upcoming || church.service_sets.order(Arel.sql("service_date DESC NULLS LAST")).first
+    upcoming || church.service_sets.services.order(Arel.sql("service_date DESC NULLS LAST")).first
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_12_170000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_12_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -66,6 +66,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_170000) do
     t.integer "projector_bg_gradient_angle", default: 160, null: false
     t.integer "projector_font_size"
     t.integer "projector_min_font_size"
+    t.bigint "default_template_id"
+    t.index ["default_template_id"], name: "index_churches_on_default_template_id"
     t.index ["subdomain"], name: "index_churches_on_subdomain", unique: true, where: "(subdomain IS NOT NULL)"
     t.check_constraint "projector_bg_gradient_angle >= 0 AND projector_bg_gradient_angle <= 360", name: "churches_projector_bg_gradient_angle_check"
     t.check_constraint "projector_font_size IS NULL OR projector_font_size >= 2 AND projector_font_size <= 30", name: "churches_projector_font_size_check"
@@ -127,7 +129,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_170000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "musician_token"
+    t.boolean "template", default: false, null: false
     t.index ["church_id", "service_date"], name: "index_service_sets_on_church_id_and_service_date"
+    t.index ["church_id", "template"], name: "index_service_sets_on_church_id_and_template"
     t.index ["musician_token"], name: "index_service_sets_on_musician_token", unique: true
   end
 
@@ -139,11 +143,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_170000) do
     t.bigint "text_slide_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "slot_label"
+    t.string "slot_tag"
     t.index ["service_set_id", "position"], name: "index_set_items_on_service_set_id_and_position", unique: true
     t.index ["service_set_id"], name: "index_set_items_on_service_set_id"
     t.index ["song_id"], name: "index_set_items_on_song_id"
     t.index ["text_slide_id"], name: "index_set_items_on_text_slide_id"
-    t.check_constraint "((song_id IS NOT NULL)::integer + (text_slide_id IS NOT NULL)::integer) = 1", name: "set_items_exactly_one_item_check"
+    t.check_constraint "((song_id IS NOT NULL)::integer + (text_slide_id IS NOT NULL)::integer) = 1 OR slot_label IS NOT NULL AND song_id IS NULL AND text_slide_id IS NULL", name: "set_items_item_or_slot_check"
     t.check_constraint "\"position\" >= 0", name: "set_items_position_check"
     t.check_constraint "item_type::text = ANY (ARRAY['song'::character varying::text, 'text_slide'::character varying::text])", name: "set_items_item_type_check"
   end
@@ -244,6 +250,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_170000) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "churches", "service_sets", column: "default_template_id", on_delete: :nullify
   add_foreign_key "invitations", "churches"
   add_foreign_key "invitations", "users", column: "invited_by_id"
   add_foreign_key "live_sessions", "churches"

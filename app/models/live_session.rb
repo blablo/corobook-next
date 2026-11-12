@@ -18,7 +18,7 @@ class LiveSession < ApplicationRecord
   # authoritative live state (design §6.1); Cable is only transport. Refuses a second concurrent
   # launch for a church (one active session only).
   def self.launch(service_set)
-    first_item = service_set.set_items.order(:position).first
+    first_item = service_set.set_items.filled.order(:position).first
     session = create!(
       church: service_set.church,
       service_set: service_set,

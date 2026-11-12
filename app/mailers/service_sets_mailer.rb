@@ -8,7 +8,7 @@ class ServiceSetsMailer < ApplicationMailer
     @service_set = service_set
     @church      = service_set.church
     @sender      = sender
-    @items       = service_set.ordered_items.to_a
+    @items       = service_set.ordered_items.filled.to_a
     @url         = preview_service_set_url(service_set)
     @musician_url = service_musician_url(token: service_set.musician_token)
 

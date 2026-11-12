@@ -14,7 +14,8 @@ module Corobook
 
     def initialize(service_set)
       @service_set = service_set
-      @items = service_set.set_items.order(:position).includes(:song, :text_slide).to_a
+      # Empty template slots are not stops: Next/Back skip them until someone fills them.
+      @items = service_set.set_items.filled.order(:position).includes(:song, :text_slide).to_a
       @chunker = Corobook::SlideChunker.new(service_set.church)
     end
 

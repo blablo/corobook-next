@@ -86,6 +86,17 @@ class TextSlide < ApplicationRecord
   def archive! = update!(archived_at: Time.current)
   def unarchive! = update!(archived_at: nil)
 
+  # A saved copy of this inline slide owned by another set (a service made from a template).
+  # Attachments point at the same stored files rather than copying them.
+  def copy_for(service_set)
+    dup.tap do |copy|
+      copy.set_id = service_set.id
+      copy.background_image.attach(background_image.blob) if background_image.attached?
+      page_images_attachments.sort_by(&:id).each { |image| copy.page_images.attach(image.blob) }
+      copy.save!
+    end
+  end
+
   # Slides carrying a given tag (case-insensitive; tags are stored lower-cased).
   scope :tagged, ->(tag) { where("tags @> ?", [ tag.to_s.strip.downcase ].to_json) }
 

@@ -22,7 +22,7 @@ module Corobook
                      :displayed_key, :projected, :page, keyword_init: true)
 
     def initialize(service_set, target_key: nil, semitones: 0, capo: nil)
-      @items = service_set.set_items.order(:position).includes(:song, :text_slide).to_a
+      @items = service_set.set_items.filled.order(:position).includes(:song, :text_slide).to_a
       @target_key = target_key
       @semitones = semitones.to_i
       @capo = capo

@@ -15,12 +15,12 @@ class HomeController < ApplicationController
     @active_session = church_scope(:live_sessions).find_by(status: "active")
     # While a service is live the hero is that service, so Resume always matches what is shown.
     @hero_set = @active_session&.service_set || HeroSet.for(Current.church)
-    @recent_sets = church_scope(:service_sets).includes(:set_items)
+    @recent_sets = church_scope(:service_sets).services.includes(:set_items)
       .order(Arel.sql("service_date DESC NULLS LAST, name ASC")).limit(5)
     @counts = {
       songs: church_scope(:songs).count,
       slides: church_scope(:text_slides).library.count,
-      sets: church_scope(:service_sets).count
+      sets: church_scope(:service_sets).services.count
     }
     render "home/show", layout: "shell"
   end
