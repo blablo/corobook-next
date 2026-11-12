@@ -1,7 +1,15 @@
 <%= turbo_stream_from [ @session, :projector ] %>
 <div class="projector-root" data-role="projector-root"
-     data-controller="projector-clicker"
+     data-controller="projector-clicker whiteboard"
      data-projector-clicker-advance-url-value="<%= projector_advance_path(@session.projector_token) %>"
-     data-projector-clicker-back-url-value="<%= projector_back_path(@session.projector_token) %>">
+     data-projector-clicker-back-url-value="<%= projector_back_path(@session.projector_token) %>"
+     data-whiteboard-viewer-value="<%= @session.whiteboard_viewer_key %>"
+     data-whiteboard-labels-value="<%= whiteboard_labels %>">
   <%= render "live/projector_frame", session: @session %>
+  <%# The speaker's whiteboard or slide drawing, over the frame (outside it, so a new frame
+      never wipes the drawing). %>
+  <div class="whiteboard-layer" hidden data-whiteboard-target="layer" data-role="whiteboard-layer">
+    <div class="whiteboard-surface" data-whiteboard-target="surface"></div>
+    <canvas data-whiteboard-target="canvas"></canvas>
+  </div>
 </div>

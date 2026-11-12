@@ -12,6 +12,10 @@
   <div class="musician-now-head">
     <span class="musician-cue badge badge-error badge-sm"><%= t("live.musician.now") %></span>
     <span class="musician-now-summary" data-role="now-summary"><%= operator_stop_label(session) %></span>
+    <% if session.whiteboard_on? %>
+      <%# The projector shows the speaker's whiteboard (or drawing) instead of the slide. %>
+      <span class="badge badge-ghost badge-sm" data-role="whiteboard-note">✎ <%= t("live.musician.whiteboard_on") %></span>
+    <% end %>
   </div>
 
   <div class="musician-now-body">

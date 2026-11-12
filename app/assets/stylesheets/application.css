@@ -105,6 +105,15 @@
 .projector-root.is-blanked, .projector-blank { background: #000; }
 .projector-blank { position: fixed; inset: 0; }
 
+/* The speaker's whiteboard (whiteboard_controller.js): a layer over the stage on the projector,
+   the operator's Now preview and the speaker view. A "board" fills it with its surface colour; a
+   slide drawing leaves it clear. Only the speaker view takes pointer input. */
+.whiteboard-layer { position: absolute; inset: 0; z-index: 30; pointer-events: none; }
+.whiteboard-layer > .whiteboard-surface, .whiteboard-layer > canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.speaker-stage .whiteboard-layer { pointer-events: auto; }
+.speaker-stage canvas { touch-action: none; cursor: crosshair; }
+.follower-body:has(.speaker-root) { background: var(--color-base-200); }
+
 /* A text slide fills the stage as a column; its body is placed with auto margins per the slide's
    alignment (top/center/bottom × left/center/right). Auto margins (not justify-content) collapse
    to 0 when the text overflows, so the fit controller still measures overflow correctly. */

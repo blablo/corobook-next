@@ -1,0 +1,62 @@
+<%#
+  Speaker view (the pastor's tablet). The stage is the projector's own frame, kept live by the
+  projector stream; the whiteboard layer on top is drawn here and shown on the projector and the
+  operator's preview (whiteboard_controller.js, WhiteboardChannel).
+%>
+<%= turbo_stream_from [ @session, :projector ] %>
+<div class="speaker-root mx-auto max-w-4xl p-3 sm:p-5 space-y-3" data-role="speaker"
+     data-controller="whiteboard"
+     data-whiteboard-speaker-value="<%= @session.speaker_token %>"
+     data-whiteboard-labels-value="<%= whiteboard_labels %>">
+  <header class="flex flex-wrap items-center justify-between gap-2">
+    <div class="min-w-0 space-y-1">
+      <div class="text-xs text-base-content/60 truncate"><%= t("live.speaker.title") %> · <%= @session.service_set.name %></div>
+      <span class="badge badge-soft badge-ghost" data-whiteboard-target="status" data-role="speaker-status"><%= t("live.whiteboard.idle") %></span>
+    </div>
+    <button type="button" class="btn btn-error" hidden data-whiteboard-target="stop" data-action="whiteboard#stopDrawing"
+            data-role="speaker-stop"><%= t("live.whiteboard.stop_board") %></button>
+  </header>
+
+  <%# Tools: shown while the whiteboard or slide drawing is on. %>
+  <div class="flex flex-wrap items-center gap-2 rounded-box border border-base-300 bg-base-100 px-2 py-1.5"
+       hidden data-whiteboard-target="tools" data-role="speaker-tools">
+    <% whiteboard_colors.each_with_index do |(hex, name), i| %>
+      <button type="button" class="size-8 rounded-full border border-base-300 aria-pressed:outline-2 aria-pressed:outline-offset-2 aria-pressed:outline-[var(--color-primary)]"
+              style="background: <%= hex %>" data-color="<%= hex %>" aria-label="<%= name %>" aria-pressed="<%= i == 2 %>"
+              data-whiteboard-target="color" data-action="whiteboard#pickColor"></button>
+    <% end %>
+    <span class="mx-1 h-6 w-px bg-base-300" aria-hidden="true"></span>
+    <% { pen: "✎", hl: "▬", erase: "⌫" }.each do |tool, icon| %>
+      <button type="button" class="btn btn-sm btn-ghost <%= 'btn-active' if tool == :pen %>" aria-pressed="<%= tool == :pen %>"
+              data-whiteboard-target="tool" data-whiteboard-tool-param="<%= tool %>" data-action="whiteboard#pickTool">
+        <span aria-hidden="true"><%= icon %></span> <%= t("live.whiteboard.tools.#{tool}") %>
+      </button>
+    <% end %>
+    <span class="mx-1 h-6 w-px bg-base-300" aria-hidden="true"></span>
+    <button type="button" class="btn btn-sm btn-ghost" data-action="whiteboard#undo" data-role="speaker-undo">↶ <%= t("live.whiteboard.undo") %></button>
+    <button type="button" class="btn btn-sm btn-ghost" data-action="whiteboard#clear"><%= t("live.whiteboard.clear") %></button>
+    <button type="button" class="btn btn-sm btn-ghost" hidden data-whiteboard-target="darkToggle" data-action="whiteboard#toggleDark">◐ <%= t("live.whiteboard.background") %></button>
+  </div>
+
+  <div class="speaker-stage projector-preview rounded-box overflow-hidden" data-role="speaker-stage">
+    <%= render "live/projector_frame", session: @session %>
+    <div class="whiteboard-layer" hidden data-whiteboard-target="layer" data-role="whiteboard-layer">
+      <div class="whiteboard-surface" data-whiteboard-target="surface"></div>
+      <canvas data-whiteboard-target="canvas" data-role="whiteboard-canvas"></canvas>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-3" data-whiteboard-target="start">
+    <button type="button" class="btn btn-primary h-auto min-h-20 flex-col gap-0 py-3" data-role="start-board"
+            data-action="whiteboard#start" data-whiteboard-mode-param="board">
+      <span class="text-lg">▢ <%= t("live.speaker.whiteboard") %></span>
+      <span class="text-xs font-normal opacity-80 whitespace-normal"><%= t("live.speaker.whiteboard_hint") %></span>
+    </button>
+    <button type="button" class="btn btn-soft btn-primary h-auto min-h-20 flex-col gap-0 py-3" data-role="start-slide"
+            data-action="whiteboard#start" data-whiteboard-mode-param="slide">
+      <span class="text-lg">✎ <%= t("live.speaker.draw_on_slide") %></span>
+      <span class="text-xs font-normal opacity-80 whitespace-normal"><%= t("live.speaker.draw_on_slide_hint") %></span>
+    </button>
+  </div>
+  <p class="text-xs text-center text-base-content/60" data-whiteboard-target="hint"><%= t("live.whiteboard.hint_idle") %></p>
+</div>
