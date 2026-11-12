@@ -2,9 +2,9 @@
     still renders, without the live Now/Next bar or the current-row highlight. %>
 <%= turbo_stream_from [ @session, :musician ] if @session %>
 <div class="musician-root" data-theme="light" data-role="musician-root"
-     data-controller="topbar-reveal<%= ' musician-follow' if @session %>">
+     data-controller="header-reveal<%= ' musician-follow' if @session %>">
 
-  <%# ── Top bar: one slim line; slides away while reading down, back on scroll up ── %>
+  <%# ── Top bar: one slim line; it and the Now band slide away while reading down ── %>
   <div class="musician-topbar">
     <div class="musician-setname truncate min-w-0" data-role="set-name"><%= @service_set.name %></div>
     <div class="flex items-center gap-2 shrink-0 text-xs text-base-content/60">

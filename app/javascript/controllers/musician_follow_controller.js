@@ -55,14 +55,15 @@ export default class extends Controller {
     this.scrollToRow(row, true)
   }
 
-  // Put the row just below the sticky header. The top bar hides while scrolling down
-  // (topbar_reveal_controller) and returns when scrolling up, so it only counts going up.
+  // Put the row at the top of the screen. The sticky header (top bar + Now band) hides while
+  // scrolling down and returns when scrolling up (header_reveal_controller), so it only takes
+  // room going up.
   scrollToRow(row, smooth) {
     const band = this.element.querySelector("[data-role=now-bar]")
     const bar = this.element.querySelector(".musician-topbar")
     const rowTop = row.getBoundingClientRect().top + window.scrollY
-    let top = rowTop - (band?.offsetHeight || 0) - GAP
-    if (top < window.scrollY) top -= bar?.offsetHeight || 0
+    let top = rowTop - GAP
+    if (top < window.scrollY) top -= (band?.offsetHeight || 0) + (bar?.offsetHeight || 0)
     top = Math.max(0, Math.round(top))
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches

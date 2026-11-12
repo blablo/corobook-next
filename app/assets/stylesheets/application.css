@@ -206,9 +206,10 @@
   background: var(--color-base-100); border-bottom: 1px solid var(--color-base-300);
   transition: transform 0.2s ease;
 }
-/* Scrolling down hides the bar (topbar_reveal_controller); the Now band takes the top edge. */
-.musician-root.topbar-hidden .musician-topbar { transform: translateY(-100%); }
-.musician-root.topbar-hidden .musician-nowbar { top: 0; }
+/* Scrolling down hides the whole header, bar and Now band (header_reveal_controller); scrolling
+   up brings both back. The live row keeps its red edge while they are away. */
+.musician-root.header-hidden .musician-topbar { transform: translateY(-100%); }
+.musician-root.header-hidden .musician-nowbar { top: 0; transform: translateY(-100%); box-shadow: none; }
 /* The bar and band move while the chart scrolls; never let the browser anchor scrolling to them
    (scroll anchoring would "correct" for that movement and cut the follow scroll short). */
 .musician-topbar, .musician-nowbar { overflow-anchor: none; }
@@ -216,7 +217,7 @@
 
 /* Above the fold: the sticky Now/Next header that follows the projector. */
 .musician-nowbar {
-  position: sticky; top: 2.75rem; z-index: 20; transition: top 0.2s ease;
+  position: sticky; top: 2.75rem; z-index: 20; transition: top 0.2s ease, transform 0.2s ease;
   margin: 0 0 1.25rem; padding: 0.9rem 1.25rem 1rem;
   background: var(--color-base-100);
   border-bottom: 1px solid var(--color-base-300);
