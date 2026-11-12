@@ -1,55 +1,76 @@
 <% content_for :title, t("settings.general.title") %>
 
-<div class="mx-auto max-w-3xl p-4" data-role="settings">
-  <h1 class="text-2xl font-semibold mb-6"><%= t("settings.general.title") %></h1>
+<div class="space-y-6" data-role="settings">
+  <div>
+    <h1 class="text-2xl font-semibold"><%= t("settings.general.title") %></h1>
+    <p class="text-base-content/60 mt-1"><%= t("settings.general.subtitle", church: @church.name) %></p>
+  </div>
 
-  <%# ── Church subdomain ─────────────────────────────────────────── %>
-  <section data-role="subdomain-settings">
-    <h2 class="text-sm font-semibold uppercase tracking-wide text-base-content/60 mb-2"><%= t("settings.general.subdomain_heading") %></h2>
-    <p class="text-sm text-base-content/60 mb-4 max-w-prose">
-      <%= t("settings.general.subdomain_intro_html", church: tag.span(@church.name, class: "font-medium")) %>
-      <span class="text-base-content/50"><%= t("settings.general.subdomain_coming_soon") %></span>
-    </p>
-
-    <%= form_with model: @church, url: settings_path, method: :patch, data: { controller: "subdomain-preview" } do |f| %>
-      <%= hidden_field_tag :section, "general" %>
-      <% if @church.errors[:subdomain].any? %>
-        <div class="alert alert-error mb-4 text-sm" data-role="subdomain-error">
-          <div><%= t("settings.general.subdomain_error", message: @church.errors[:subdomain].to_sentence) %></div>
-        </div>
-      <% end %>
-
-      <fieldset class="fieldset max-w-md">
-        <%= f.label :subdomain, t("settings.general.subdomain_label"), class: "fieldset-legend" %>
-        <label class="input input-bordered flex items-center gap-1 w-full">
-          <%= f.text_field :subdomain,
-                value: @church.subdomain,
-                placeholder: "gracia",
-                autocomplete: "off", autocapitalize: "off", spellcheck: "false",
-                class: "grow", data: { role: "subdomain-input", action: "input->subdomain-preview#update" } %>
-          <span class="text-base-content/50 text-sm whitespace-nowrap">.<%= request.domain.presence || "example.com" %></span>
-        </label>
-        <p class="label text-base-content/60">
-          <%= t("settings.general.subdomain_help") %>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+    <%# ── Church subdomain ─────────────────────────────────────────── %>
+    <section class="card card-border bg-base-100 lg:col-span-2" data-role="subdomain-settings">
+      <div class="card-body">
+        <h2 class="card-title text-base"><%= t("settings.general.subdomain_heading") %></h2>
+        <p class="text-base-content/60">
+          <%= t("settings.general.subdomain_intro_html", church: tag.span(@church.name, class: "font-medium")) %>
         </p>
-      </fieldset>
 
-      <p class="text-sm mt-3 flex items-center gap-2 flex-wrap">
-        <span><%= t("settings.general.address_will_be") %></span>
-        <code class="px-1 py-0.5 rounded bg-base-200" data-role="subdomain-preview-url" data-subdomain-preview-target="url">
-          <%= @church.subdomain.present? ? "https://#{@church.subdomain}.#{request.domain.presence || 'example.com'}/" : t("settings.general.not_set") %>
-        </code>
-        <button type="button" class="btn btn-ghost btn-xs gap-1 <%= 'btn-disabled' if @church.subdomain.blank? %>"
-                data-role="copy-link" data-subdomain-preview-target="copyBtn"
-                data-action="subdomain-preview#copy" aria-label="<%= t("settings.general.copy_link") %>">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m11.25 5.5H16.5a1.125 1.125 0 0 1-1.125-1.125v-3.5"/></svg>
-          <span data-subdomain-preview-target="copyLabel"><%= t("settings.general.copy") %></span>
-        </button>
-      </p>
+        <%= form_with model: @church, url: settings_path, method: :patch,
+              data: { controller: "subdomain-preview", subdomain_preview_domain_value: app_base_host } do |f| %>
+          <%= hidden_field_tag :section, "general" %>
+          <% if @church.errors[:subdomain].any? %>
+            <div class="alert alert-error my-2" data-role="subdomain-error">
+              <span><%= t("settings.general.subdomain_error", message: @church.errors[:subdomain].to_sentence) %></span>
+            </div>
+          <% end %>
 
-      <div class="mt-4">
-        <%= f.submit t("settings.general.save"), class: "btn btn-primary btn-sm" %>
+          <fieldset class="fieldset max-w-lg mt-2">
+            <%= f.label :subdomain, t("settings.general.subdomain_label"), class: "label" %>
+            <label class="input w-full">
+              <%= f.text_field :subdomain,
+                    value: @church.subdomain,
+                    placeholder: "gracia",
+                    autocomplete: "off", autocapitalize: "off", spellcheck: "false",
+                    class: "grow", data: { role: "subdomain-input", action: "input->subdomain-preview#update" } %>
+              <span class="text-base-content/60 whitespace-nowrap">.<%= app_base_host %></span>
+            </label>
+            <p class="label whitespace-normal"><%= t("settings.general.subdomain_help") %></p>
+          </fieldset>
+
+          <div class="flex flex-wrap items-center gap-3 rounded-box border border-base-300 bg-base-200 px-4 py-3 mt-3 max-w-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"/></svg>
+            <span class="sr-only"><%= t("settings.general.address_will_be") %></span>
+            <code class="font-medium grow break-all" data-role="subdomain-preview-url" data-subdomain-preview-target="url"><%= @church.subdomain.present? ? "https://#{@church.subdomain}.#{app_base_host}/" : t("settings.general.not_set") %></code>
+            <button type="button" class="btn btn-ghost btn-sm gap-1 <%= 'btn-disabled' if @church.subdomain.blank? %>"
+                    data-role="copy-link" data-subdomain-preview-target="copyBtn"
+                    data-action="subdomain-preview#copy" aria-label="<%= t("settings.general.copy_link") %>">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m11.25 5.5H16.5a1.125 1.125 0 0 1-1.125-1.125v-3.5"/></svg>
+              <span data-subdomain-preview-target="copyLabel"><%= t("settings.general.copy") %></span>
+            </button>
+          </div>
+
+          <div class="card-actions justify-end border-t border-base-300 pt-4 mt-6">
+            <%= f.submit t("settings.general.save"), class: "btn btn-primary" %>
+          </div>
+        <% end %>
       </div>
-    <% end %>
-  </section>
+    </section>
+
+    <%# ── Church summary ───────────────────────────────────────────── %>
+    <section class="card card-border bg-base-100" data-role="church-summary">
+      <div class="card-body">
+        <h2 class="card-title text-base"><%= t("settings.general.church_heading") %></h2>
+        <dl class="space-y-3">
+          <div>
+            <dt class="text-xs text-base-content/60"><%= t("settings.general.church_name") %></dt>
+            <dd class="font-medium"><%= @church.name %></dd>
+          </div>
+          <div>
+            <dt class="text-xs text-base-content/60"><%= t("settings.general.church_members") %></dt>
+            <dd class="font-medium"><%= link_to @church.users.count, team_path, class: "link link-hover" %></dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+  </div>
 </div>

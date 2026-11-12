@@ -26,7 +26,7 @@
                value="<%= @church.subdomain %>" placeholder="<%= t("auth.signup.subdomain_placeholder") %>"
                autocomplete="off" autocapitalize="off" spellcheck="false"
                class="grow" data-role="church-subdomain">
-        <span class="text-base-content/50 text-sm whitespace-nowrap">.<%= request.domain.presence || "example.com" %></span>
+        <span class="text-base-content/50 text-sm whitespace-nowrap">.<%= app_base_host %></span>
       </label>
       <p class="label text-base-content/60"><%= t("auth.signup.subdomain_help") %></p>
     </fieldset>

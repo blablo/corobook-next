@@ -5,11 +5,12 @@ import { Controller } from "@hotwired/stimulus"
 // the typed value sanitized to the allowed label charset, so it matches what will be stored.
 export default class extends Controller {
   static targets = ["url", "copyBtn", "copyLabel"]
+  static values = { domain: String }
 
   update() {
     const input = this.element.querySelector("[data-role=subdomain-input]")
     if (!input || !this.hasUrlTarget) return
-    const domain = this.domain()
+    const domain = this.domainValue
     const sub = input.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, "")
     this.urlTarget.textContent = sub ? `https://${sub}.${domain}/` : "— not set —"
     // Enable the copy button only when there is a real URL to copy.
@@ -40,14 +41,5 @@ export default class extends Controller {
     this.copyLabelTarget.textContent = text
     clearTimeout(this._t)
     this._t = setTimeout(() => { this.copyLabelTarget.textContent = prev }, 1500)
-  }
-
-  // The base domain from the current preview text, or derived from the page host.
-  domain() {
-    if (this.hasUrlTarget) {
-      const parts = this.urlTarget.textContent.replace(/^https?:\/\//, "").replace(/\/$/, "").split(".")
-      if (parts.length > 1) return parts.slice(1).join(".")
-    }
-    return window.location.hostname.split(".").slice(-2).join(".")
   }
 }

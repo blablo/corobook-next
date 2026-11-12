@@ -3,7 +3,7 @@ module Authentication
 
   included do
     before_action :set_current_user
-    helper_method :current_user, :current_church, :signed_in?, :subdomain_church
+    helper_method :current_user, :current_church, :signed_in?, :subdomain_church, :app_base_host
   end
 
   private
