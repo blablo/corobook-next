@@ -4,16 +4,30 @@ class ServiceSetsController < ApplicationController
   before_action :require_editor, except: %i[index show preview print]
   before_action :set_service_set, only: %i[show edit update destroy add_item reorder remove_item library preview print send_to_band]
 
+  PAST_PER_PAGE = 20
+
   def index
-    sets = church_scope(:service_sets)
+    sets = church_scope(:service_sets).includes(set_items: %i[song text_slide])
     today = Date.current
     # Upcoming = today or later (plus any set with no date), soonest first.
-    @upcoming_sets = sets.where("service_date >= ? OR service_date IS NULL", today)
-                         .order(Arel.sql("service_date ASC NULLS LAST, name ASC"))
-    # Past = before today, newest first.
-    @past_sets = sets.where("service_date < ?", today)
-                     .order(service_date: :desc, name: :asc)
-    @service_sets = @upcoming_sets + @past_sets
+    upcoming = sets.where("service_date >= ? OR service_date IS NULL", today)
+                   .order(Arel.sql("service_date ASC NULLS LAST, name ASC"))
+    # Past = before today, newest first, a page at a time.
+    past = sets.where("service_date < ?", today).order(service_date: :desc, name: :asc)
+
+    @upcoming_count = upcoming.count
+    @past_count = past.count
+    @active_session = church_scope(:live_sessions).find_by(status: "active")
+    @next_set = upcoming.first
+    @tab = params[:tab] == "past" ? "past" : "upcoming"
+    @page = [ params[:page].to_i, 1 ].max
+
+    if @tab == "past"
+      @sets = past.limit(PAST_PER_PAGE).offset((@page - 1) * PAST_PER_PAGE)
+      @older_page = @page + 1 if @past_count > @page * PAST_PER_PAGE
+    else
+      @sets = @next_set ? upcoming.where.not(id: @next_set.id) : upcoming
+    end
   end
 
   def show

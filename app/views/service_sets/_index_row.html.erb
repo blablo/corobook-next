@@ -1,0 +1,15 @@
+<li class="list-row items-center hover:bg-base-200" data-role="set-row">
+  <%= render "date_block", date: set.service_date %>
+  <%= link_to service_set_path(set), class: "list-col-grow min-w-0" do %>
+    <span class="block font-medium truncate"><%= set.name %></span>
+    <% if set.set_items.empty? %>
+      <span class="block text-xs text-warning"><%= t("services.index.no_items") %></span>
+    <% else %>
+      <span class="block text-xs text-base-content/60 truncate"><%= set_items_preview(set) %></span>
+    <% end %>
+  <% end %>
+  <span class="badge badge-ghost badge-sm hidden sm:inline-flex whitespace-nowrap">
+    <%= t("services.index.items", count: set.set_items.size) %>
+  </span>
+  <%= render "live_action", set: set, active_session: active_session %>
+</li>

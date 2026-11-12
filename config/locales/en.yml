@@ -93,11 +93,41 @@ en:
 
   services:
     index:
-      title: "Services — %{church}"
+      title: "Services"
+      subtitle: "Plan what %{church} sings and shows each week."
       new: "New service"
       empty: "No services yet."
+      empty_hint: "Create one to start planning songs and slides."
       upcoming: "Upcoming"
       past: "Past"
+      live_now_html: "%{name} is live now."
+      open_operator: "Open operator"
+      next_service: "Next service"
+      today: "Today"
+      tomorrow: "Tomorrow"
+      in_days:
+        one: "in %{count} day"
+        other: "in %{count} days"
+      no_date: "No date"
+      no_items: "No items yet"
+      items:
+        one: "%{count} item"
+        other: "%{count} items"
+      songs:
+        one: "%{count} song"
+        other: "%{count} songs"
+      slides:
+        one: "%{count} slide"
+        other: "%{count} slides"
+      open: "Open"
+      resume: "Resume"
+      go_live: "Go live"
+      go_live_with: "Go live with %{name}"
+      add_items: "Add items"
+      no_other_upcoming: "No other upcoming services."
+      no_past: "No past services yet."
+      older: "Older"
+      newer: "Newer"
     new:
       title: "New service"
     edit:

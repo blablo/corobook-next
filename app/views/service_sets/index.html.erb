@@ -1,38 +1,107 @@
-<div class="mx-auto mt-8 max-w-3xl p-4" data-role="sets-index">
-  <div class="flex items-center justify-between mb-4">
-    <h1 class="text-2xl font-semibold"><%= t("services.index.title", church: current_church.name) %></h1>
-    <%= link_to t("services.index.new"), new_service_set_path, class: "btn btn-primary btn-sm" %>
+<div class="space-y-6" data-role="sets-index">
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-semibold"><%= t("services.index.title") %></h1>
+      <p class="text-base-content/60 mt-1"><%= t("services.index.subtitle", church: current_church.name) %></p>
+    </div>
+    <%= link_to new_service_set_path, class: "btn btn-primary" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+      <%= t("services.index.new") %>
+    <% end %>
   </div>
 
-  <% if @service_sets.empty? %>
-    <div class="card bg-base-100 border border-base-200">
-      <div class="card-body items-center text-center text-sm text-base-content/60" data-role="empty">
-        <%= t("services.index.empty") %>
+  <% if @active_session %>
+    <div role="status" class="alert alert-success alert-soft" data-role="live-banner">
+      <span class="status status-success animate-pulse" aria-hidden="true"></span>
+      <span><%= t("services.index.live_now_html", name: tag.b(@active_session.service_set.name)) %></span>
+      <%= link_to t("services.index.open_operator"), operator_path(@active_session), class: "btn btn-sm btn-success" %>
+    </div>
+  <% end %>
+
+  <% if @upcoming_count.zero? && @past_count.zero? %>
+    <div class="card card-border bg-base-100" data-role="empty">
+      <div class="card-body items-center text-center">
+        <h2 class="card-title text-base"><%= t("services.index.empty") %></h2>
+        <p class="text-base-content/60"><%= t("services.index.empty_hint") %></p>
+        <%= link_to t("services.index.new"), new_service_set_path, class: "btn btn-primary mt-2" %>
       </div>
     </div>
   <% else %>
-    <% if @upcoming_sets.any? %>
-      <h2 class="text-xs font-semibold uppercase tracking-wide text-base-content/40 mb-2"><%= t("services.index.upcoming") %></h2>
-      <ul class="list bg-base-100 rounded-box border border-base-200 mb-6" data-role="upcoming-sets">
-        <% @upcoming_sets.each do |set| %>
-          <li class="list-row items-center" data-role="set-row">
-            <%= link_to set.name, service_set_path(set), class: "link link-hover list-col-grow font-medium" %>
-            <span class="text-sm text-base-content/60"><%= set.service_date %></span>
-          </li>
-        <% end %>
-      </ul>
+    <% if @next_set %>
+      <section class="card card-border bg-base-100" data-role="next-service">
+        <div class="card-body sm:flex-row sm:items-center gap-5">
+          <%= render "date_block", date: @next_set.service_date, big: true %>
+          <div class="grow min-w-0">
+            <div class="flex items-center gap-2">
+              <span class="badge badge-soft badge-primary badge-sm"><%= t("services.index.next_service") %></span>
+              <% if @next_set.service_date %>
+                <span class="text-xs text-base-content/60"><%= days_until(@next_set.service_date) %></span>
+              <% end %>
+            </div>
+            <h2 class="text-lg font-semibold mt-1">
+              <%= link_to @next_set.name, service_set_path(@next_set), class: "link link-hover" %>
+            </h2>
+            <% if @next_set.set_items.empty? %>
+              <p class="text-warning"><%= t("services.index.no_items") %></p>
+            <% else %>
+              <p class="text-base-content/60 truncate"><%= set_items_preview(@next_set) %></p>
+              <div class="flex gap-2 mt-2">
+                <% { songs: set_song_count(@next_set), slides: set_slide_count(@next_set) }.each do |kind, n| %>
+                  <% next if n.zero? %>
+                  <span class="badge badge-ghost badge-sm"><%= t("services.index.#{kind}", count: n) %></span>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+          <div class="flex gap-2 shrink-0">
+            <%= link_to t("services.index.open"), service_set_path(@next_set), class: "btn btn-ghost" %>
+            <% if @next_set.set_items.any? && (@active_session.nil? || @active_session.service_set_id == @next_set.id) %>
+              <%= render "live_action", set: @next_set, active_session: @active_session, size: "" %>
+            <% end %>
+          </div>
+        </div>
+      </section>
     <% end %>
 
-    <% if @past_sets.any? %>
-      <h2 class="text-xs font-semibold uppercase tracking-wide text-base-content/40 mb-2"><%= t("services.index.past") %></h2>
-      <ul class="list bg-base-100 rounded-box border border-base-200" data-role="past-sets">
-        <% @past_sets.each do |set| %>
-          <li class="list-row items-center" data-role="set-row">
-            <%= link_to set.name, service_set_path(set), class: "link link-hover list-col-grow font-medium" %>
-            <span class="text-sm text-base-content/60"><%= set.service_date %></span>
-          </li>
+    <section class="card card-border bg-base-100">
+      <div class="card-body p-0">
+        <div role="tablist" class="tabs tabs-border px-4 pt-2">
+          <%= link_to service_sets_path, role: "tab", class: "tab #{"tab-active" if @tab == "upcoming"}",
+                aria: { selected: @tab == "upcoming" }, data: { role: "tab-upcoming" } do %>
+            <%= t("services.index.upcoming") %> <span class="badge badge-sm ml-2"><%= @upcoming_count %></span>
+          <% end %>
+          <%= link_to service_sets_path(tab: "past"), role: "tab", class: "tab #{"tab-active" if @tab == "past"}",
+                aria: { selected: @tab == "past" }, data: { role: "tab-past" } do %>
+            <%= t("services.index.past") %> <span class="badge badge-sm ml-2"><%= @past_count %></span>
+          <% end %>
+        </div>
+
+        <% if @sets.empty? %>
+          <p class="px-6 py-8 text-center text-base-content/60" data-role="tab-empty">
+            <%= t(@tab == "past" ? "services.index.no_past" : "services.index.no_other_upcoming") %>
+          </p>
+        <% else %>
+          <ul class="list" data-role="<%= @tab %>-sets">
+            <% @sets.each do |set| %>
+              <%= render "index_row", set: set, active_session: @active_session %>
+            <% end %>
+          </ul>
         <% end %>
-      </ul>
-    <% end %>
+
+        <% if @tab == "past" && (@older_page || @page > 1) %>
+          <div class="flex justify-between border-t border-base-300 px-4 py-3">
+            <% if @page > 1 %>
+              <%= link_to t("services.index.newer"), service_sets_path(tab: "past", page: @page - 1), class: "btn btn-ghost btn-sm" %>
+            <% else %>
+              <span></span>
+            <% end %>
+            <% if @older_page %>
+              <%= link_to t("services.index.older"), service_sets_path(tab: "past", page: @older_page),
+                    class: "btn btn-ghost btn-sm", data: { role: "older-services" } %>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </section>
   <% end %>
 </div>
