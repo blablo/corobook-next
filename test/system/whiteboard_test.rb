@@ -25,6 +25,7 @@ class WhiteboardSystemTest < ApplicationSystemTestCase
     find("[data-role=start-board]").click
     assert_selector "[data-role=speaker-status]", text: "Whiteboard on the projector"
     assert_selector "[data-role=speaker-tools]"
+    assert_no_selector "[data-role=speaker-next]", "Next/Back make room for the board"
 
     canvas = find("[data-role=whiteboard-canvas]")
     page.driver.browser.action.move_to(canvas.native).click_and_hold.move_by(60, 20).move_by(60, -10).release.perform
@@ -35,6 +36,7 @@ class WhiteboardSystemTest < ApplicationSystemTestCase
 
     find("[data-role=speaker-stop]").click
     assert_selector "[data-role=start-board]"
+    assert_selector "[data-role=speaker-next]"
     using_session(:projector) { assert_selector "[data-role=whiteboard-layer]", visible: :hidden }
     assert_nil @session.reload.whiteboard_mode
     assert_equal 1, @session.whiteboard_board.size, "the board is kept for next time"

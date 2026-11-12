@@ -47,9 +47,9 @@
     </div>
   </div>
 
-  <%# Next/Back move the service for everyone. The Now line follows it, so a move is visible even
-      while the whiteboard covers the slide. %>
-  <div class="flex items-center gap-3" data-controller="projector-clicker"
+  <%# Next/Back move the service for everyone; the Now line follows it. Hidden while drawing, so
+      the board gets the whole screen (the operator can still move the service). %>
+  <div class="flex items-center gap-3" data-controller="projector-clicker" data-whiteboard-target="nav"
        data-projector-clicker-advance-url-value="<%= speaker_advance_path(@session.speaker_token) %>"
        data-projector-clicker-back-url-value="<%= speaker_back_path(@session.speaker_token) %>"
        data-projector-clicker-keys-value="false">
