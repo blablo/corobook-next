@@ -1,7 +1,7 @@
 <p><%= t("service_sets_mailer.band.greeting") %></p>
 
 <p>
-  <%= t("service_sets_mailer.band.intro_html", sender: @sender.email, name: content_tag(:strong, @service_set.name)) %>
+  <%= t("service_sets_mailer.band.intro_html", sender: @sender.display_name, name: content_tag(:strong, @service_set.name)) %>
   <% if @date %><br><%= t("service_sets_mailer.band.date", date: @date) %><% end %>
 </p>
 

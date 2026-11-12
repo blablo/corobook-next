@@ -24,6 +24,8 @@ class InvitationAcceptancesController < ApplicationController
     end
 
     user = church.users.new(
+      name: params[:name],
+      name_required: true,
       email: @invitation.email,
       role: @invitation.role,
       password: params[:password],

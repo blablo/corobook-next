@@ -29,8 +29,11 @@ class LiveRecoveryTest < ApplicationSystemTestCase
   test "an operator reload lands on the current position" do
     visit operator_path(@session)
     click_on "Next →" # title -> V1 (Uno)
+    # Each Next reloads the page; wait for it before clicking again, or the second click can land
+    # on the old page as it is replaced.
+    assert_selector "[data-role=operator-frame]", text: "Uno"
     click_on "Next →" # V1 -> V2 (Dos)
-    assert_text "Dos"
+    assert_selector "[data-role=operator-frame]", text: "Dos"
 
     # Cold reload — reads the LiveSession row and lands where we were.
     visit operator_path(@session)

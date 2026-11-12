@@ -1,7 +1,7 @@
-<p><%= t("auth.mailer.invite.greeting") %></p>
+<p><%= @name.present? ? t("auth.mailer.invite.greeting_name", name: @name) : t("auth.mailer.invite.greeting") %></p>
 
 <p>
-  <%= t("auth.mailer.invite.body_html", inviter: @inviter.email, church: content_tag(:strong, @church.name), role: content_tag(:strong, @role)) %>
+  <%= t("auth.mailer.invite.body_html", inviter: @inviter.display_name, church: content_tag(:strong, @church.name), role: content_tag(:strong, @role)) %>
 </p>
 
 <div class="btn-wrap">

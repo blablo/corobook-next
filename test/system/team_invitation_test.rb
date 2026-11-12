@@ -18,6 +18,7 @@ class TeamInvitationTest < ApplicationSystemTestCase
     assert_selector "[data-role=team]"
 
     within "[data-role=invite-form]" do
+      fill_in "Name", with: "Nuevo Miembro"
       fill_in "Email", with: "newmember@example.com"
       select "Editor", from: "Role"
       click_on "Send invite"
@@ -44,6 +45,7 @@ class TeamInvitationTest < ApplicationSystemTestCase
     find("[data-role=user-email]", wait: 5) rescue nil
     visit accept_invitation_path(token: raw)
     assert_selector "[data-role=accept-invitation]"
+    fill_in "Your name", with: "Juan Ruiz"
     fill_in "Password", with: "joinerpass1"
     fill_in "Confirm password", with: "joinerpass1"
     click_on "Join #{@church.name}"

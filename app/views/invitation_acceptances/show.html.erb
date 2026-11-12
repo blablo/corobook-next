@@ -15,6 +15,11 @@
             class: "input input-bordered w-full" %>
     </fieldset>
     <fieldset class="fieldset">
+      <%= f.label :name, t("auth.accept.name_label"), class: "fieldset-legend" %>
+      <%= f.text_field :name, value: @user&.name || @invitation.name, required: true, maxlength: 100, autocomplete: "name",
+            class: "input input-bordered w-full" %>
+    </fieldset>
+    <fieldset class="fieldset">
       <%= f.label :password, t("auth.accept.password_label"), class: "fieldset-legend" %>
       <%= f.password_field :password, autocomplete: "new-password",
             class: "input input-bordered w-full" %>

@@ -44,7 +44,7 @@
             <% if respond_to?(:current_user) && current_user %>
               <div class="dropdown dropdown-end">
                 <div tabindex="0" role="button" class="btn btn-ghost btn-sm gap-2 max-w-[12rem]">
-                  <span class="truncate" data-role="user-email"><%= current_user.email %></span>
+                  <span class="truncate" data-role="user-email"><%= current_user.display_name %></span>
                   <span class="badge badge-sm badge-ghost hidden sm:inline-flex"><%= current_user.role %></span>
                 </div>
                 <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-50 w-48 p-2 shadow mt-2">

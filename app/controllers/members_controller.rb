@@ -3,7 +3,9 @@ class MembersController < ApplicationController
   before_action :require_admin
 
   def update
-    member   = find_in_church(:users, params[:id])
+    member = find_in_church(:users, params[:id])
+    return rename(member) if params[:user]&.key?(:name)
+
     new_role = params.dig(:user, :role)
 
     if demoting_last_admin?(member, new_role)
@@ -11,7 +13,7 @@ class MembersController < ApplicationController
     end
 
     if member.update(role: new_role)
-      redirect_to team_path, notice: "#{member.email} is now #{member.role}."
+      redirect_to team_path, notice: "#{member.display_name} is now #{member.role}."
     else
       redirect_to team_path, alert: member.errors.full_messages.to_sentence
     end
@@ -39,6 +41,15 @@ class MembersController < ApplicationController
   end
 
   private
+
+  # The Team page's inline name field. Only the name: role changes go through #update's checks.
+  def rename(member)
+    if member.update(name: params.dig(:user, :name).to_s)
+      redirect_to team_path, notice: t("members.renamed", email: member.email)
+    else
+      redirect_to team_path, alert: member.errors.full_messages.to_sentence
+    end
+  end
 
   def demoting_last_admin?(member, new_role)
     member.admin? && new_role.to_s != "admin" && current_church.only_admin?(member)

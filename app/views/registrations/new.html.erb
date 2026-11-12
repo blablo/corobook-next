@@ -32,6 +32,13 @@
     </fieldset>
 
     <fieldset class="fieldset">
+      <label class="fieldset-legend" for="user_name"><%= t("auth.signup.name_label") %></label>
+      <input type="text" id="user_name" name="user[name]" required maxlength="100"
+             value="<%= @user.name %>" autocomplete="name"
+             class="input input-bordered w-full" data-role="admin-name">
+    </fieldset>
+
+    <fieldset class="fieldset">
       <label class="fieldset-legend" for="user_email"><%= t("auth.signup.email_label") %></label>
       <input type="email" id="user_email" name="user[email]" required
              value="<%= @user.email %>" autocomplete="email"

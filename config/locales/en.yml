@@ -424,6 +424,7 @@ en:
       subdomain_optional: "(optional)"
       subdomain_placeholder: "gracia"
       subdomain_help: "Your team can sign in here and skip choosing the church. You can set this later."
+      name_label: "Your name"
       email_label: "Your email"
       password_label: "Password"
       password_help: "At least 8 characters."
@@ -445,6 +446,7 @@ en:
     accept:
       title: "Join %{church}"
       invited_as_html: "You were invited as %{role}. Set a password to finish."
+      name_label: "Your name"
       email_label: "Email"
       password_label: "Password"
       password_confirmation_label: "Confirm password"
@@ -456,6 +458,7 @@ en:
     mailer:
       footer: "© %{year} Corobook · Worship presentation & song management"
       invite:
+        greeting_name: "Hi %{name},"
         greeting: "Hi,"
         body_html: "%{inviter} has invited you to join %{church} on Corobook as %{role}."
         body_text: "%{inviter} has invited you to join %{church} on Corobook as %{role}."
@@ -686,6 +689,10 @@ en:
       band_hint: "Members in the band will receive the planned service by email."
       band_empty: "No one is in the band yet. Turn on Band for a member below."
       th_band: "Band"
+      invite_name_label: "Name"
+      invite_name_placeholder: "María García"
+      name_placeholder: "Add a name"
+      name_for: "Name for %{email}"
       band_toggle: "%{email} is in the band"
       save: "Save"
       subtitle: "People who can sign in to %{church}, and who plays in the band."
@@ -697,6 +704,7 @@ en:
       role_help: "Editors manage songs, slides and services. Admins can also manage the team and settings."
       invite_meta: "%{role} · invited by %{by} · expires %{date}"
   members:
+    renamed: "Saved the name for %{email}."
     band:
       added: "%{email} added to the band."
       removed: "%{email} removed from the band."

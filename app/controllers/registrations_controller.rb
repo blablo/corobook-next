@@ -9,7 +9,7 @@ class RegistrationsController < ApplicationController
 
   def create
     @church = Church.new(church_params)
-    @user = @church.users.build(user_params.merge(role: "admin"))
+    @user = @church.users.build(user_params.merge(role: "admin", name_required: true))
     @user.regenerate_confirmation_token! # unconfirmed until the emailed link is clicked
 
     ActiveRecord::Base.transaction do
@@ -60,7 +60,7 @@ class RegistrationsController < ApplicationController
   end
 
   def user_params
-    params.require(:user).permit(:email, :password, :password_confirmation)
+    params.require(:user).permit(:name, :email, :password, :password_confirmation)
   end
 
   def redirect_if_signed_in

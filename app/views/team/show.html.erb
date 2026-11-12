@@ -56,13 +56,28 @@
                       <div class="flex items-center gap-3">
                         <div class="avatar avatar-placeholder">
                           <div class="bg-primary text-primary-content w-9 rounded-full">
-                            <span class="font-medium"><%= member.email.first.upcase %></span>
+                            <span class="font-medium"><%= member_initials(member) %></span>
                           </div>
                         </div>
-                        <span class="font-medium break-all"><%= member.email %></span>
-                        <% if member == current_user %>
-                          <span class="badge badge-ghost badge-sm"><%= t("team.show.you") %></span>
-                        <% end %>
+                        <div class="min-w-0 grow flex flex-col gap-0.5">
+                          <%# Inline name, saved on change. The ghost input's padding is offset (-ml-2/px-2) so its
+                              text lines up with the email beneath. Hover tints it so it reads as editable; focus
+                              draws a thin primary ring with a soft halo on the box itself, instead of DaisyUI's
+                              dark 2px outline 2px outside it, which ran into the email. %>
+                          <%= form_with url: member_path(member), method: :patch do |f| %>
+                            <%= f.text_field :"user[name]", value: member.name, id: "member-name-#{member.id}", maxlength: 100, autocomplete: "off",
+                                  placeholder: t("team.show.name_placeholder"),
+                                  class: "input input-ghost input-sm h-7 w-full max-w-64 -ml-2 px-2 text-sm font-medium hover:bg-base-200 focus:bg-[var(--color-base-100)] focus:outline-1 focus:outline-offset-0 focus:outline-[var(--color-primary)] focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--color-primary)_15%,transparent)]",
+                                  aria: { label: t("team.show.name_for", email: member.email) },
+                                  data: { role: "member-name" }, onchange: "this.form.requestSubmit()" %>
+                          <% end %>
+                          <div class="flex items-center gap-2 text-xs text-base-content/60">
+                            <span class="break-all"><%= member.email %></span>
+                            <% if member == current_user %>
+                              <span class="badge badge-ghost badge-xs"><%= t("team.show.you") %></span>
+                            <% end %>
+                          </div>
+                        </div>
                       </div>
                     </td>
                     <td>
@@ -118,9 +133,10 @@
                     </div>
                   </div>
                   <div class="list-col-grow min-w-0">
-                    <div class="font-medium break-all"><%= inv.email %></div>
+                    <div class="font-medium break-all" data-role="invite-name"><%= inv.name.presence || inv.email %></div>
+                    <% if inv.name.present? %><div class="text-xs text-base-content/60 break-all"><%= inv.email %></div><% end %>
                     <div class="text-xs text-base-content/60">
-                      <%= t("team.show.invite_meta", role: t("team.show.role_#{inv.role}"), by: inv.invited_by.email,
+                      <%= t("team.show.invite_meta", role: t("team.show.role_#{inv.role}"), by: inv.invited_by.display_name,
                             date: inv.expires_at.to_date.to_fs(:long)) %>
                     </div>
                   </div>
@@ -146,7 +162,10 @@
           <p class="text-sm text-base-content/60"><%= t("team.show.invite_hint", church: current_church.name) %></p>
           <%= form_with model: @invitation, url: invitations_path, method: :post do |f| %>
             <fieldset class="fieldset">
-              <%= f.label :email, class: "label" %>
+              <%= f.label :name, t("team.show.invite_name_label"), class: "label" %>
+              <%= f.text_field :name, required: true, maxlength: 100, autocomplete: "off",
+                    placeholder: t("team.show.invite_name_placeholder"), class: "input w-full" %>
+              <%= f.label :email, class: "label mt-2" %>
               <%= f.email_field :email, placeholder: "person@example.com", required: true, class: "input w-full" %>
               <%= f.label :role, class: "label mt-2" %>
               <%= f.select :role, [ [ t("team.show.role_editor"), "editor" ], [ t("team.show.role_admin"), "admin" ] ], {},
@@ -168,7 +187,7 @@
           <% else %>
             <div class="flex flex-wrap gap-2">
               <% band.each do |m| %>
-                <span class="badge badge-soft badge-primary" data-role="band-member"><%= m.email %></span>
+                <span class="badge badge-soft badge-primary" data-role="band-member" title="<%= m.email %>"><%= m.display_name %></span>
               <% end %>
             </div>
           <% end %>

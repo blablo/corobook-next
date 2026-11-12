@@ -6,11 +6,17 @@ class User < ApplicationRecord
   enum :role, { admin: "admin", editor: "editor" }, validate: true
 
   normalizes :email, with: ->(e) { e.strip.downcase }
+  normalizes :name, with: ->(n) { n.squish }
 
   # The church's Band: members flagged here receive the planned-service email.
   scope :band, -> { where(band_member: true) }
 
   validates :email, presence: true, uniqueness: { scope: :church_id, case_sensitive: false }
+  validates :name, length: { maximum: 100 }
+  # Signup and invitation acceptance ask for a name; members created before names existed (and
+  # console/seed users) may have none, so it is only required where a form collects it.
+  attr_accessor :name_required
+  validates :name, presence: true, if: :name_required
   # Enforce a minimum password length on set (has_secure_password only requires presence).
   # allow_nil lets an update that does not touch the password through unchanged.
   validates :password, length: { minimum: 8 }, allow_nil: true
@@ -24,6 +30,9 @@ class User < ApplicationRecord
   attr_reader :raw_confirmation_token
 
   def confirmed? = confirmed_at.present?
+
+  # What to call this member on screen and in email: their name, or their email before they set one.
+  def display_name = name.presence || email
 
   # A user created WITHOUT going through the self-serve signup path is trusted and confirmed on
   # create: invited members (the invite proves email ownership), seeded/console/admin-made users.

@@ -12,7 +12,8 @@ class InvitationsController < ApplicationController
 
     invitation = church_scope(:invitations).pending.find_by(email: email) ||
                  church_scope(:invitations).new(email: email)
-    invitation.assign_attributes(role: role, invited_by: current_user)
+    invitation.assign_attributes(role: role, name: params.dig(:invitation, :name), name_required: true,
+                                 invited_by: current_user)
     invitation.regenerate_token!
 
     if invitation.save

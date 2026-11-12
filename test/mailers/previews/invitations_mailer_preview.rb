@@ -4,10 +4,10 @@
 class InvitationsMailerPreview < ActionMailer::Preview
   def invite
     church  = Church.new(name: "Palabra Fiel")
-    inviter = User.new(email: "pastor@palabrafiel.org", church: church, role: "admin")
+    inviter = User.new(name: "Daniel Pérez", email: "pastor@palabrafiel.org", church: church, role: "admin")
     invitation = Invitation.new(
       church: church, invited_by: inviter,
-      email: "nuevo.musico@example.com", role: "editor"
+      name: "Juan Ruiz", email: "nuevo.musico@example.com", role: "editor"
     )
     InvitationsMailer.invite(invitation, "preview-token-abc123")
   end

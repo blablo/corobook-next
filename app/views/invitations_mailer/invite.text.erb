@@ -1,6 +1,6 @@
-<%= t("auth.mailer.invite.greeting") %>
+<%= @name.present? ? t("auth.mailer.invite.greeting_name", name: @name) : t("auth.mailer.invite.greeting") %>
 
-<%= t("auth.mailer.invite.body_text", inviter: @inviter.email, church: @church.name, role: @role) %>
+<%= t("auth.mailer.invite.body_text", inviter: @inviter.display_name, church: @church.name, role: @role) %>
 
 <%= t("auth.mailer.invite.cta") %>:
 <%= @url %>
