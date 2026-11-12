@@ -7,7 +7,7 @@ class SongsIndexTest < ActionDispatch::IntegrationTest
     post login_path, params: { church_id: @church.id, email: @admin.email, password: "secret123" }
   end
 
-  test "rows show key, the matching lyric line, and when the song was last used in a service" do
+  test "rows show key and last use; a lyric search shows the matching line" do
     song = @church.songs.create!(title: "Cuán grande es Él", author: "Stuart K. Hine", song_key: "G",
       chordpro_source: "Señor mi [G]Dios\nal contemplar los cielos")
     @church.songs.create!(title: "Sin usar", chordpro_source: "Primera línea")
@@ -20,14 +20,14 @@ class SongsIndexTest < ActionDispatch::IntegrationTest
     assert_select "[data-role=song-row]", count: 2
     assert_select "[data-role=song-row]", text: /Cuán grande es Él/ do
       assert_select ".badge", text: "G"
-      assert_select "[data-role=song-snippet]", text: "Señor mi Dios"
+      assert_select "[data-role=song-snippet]", count: 0
       assert_select "td", text: "Nov 1, 2026"
     end
     assert_select "[data-role=song-row]", text: /Sin usar.*Never/m
 
     get songs_path(q: "contemplar")
     assert_select "[data-role=song-row]", count: 1
-    assert_select "[data-role=song-snippet]", text: "al contemplar los cielos"
+    assert_select "[data-role=song-snippet]", text: "“al contemplar los cielos”"
   end
 
   test "a search with no matches offers to clear it" do

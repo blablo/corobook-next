@@ -46,7 +46,9 @@
                 <td class="pl-6 max-w-0 w-full">
                   <%= link_to song.title, song, class: "block font-medium truncate after:absolute after:inset-0" %>
                   <span class="block text-xs text-base-content/60 truncate md:hidden"><%= song.author %></span>
-                  <span class="hidden md:block text-xs text-base-content/60 truncate" data-role="song-snippet"><%= song_snippet(song, @query) %></span>
+                  <% if (snippet = song_snippet(song, @query)) %>
+                    <span class="block text-xs text-base-content/60 truncate" data-role="song-snippet">“<%= snippet %>”</span>
+                  <% end %>
                 </td>
                 <td class="hidden md:table-cell whitespace-nowrap"><%= song.author %></td>
                 <td class="text-center">
