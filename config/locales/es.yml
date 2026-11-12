@@ -251,6 +251,7 @@ es:
       clear_filters: "Quitar filtros"
     new:
       title: "Nueva diapositiva"
+      subtitle: "Escríbela una vez y agrégala a cualquier servicio."
     archive:
       title: "Diapositivas archivadas"
       intro: "Las diapositivas archivadas no aparecen en la biblioteca, la búsqueda ni el armado de servicios. Los servicios que ya usan una siguen funcionando. Restaura una diapositiva para traerla de vuelta."

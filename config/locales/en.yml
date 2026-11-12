@@ -251,6 +251,7 @@ en:
       clear_filters: "Clear filters"
     new:
       title: "New slide"
+      subtitle: "Write it once, then add it to any service."
     archive:
       title: "Archived slides"
       intro: "Archived slides are hidden from the Slides library, search and the service builder. Services that already use one keep working. Restore a slide to bring it back."
