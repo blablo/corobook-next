@@ -59,11 +59,14 @@
                             <span class="font-medium"><%= member_initials(member) %></span>
                           </div>
                         </div>
-                        <div class="min-w-0 grow">
+                        <div class="min-w-0 grow flex flex-col gap-0.5">
+                          <%# Inline name, saved on change. The ghost input's padding is offset (-ml-2/px-2) so its
+                              text lines up with the email beneath; the focus ring hugs the box (offset 0, 1px)
+                              instead of DaisyUI's 2px outline 2px outside it, which ran into the email. %>
                           <%= form_with url: member_path(member), method: :patch do |f| %>
                             <%= f.text_field :"user[name]", value: member.name, id: "member-name-#{member.id}", maxlength: 100, autocomplete: "off",
                                   placeholder: t("team.show.name_placeholder"),
-                                  class: "input input-ghost input-sm w-full max-w-xs -ml-3 font-medium",
+                                  class: "input input-ghost input-sm w-full max-w-xs -ml-2 px-2 text-sm font-medium focus:outline-1 focus:outline-offset-0",
                                   aria: { label: t("team.show.name_for", email: member.email) },
                                   data: { role: "member-name" }, onchange: "this.form.requestSubmit()" %>
                           <% end %>
