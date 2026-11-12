@@ -44,10 +44,10 @@ class SubdomainLoginTest < ActionDispatch::IntegrationTest
   end
 
   # ── Multi-level base host: churches live UNDER a configured base, e.g.
-  #    gracia.corobook.duckdns.org where the base host is corobook.duckdns.org. ──
+  #    gracia.next.corobook.com where the base host is next.corobook.com. ──
   test "a church under a multi-level base host pins that church" do
-    with_app_host("corobook.duckdns.org") do
-      get login_url(host: "gracia.corobook.duckdns.org")
+    with_app_host("next.corobook.com") do
+      get login_url(host: "gracia.next.corobook.com")
       assert_response :success
       assert_select "[data-role=subdomain-church]", text: /Gracia/
       assert_select "select[name='church_id']", count: 0
@@ -55,8 +55,8 @@ class SubdomainLoginTest < ActionDispatch::IntegrationTest
   end
 
   test "the bare multi-level base host shows the picker, not a church named for a base label" do
-    with_app_host("corobook.duckdns.org") do
-      get login_url(host: "corobook.duckdns.org")
+    with_app_host("next.corobook.com") do
+      get login_url(host: "next.corobook.com")
       assert_response :success
       assert_select "select[name='church_id']"
       assert_select "[data-role=subdomain-church]", count: 0
@@ -64,8 +64,8 @@ class SubdomainLoginTest < ActionDispatch::IntegrationTest
   end
 
   test "a deeper host (a.b.base) is not treated as a church subdomain" do
-    with_app_host("corobook.duckdns.org") do
-      get login_url(host: "a.gracia.corobook.duckdns.org")
+    with_app_host("next.corobook.com") do
+      get login_url(host: "a.gracia.next.corobook.com")
       assert_response :success
       assert_select "select[name='church_id']"
     end

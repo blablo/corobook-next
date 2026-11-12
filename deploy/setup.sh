@@ -85,7 +85,7 @@ command -v docker >/dev/null 2>&1 || die "docker not found on PATH."
 
 # ─────────────────────────────── questions ───────────────────────────────
 hdr "1) Hostname"
-DEF_HOST="$(read_env "$ENV_PROD" APP_HOST)"; DEF_HOST="${DEF_HOST:-corobook.duckdns.org}"
+DEF_HOST="$(read_env "$ENV_PROD" APP_HOST)"; DEF_HOST="${DEF_HOST:-next.corobook.com}"
 APP_HOST="$(ask "Public hostname Corobook is served at (no scheme)" "$DEF_HOST")"
 [ -n "$APP_HOST" ] || die "A hostname is required."
 say "${DIM}Its A record must point at this server; church subdomains will be <church>.$APP_HOST${RESET}"

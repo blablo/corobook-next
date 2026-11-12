@@ -12,10 +12,10 @@ module Authentication
   # pre-selects the church at sign-in and does NOT scope tenancy after login, which still comes
   # from the signed-in user's own church).
   #
-  # Churches live UNDER a configured base host: <church>.<base>, e.g. gracia.corobook.duckdns.org
-  # where the base is corobook.duckdns.org. We resolve the church label by stripping the known base
+  # Churches live UNDER a configured base host: <church>.<base>, e.g. gracia.next.corobook.com
+  # where the base is next.corobook.com. We resolve the church label by stripping the known base
   # host from the request host — deterministic regardless of tld_length / domain depth, unlike
-  # request.subdomain (which miscounts labels on multi-level hosts like *.duckdns.org). Memoized.
+  # request.subdomain (which miscounts labels on multi-level hosts). Memoized.
   def subdomain_church
     return @subdomain_church if defined?(@subdomain_church)
 
@@ -25,8 +25,8 @@ module Authentication
 
   # The church label in front of the base host, or nil when the request is the bare base host
   # (or www). Case-insensitive; only a single leading label is treated as the church.
-  def church_subdomain_label
-    host = request.host.to_s.downcase
+  def church_subdomain_label(host = request.host)
+    host = host.to_s.downcase
     base = app_base_host
     return nil if host.blank? || base.blank?
     return nil if host == base || host == "www.#{base}"
