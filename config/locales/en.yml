@@ -45,6 +45,7 @@ en:
       next: "Next"
     new:
       title: "New song"
+      subtitle: "Type the lyrics, then click above a word to place a chord."
     edit:
       title: "Edit song"
     show:

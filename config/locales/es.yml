@@ -45,6 +45,7 @@ es:
       next: "Siguiente"
     new:
       title: "Nueva canción"
+      subtitle: "Escribe la letra y haz clic sobre una palabra para colocar un acorde."
     edit:
       title: "Editar canción"
     show:
