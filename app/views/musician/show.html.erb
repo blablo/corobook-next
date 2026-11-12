@@ -2,20 +2,18 @@
     still renders, without the live Now/Next bar or the current-row highlight. %>
 <%= turbo_stream_from [ @session, :musician ] if @session %>
 <div class="musician-root" data-theme="light" data-role="musician-root"
-     <%= 'data-controller="musician-follow"'.html_safe if @session %>>
+     data-controller="topbar-reveal<%= ' musician-follow' if @session %>">
 
-  <%# ── Top bar: set name, live state, date ─────────────────────────── %>
+  <%# ── Top bar: one slim line; slides away while reading down, back on scroll up ── %>
   <div class="musician-topbar">
-    <div class="min-w-0">
-      <div class="musician-setname truncate" data-role="set-name"><%= @service_set.name %></div>
-      <div class="flex items-center gap-2 text-xs text-base-content/60">
-        <% if @session %>
-          <span class="badge badge-soft badge-success badge-xs gap-1">
-            <span class="status status-success animate-pulse" aria-hidden="true"></span><%= t("live.musician.live") %>
-          </span>
-        <% end %>
-        <% if @service_set.service_date %><span><%= @service_set.service_date.strftime(t("live.musician.date_format")) %></span><% end %>
-      </div>
+    <div class="musician-setname truncate min-w-0" data-role="set-name"><%= @service_set.name %></div>
+    <div class="flex items-center gap-2 shrink-0 text-xs text-base-content/60">
+      <% if @service_set.service_date %><span class="hidden sm:inline"><%= @service_set.service_date.strftime(t("live.musician.date_format")) %></span><% end %>
+      <% if @session %>
+        <span class="badge badge-soft badge-success badge-sm gap-1.5">
+          <span class="status status-success animate-pulse" aria-hidden="true"></span><%= t("live.musician.live") %>
+        </span>
+      <% end %>
     </div>
   </div>
 

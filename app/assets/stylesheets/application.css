@@ -202,14 +202,18 @@
 .musician-topbar {
   position: sticky; top: 0; z-index: 30;
   display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-  height: 3.5rem; padding: 0 1.25rem; box-sizing: border-box;
+  height: 2.75rem; padding: 0 1.25rem; box-sizing: border-box;
   background: var(--color-base-100); border-bottom: 1px solid var(--color-base-300);
+  transition: transform 0.2s ease;
 }
+/* Scrolling down hides the bar (topbar_reveal_controller); the Now band takes the top edge. */
+.musician-root.topbar-hidden .musician-topbar { transform: translateY(-100%); }
+.musician-root.topbar-hidden .musician-nowbar { top: 0; }
 .musician-setname { font-weight: 600; font-size: 1rem; line-height: 1.25; }
 
 /* Above the fold: the sticky Now/Next header that follows the projector. */
 .musician-nowbar {
-  position: sticky; top: 3.5rem; z-index: 20;
+  position: sticky; top: 2.75rem; z-index: 20; transition: top 0.2s ease;
   margin: 0 0 1.25rem; padding: 0.9rem 1.25rem 1rem;
   background: var(--color-base-100);
   border-bottom: 1px solid var(--color-base-300);
@@ -252,7 +256,7 @@
   .musician-now-head { margin-bottom: 0; }
   .musician-next { margin-top: 0.5rem; padding-top: 0.5rem; }
   .musician-setlist { padding: 0 0.75rem; }
-  .musician-row { scroll-margin-top: 9.5rem; padding: 0.9rem 1rem; }
+  .musician-row { scroll-margin-top: 9rem; padding: 0.9rem 1rem; }
 }
 /* The row the projector is on: an on-air left edge, like the operator's Now marker. */
 .musician-row.is-current { border-color: var(--color-error); box-shadow: inset 4px 0 0 var(--color-error); }
@@ -281,6 +285,7 @@
 @media (min-width: 58.5rem) { .musician-not-live { margin-inline: auto; } }
 
 @media (prefers-reduced-motion: reduce) {
+  .musician-topbar, .musician-nowbar { transition: none; }
   .musician-row { scroll-behavior: auto; }
 }
 
@@ -313,7 +318,7 @@
    Reuses the musician chart styling on a light surface. The preview's own top bar
    should not be sticky (the shell already has a sticky navbar), and the header +
    app chrome drop away when printing so the sheet prints clean. */
-.musician-preview-page .musician-topbar { position: static; border-radius: 0.75rem; margin-bottom: 1rem; }
+.musician-preview-page .musician-topbar { position: static; height: auto; padding: 0.75rem 1.25rem; border-radius: 0.75rem; margin-bottom: 1rem; }
 .musician-preview-page .musician-setlist { padding: 0; }
 @media print {
   .no-print { display: none !important; }
