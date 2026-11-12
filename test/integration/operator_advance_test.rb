@@ -96,14 +96,9 @@ class OperatorAdvanceTest < ActionDispatch::IntegrationTest
     assert_select "[data-role=projector-copy][aria-label=?]", "Copy link: Projector"
   end
 
-  test "the join codes are out front until the service first moves, then behind Connect devices" do
-    get operator_path(@session)
-    assert_select "[data-role=join-links]:not([hidden])"
-    assert_select "[data-role=connect-devices][aria-expanded=true]"
-
+  test "the join codes stay under the header after the service moves" do
     patch operator_advance_path(@session)
     get operator_path(@session)
-    assert_select "[data-role=join-links][hidden]"
-    assert_select "[data-role=connect-devices][aria-expanded=false][aria-controls=join-links]"
+    assert_select "[data-role=join-links]:not([hidden]) [data-role=projector-copy]"
   end
 end
