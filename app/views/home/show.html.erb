@@ -97,7 +97,7 @@
               <% item_count = set.set_items.size %>
               <li class="list-row items-center hover:bg-base-200">
                 <%= render "service_sets/date_block", date: set.service_date %>
-                <%= link_to service_set_path(set), class: "list-col-grow min-w-0" do %>
+                <%= link_to service_set_path(set), class: "list-col-grow min-w-0 after:absolute after:inset-0" do %>
                   <span class="block font-medium truncate"><%= set.name %></span>
                   <span class="block text-xs text-base-content/60"><%= t("home.recent.items", count: item_count) %></span>
                 <% end %>

@@ -1,9 +1,10 @@
 <%#
   A list row's button: Resume for the live service, Open for every other. Going live, adding
   items and filling slots happen on the service page (or from the Next service card). The column
-  is a fixed width so the status badges beside it line up. Locals: set, active_session.
+  is a fixed width so the status badges beside it line up, and sits above the row's stretched link.
+  Locals: set, active_session.
 %>
-<div class="flex shrink-0 justify-end sm:w-24">
+<div class="relative z-10 flex shrink-0 justify-end sm:w-24">
   <% if active_session&.service_set_id == set.id %>
     <%= link_to t("services.index.resume"), operator_path(active_session),
           class: "btn btn-primary btn-sm", data: { role: "set-resume" } %>
