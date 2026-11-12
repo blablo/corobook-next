@@ -1,6 +1,12 @@
 module OperatorHelper
   # "Vamos a Cantar · Chorus" / "Lectura Bíblica · Page 2 of 3": what a (live or preview)
   # session is showing, for the operator's Now / Next labels.
+  # A follow link (projector, band view, speaker view) on the host the operator is using, so it
+  # works from a church subdomain or the bare domain alike.
+  def follow_url(route, token)
+    public_send(:"#{route}_url", token, host: request.host_with_port, protocol: request.protocol.delete_suffix("://"))
+  end
+
   def operator_stop_label(session)
     item = session.current_item
     return "" unless item

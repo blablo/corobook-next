@@ -26,8 +26,9 @@ class LiveSession < ApplicationRecord
       current_set_item: first_item,
       current_section_index: 0,
       position_version: 0,
-      projector_token: SecureRandom.urlsafe_base64(24),
-      musician_token: SecureRandom.urlsafe_base64(24),
+      projector_token: new_token,
+      musician_token: new_token,
+      speaker_token: new_token,
       started_at: Time.current,
       position_changed_at: Time.current
     )
@@ -38,9 +39,35 @@ class LiveSession < ApplicationRecord
     raise AlreadyLiveError, "#{service_set.church.name} already has an active service"
   end
 
+  def self.new_token = SecureRandom.urlsafe_base64(24)
+
   def end!
-    update!(status: "ended", projector_token: nil, musician_token: nil, ended_at: Time.current)
+    update!(status: "ended", projector_token: nil, musician_token: nil, speaker_token: nil, ended_at: Time.current)
+    # Written directly: the speaker may have drawn since this row was loaded, and update! only
+    # writes attributes that changed in memory. The drawings aren't needed once it's over.
+    update_columns(whiteboard_mode: nil, whiteboard_board: [], whiteboard_slide: [], whiteboard_slide_stop: nil)
   end
+
+  # The speaker view link (/s/:token). The migration gave live sessions one; this covers any it
+  # missed. Locked, so two operators opening the page at once agree on the same link.
+  def speaker_token!
+    return speaker_token if speaker_token.present?
+
+    with_lock { update_column(:speaker_token, self.class.new_token) if speaker_token.blank? }
+    speaker_token
+  end
+
+  # A signed key that lets a screen (projector, operator) watch this session's whiteboard
+  # without being able to draw; see WhiteboardChannel.
+  def whiteboard_viewer_key
+    Rails.application.message_verifier(:whiteboard_viewer).generate(id, purpose: :viewer, expires_in: 1.day)
+  end
+
+  def self.whiteboard_viewer_id(key)
+    Rails.application.message_verifier(:whiteboard_viewer).verified(key.to_s, purpose: :viewer)
+  end
+
+  def whiteboard_on? = whiteboard_mode.present?
 
   def current_item = current_set_item&.item
 

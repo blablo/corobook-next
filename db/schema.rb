@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_12_180000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_12_200000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -111,15 +111,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_180000) do
     t.datetime "updated_at", null: false
     t.integer "current_chunk_index", default: 0, null: false
     t.datetime "position_changed_at"
+    t.string "speaker_token"
+    t.string "whiteboard_mode"
+    t.boolean "whiteboard_dark", default: false, null: false
+    t.jsonb "whiteboard_board", default: [], null: false
+    t.jsonb "whiteboard_slide", default: [], null: false
+    t.string "whiteboard_slide_stop"
     t.index ["church_id"], name: "index_live_sessions_on_church_id"
     t.index ["church_id"], name: "index_one_active_live_session_per_church", unique: true, where: "((status)::text = 'active'::text)"
     t.index ["current_set_item_id"], name: "index_live_sessions_on_current_set_item_id"
     t.index ["musician_token"], name: "index_live_sessions_on_musician_token", unique: true
     t.index ["projector_token"], name: "index_live_sessions_on_projector_token", unique: true
     t.index ["service_set_id"], name: "index_live_sessions_on_service_set_id"
+    t.index ["speaker_token"], name: "index_live_sessions_on_speaker_token", unique: true
     t.check_constraint "current_section_index >= 0", name: "live_sessions_section_index_check"
     t.check_constraint "font_scale >= 50 AND font_scale <= 400", name: "live_sessions_font_scale_check"
     t.check_constraint "status::text = ANY (ARRAY['active'::character varying::text, 'ended'::character varying::text])", name: "live_sessions_status_check"
+    t.check_constraint "whiteboard_mode IS NULL OR (whiteboard_mode::text = ANY (ARRAY['board'::character varying, 'slide'::character varying]::text[]))", name: "live_sessions_whiteboard_mode_check"
   end
 
   create_table "service_sets", force: :cascade do |t|

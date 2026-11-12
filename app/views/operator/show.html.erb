@@ -1,4 +1,6 @@
-<div class="space-y-6" data-role="operator" data-controller="operator-clicker">
+<div class="space-y-6" data-role="operator" data-controller="operator-clicker whiteboard"
+     data-whiteboard-viewer-value="<%= @session.whiteboard_viewer_key %>"
+     data-whiteboard-labels-value="<%= whiteboard_labels %>">
   <%# ── Header: service, live state, wall clock, exits ───────────── %>
   <header class="flex flex-wrap items-center justify-between gap-4">
     <div class="min-w-0 space-y-1">
@@ -21,12 +23,25 @@
       <%= link_to t("live.operator.back_to_service"), service_set_path(@session.service_set),
             class: "btn btn-ghost", data: { role: "back-to-set" } %>
       <% if @session.active? %>
+        <button type="button" class="btn btn-soft btn-primary" data-role="speaker-view"
+                onclick="document.getElementById('speaker-modal').showModal()">✎ <%= t("live.operator.speaker_view") %></button>
+      <% end %>
+      <% if @session.active? %>
         <%# Ending clears the projector and musician links, so it asks first. %>
         <button type="button" class="btn btn-error btn-outline" data-role="end-service"
                 onclick="document.getElementById('end-service-modal').showModal()"><%= t("live.operator.end_service") %></button>
       <% end %>
     </div>
   </header>
+
+  <%# The speaker's whiteboard is on: say so, with a way to take it off (whiteboard_controller.js
+      shows this as the state changes). %>
+  <div role="status" class="alert alert-warning alert-soft" hidden data-whiteboard-target="banner" data-role="whiteboard-banner">
+    <span aria-hidden="true">✎</span>
+    <span data-whiteboard-target="bannerText"></span>
+    <%= button_to t("live.operator.stop_whiteboard"), operator_whiteboard_stop_path(@session), method: :patch,
+          class: "btn btn-sm btn-warning", form: { data: { turbo: false } }, data: { role: "stop-whiteboard" } %>
+  </div>
 
   <%# Presenter view (like Keynote): Now on the left with the controls under it; Next and the
       service order on the right. On a phone the cards stack Now (with controls) → Next → order,
@@ -47,6 +62,11 @@
       <div class="px-5">
         <div class="rounded-box overflow-hidden projector-preview" data-role="operator-frame">
           <%= render "live/projector_frame", session: @session %>
+          <%# What the speaker draws, so Now shows exactly what the projector shows. %>
+          <div class="whiteboard-layer" hidden data-whiteboard-target="layer">
+            <div class="whiteboard-surface" data-whiteboard-target="surface"></div>
+            <canvas data-whiteboard-target="canvas"></canvas>
+          </div>
           <% if @session.blanked %>
             <%# The preview stage is always black, so fixed light text (not base-content) stays legible. %>
             <span class="absolute inset-0 z-10 flex items-center justify-center text-sm text-white/40"><%= t("live.operator.screen_blank") %></span>
@@ -139,35 +159,33 @@
 
   <%# ── Join links: open the projector screen, let musicians follow along ── %>
   <div class="grid gap-6 sm:grid-cols-2" data-role="join-links">
-    <% projector_url = projector_url(@session.projector_token, host: request.host_with_port, protocol: request.protocol.delete_suffix("://")) %>
-    <% musician_url  = musician_url(@session.musician_token,  host: request.host_with_port, protocol: request.protocol.delete_suffix("://")) %>
-
-    <section class="card card-border bg-base-100" data-role="projector-join">
-      <div class="card-body flex-row items-center gap-5">
-        <div class="shrink-0 rounded-box border border-base-300 bg-white p-2"><%= qr_svg(projector_url, size: 112) %></div>
-        <div class="min-w-0 space-y-1">
-          <h2 class="card-title text-base"><%= t("live.operator.projector") %></h2>
-          <p class="text-sm text-base-content/60"><%= t("live.operator.projector_hint") %></p>
-          <%= link_to projector_url, projector_url, target: "_blank", rel: "noopener",
-                class: "link link-primary text-sm break-all", data: { role: "projector-url" } %>
-        </div>
+    <section class="card card-border bg-base-100">
+      <div class="card-body">
+        <%= render "join_link", url: follow_url(:projector, @session.projector_token), role: "projector",
+              title: t("live.operator.projector"), hint: t("live.operator.projector_hint") %>
       </div>
     </section>
-
-    <section class="card card-border bg-base-100" data-role="musician-join">
-      <div class="card-body flex-row items-center gap-5">
-        <div class="shrink-0 rounded-box border border-base-300 bg-white p-2"><%= qr_svg(musician_url, size: 112) %></div>
-        <div class="min-w-0 space-y-1">
-          <h2 class="card-title text-base"><%= t("live.operator.musician") %></h2>
-          <p class="text-sm text-base-content/60"><%= t("live.operator.musician_hint") %></p>
-          <%= link_to musician_url, musician_url, target: "_blank", rel: "noopener",
-                class: "link link-primary text-sm break-all", data: { role: "musician-url" } %>
-        </div>
+    <section class="card card-border bg-base-100">
+      <div class="card-body">
+        <%= render "join_link", url: follow_url(:musician, @session.musician_token), role: "musician",
+              title: t("live.operator.musician"), hint: t("live.operator.musician_hint") %>
       </div>
     </section>
   </div>
 
   <% if @session.active? %>
+    <dialog id="speaker-modal" class="modal" data-role="speaker-modal">
+      <div class="modal-box space-y-3">
+        <%= render "join_link", url: follow_url(:speaker, @session.speaker_token!), role: "speaker", copy: true,
+              title: t("live.operator.speaker_view"), hint: t("live.operator.speaker_hint") %>
+        <p class="text-xs text-base-content/60"><%= t("live.operator.speaker_expires") %></p>
+        <div class="modal-action">
+          <button type="button" class="btn btn-ghost" onclick="document.getElementById('speaker-modal').close()"><%= t("live.operator.close") %></button>
+        </div>
+      </div>
+      <form method="dialog" class="modal-backdrop"><button aria-label="<%= t('live.operator.close') %>"><%= t("live.operator.close") %></button></form>
+    </dialog>
+
     <dialog id="end-service-modal" class="modal" data-role="end-service-modal">
       <div class="modal-box">
         <h3 class="text-lg font-semibold"><%= t("live.operator.end_title") %></h3>

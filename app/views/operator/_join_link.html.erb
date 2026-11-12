@@ -1,0 +1,19 @@
+<%#
+  A follow link with its QR code (projector, band view, speaker view). Locals: url, title, hint,
+  role (data-role prefix), and copy (show a Copy link button).
+%>
+<div class="flex flex-row items-center gap-5" data-role="<%= role %>-join">
+  <div class="shrink-0 rounded-box border border-base-300 bg-white p-2"><%= qr_svg(url, size: 112) %></div>
+  <div class="min-w-0 space-y-1">
+    <h2 class="card-title text-base"><%= title %></h2>
+    <p class="text-sm text-base-content/60"><%= hint %></p>
+    <%= link_to url, url, target: "_blank", rel: "noopener",
+          class: "link link-primary text-sm break-all", data: { role: "#{role}-url" } %>
+    <% if local_assigns[:copy] %>
+      <div data-controller="clipboard" data-clipboard-text-value="<%= url %>" data-clipboard-done-value="<%= t('live.operator.copied') %>">
+        <button type="button" class="btn btn-sm btn-primary mt-1" data-action="clipboard#copy"
+                data-clipboard-target="label"><%= t("live.operator.copy_link") %></button>
+      </div>
+    <% end %>
+  </div>
+</div>
