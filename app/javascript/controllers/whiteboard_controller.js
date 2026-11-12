@@ -16,7 +16,7 @@ const BOARD_BG = { light: "#ffffff", dark: "#0f172a" }
 
 export default class extends Controller {
   static targets = ["layer", "canvas", "surface", "start", "tools", "stop", "status", "darkToggle",
-    "color", "tool", "banner", "bannerText", "hint"]
+    "color", "tool", "banner", "bannerText", "hint", "nowLabel"]
   static values = { speaker: String, viewer: String, labels: Object }
 
   connect() {
@@ -68,6 +68,7 @@ export default class extends Controller {
       case "state":
         Object.assign(this, { mode: m.mode, dark: m.dark, blanked: m.blanked, stopKey: m.stop, board: m.board || [], slide: m.slide || [] })
         this.live.clear()
+        this.showLabel(m.label)
         this.render()
         break
       case "stroke":
@@ -87,6 +88,7 @@ export default class extends Controller {
       case "position":
         if (m.stop !== this.stopKey) { this.stopKey = m.stop; this.slide = [] }
         this.blanked = m.blanked
+        this.showLabel(m.label)
         this.render()
         break
       case "ended":
@@ -100,6 +102,8 @@ export default class extends Controller {
   }
 
   layer(name) { return name === "board" ? this.board : name === "slide" ? this.slide : null }
+
+  showLabel(label) { if (this.hasNowLabelTarget && label != null) this.nowLabelTarget.textContent = label }
 
   // ---- speaker actions ----
   start(e) { this.perform("start", { mode: e.params.mode }) }

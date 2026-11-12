@@ -22,6 +22,28 @@ class SpeakerViewTest < ActionDispatch::IntegrationTest
     assert_select "[data-role=whiteboard-canvas]"
   end
 
+  test "Next and Back on the speaker view move the service for every screen" do
+    get speaker_path(@session.speaker_token)
+    assert_select "[data-role=speaker-next]"
+    assert_select "[data-role=speaker-back]"
+    assert_select "[data-role=speaker-now]", text: "Uno · Title"
+
+    patch speaker_advance_path(@session.speaker_token)
+    assert_response :no_content
+    assert_equal 1, @session.reload.current_section_index
+    patch speaker_back_path(@session.speaker_token)
+    assert_equal 0, @session.reload.current_section_index
+  end
+
+  test "Next and Back stop working with the speaker link" do
+    token = @session.speaker_token
+    @session.end!
+    patch speaker_advance_path(token)
+    assert_response :not_found
+    patch speaker_advance_path("nope")
+    assert_response :not_found
+  end
+
   test "the speaker link stops working when the service ends" do
     token = @session.speaker_token
     @session.end!

@@ -48,9 +48,11 @@ Rails.application.routes.draw do
   get   "p/:token"         => "projector#show",    as: :projector
   patch "p/:token/advance" => "projector#advance", as: :projector_advance
   patch "p/:token/back"    => "projector#back",    as: :projector_back
-  # Speaker view (the pastor's tablet): whiteboard and drawing on the slide. Token-gated like
-  # the projector; the drawing itself goes over WhiteboardChannel.
-  get "s/:token" => "speaker#show", as: :speaker
+  # Speaker view (the pastor's tablet): Next/Back, whiteboard and drawing on the slide.
+  # Token-gated like the projector; the drawing itself goes over WhiteboardChannel.
+  get   "s/:token"         => "speaker#show",      as: :speaker
+  patch "s/:token/advance" => "speaker#advance",   as: :speaker_advance
+  patch "s/:token/back"    => "speaker#back",      as: :speaker_back
   get "m/:token" => "musician#show",  as: :musician
   # Permanent per-service musician link (emailed to the band): follows live when the service is live.
   get "m/s/:token" => "musician#service", as: :service_musician

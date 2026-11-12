@@ -71,6 +71,24 @@ class LiveSession < ApplicationRecord
 
   def current_item = current_set_item&.item
 
+  # Move the live position to a stop (a Corobook::LivePosition stop): bump the version, record
+  # CCLI usage when a song comes up, and broadcast to every screen. Shared by the operator, the
+  # projector's clicker and the speaker view. Returns false when another driver moved it in the
+  # same instant (lock_version); the screens already follow that newer position.
+  def move_to!(stop)
+    with_lock do
+      update!(current_set_item_id: stop.set_item_id, current_section_index: stop.section_index,
+              current_chunk_index: stop.chunk_index, position_version: position_version + 1,
+              # An auto-advancing slide starts its page clock here.
+              position_changed_at: Time.current)
+      UsageEvent.capture(live_session: self, song: current_set_item.song) if current_set_item&.item_type == "song"
+    end
+    Corobook::LiveBroadcast.position(self)
+    true
+  rescue ActiveRecord::StaleObjectError
+    false
+  end
+
   # When the current stop went live: the shared start of an auto-advancing slide's page clock.
   # Older sessions predate the column, so fall back to the launch time.
   def position_since = position_changed_at || started_at || updated_at

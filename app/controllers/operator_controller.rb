@@ -66,39 +66,13 @@ class OperatorController < ApplicationController
     end
   end
 
-  # Resolve the target stop, then update position + bump position_version in one transaction
-  # (optimistic lock_version guards a concurrent operator), capture usage, and broadcast inline.
+  # Resolve the target stop and move there (LiveSession#move_to! bumps the version, records usage
+  # and broadcasts). A concurrent move by another driver wins; this page just reloads.
   def move
     pos = Corobook::LivePosition.new(@session.service_set)
     target = yield(pos)
-    return redirect_to(operator_path(@session)) if target.nil?
-
-    begin
-      @session.with_lock do
-        @session.update!(
-          current_set_item_id: target.set_item_id,
-          current_section_index: target.section_index,
-          current_chunk_index: target.chunk_index,
-          position_version: @session.position_version + 1,
-          position_changed_at: Time.current
-        )
-        capture_usage(@session) # 8.1 hooks here — additive, inside the position transaction
-      end
-    rescue ActiveRecord::StaleObjectError
-      flash.now[:alert] = "Another operator changed the session; reloaded."
-    end
-
-    broadcast_position(@session)
+    @session.move_to!(target) if target
     redirect_to operator_path(@session)
-  end
-
-  # CCLI usage capture (§7): when a song becomes current, record one idempotent usage event.
-  # Runs inside the position transaction; live_session is passed explicitly (never Current).
-  def capture_usage(session)
-    item = session.current_set_item
-    return unless item&.item_type == "song"
-
-    UsageEvent.capture(live_session: session, song: item.song)
   end
 
   # Apply a projector-state change (blank/font), clamp font, bump version, broadcast inline.
@@ -111,10 +85,5 @@ class OperatorController < ApplicationController
     end
     Corobook::LiveBroadcast.position(@session)
     redirect_to operator_path(@session)
-  end
-
-  # Inline broadcast to both follower streams (never via Solid Queue; church is held explicitly).
-  def broadcast_position(session)
-    Corobook::LiveBroadcast.position(session)
   end
 end
