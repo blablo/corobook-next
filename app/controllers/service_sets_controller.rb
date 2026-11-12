@@ -6,7 +6,7 @@ class ServiceSetsController < ApplicationController
                                            preview print send_to_band toggle_default]
 
   PAST_PER_PAGE = 20
-  TABS = %w[upcoming past templates].freeze
+  TABS = %w[upcoming past].freeze
 
   def index
     all_sets = church_scope(:service_sets).includes(set_items: %i[song text_slide])
@@ -17,22 +17,19 @@ class ServiceSetsController < ApplicationController
                    .order(Arel.sql("service_date ASC NULLS LAST, name ASC"))
     # Past = before today, newest first, a page at a time.
     past = sets.where("service_date < ?", today).order(service_date: :desc, name: :asc)
-    templates = all_sets.templates.order(:name)
+    # Shown in the Templates card beside the services, whichever tab is open.
+    @templates = all_sets.templates.order(:name).to_a
 
     @upcoming_count = upcoming.count
     @past_count = past.count
-    @template_count = templates.count
     @active_session = church_scope(:live_sessions).find_by(status: "active")
     @next_set = upcoming.first
     @tab = TABS.include?(params[:tab]) ? params[:tab] : "upcoming"
     @page = [ params[:page].to_i, 1 ].max
 
-    case @tab
-    when "past"
+    if @tab == "past"
       @sets = past.limit(PAST_PER_PAGE).offset((@page - 1) * PAST_PER_PAGE)
       @older_page = @page + 1 if @past_count > @page * PAST_PER_PAGE
-    when "templates"
-      @sets = templates
     else
       # Every upcoming service, the next one included (it is also in the card above the tabs, and
       # its row carries a Next badge), so the list matches the tab's count.
@@ -135,7 +132,7 @@ class ServiceSetsController < ApplicationController
   def destroy
     template = @service_set.template?
     @service_set.destroy
-    redirect_to service_sets_path(tab: ("templates" if template)),
+    redirect_to service_sets_path,
                 notice: t(template ? "services.destroy.template" : "services.destroy.service")
   end
 

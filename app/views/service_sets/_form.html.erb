@@ -53,7 +53,7 @@
         <% create_label = template ? t("services.form.create_template") : t("services.form.create") %>
         <%= f.submit (service_set.persisted? ? t("services.form.save") : create_label), class: "btn btn-primary" %>
         <%= link_to t("services.form.cancel"),
-              (service_set.persisted? ? service_set_path(service_set) : service_sets_path(tab: ("templates" if template))),
+              (service_set.persisted? ? service_set_path(service_set) : service_sets_path),
               class: "btn btn-ghost" %>
       </div>
     </div>

@@ -151,10 +151,6 @@ en:
       no_past: "No past services yet."
       older: "Older"
       newer: "Newer"
-      new_template: "New template"
-      templates: "Templates"
-      no_templates: "No templates yet."
-      no_templates_hint: "A template holds your church's usual order: the fixed songs and slides, and slots to fill each week."
       fill_slots:
         one: "Fill %{count} slot"
         other: "Fill %{count} slots"
@@ -195,6 +191,13 @@ en:
     status:
       live: "Live"
       empty: "Empty"
+    templates_card:
+      title: "Templates"
+      use: "Use"
+      use_title: "New service from %{name}"
+      new: "+ New template"
+      help: "Use starts a service with the template's songs and slides, and empty slots to fill. Click a name to edit it."
+      empty: "Save your usual order once: the songs and slides that repeat, and slots for the ones that change each week."
     launch:
       nothing_to_show: "Nothing to show yet. Add a song or slide, or fill a slot."
     template:
@@ -206,7 +209,6 @@ en:
       delete: "Delete"
       delete_confirm: "Delete the template %{name}? Services made from it are kept."
       new_service_from: "New service from template"
-      new_service: "New service"
       song_slots:
         one: "%{count} song slot"
         other: "%{count} song slots"

@@ -18,23 +18,33 @@ class ServiceTemplatesTest < ActionDispatch::IntegrationTest
   end
 
   # ---- Services page ----
-  test "templates get their own tab and stay out of upcoming and past" do
+  test "templates are listed in the Templates card, apart from the services" do
     @church.service_sets.create!(name: "Domingo 9", service_date: Date.current + 3)
     get service_sets_path
-    assert_select "[data-role=tab-templates] .badge", text: "1"
     assert_select "[data-role=next-service]", text: /Domingo 9/
-    assert_select "body", text: /Domingo base/, count: 0
+    assert_select "[data-role=upcoming-sets]", text: /Domingo base/, count: 0
+    assert_select "[data-role=tab-templates]", count: 0
 
-    get service_sets_path(tab: "templates")
-    assert_select "[data-role=template-row]", 1
-    assert_select "[data-role=template-row]", text: /Domingo base/
-    assert_select "[data-role=new-template][href='#{new_service_set_path(template: 1)}']"
-    assert_select "[data-role=new-from-template][href='#{new_service_set_path(from_template_id: @template.id)}']"
+    assert_select "[data-role=templates-card] [data-role=template-row]", 1
+    assert_select "[data-role=template-row] [data-role=template-link][href='#{service_set_path(@template)}']", text: "Domingo base"
+    assert_select "[data-role=template-row]", text: /1 song slot · 1 slide slot/
+    assert_select "[data-role=template-row] [data-role=use-template][href='#{new_service_set_path(from_template_id: @template.id)}']"
+    assert_select "[data-role=templates-card] [data-role=new-template][href='#{new_service_set_path(template: 1)}']"
+
+    get service_sets_path(tab: "past")
+    assert_select "[data-role=templates-card] [data-role=template-row]", 1
   end
 
-  test "the default template is marked on the Templates tab" do
+  test "the Templates card explains templates when there are none" do
+    @template.destroy
+    get service_sets_path
+    assert_select "[data-role=templates-card] [data-role=templates-empty] [data-role=new-template]"
+    assert_select "[data-role=template-row]", count: 0
+  end
+
+  test "the default template is marked in the Templates card" do
     @church.update!(default_template: @template)
-    get service_sets_path(tab: "templates")
+    get service_sets_path
     assert_select "[data-role=template-row] [data-role=default-badge]"
   end
 
@@ -115,7 +125,7 @@ class ServiceTemplatesTest < ActionDispatch::IntegrationTest
   test "deleting a template returns to the Templates tab and clears the default" do
     @church.update!(default_template: @template)
     delete service_set_path(@template)
-    assert_redirected_to service_sets_path(tab: "templates")
+    assert_redirected_to service_sets_path
     assert_nil @church.reload.default_template_id
     assert TextSlide.exists?(@credo.id), "a library slide in the template survives"
   end
