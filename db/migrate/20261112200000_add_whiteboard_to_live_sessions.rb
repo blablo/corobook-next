@@ -17,5 +17,15 @@ class AddWhiteboardToLiveSessions < ActiveRecord::Migration[8.1]
     add_column :live_sessions, :whiteboard_slide, :jsonb, default: [], null: false
     # The stop the slide strokes were drawn on; they are dropped once the service moves off it.
     add_column :live_sessions, :whiteboard_slide_stop, :string
+
+    # A service live during the deploy gets its speaker link now, not on the operator's first GET.
+    reversible do |dir|
+      dir.up do
+        execute <<~SQL.squish
+          UPDATE live_sessions SET speaker_token = replace(gen_random_uuid()::text, '-', '')
+          WHERE status = 'active' AND speaker_token IS NULL
+        SQL
+      end
+    end
   end
 end

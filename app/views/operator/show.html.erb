@@ -159,50 +159,26 @@
 
   <%# ── Join links: open the projector screen, let musicians follow along ── %>
   <div class="grid gap-6 sm:grid-cols-2" data-role="join-links">
-    <% projector_url = projector_url(@session.projector_token, host: request.host_with_port, protocol: request.protocol.delete_suffix("://")) %>
-    <% musician_url  = musician_url(@session.musician_token,  host: request.host_with_port, protocol: request.protocol.delete_suffix("://")) %>
-
-    <section class="card card-border bg-base-100" data-role="projector-join">
-      <div class="card-body flex-row items-center gap-5">
-        <div class="shrink-0 rounded-box border border-base-300 bg-white p-2"><%= qr_svg(projector_url, size: 112) %></div>
-        <div class="min-w-0 space-y-1">
-          <h2 class="card-title text-base"><%= t("live.operator.projector") %></h2>
-          <p class="text-sm text-base-content/60"><%= t("live.operator.projector_hint") %></p>
-          <%= link_to projector_url, projector_url, target: "_blank", rel: "noopener",
-                class: "link link-primary text-sm break-all", data: { role: "projector-url" } %>
-        </div>
+    <section class="card card-border bg-base-100">
+      <div class="card-body">
+        <%= render "join_link", url: follow_url(:projector, @session.projector_token), role: "projector",
+              title: t("live.operator.projector"), hint: t("live.operator.projector_hint") %>
       </div>
     </section>
-
-    <section class="card card-border bg-base-100" data-role="musician-join">
-      <div class="card-body flex-row items-center gap-5">
-        <div class="shrink-0 rounded-box border border-base-300 bg-white p-2"><%= qr_svg(musician_url, size: 112) %></div>
-        <div class="min-w-0 space-y-1">
-          <h2 class="card-title text-base"><%= t("live.operator.musician") %></h2>
-          <p class="text-sm text-base-content/60"><%= t("live.operator.musician_hint") %></p>
-          <%= link_to musician_url, musician_url, target: "_blank", rel: "noopener",
-                class: "link link-primary text-sm break-all", data: { role: "musician-url" } %>
-        </div>
+    <section class="card card-border bg-base-100">
+      <div class="card-body">
+        <%= render "join_link", url: follow_url(:musician, @session.musician_token), role: "musician",
+              title: t("live.operator.musician"), hint: t("live.operator.musician_hint") %>
       </div>
     </section>
   </div>
 
   <% if @session.active? %>
-    <% speaker_url = speaker_url(@session.speaker_token!, host: request.host_with_port, protocol: request.protocol.delete_suffix("://")) %>
     <dialog id="speaker-modal" class="modal" data-role="speaker-modal">
-      <div class="modal-box">
-        <h3 class="text-lg font-semibold"><%= t("live.operator.speaker_view") %></h3>
-        <p class="py-2 text-base-content/80"><%= t("live.operator.speaker_hint") %></p>
-        <div class="flex flex-wrap items-center gap-5 mt-2">
-          <div class="shrink-0 rounded-box border border-base-300 bg-white p-2"><%= qr_svg(speaker_url, size: 144) %></div>
-          <div class="min-w-0 flex-1 space-y-2">
-            <%= link_to speaker_url, speaker_url, target: "_blank", rel: "noopener",
-                  class: "link link-primary text-sm break-all", data: { role: "speaker-url" } %>
-            <button type="button" class="btn btn-sm btn-primary block"
-                    onclick="navigator.clipboard.writeText(<%= speaker_url.to_json %>).then(() => { this.textContent = <%= t('live.operator.copied').to_json %> })"><%= t("live.operator.copy_link") %></button>
-            <p class="text-xs text-base-content/60"><%= t("live.operator.speaker_expires") %></p>
-          </div>
-        </div>
+      <div class="modal-box space-y-3">
+        <%= render "join_link", url: follow_url(:speaker, @session.speaker_token!), role: "speaker", copy: true,
+              title: t("live.operator.speaker_view"), hint: t("live.operator.speaker_hint") %>
+        <p class="text-xs text-base-content/60"><%= t("live.operator.speaker_expires") %></p>
         <div class="modal-action">
           <button type="button" class="btn btn-ghost" onclick="document.getElementById('speaker-modal').close()"><%= t("live.operator.close") %></button>
         </div>

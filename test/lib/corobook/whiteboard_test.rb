@@ -107,4 +107,42 @@ class Corobook::WhiteboardTest < ActiveSupport::TestCase
       Corobook::LiveBroadcast.position(@session)
     end
   end
+
+  test "moving off a slide drops its marks, so coming back to it shows a clean slide" do
+    @board.start!("slide")
+    @board.add_stroke!(stroke)
+    first = [ @session.current_section_index, @session.current_chunk_index ]
+
+    @session.update!(current_section_index: 1, position_version: @session.position_version + 1)
+    Corobook::LiveBroadcast.position(@session)
+    @session.update!(current_section_index: first[0], position_version: @session.position_version + 1)
+    Corobook::LiveBroadcast.position(@session)
+
+    assert_empty @session.reload.whiteboard_slide
+    assert_empty Corobook::Whiteboard.new(@session).state[:slide]
+  end
+
+  test "ending the service tells the screens and forgets the drawings" do
+    @board.start!("board")
+    @board.add_stroke!(stroke)
+    @session.end!
+    assert_broadcast_on(stream, { type: "ended" }) { Corobook::LiveBroadcast.ended(@session) }
+    assert_empty @session.reload.whiteboard_board
+  end
+
+  test "start and stop do nothing once the service has ended" do
+    @session.end!
+    version = @session.position_version
+    assert_no_broadcasts(stream) { Corobook::Whiteboard.new(@session).stop! }
+    assert_equal version, @session.reload.position_version
+  end
+
+  test "stroke ids echoed to the screens are kept short, and non-hash strokes are ignored" do
+    @board.start!("board")
+    assert_broadcast_on(stream, { type: "stroke", layer: "board", stroke: Corobook::Whiteboard.clean_stroke(stroke),
+                                  src: "s" * 64, id: "i" * 64 }) do
+      @board.add_stroke!(stroke, src: "s" * 500, id: "i" * 500)
+    end
+    assert_nil Corobook::Whiteboard.clean_stroke([ [ 0.1, 0.2 ] ])
+  end
 end

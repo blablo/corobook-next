@@ -20,6 +20,7 @@ export default class extends Controller {
   static values = { speaker: String, viewer: String, labels: Object }
 
   connect() {
+    this.isDisconnected = false
     this.src = Math.random().toString(36).slice(2)
     this.seq = 0
     this.mode = null
@@ -84,6 +85,8 @@ export default class extends Controller {
       case "ended":
         this.ended = true
         this.mode = null
+        this.current = null
+        clearInterval(this.flushTimer)
         this.render()
         break
     }
@@ -116,21 +119,24 @@ export default class extends Controller {
   perform(action, data = {}) { this.sub?.perform(action, data) }
 
   // ---- drawing (speaker) ----
+  // One pointer draws at a time: a palm or second finger on the tablet is ignored until the
+  // pen lifts, so it can't cut the stroke short.
   wirePointer() {
     const c = this.canvasTarget
     c.addEventListener("pointerdown", (e) => {
-      if (!this.mode || this.ended) return
+      if (!this.mode || this.ended || this.current) return
       e.preventDefault()
+      this.pointerId = e.pointerId
       try { c.setPointerCapture(e.pointerId) } catch { /* a pen that already lifted */ }
       this.begin(this.point(e))
     })
     c.addEventListener("pointermove", (e) => {
-      if (!this.current) return
+      if (!this.current || e.pointerId !== this.pointerId) return
       const events = e.getCoalescedEvents ? e.getCoalescedEvents() : [ e ]
       events.forEach(ev => this.extend(this.point(ev)))
       this.draw()
     })
-    const end = () => this.finish()
+    const end = (e) => { if (e.pointerId === this.pointerId) this.finish() }
     c.addEventListener("pointerup", end)
     c.addEventListener("pointercancel", end)
   }

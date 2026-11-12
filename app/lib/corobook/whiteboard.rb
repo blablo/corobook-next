@@ -3,8 +3,8 @@
 module Corobook
   # The speaker's whiteboard for one live session. The speaker view (the pastor's tablet) puts a
   # whiteboard over the projector ("board") or draws over the current slide ("slide"); the
-  # projector and the operator show the same strokes. The position never moves, so stopping shows
-  # the slide the service is on.
+  # projector and the operator show the same strokes. Turning it on or off doesn't move the
+  # position, so stopping shows whatever slide the service is on.
   #
   # Strokes are stored on the session row (board strokes stay until cleared; slide strokes belong
   # to one stop and are dropped once the service moves on) and travel over WhiteboardChannel.
@@ -19,6 +19,7 @@ module Corobook
     MAX_POINTS = 1500          # per stroke
     MAX_LIVE_POINTS = 200      # per in-progress message
     MAX_LAYER_POINTS = 60_000  # per layer (roughly 1 MB of JSON)
+    MAX_ID_LENGTH = 64         # client and stroke ids, echoed back to the screens
 
     attr_reader :session
 
@@ -33,9 +34,9 @@ module Corobook
 
     # A stroke from the client, or nil if it isn't one. Unknown colours fall back to the first.
     def self.clean_stroke(raw, max_points: MAX_POINTS)
-      return unless raw.respond_to?(:to_h)
+      return unless raw.is_a?(Hash)
 
-      raw = raw.to_h.stringify_keys
+      raw = raw.stringify_keys
       tool = raw["t"].to_s
       return unless TOOLS.include?(tool)
 
@@ -110,7 +111,7 @@ module Corobook
         return
       end
 
-      broadcast({ type: "stroke", layer:, stroke:, src: src.to_s, id: id.to_s })
+      broadcast({ type: "stroke", layer:, stroke:, src: short(src), id: short(id) })
       stroke
     end
 
@@ -121,7 +122,7 @@ module Corobook
       stroke = self.class.clean_stroke(raw, max_points: MAX_LIVE_POINTS)
       return if stroke.nil?
 
-      broadcast(stroke.merge(type: "live", src: src.to_s, id: id.to_s))
+      broadcast(stroke.merge(type: "live", src: short(src), id: short(id)))
     end
 
     def undo!
@@ -146,8 +147,12 @@ module Corobook
       broadcast(state)
     end
 
-    # After any position or blank change: the screens drop slide strokes from another stop.
+    # After any position or blank change. Slide strokes from the stop the service just left are
+    # dropped, and the screens told which stop is showing so they drop them too.
     def broadcast_position
+      # Straight in SQL: this row may have been loaded before the speaker started drawing.
+      LiveSession.where(id: session.id).where.not(whiteboard_slide_stop: [ nil, stop_key ])
+                 .update_all("whiteboard_slide = '[]'::jsonb, whiteboard_slide_stop = NULL")
       broadcast({ type: "position", stop: stop_key, blanked: session.blanked })
     end
 
@@ -157,7 +162,11 @@ module Corobook
 
     private
 
+    # Only while the service is live: after it ends, a re-broadcast frame would replace the
+    # "ended" screen on the projector and the band view.
     def change_mode(mode, **extra)
+      return unless session.active?
+
       locked do
         session.update_columns(whiteboard_mode: mode, position_version: session.position_version + 1, **extra)
       end
@@ -169,9 +178,10 @@ module Corobook
 
     def points_in(strokes) = strokes.sum { |s| Array(s["p"]).size }
 
+    def short(value) = value.to_s.first(MAX_ID_LENGTH)
+
     def broadcast(payload)
       WhiteboardChannel.broadcast_to(session, payload)
-      true
     end
   end
 end

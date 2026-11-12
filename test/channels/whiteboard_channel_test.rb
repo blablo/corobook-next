@@ -31,6 +31,12 @@ class WhiteboardChannelTest < ActionCable::Channel::TestCase
     subscribe viewer: @session.id.to_s
     assert subscription.rejected?
 
+    key = @session.whiteboard_viewer_key
+    travel 2.days do
+      subscribe viewer: key
+      assert subscription.rejected?, "the viewer key expires"
+    end
+
     token = @session.speaker_token
     @session.end!
     subscribe speaker: token
