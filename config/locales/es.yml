@@ -491,6 +491,7 @@ es:
       new_service: "Nuevo servicio"
       new_song: "Nueva canción"
       new_slide: "Nueva diapositiva"
+      new: "Nuevo"
     library:
       heading: "Biblioteca"
       songs: "Canciones"
