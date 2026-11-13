@@ -108,7 +108,7 @@ class TextSlidesController < ApplicationController
   end
 
   def slide_params
-    params.require(:text_slide).permit(:title, :background_image, :font_size, :text_align, :vertical_align,
+    params.require(:text_slide).permit(:title, :background_image, :font_size, :line_height, :text_align, :vertical_align,
                                        :bg_type, :bg_color, :bg_color2, :bg_gradient_angle, :text_color, :font,
                                        :auto_advance, :auto_advance_seconds, :auto_advance_loop, :auto_advance_transition,
                                        tags: [], pages: [ :body_markdown ])

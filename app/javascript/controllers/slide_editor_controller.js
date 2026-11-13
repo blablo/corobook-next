@@ -199,6 +199,13 @@ export default class extends Controller {
     this.updateSummaries()
   }
 
+  // Line spacing select: apply it to the preview text ("" = the default) and refit, since taller
+  // lines change the size that fits.
+  setLineHeight(e) {
+    this.previewTarget.style.lineHeight = e.target.value
+    this.previewTarget.closest('[data-controller~="fit"]')?.dispatchEvent(new CustomEvent("fit:refit"))
+  }
+
   // Projection look (background type/colours/gradient, text colour, font): repaint the preview
   // with the same --proj-* variables the projector uses, and show only the fields in use.
   updateLook() {

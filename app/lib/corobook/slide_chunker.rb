@@ -16,7 +16,6 @@ module Corobook
     AREA_WIDTH = 177.0  # lyric area is 16:9, so its width is ~177% of its height
     CHAR_WIDTH = 0.58   # average glyph advance in em for bold sans lyrics (a little generous)
     UPPER_CHAR_WIDTH = 0.70
-    LINE_GAP = 0.35     # em between lines (.projector-line + .projector-line)
 
     Slide = Struct.new(:offset, :lines)
 
@@ -51,7 +50,7 @@ module Corobook
         width = line.to_s.strip.length * @char_width * size
         [ (width / AREA_WIDTH).ceil, 1 ].max # a line too wide for the screen wraps onto more rows
       end
-      height = rows * @line_height * size + [ lines.length - 1, 0 ].max * LINE_GAP * size
+      height = rows * @line_height * size
       height <= 100
     end
 

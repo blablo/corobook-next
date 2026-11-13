@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_13_020000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_13_150000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -55,7 +55,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_020000) do
     t.string "projector_lyric_case", default: "none", null: false
     t.string "projector_title_case", default: "none", null: false
     t.string "projector_font", default: "sans", null: false
-    t.string "projector_line_height", default: "normal", null: false
+    t.string "projector_line_height", default: "1.15", null: false
     t.boolean "projector_bold", default: true, null: false
     t.boolean "projector_show_credits", default: true, null: false
     t.string "projector_valign", default: "center", null: false
@@ -197,6 +197,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_020000) do
     t.jsonb "tags", default: [], null: false
     t.jsonb "pages", default: [], null: false
     t.integer "font_size"
+    t.string "line_height"
     t.string "text_align", default: "center", null: false
     t.string "vertical_align", default: "center", null: false
     t.string "bg_type", default: "solid", null: false
@@ -218,6 +219,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_020000) do
     t.check_constraint "auto_advance_seconds IS NULL OR auto_advance_seconds >= 2 AND auto_advance_seconds <= 600", name: "text_slides_auto_advance_seconds_range"
     t.check_constraint "bg_type::text = ANY (ARRAY['solid'::character varying::text, 'gradient'::character varying::text, 'image'::character varying::text])", name: "text_slides_bg_type_check"
     t.check_constraint "font_size IS NULL OR font_size >= 10 AND font_size <= 200", name: "text_slides_font_size_check"
+    t.check_constraint "line_height IS NULL OR (line_height::text = ANY (ARRAY['1.0'::character varying, '1.15'::character varying, '1.5'::character varying, '2.0'::character varying]::text[]))", name: "text_slides_line_height_check"
     t.check_constraint "text_align::text = ANY (ARRAY['left'::character varying::text, 'center'::character varying::text, 'right'::character varying::text])", name: "text_slides_text_align_check"
     t.check_constraint "vertical_align::text = ANY (ARRAY['top'::character varying::text, 'center'::character varying::text, 'bottom'::character varying::text])", name: "text_slides_vertical_align_check"
   end

@@ -4,7 +4,7 @@ class Corobook::ProjectorSettingsTest < ActiveSupport::TestCase
   test "style emits every projector CSS variable from the church columns" do
     church = Church.create!(name: "Looks",
       projector_bg_color: "#102030", projector_text_color: "#fafafa",
-      projector_font: "serif", projector_line_height: "relaxed",
+      projector_font: "serif", projector_line_height: "1.5",
       projector_bold: false, projector_valign: "top",
       projector_lyric_case: "upper", projector_title_case: "title")
     style = church.projector_settings.style
@@ -12,7 +12,7 @@ class Corobook::ProjectorSettingsTest < ActiveSupport::TestCase
     assert_includes style, "--proj-bg: #102030"
     assert_includes style, "--proj-text: #fafafa"
     assert_includes style, "Georgia"            # serif stack
-    assert_includes style, "--proj-line-height: 1.4"
+    assert_includes style, "--proj-line-height: 1.5"
     assert_includes style, "--proj-weight: 400" # bold off
     assert_includes style, "--proj-valign: flex-start"
     assert_includes style, "--proj-lyric-case: uppercase"

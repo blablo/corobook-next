@@ -15,13 +15,13 @@ class Corobook::SongSlideSizingTest < ActiveSupport::TestCase
   end
 
   test "a section too long for the minimum is split into balanced slides" do
-    slides = Corobook::SlideChunker.new(@church).slides(lines(15))
-    assert_equal [ 8, 7 ], slides.map { |s| s.lines.length }
-    assert_equal [ 0, 8 ], slides.map(&:offset)
+    slides = Corobook::SlideChunker.new(@church).slides(lines(19))
+    assert_equal [ 10, 9 ], slides.map { |s| s.lines.length }
+    assert_equal [ 0, 10 ], slides.map(&:offset)
   end
 
   test "a larger minimum splits sooner" do
-    @church.update!(projector_min_font_size: 54)
+    @church.update!(projector_min_font_size: 66)
     slides = Corobook::SlideChunker.new(@church).slides(lines(8))
     assert_equal [ 4, 4 ], slides.map { |s| s.lines.length }
   end
@@ -29,8 +29,8 @@ class Corobook::SongSlideSizingTest < ActiveSupport::TestCase
   test "long lines count as the rows they wrap onto" do
     long = "una linea muy larga que no cabe en un solo renglon de la pantalla cuando el texto es grande"
     chunker = Corobook::SlideChunker.new(@church)
-    assert chunker.fits?(lines(8), 5)
-    assert_not chunker.fits?(Array.new(8) { long }, 5)
+    assert chunker.fits?(lines(12), 5)
+    assert_not chunker.fits?(Array.new(12) { long }, 5)
   end
 
   test "number-of-lines pagination keeps its fixed N-line slides" do
@@ -53,7 +53,7 @@ class Corobook::SongSlideSizingTest < ActiveSupport::TestCase
   end
 
   test "stops and the projector frame agree on a split section" do
-    song = @church.songs.create!(title: "Larga", chordpro_source: "{sov: V1}\n#{lines(15).join("\n")}\n{eov}")
+    song = @church.songs.create!(title: "Larga", chordpro_source: "{sov: V1}\n#{lines(19).join("\n")}\n{eov}")
     set = @church.service_sets.create!(name: "Domingo")
     item = set.set_items.create!(position: 0, item_type: "song", song: song)
 
@@ -63,9 +63,9 @@ class Corobook::SongSlideSizingTest < ActiveSupport::TestCase
     session = @church.live_sessions.create!(service_set: set,
       current_set_item_id: item.id, current_section_index: 1, current_chunk_index: 1)
     frame = Corobook::LiveFrame.new(session)
-    assert_equal lines(15).last(7), frame.current_section_plain_lines
+    assert_equal lines(19).last(9), frame.current_section_plain_lines
     assert frame.final_chunk?
-    assert_equal [ 8, 7 ], frame.song_slide_lines.map(&:length)
+    assert_equal [ 10, 9 ], frame.song_slide_lines.map(&:length)
   end
 
   test "the projector frame carries the song sizing data and a hidden copy of every slide" do

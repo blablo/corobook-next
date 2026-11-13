@@ -14,8 +14,6 @@ module Corobook
       "mono"      => %(ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace)
     }.freeze
 
-    LINE_HEIGHTS = { "tight" => "1.0", "normal" => "1.15", "relaxed" => "1.4" }.freeze
-
     # Flexbox justify-content for the vertical placement of the lyric block on the stage.
     VALIGNS = { "top" => "flex-start", "center" => "center", "bottom" => "flex-end" }.freeze
 
@@ -33,7 +31,7 @@ module Corobook
         "--proj-bg"          => background_css,
         "--proj-text"        => church.projector_text_color,
         "--proj-font"        => FONT_STACKS.fetch(church.projector_font, FONT_STACKS["sans"]),
-        "--proj-line-height" => LINE_HEIGHTS.fetch(church.projector_line_height, "1.15"),
+        "--proj-line-height" => line_height_css,
         "--proj-weight"      => church.projector_bold ? "700" : "400",
         "--proj-valign"      => VALIGNS.fetch(church.projector_valign, "center"),
         "--proj-lyric-case"  => CASE_TRANSFORMS.fetch(church.projector_lyric_case, "none"),
@@ -79,7 +77,13 @@ module Corobook
     # Smallest song-lyric size (pt) before a section is split onto more slides.
     def min_font_size = church.projector_min_font_size || DEFAULT_MIN_FONT_SIZE
 
-    def line_height = LINE_HEIGHTS.fetch(church.projector_line_height, "1.15").to_f
+    # Song line spacing as a multiple of the font size (Corobook::LineSpacing).
+    def line_height_css
+      value = church.projector_line_height
+      LineSpacing::OPTIONS.include?(value) ? value : LineSpacing::DEFAULT
+    end
+
+    def line_height = line_height_css.to_f
 
     def uppercase_lyrics? = church.projector_lyric_case == "upper"
 

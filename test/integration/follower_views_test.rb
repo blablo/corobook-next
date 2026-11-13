@@ -83,6 +83,15 @@ class FollowerViewsTest < ActionDispatch::IntegrationTest
     assert_select "[data-role=projector-slide][data-fit-fixed-value='0']"
   end
 
+  test "a text slide's line spacing reaches the projector" do
+    slide = @church.text_slides.create!(title: "Aire", line_height: "2.0", pages: [ { "body_markdown" => "Hola" } ])
+    item = @set.set_items.create!(position: 1, item_type: "text_slide", text_slide: slide)
+    @session.update!(current_set_item_id: item.id, current_section_index: 0)
+
+    get projector_path(@session.projector_token)
+    assert_select ".projector-slide-body[style='line-height: 2.0']"
+  end
+
   test "the church's song font size reaches the lyric section's fit controller" do
     @church.update!(projector_font_size: 72)
     @session.update!(current_section_index: 1) # first lyric section

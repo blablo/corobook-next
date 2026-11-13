@@ -230,7 +230,7 @@
                 </div>
               </div>
             </details>
-            <details class="collapse collapse-arrow border border-base-300 bg-base-100" data-role="slide-section-text"<%= " open" if text_slide.errors[:text_color].any? || text_slide.errors[:font].any? || text_slide.errors[:font_size].any? %>>
+            <details class="collapse collapse-arrow border border-base-300 bg-base-100" data-role="slide-section-text"<%= " open" if text_slide.errors[:text_color].any? || text_slide.errors[:font].any? || text_slide.errors[:font_size].any? || text_slide.errors[:line_height].any? %>>
               <summary class="collapse-title font-semibold text-sm">
                 <%= t("slides.form.section_text") %>
                 <span class="font-normal text-base-content/60" data-role="slide-summary-text" data-auto-label="<%= t("slides.form.font_size_auto_short") %>">· <%= t("settings.projection.font_#{text_slide.font}") %>, <%= text_slide.font_size ? t("slides.form.font_size_points", n: text_slide.font_size) : t("slides.form.font_size_auto_short") %></span>
@@ -256,6 +256,14 @@
                         {}, class: "select w-full",
                         data: { role: "slide-font-size", action: "change->slide-editor#setFontSize" } %>
                   <p class="label whitespace-normal"><%= t("slides.form.font_size_help") %></p>
+                </fieldset>
+
+                <fieldset class="fieldset sm:col-span-2">
+                  <%= f.label :line_height, t("settings.projection.line_spacing"), class: "fieldset-legend" %>
+                  <%= f.select :line_height,
+                        [ [ t("slides.form.line_spacing_default"), "" ] ] + Corobook::LineSpacing::OPTIONS.map { |v| [ t("settings.projection.spacing_option.#{v.tr(".", "_")}"), v ] },
+                        {}, class: "select w-full",
+                        data: { role: "slide-line-height", action: "change->slide-editor#setLineHeight" } %>
                 </fieldset>
                 </div>
               </div>
@@ -336,7 +344,7 @@
             <div class="projector-slide <%= text_slide.alignment_classes %><%= ' has-bg' if text_slide.background_image? %>" data-controller="fit" data-role="projector-slide"
                  data-slide-editor-target="previewSlide"
                  data-fit-fixed-value="<%= text_slide.font_size.to_i %>">
-              <div class="projector-slide-body" data-fit-target="content" data-slide-editor-target="preview" data-role="slide-preview"></div>
+              <div class="projector-slide-body" data-fit-target="content" data-slide-editor-target="preview" data-role="slide-preview" <%= tag.attributes(style: ("line-height: #{text_slide.line_height}" if text_slide.line_height)) %>></div>
             </div>
           </div>
           <%# Time left on the current page while auto-advance plays (DaisyUI progress). %>

@@ -22,7 +22,7 @@
 <% end %>
 <div class="projector-slide <%= slide.alignment_classes %><%= ' has-bg' if slide.background_image? %>" data-controller="fit" data-role="projector-slide"
      data-fit-fixed-value="<%= slide.font_size.to_i %>">
-  <div data-fit-target="content" class="projector-slide-body">
+  <div data-fit-target="content" class="projector-slide-body" <%= tag.attributes(style: ("line-height: #{slide.line_height}" if slide.line_height)) %>>
     <%= raw slide.rendered_html(local_assigns.fetch(:page, 0)) %>
   </div>
 </div>
