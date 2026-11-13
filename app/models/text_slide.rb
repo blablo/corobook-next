@@ -20,7 +20,9 @@ class TextSlide < ApplicationRecord
 
   validates :font_size, numericality: { only_integer: true, in: Corobook::FontSize::RANGE }, allow_nil: true
 
-  # Optional line spacing (Corobook::LineSpacing); nil = the slide's default spacing.
+  # Optional line spacing (Corobook::LineSpacing); nil = the slide's default spacing. The form's
+  # Default option submits "", which means nil.
+  normalizes :line_height, with: ->(value) { value.presence }
   validates :line_height, inclusion: { in: Corobook::LineSpacing::OPTIONS }, allow_nil: true
 
   # Where the text sits on the projector screen (all pages). Defaults: centered both ways.

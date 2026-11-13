@@ -94,6 +94,8 @@ class TextSlideTest < ActiveSupport::TestCase
     assert_nil slide.line_height
     assert slide(line_height: "1.5").valid?
     assert_not slide(line_height: "3").valid?
+    assert_nil slide(line_height: "").line_height
+    assert slide(line_height: "").valid?
   end
 
   test "font size outside 10..200 pt is invalid" do
