@@ -106,7 +106,7 @@
               <fieldset class="fieldset">
                 <%= f.label :projector_line_height, t("settings.projection.line_spacing"), class: "fieldset-legend" %>
                 <%= f.select :projector_line_height,
-                      [ [t("settings.projection.spacing_tight"), "tight"], [t("settings.projection.spacing_normal"), "normal"], [t("settings.projection.spacing_relaxed"), "relaxed"] ],
+                      Church::LINE_HEIGHT_OPTIONS.map { |v| [ t("settings.projection.spacing_option.#{v.tr(".", "_")}"), v ] },
                       {}, class: "select select-bordered w-full",
                       data: { role: "pp-lh", action: "change->projector-preview#update" } %>
               </fieldset>

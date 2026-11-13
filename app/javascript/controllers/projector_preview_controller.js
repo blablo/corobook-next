@@ -13,7 +13,6 @@ export default class extends Controller {
     condensed: '"Arial Narrow", "Roboto Condensed", "Helvetica Neue", sans-serif',
     mono: 'ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace',
   }
-  static LINE_HEIGHTS = { tight: "1.0", normal: "1.15", relaxed: "1.4" }
   static VALIGN = { top: "flex-start", center: "center", bottom: "flex-end" }
   static CASE = { none: "none", upper: "uppercase", title: "capitalize" }
 
@@ -71,7 +70,7 @@ export default class extends Controller {
       : bg1
     const text = this.val("pp-text") || "#ffffff"
     const font = this.constructor.FONTS[this.val("pp-font")] || this.constructor.FONTS.sans
-    const lh = this.constructor.LINE_HEIGHTS[this.val("pp-lh")] || "1.15"
+    const lh = this.val("pp-lh") || "1.15"
     const valign = this.constructor.VALIGN[this.val("pp-valign")] || "center"
     const lyricCase = this.constructor.CASE[this.val("pp-lyric-case")] || "none"
     const bold = this.val("pp-bold")
@@ -107,7 +106,6 @@ export default class extends Controller {
       div.style.fontWeight = bold ? "700" : "400"
       div.style.lineHeight = lh
       div.style.textTransform = lyricCase
-      div.style.marginTop = "0.3em"
       div.style.textShadow = useImage ? "0 2px 12px rgba(0,0,0,0.65)" : "none"
       this.lyricsTarget.appendChild(div)
     })

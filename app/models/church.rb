@@ -15,7 +15,7 @@ class Church < ApplicationRecord
   # ── Projector settings (per-church projection look & behaviour) ──────────────
   CASE_OPTIONS        = %w[none upper title].freeze
   FONT_OPTIONS        = %w[sans serif condensed mono].freeze
-  LINE_HEIGHT_OPTIONS = %w[tight normal relaxed].freeze
+  LINE_HEIGHT_OPTIONS = Corobook::LineSpacing::OPTIONS
   VALIGN_OPTIONS      = %w[top center bottom].freeze
   PAGINATION_OPTIONS  = %w[by_section by_lines].freeze
   BG_TYPE_OPTIONS     = %w[solid gradient image].freeze
