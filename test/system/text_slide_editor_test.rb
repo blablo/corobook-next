@@ -179,13 +179,18 @@ class TextSlideEditorTest < ApplicationSystemTestCase
     # One paragraph with line breaks (not one paragraph per line), formatting shown, no markers.
     rich = find("[data-slide-editor-target=rich]")
     assert_selector "[data-slide-editor-target=rich] > p", count: 3
-    assert_selector "[data-slide-editor-target=rich] p:first-child br", count: 2
+    assert_selector "[data-slide-editor-target=rich] p:first-child br", count: 2, visible: :all
     assert_selector "[data-slide-editor-target=rich] strong em", text: "Save us"
     assert_no_text "***"
 
     # Type at the end of the page, then save: everything else comes back unchanged.
     rich.click
-    rich.send_keys([ :command, :end ], " Amen.")
+    page.execute_script(<<~JS)
+      const el = document.querySelector("[data-slide-editor-target=rich]")
+      const r = document.createRange(); r.selectNodeContents(el.lastElementChild); r.collapse(false)
+      const s = window.getSelection(); s.removeAllRanges(); s.addRange(r)
+    JS
+    rich.send_keys(" Amen.")
     click_on "Save changes"
     assert_text "Slide updated."
     assert_equal "#{body} Amen.", slide.reload.page_markdown(0)
