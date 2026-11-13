@@ -77,7 +77,7 @@ export default class extends Controller {
     const bold = this.val("pp-bold")
     const pagination = this.val("pp-pagination")
     const perSlide = Math.max(1, Math.min(20, parseInt(this.val("pp-lines"), 10) || 4))
-    // Fixed lyric size as % of screen height (cqh — the preview stage is a size container); 0 = auto.
+    // Fixed lyric size in pt (the fit controller turns it into cqh of the preview stage); 0 = auto.
     const fixedSize = parseInt(this.val("pp-font-size"), 10) || 0
 
     // Stage background (solid or gradient). Painted on the stage only — the frame sits inside the

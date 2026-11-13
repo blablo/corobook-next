@@ -14,10 +14,11 @@ class TextSlide < ApplicationRecord
   BACKGROUND_IMAGE_TYPES = %w[image/png image/jpeg image/webp image/gif].freeze
   BACKGROUND_IMAGE_MAX_BYTES = 10.megabytes
 
-  # Fixed font sizes offered in the editor, as a percentage of the screen height. nil = auto (fit).
-  FONT_SIZE_OPTIONS = [ 4, 5, 6, 8, 10, 12, 14, 16, 18, 20, 24 ].freeze
+  # Fixed font sizes offered in the editor, in pt on a 540 pt-tall screen (see Corobook::FontSize).
+  # nil = auto (fit).
+  FONT_SIZE_OPTIONS = Corobook::FontSize::OPTIONS
 
-  validates :font_size, numericality: { only_integer: true, in: 2..30 }, allow_nil: true
+  validates :font_size, numericality: { only_integer: true, in: Corobook::FontSize::RANGE }, allow_nil: true
 
   # Where the text sits on the projector screen (all pages). Defaults: centered both ways.
   TEXT_ALIGN_OPTIONS = %w[left center right].freeze

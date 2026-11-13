@@ -1,5 +1,10 @@
 import { Controller } from "@hotwired/stimulus"
 
+// Sizes are entered in pt on a PowerPoint-sized screen, 540 pt tall (Corobook::FontSize), so a
+// size in pt is that share of the stage height: 54 pt = 10cqh.
+const SCREEN_HEIGHT_PT = 540
+const ptToCqh = (pt) => `${(pt * 100) / SCREEN_HEIGHT_PT}cqh`
+
 // Song sizes already worked out, keyed by song + stage size + settings. The projector frame is
 // re-rendered on every slide change, so the cache lives outside the controller instance.
 const songSizes = new Map()
@@ -15,13 +20,13 @@ const songSizes = new Map()
 // * Anything else (text slides, previews): a fixed size, or as large as this slide allows.
 export default class extends Controller {
   static targets = ["content"]
-  // fixed: preferred/fixed size as % of the stage height; 0 = as large as fits.
-  // minPct: smallest song size as % of the stage height. songKey: identifies the song.
+  // fixed: preferred/fixed size in pt; 0 = as large as fits.
+  // minPt: smallest song size in pt. songKey: identifies the song.
   static values = {
     min: { type: Number, default: 12 },
     max: { type: Number, default: 400 },
     fixed: { type: Number, default: 0 },
-    minPct: { type: Number, default: 0 },
+    minPt: { type: Number, default: 0 },
     songKey: { type: String, default: "" }
   }
 
@@ -62,10 +67,10 @@ export default class extends Controller {
     const content = this.hasContentTarget ? this.contentTarget : this.element
     const stage = this.element.closest("#live-frame, .live-frame") || this.element.closest(".projector-preview") || this.element.parentElement || this.element
 
-    // Fixed size outside a song: a percentage of the stage height via container-query units,
-    // so it is the same proportion of the screen on the projector and every preview.
+    // Fixed size outside a song: a share of the stage height via container-query units, so it
+    // is the same proportion of the screen on the projector and every preview.
     if (this.fixedValue > 0 && !this.songKeyValue) {
-      content.style.fontSize = `${this.fixedValue}cqh`
+      content.style.fontSize = ptToCqh(this.fixedValue)
       content.style.visibility = "visible"
       return
     }
@@ -102,8 +107,8 @@ export default class extends Controller {
 
   // The one size for every slide of this song, in px.
   songSize(stage, content, availW, availH) {
-    const cap = this.fixedValue > 0 ? this.pctToPx(content, this.fixedValue) : this.maxValue
-    const floor = this.minPctValue > 0 ? this.pctToPx(content, this.minPctValue) : this.minValue
+    const cap = this.fixedValue > 0 ? this.ptToPx(content, this.fixedValue) : this.maxValue
+    const floor = this.minPtValue > 0 ? this.ptToPx(content, this.minPtValue) : this.minValue
     const key = `${this.songKeyValue}|${Math.round(availW)}x${Math.round(availH)}|${cap}|${floor}`
     if (songSizes.has(key)) return songSizes.get(key)
 
@@ -135,11 +140,11 @@ export default class extends Controller {
     return lo
   }
 
-  // A % of the stage height (cqh, as stored in the settings) in px, read from the browser so it
+  // A size in pt (as stored in the settings) in px on this stage, read from the browser so it
   // matches what the fixed-size path renders.
-  pctToPx(el, pct) {
+  ptToPx(el, pt) {
     const previous = el.style.fontSize
-    el.style.fontSize = `${pct}cqh`
+    el.style.fontSize = ptToCqh(pt)
     const px = parseFloat(getComputedStyle(el).fontSize)
     el.style.fontSize = previous
     return Math.round(px)

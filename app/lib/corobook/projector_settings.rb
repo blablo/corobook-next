@@ -71,12 +71,12 @@ module Corobook
 
     def show_credits? = church.projector_show_credits
 
-    # Preferred song-lyric size as % of screen height, or 0 for "as large as fits".
+    # Preferred song-lyric size in pt (Corobook::FontSize), or 0 for "as large as fits".
     def font_size = church.projector_font_size.to_i
 
-    DEFAULT_MIN_FONT_SIZE = 5
+    DEFAULT_MIN_FONT_SIZE = 28
 
-    # Smallest song-lyric size (% of screen height) before a section is split onto more slides.
+    # Smallest song-lyric size (pt) before a section is split onto more slides.
     def min_font_size = church.projector_min_font_size || DEFAULT_MIN_FONT_SIZE
 
     def line_height = LINE_HEIGHTS.fetch(church.projector_line_height, "1.15").to_f

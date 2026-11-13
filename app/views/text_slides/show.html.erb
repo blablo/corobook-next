@@ -120,7 +120,7 @@
               <dd class="flex items-center gap-2">
                 <span class="inline-block size-4 rounded-field border border-base-300" style="background: <%= slide.text_color %>"></span>
                 <%= t("settings.projection.font_#{slide.font}") %>,
-                <%= slide.font_size ? t("slides.form.font_size_percent", percent: slide.font_size) : t("slides.form.font_size_auto_short") %>
+                <%= slide.font_size ? t("slides.form.font_size_points", n: slide.font_size) : t("slides.form.font_size_auto_short") %>
               </dd>
             </div>
             <div>
