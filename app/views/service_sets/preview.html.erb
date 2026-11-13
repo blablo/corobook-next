@@ -1,55 +1,141 @@
 <% content_for :title, t("services.preview.page_title", name: @service_set.name) %>
+<%#
+  The band's read-through of the whole service: one numbered card per item (a song with all its
+  sections and chords, a text slide's text, an imported deck's page images), Transpose and Capo
+  for the whole service (Print keeps them), and the order beside it on wide screens.
+%>
+<% item_title = ->(row) { row.kind == :title ? row.song.title : (row.slide.title.presence || t("services.preview.untitled_slide")) } %>
+<%# The page's own query (key, semitones, capo) for links and the capo form; zero semitones is omitted. %>
+<% view_params = ->(semitones: @semitones) { { key: params[:key], semitones: (semitones unless semitones.zero?), capo: @capo }.compact_blank } %>
+<% song_icon = capture do %><svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9 19.5 6.75v8.25M9 9v8.25M9 9l-.75.161M9 17.25a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm10.5-2.25a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/></svg><% end %>
+<% slide_icon = capture do %><svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75h16.5v12.75H3.75zM12 16.5v3.75m-3 0h6"/></svg><% end %>
 
-<div class="mx-auto my-6 max-w-3xl px-4 sm:px-6 musician-root musician-preview-page" data-role="set-preview">
-  <%# ── Header (hidden when printing) ───────────────────────────── %>
-  <header class="musician-topbar no-print">
+<div class="space-y-6" data-role="set-preview">
+  <%# ── Header: the service, then Transpose / Capo / Print ─────────── %>
+  <header class="flex flex-wrap items-end justify-between gap-4">
     <div class="min-w-0">
-      <div class="musician-setname" data-role="set-name"><%= @service_set.name %></div>
-      <div class="text-xs text-base-content/60">
-        <%= @service_set.service_date&.strftime("%A, %B %-d, %Y") || t("services.preview.no_date") %>
-        · <%= t("services.preview.stops", count: @set_rows.count { |r| r.kind != :title }) %>
-      </div>
+      <%= link_to t("services.preview.back"), service_set_path(@service_set),
+            class: "link link-hover text-xs text-base-content/70 no-print", data: { role: "back-to-service" } %>
+      <h1 class="text-2xl font-semibold leading-tight mt-1" data-role="set-name"><%= @service_set.name %></h1>
+      <p class="text-sm text-base-content/60" data-role="set-summary">
+        <%= [ t("services.preview.heading"),
+              @service_set.service_date ? l(@service_set.service_date, format: :weekday) : t("services.preview.no_date"),
+              t("services.preview.items", count: @preview_items.size) ].join(" · ") %>
+      </p>
     </div>
-    <div class="flex items-center gap-2">
-      <%= link_to t("services.preview.back"), service_set_path(@service_set), class: "btn btn-ghost btn-sm" %>
-      <%= link_to t("services.preview.print"), print_service_set_path(@service_set, key: params[:key], semitones: params[:semitones], capo: params[:capo]),
-            class: "btn btn-primary btn-sm", target: "_blank", rel: "noopener" %>
+
+    <div class="flex flex-wrap items-center gap-3 no-print">
+      <div class="flex items-center gap-2">
+        <span class="text-xs text-base-content/60"><%= t("services.preview.transpose") %></span>
+        <div class="join">
+          <%= link_to "−", preview_service_set_path(@service_set, view_params.(semitones: [ @semitones - 1, -11 ].max).except(:key)),
+                class: "btn btn-sm join-item", aria: { label: t("services.preview.transpose_down") }, data: { role: "transpose-down" } %>
+          <span class="join-item inline-flex items-center justify-center min-w-20 px-3 border-y border-base-300 bg-base-100 text-sm tabular-nums" data-role="transpose-value">
+            <%= params[:key].presence || (@semitones.zero? ? t("services.preview.original") : format("%+d", @semitones)) %>
+          </span>
+          <%= link_to "+", preview_service_set_path(@service_set, view_params.(semitones: [ @semitones + 1, 11 ].min).except(:key)),
+                class: "btn btn-sm join-item", aria: { label: t("services.preview.transpose_up") }, data: { role: "transpose-up" } %>
+        </div>
+      </div>
+      <%= form_with url: preview_service_set_path(@service_set), method: :get, class: "flex items-center gap-2" do %>
+        <% view_params.call.except(:capo).each do |name, value| %><%= hidden_field_tag name, value, id: nil %><% end %>
+        <%= label_tag :capo, t("services.preview.capo"), class: "text-xs text-base-content/60" %>
+        <%= select_tag :capo, options_for_select([ [ t("services.preview.capo_none"), "" ] ] + (1..7).map { |n| [ n, n ] }, @capo),
+              class: "select select-sm w-24", onchange: "this.form.requestSubmit()", data: { role: "capo" } %>
+        <noscript><%= submit_tag t("services.preview.apply"), name: nil, class: "btn btn-sm" %></noscript>
+      <% end %>
+      <%= link_to t("services.preview.print_order"), print_order_service_set_path(@service_set),
+            class: "btn btn-sm", target: "_blank", rel: "noopener", data: { role: "print-order" } %>
+      <%= link_to t("services.preview.print"), print_service_set_path(@service_set, view_params.call),
+            class: "btn btn-primary btn-sm", target: "_blank", rel: "noopener", data: { role: "print" } %>
     </div>
   </header>
 
-  <%# ── The whole set in order ──────────────────────────────────── %>
-  <div class="musician-setlist" data-role="set-list">
-    <% @set_rows.each do |row| %>
-      <section class="musician-row" data-role="set-row"
-               data-item-id="<%= row.item_id %>" data-section-index="<%= row.section_index %>">
-        <% case row.kind %>
-        <% when :title %>
-          <div class="musician-chart-title" data-role="chart-title">
-            <h2><%= row.song.title %></h2>
-            <% if row.displayed_key %><span class="musician-chart-key" data-role="key-badge"><%= t("services.preview.key", key: row.displayed_key) %></span><% end %>
-            <% credits = [ row.song.author, row.song.copyright_line, (row.song.ccli_song_number.present? ? "CCLI ##{row.song.ccli_song_number}" : nil) ].compact %>
-            <% if credits.any? %>
-              <div class="musician-chart-credits"><% credits.each do |c| %><div><%= c %></div><% end %></div>
-            <% end %>
-          </div>
-        <% when :section %>
-          <%= render "songs/musician_chart_section", section: row.section, projected: row.projected %>
-        <% when :slide %>
-          <div class="musician-chart-title" data-role="slide-title">
-            <h2>
-              <%= row.slide.title.presence || t("services.preview.untitled_slide") %>
-              <% if row.slide.page_count > 1 %>
-                <span class="musician-chart-key" data-role="slide-page"><%= t("services.preview.page_of", page: row.page + 1, total: row.slide.page_count) %></span>
-              <% end %>
-            </h2>
-          </div>
-          <%= render "text_slides/musician_slide", slide: row.slide, page: row.page %>
-        <% end %>
-      </section>
-    <% end %>
+  <% if @preview_items.empty? %>
+    <div class="card card-border bg-base-100">
+      <p class="card-body text-center text-base-content/60" data-role="empty"><%= t("services.preview.empty") %></p>
+    </div>
+  <% else %>
+    <div class="grid gap-6 items-start lg:grid-cols-[minmax(0,1fr)_14rem]">
+      <%# ── The whole service, one card per item ───────────────────── %>
+      <div class="space-y-4 min-w-0">
+        <% @preview_items.each_with_index do |rows, i| %>
+          <% first = rows.first %>
+          <% song = first.kind == :title %>
+          <section id="item-<%= first.item_id %>" class="card card-border bg-base-100 scroll-mt-24 print:break-inside-avoid" data-role="preview-item">
+            <div class="card-body p-5 gap-0">
+              <div class="flex items-center gap-3">
+                <span class="w-5 shrink-0 text-right text-sm tabular-nums text-base-content/60"><%= i + 1 %></span>
+                <span class="inline-grid place-items-center size-8 shrink-0 rounded-box bg-base-200 text-primary"><%= song ? song_icon : slide_icon %></span>
+                <div class="min-w-0 grow">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <h2 class="text-lg font-semibold" data-role="<%= song ? "chart-title" : "slide-title" %>"><%= item_title.(first) %></h2>
+                    <% if song %>
+                      <% capo = first.capo.to_i %>
+                      <% key_text = if first.displayed_key && capo.positive? then t("services.preview.key_capo", key: first.displayed_key, capo: capo)
+                                    elsif first.displayed_key then t("services.preview.key", key: first.displayed_key)
+                                    elsif capo.positive? then t("services.preview.capo_only", capo: capo) end %>
+                      <% if key_text %><span class="badge badge-soft badge-primary badge-sm font-mono" data-role="key-badge"><%= key_text %></span><% end %>
+                    <% elsif rows.size > 1 %>
+                      <span class="badge badge-ghost badge-sm" data-role="slide-pages"><%= t("services.preview.pages", count: rows.size) %></span>
+                    <% end %>
+                  </div>
+                  <% if song %>
+                    <% credits = [ first.song.author, first.song.copyright_line, (first.song.ccli_song_number.present? ? "CCLI ##{first.song.ccli_song_number}" : nil) ].compact_blank %>
+                    <% if credits.any? %><div class="text-xs text-base-content/60" data-role="credits"><%= credits.join(" · ") %></div><% end %>
+                  <% end %>
+                </div>
+              </div>
 
-    <% if @set_rows.empty? %>
-      <p class="musician-empty" data-role="empty"><%= t("services.preview.empty") %></p>
-    <% end %>
-  </div>
+              <% if song %>
+                <div class="mt-3 sm:pl-[4.75rem]">
+                  <% rows.drop(1).each do |row| %>
+                    <%= render "songs/musician_chart_section", section: row.section, projected: row.projected %>
+                  <% end %>
+                </div>
+              <% elsif first.slide.imported? %>
+                <%# An imported deck's pages are images, so they show as thumbnails, in order (the
+                    badge gives the count). Not <figure>: DaisyUI lays figures in a card out as a row. %>
+                <div class="mt-3 sm:pl-[4.75rem] grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  <% rows.each do |row| %>
+                    <% if (image = first.slide.page_image(row.page)) %>
+                      <%= image_tag rails_blob_path(image, only_path: true), loading: "lazy",
+                            alt: "#{item_title.(first)} · #{t("services.preview.page", n: row.page + 1)}",
+                            class: "w-full rounded-lg border border-base-300", data: { role: "deck-page" } %>
+                    <% end %>
+                  <% end %>
+                </div>
+              <% else %>
+                <%# A text slide shows its text as written, not the projector's look. %>
+                <div class="mt-3 sm:pl-[4.75rem] space-y-3">
+                  <% rows.each do |row| %>
+                    <div data-role="musician-slide">
+                      <% if rows.size > 1 %><div class="musician-chart-label" data-role="slide-page"><%= t("services.preview.page", n: row.page + 1) %></div><% end %>
+                      <div class="[&>*+*]:mt-1 [&_:is(h1,h2,h3,h4)]:font-semibold [&_ul]:list-disc [&_ol]:list-decimal [&_:is(ul,ol)]:pl-5">
+                        <%= raw first.slide.rendered_html(row.page) %>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </section>
+        <% end %>
+      </div>
+
+      <%# ── The order, kept in view while scrolling (wide screens) ───── %>
+      <aside class="hidden lg:block lg:sticky lg:top-20 card card-border bg-base-100 no-print" data-role="preview-contents">
+        <nav class="card-body p-3 gap-0.5" aria-label="<%= t("services.preview.in_this_service") %>">
+          <h2 class="font-semibold text-sm px-2 mb-1"><%= t("services.preview.in_this_service") %></h2>
+          <% @preview_items.each_with_index do |rows, i| %>
+            <a href="#item-<%= rows.first.item_id %>" class="flex items-center gap-2 rounded-box px-2 py-1.5 text-sm hover:bg-base-200" data-role="contents-link">
+              <span class="w-4 shrink-0 text-right text-xs tabular-nums text-base-content/60"><%= i + 1 %></span>
+              <span class="truncate grow"><%= item_title.(rows.first) %></span>
+              <% if rows.first.displayed_key %><span class="text-xs font-mono text-base-content/60"><%= rows.first.displayed_key %></span><% end %>
+            </a>
+          <% end %>
+        </nav>
+      </aside>
+    </div>
+  <% end %>
 </div>
