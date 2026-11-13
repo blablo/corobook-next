@@ -193,6 +193,7 @@ class TextSlideEditorTest < ApplicationSystemTestCase
     rich.send_keys(" Amen.")
     click_on "Save changes"
     assert_text "Slide updated."
-    assert_equal "#{body} Amen.", slide.reload.page_markdown(0)
+    # The browser submits form text with CRLF line endings; markdown treats them as plain newlines.
+    assert_equal "#{body} Amen.", slide.reload.page_markdown(0).gsub("\r\n", "\n")
   end
 end
