@@ -92,17 +92,15 @@
                   <% end %>
                 </div>
               <% elsif first.slide.imported? %>
-                <%# An imported deck's pages are images, so they show as thumbnails. %>
+                <%# An imported deck's pages are images, so they show as thumbnails, in order (the
+                    badge gives the count). Not <figure>: DaisyUI lays figures in a card out as a row. %>
                 <div class="mt-3 sm:pl-[4.75rem] grid grid-cols-2 sm:grid-cols-3 gap-3">
                   <% rows.each do |row| %>
-                    <figure data-role="deck-page">
-                      <% if (image = first.slide.page_image(row.page)) %>
-                        <%= image_tag rails_blob_path(image, only_path: true), loading: "lazy",
-                              alt: "#{item_title.(first)} · #{t("services.preview.page", n: row.page + 1)}",
-                              class: "w-full rounded-lg border border-base-300" %>
-                      <% end %>
-                      <% if rows.size > 1 %><figcaption class="text-xs text-base-content/60 mt-1"><%= t("services.preview.page", n: row.page + 1) %></figcaption><% end %>
-                    </figure>
+                    <% if (image = first.slide.page_image(row.page)) %>
+                      <%= image_tag rails_blob_path(image, only_path: true), loading: "lazy",
+                            alt: "#{item_title.(first)} · #{t("services.preview.page", n: row.page + 1)}",
+                            class: "w-full rounded-lg border border-base-300", data: { role: "deck-page" } %>
+                    <% end %>
                   <% end %>
                 </div>
               <% else %>
