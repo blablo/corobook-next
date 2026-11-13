@@ -75,10 +75,13 @@ class ServiceSetsController < ApplicationController
   # like the musician sees it — so an editor can eyeball the whole service before going live.
   # Honors an optional viewer key/capo (same per-viewer transpose as the musician view).
   def preview
-    @set_rows = Corobook::MusicianSetView.new(
-      @service_set,
-      target_key: params[:key], semitones: params[:semitones].to_i, capo: params[:capo].presence
+    @semitones = params[:semitones].to_i.clamp(-11, 11)
+    @capo = params[:capo].presence
+    rows = Corobook::MusicianSetView.new(
+      @service_set, target_key: params[:key], semitones: @semitones, capo: @capo
     ).rows
+    # One card per set item; an item's rows are consecutive.
+    @preview_items = rows.chunk_while { |a, b| a.item_id == b.item_id }.to_a
   end
 
   # A standalone, print-first band chart (its own minimal layout, no admin shell) — a

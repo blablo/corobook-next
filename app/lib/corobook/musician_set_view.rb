@@ -9,17 +9,18 @@ module Corobook
   # their key, not just the live section. Pure; no DB writes.
   #
   # The result is a flat list of rows the view renders top to bottom:
-  #   { kind: :title,   item:, song:, item_id:, section_index: 0 }
+  #   { kind: :title,   item:, song:, item_id:, section_index: 0, displayed_key:, capo: }
   #   { kind: :section, item:, song:, item_id:, section_index: n, section: <transposed hash>,
   #                      displayed_key:, projected: bool }
   #   { kind: :slide,   item:, slide:, item_id:, section_index: n, page: n }
   #
+  # `capo` is the capo the chords are shown for (the musician's, else the song's own).
   # `projected` is false for a chords-only section (shown to the musician, never a projector stop).
   # `section_index` matches LiveFrame's index contract (0 = title, i+1 = i-th ordered section) so a
   # row can be matched to the live position for "current"/"next" highlighting.
   class MusicianSetView
     Row = Struct.new(:kind, :item_id, :section_index, :song, :slide, :item, :section,
-                     :displayed_key, :projected, :page, keyword_init: true)
+                     :displayed_key, :capo, :projected, :page, keyword_init: true)
 
     def initialize(service_set, target_key: nil, semitones: 0, capo: nil)
       @items = service_set.set_items.filled.order(:position).includes(:song, :text_slide).to_a
@@ -44,11 +45,11 @@ module Corobook
       return [] if song.nil?
 
       renderer = MusicianRender.new(song, target_key: @target_key, semitones: @semitones, follower_capo: @capo)
-      transposed, _capo = renderer.call
+      transposed, capo = renderer.call
       key = renderer.displayed_key
 
       out = [ Row.new(kind: :title, item_id: item.id, section_index: 0, song: song, item: item,
-                      displayed_key: key) ]
+                      displayed_key: key, capo: capo) ]
 
       ordered_sections(transposed.to_h["sections"], song.arrangement).each_with_index do |section, i|
         out << Row.new(

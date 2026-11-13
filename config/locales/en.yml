@@ -1,5 +1,8 @@
 # English — base locale. A missing key in es.yml falls back to the value here.
 en:
+  date:
+    formats:
+      weekday: "%A, %B %-d"
   nav:
     library_heading: "Library"
     admin_heading: "Admin"
@@ -303,15 +306,29 @@ en:
       new_slide_modal_title: "New slide"
     preview:
       page_title: "%{name} — preview"
+      heading: "Band preview"
       no_date: "No date set"
-      stops:
-        one: "%{count} stop"
-        other: "%{count} stops"
+      items:
+        one: "%{count} item"
+        other: "%{count} items"
       back: "← Back to service"
       print: "Print"
+      transpose: "Transpose"
+      transpose_down: "Down a semitone"
+      transpose_up: "Up a semitone"
+      original: "Original"
+      capo: "Capo"
+      capo_none: "None"
+      apply: "Apply"
       key: "Key %{key}"
+      key_capo: "Key %{key} · Capo %{capo}"
+      capo_only: "Capo %{capo}"
+      pages:
+        one: "%{count} page"
+        other: "%{count} pages"
+      page: "Page %{n}"
+      in_this_service: "In this service"
       untitled_slide: "Untitled slide"
-      page_of: "page %{page} of %{total}"
       empty: "This set has no items yet."
     print:
       page_title: "%{name} — print"

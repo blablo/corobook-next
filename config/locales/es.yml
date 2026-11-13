@@ -1,5 +1,11 @@
 # Español — mirrors en.yml. A missing key here falls back to English.
 es:
+  # Day and month names for l(date); without them Spanish dates fall back to English names.
+  date:
+    day_names: [ domingo, lunes, martes, miércoles, jueves, viernes, sábado ]
+    month_names: [ ~, enero, febrero, marzo, abril, mayo, junio, julio, agosto, septiembre, octubre, noviembre, diciembre ]
+    formats:
+      weekday: "%A %-d de %B"
   nav:
     library_heading: "Biblioteca"
     admin_heading: "Administración"
@@ -303,15 +309,29 @@ es:
       new_slide_modal_title: "Nueva diapositiva"
     preview:
       page_title: "%{name} — vista previa"
+      heading: "Vista previa de la banda"
       no_date: "Sin fecha"
-      stops:
-        one: "%{count} parada"
-        other: "%{count} paradas"
+      items:
+        one: "%{count} elemento"
+        other: "%{count} elementos"
       back: "← Volver al servicio"
       print: "Imprimir"
+      transpose: "Transponer"
+      transpose_down: "Bajar un semitono"
+      transpose_up: "Subir un semitono"
+      original: "Original"
+      capo: "Cejilla"
+      capo_none: "Ninguna"
+      apply: "Aplicar"
       key: "Tono %{key}"
+      key_capo: "Tono %{key} · Cejilla %{capo}"
+      capo_only: "Cejilla %{capo}"
+      pages:
+        one: "%{count} página"
+        other: "%{count} páginas"
+      page: "Página %{n}"
+      in_this_service: "En este servicio"
       untitled_slide: "Diapositiva sin título"
-      page_of: "página %{page} de %{total}"
       empty: "Este servicio aún no tiene elementos."
     print:
       page_title: "%{name} — imprimir"
