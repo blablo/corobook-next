@@ -10,6 +10,14 @@ Rails.application.routes.draw do
 
   root "home#show"
 
+  # Token-authenticated JSON API for importing content (see docs/import_api.md).
+  namespace :api do
+    namespace :v1 do
+      resources :songs, only: %i[index show create update]
+      resources :text_slides, only: %i[index show create update]
+    end
+  end
+
   get  "login"  => "sessions#new",     as: :login
   post "login"  => "sessions#create"
   delete "logout" => "sessions#destroy", as: :logout
