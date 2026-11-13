@@ -80,6 +80,7 @@ Rails.application.routes.draw do
     member do
       get "preview"
       get "print"
+      get "print_order"
       post "items", to: "service_sets#add_item", as: :add_item
       patch "reorder"
       delete "items/:item_id", to: "service_sets#remove_item", as: :remove_item

@@ -1,9 +1,9 @@
 class ServiceSetsController < ApplicationController
   layout "shell"
   before_action :require_sign_in
-  before_action :require_editor, except: %i[index show preview print]
+  before_action :require_editor, except: %i[index show preview print print_order]
   before_action :set_service_set, only: %i[show edit update destroy add_item reorder remove_item fill_item library
-                                           preview print send_to_band toggle_default]
+                                           preview print print_order send_to_band toggle_default]
 
   PAST_PER_PAGE = 20
   TABS = %w[upcoming past].freeze
@@ -92,6 +92,13 @@ class ServiceSetsController < ApplicationController
       @service_set,
       target_key: params[:key], semitones: params[:semitones].to_i, capo: params[:capo].presence
     ).rows
+    render layout: false
+  end
+
+  # A standalone, print-first order of service: every item in order, numbered. A text slide
+  # prints its title and text; a song or an imported slide prints its title only.
+  def print_order
+    @items = @service_set.ordered_items.filled
     render layout: false
   end
 

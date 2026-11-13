@@ -141,6 +141,40 @@ class ServiceSetPreviewTest < ActionDispatch::IntegrationTest
     login(@editor)
     get preview_service_set_path(@set)
     assert_response :success
-    assert_select "a[href^='#{print_service_set_path(@set)}']"
+    assert_select "a[data-role=print][href^='#{print_service_set_path(@set)}']", text: "Print charts"
+    assert_select "a[data-role=print-order][href='#{print_order_service_set_path(@set)}']", text: "Print order"
+  end
+
+  test "the order of service prints each item in order: a text slide's title and text, a song or imported slide by title" do
+    deck = @church.text_slides.create!(title: "Anuncios", reusable: true, imported: true, pages: [ { "body_markdown" => "" } ])
+    @set.set_items.create!(position: 2, item_type: "text_slide", text_slide: deck)
+    login(@editor)
+    get print_order_service_set_path(@set)
+    assert_response :success
+    # Standalone layout: no admin shell navbar/sidebar.
+    assert_select "header.navbar", count: 0
+    assert_select "[data-role=order-item]", count: 3
+    titles = css_select("[data-role=order-title]").map { |t| t.text.strip }
+    assert_equal [ "Himno", "Aviso", "Anuncios" ], titles
+    # Only the text slide prints text; the song has no lyrics or chords, the deck no images.
+    assert_select "[data-role=order-text]", count: 1
+    assert_select "[data-role=order-item]:nth-of-type(2) [data-role=order-text]", text: /Bienvenidos/
+    assert_select "[data-role=order-item]:nth-of-type(1)", text: /mundo/, count: 0
+    assert_select ".musician-chord, [data-role=chord], img", count: 0
+  end
+
+  test "the order of service prints every page of a multi-page text slide" do
+    @slide.update!(pages: [ { "body_markdown" => "uno" }, { "body_markdown" => "dos" } ])
+    login(@editor)
+    get print_order_service_set_path(@set)
+    assert_select "[data-role=order-text] .page", count: 2
+    assert_select "[data-role=order-text]", text: /uno\s*dos/
+  end
+
+  test "an admin can open the order of service" do
+    login(@admin)
+    get print_order_service_set_path(@set)
+    assert_response :success
+    assert_select "[data-role=order-title]", text: /Himno/
   end
 end

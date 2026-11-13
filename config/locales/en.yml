@@ -312,7 +312,8 @@ en:
         one: "%{count} item"
         other: "%{count} items"
       back: "← Back to service"
-      print: "Print"
+      print: "Print charts"
+      print_order: "Print order"
       transpose: "Transpose"
       transpose_down: "Down a semitone"
       transpose_up: "Up a semitone"
@@ -338,6 +339,14 @@ en:
       key: "Key %{key}"
       untitled_slide: "Untitled slide"
       page_of: "page %{page} of %{total}"
+    print_order:
+      page_title: "%{name} — order of service"
+      heading: "Order of service"
+      no_date: "No date set"
+      back: "← Back"
+      print: "Print"
+      untitled_slide: "Untitled slide"
+      empty: "This service has no items yet."
     send_to_band:
       sent:
         one: "Service sent to %{count} band member."

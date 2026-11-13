@@ -315,7 +315,8 @@ es:
         one: "%{count} elemento"
         other: "%{count} elementos"
       back: "← Volver al servicio"
-      print: "Imprimir"
+      print: "Imprimir acordes"
+      print_order: "Imprimir orden"
       transpose: "Transponer"
       transpose_down: "Bajar un semitono"
       transpose_up: "Subir un semitono"
@@ -341,6 +342,14 @@ es:
       key: "Tono %{key}"
       untitled_slide: "Diapositiva sin título"
       page_of: "página %{page} de %{total}"
+    print_order:
+      page_title: "%{name} — orden del servicio"
+      heading: "Orden del servicio"
+      no_date: "Sin fecha"
+      back: "← Volver"
+      print: "Imprimir"
+      untitled_slide: "Diapositiva sin título"
+      empty: "Este servicio aún no tiene elementos."
     send_to_band:
       sent:
         one: "Servicio enviado a %{count} miembro de la banda."

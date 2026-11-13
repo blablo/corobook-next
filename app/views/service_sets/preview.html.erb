@@ -44,6 +44,8 @@
               class: "select select-sm w-24", onchange: "this.form.requestSubmit()", data: { role: "capo" } %>
         <noscript><%= submit_tag t("services.preview.apply"), name: nil, class: "btn btn-sm" %></noscript>
       <% end %>
+      <%= link_to t("services.preview.print_order"), print_order_service_set_path(@service_set),
+            class: "btn btn-sm", target: "_blank", rel: "noopener", data: { role: "print-order" } %>
       <%= link_to t("services.preview.print"), print_service_set_path(@service_set, view_params.call),
             class: "btn btn-primary btn-sm", target: "_blank", rel: "noopener", data: { role: "print" } %>
     </div>
