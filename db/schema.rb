@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_12_200000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_13_020000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -70,9 +70,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_200000) do
     t.index ["default_template_id"], name: "index_churches_on_default_template_id"
     t.index ["subdomain"], name: "index_churches_on_subdomain", unique: true, where: "(subdomain IS NOT NULL)"
     t.check_constraint "projector_bg_gradient_angle >= 0 AND projector_bg_gradient_angle <= 360", name: "churches_projector_bg_gradient_angle_check"
-    t.check_constraint "projector_font_size IS NULL OR projector_font_size >= 2 AND projector_font_size <= 30", name: "churches_projector_font_size_check"
+    t.check_constraint "projector_font_size IS NULL OR projector_font_size >= 10 AND projector_font_size <= 200", name: "churches_projector_font_size_check"
     t.check_constraint "projector_lines_per_slide >= 1 AND projector_lines_per_slide <= 20", name: "churches_projector_lines_per_slide_check"
-    t.check_constraint "projector_min_font_size IS NULL OR projector_min_font_size >= 2 AND projector_min_font_size <= 30", name: "churches_projector_min_font_size_check"
+    t.check_constraint "projector_min_font_size IS NULL OR projector_min_font_size >= 10 AND projector_min_font_size <= 200", name: "churches_projector_min_font_size_check"
   end
 
   create_table "invitations", force: :cascade do |t|
@@ -217,7 +217,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_200000) do
     t.check_constraint "bg_gradient_angle >= 0 AND bg_gradient_angle <= 360", name: "text_slides_bg_gradient_angle_check"
     t.check_constraint "auto_advance_seconds IS NULL OR auto_advance_seconds >= 2 AND auto_advance_seconds <= 600", name: "text_slides_auto_advance_seconds_range"
     t.check_constraint "bg_type::text = ANY (ARRAY['solid'::character varying::text, 'gradient'::character varying::text, 'image'::character varying::text])", name: "text_slides_bg_type_check"
-    t.check_constraint "font_size IS NULL OR font_size >= 2 AND font_size <= 30", name: "text_slides_font_size_check"
+    t.check_constraint "font_size IS NULL OR font_size >= 10 AND font_size <= 200", name: "text_slides_font_size_check"
     t.check_constraint "text_align::text = ANY (ARRAY['left'::character varying::text, 'center'::character varying::text, 'right'::character varying::text])", name: "text_slides_text_align_check"
     t.check_constraint "vertical_align::text = ANY (ARRAY['top'::character varying::text, 'center'::character varying::text, 'bottom'::character varying::text])", name: "text_slides_vertical_align_check"
   end

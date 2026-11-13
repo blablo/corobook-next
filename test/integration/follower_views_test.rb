@@ -55,13 +55,13 @@ class FollowerViewsTest < ActionDispatch::IntegrationTest
   end
 
   test "a text slide with a fixed font size hands it to the projector fit controller" do
-    slide = @church.text_slides.create!(title: "Grande", font_size: 12, pages: [ { "body_markdown" => "Hola" } ])
+    slide = @church.text_slides.create!(title: "Grande", font_size: 66, pages: [ { "body_markdown" => "Hola" } ])
     item = @set.set_items.create!(position: 1, item_type: "text_slide", text_slide: slide)
     @session.update!(current_set_item_id: item.id, current_section_index: 0)
 
     get projector_path(@session.projector_token)
     assert_response :success
-    assert_select "[data-role=projector-slide][data-fit-fixed-value='12']"
+    assert_select "[data-role=projector-slide][data-fit-fixed-value='66']"
   end
 
   test "a text slide's alignment reaches the projector" do
@@ -84,10 +84,10 @@ class FollowerViewsTest < ActionDispatch::IntegrationTest
   end
 
   test "the church's song font size reaches the lyric section's fit controller" do
-    @church.update!(projector_font_size: 14)
+    @church.update!(projector_font_size: 72)
     @session.update!(current_section_index: 1) # first lyric section
     get projector_path(@session.projector_token)
-    assert_select ".projector-section[data-fit-fixed-value='14']"
+    assert_select ".projector-section[data-fit-fixed-value='72']"
   end
 
   test "song projection colours apply to songs but not to custom slides" do

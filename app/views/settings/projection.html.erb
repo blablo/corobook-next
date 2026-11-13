@@ -143,7 +143,7 @@
               <fieldset class="fieldset">
                 <%= f.label :projector_font_size, t("settings.projection.preferred_size"), class: "fieldset-legend" %>
                 <%= f.select :projector_font_size,
-                      [ [ t("settings.projection.as_large_as_fits"), "" ] ] + TextSlide::FONT_SIZE_OPTIONS.map { |n| [ t("settings.projection.percent_of_height", n: n), n ] },
+                      [ [ t("settings.projection.as_large_as_fits"), "" ] ] + TextSlide::FONT_SIZE_OPTIONS.map { |n| [ t("settings.projection.points", n: n), n ] },
                       {}, class: "select w-full",
                       data: { role: "pp-font-size", action: "change->projector-preview#update" } %>
                 <p class="label text-base-content/60 whitespace-normal"><%= t("settings.projection.preferred_size_help") %></p>
@@ -152,7 +152,7 @@
               <fieldset class="fieldset">
                 <%= f.label :projector_min_font_size, t("settings.projection.minimum_size"), class: "fieldset-legend" %>
                 <%= f.select :projector_min_font_size,
-                      [ [ t("settings.projection.default_percent", n: Corobook::ProjectorSettings::DEFAULT_MIN_FONT_SIZE), "" ] ] + TextSlide::FONT_SIZE_OPTIONS.map { |n| [ t("settings.projection.percent_of_height", n: n), n ] },
+                      [ [ t("settings.projection.default_points", n: Corobook::ProjectorSettings::DEFAULT_MIN_FONT_SIZE), "" ] ] + TextSlide::FONT_SIZE_OPTIONS.map { |n| [ t("settings.projection.points", n: n), n ] },
                       {}, class: "select w-full", data: { role: "pp-min-font-size" } %>
                 <p class="label text-base-content/60 whitespace-normal"><%= t("settings.projection.minimum_size_help") %></p>
               </fieldset>

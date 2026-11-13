@@ -24,7 +24,7 @@ module Corobook
       settings = church&.projector_settings
       @by_lines = church&.paginate_by_lines? || false
       @lines_per_slide = church&.projector_lines_per_slide.to_i.clamp(1, 20)
-      @min_size = settings&.min_font_size || ProjectorSettings::DEFAULT_MIN_FONT_SIZE
+      @min_size = FontSize.to_percent(settings&.min_font_size || ProjectorSettings::DEFAULT_MIN_FONT_SIZE)
       @line_height = settings&.line_height || 1.15
       @char_width = settings&.uppercase_lyrics? ? UPPER_CHAR_WIDTH : CHAR_WIDTH
     end

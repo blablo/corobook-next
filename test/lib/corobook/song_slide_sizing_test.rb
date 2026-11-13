@@ -21,7 +21,7 @@ class Corobook::SongSlideSizingTest < ActiveSupport::TestCase
   end
 
   test "a larger minimum splits sooner" do
-    @church.update!(projector_min_font_size: 10)
+    @church.update!(projector_min_font_size: 54)
     slides = Corobook::SlideChunker.new(@church).slides(lines(8))
     assert_equal [ 4, 4 ], slides.map { |s| s.lines.length }
   end
@@ -46,8 +46,8 @@ class Corobook::SongSlideSizingTest < ActiveSupport::TestCase
   end
 
   test "the minimum cannot be larger than the preferred size" do
-    @church.projector_font_size = 6
-    @church.projector_min_font_size = 8
+    @church.projector_font_size = 32
+    @church.projector_min_font_size = 44
     assert_not @church.valid?
     assert @church.errors[:projector_min_font_size].any?
   end
@@ -69,7 +69,7 @@ class Corobook::SongSlideSizingTest < ActiveSupport::TestCase
   end
 
   test "the projector frame carries the song sizing data and a hidden copy of every slide" do
-    @church.update!(projector_font_size: 12, projector_min_font_size: 6)
+    @church.update!(projector_font_size: 66, projector_min_font_size: 32)
     song = @church.songs.create!(title: "Dos", chordpro_source: "{sov: V1}\nUno\n{eov}\n{soc}\nCoro\n{eoc}")
     set = @church.service_sets.create!(name: "Domingo")
     item = set.set_items.create!(position: 0, item_type: "song", song: song)
@@ -77,8 +77,8 @@ class Corobook::SongSlideSizingTest < ActiveSupport::TestCase
       current_set_item_id: item.id, current_section_index: 1, current_chunk_index: 0)
 
     html = ApplicationController.render(partial: "live/projector_frame", locals: { session: session })
-    assert_includes html, %(data-fit-fixed-value="12")
-    assert_includes html, %(data-fit-min-pct-value="6")
+    assert_includes html, %(data-fit-fixed-value="66")
+    assert_includes html, %(data-fit-min-pt-value="32")
     assert_includes html, %(data-fit-song-key-value="#{song.id}-)
     assert_equal 2, html.scan('data-role="fit-measure-slide"').length
   end

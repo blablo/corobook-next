@@ -87,12 +87,12 @@ class TextSlideTest < ActiveSupport::TestCase
 
   test "font size defaults to auto (nil) and accepts a size in range" do
     assert_nil slide.font_size
-    assert slide(font_size: 10).valid?
+    assert slide(font_size: 54).valid?
   end
 
-  test "font size outside 2..30 is invalid" do
-    assert_not slide(font_size: 1).valid?
-    assert_not slide(font_size: 31).valid?
+  test "font size outside 10..200 pt is invalid" do
+    assert_not slide(font_size: 9).valid?
+    assert_not slide(font_size: 201).valid?
   end
 
   test "markdown is rendered to HTML per page" do

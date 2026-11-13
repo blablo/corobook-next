@@ -233,7 +233,7 @@
             <details class="collapse collapse-arrow border border-base-300 bg-base-100" data-role="slide-section-text"<%= " open" if text_slide.errors[:text_color].any? || text_slide.errors[:font].any? || text_slide.errors[:font_size].any? %>>
               <summary class="collapse-title font-semibold text-sm">
                 <%= t("slides.form.section_text") %>
-                <span class="font-normal text-base-content/60" data-role="slide-summary-text" data-auto-label="<%= t("slides.form.font_size_auto_short") %>">· <%= t("settings.projection.font_#{text_slide.font}") %>, <%= text_slide.font_size ? t("slides.form.font_size_percent", percent: text_slide.font_size) : t("slides.form.font_size_auto_short") %></span>
+                <span class="font-normal text-base-content/60" data-role="slide-summary-text" data-auto-label="<%= t("slides.form.font_size_auto_short") %>">· <%= t("settings.projection.font_#{text_slide.font}") %>, <%= text_slide.font_size ? t("slides.form.font_size_points", n: text_slide.font_size) : t("slides.form.font_size_auto_short") %></span>
               </summary>
               <div class="collapse-content">
                 <div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
@@ -252,7 +252,7 @@
                 <fieldset class="fieldset sm:col-span-2">
                   <%= f.label :font_size, t("slides.form.font_size_label"), class: "fieldset-legend" %>
                   <%= f.select :font_size,
-                        [ [ t("slides.form.font_size_auto"), "" ] ] + TextSlide::FONT_SIZE_OPTIONS.map { |n| [ t("slides.form.font_size_percent", percent: n), n ] },
+                        [ [ t("slides.form.font_size_auto"), "" ] ] + TextSlide::FONT_SIZE_OPTIONS.map { |n| [ t("slides.form.font_size_points", n: n), n ] },
                         {}, class: "select w-full",
                         data: { role: "slide-font-size", action: "change->slide-editor#setFontSize" } %>
                   <p class="label whitespace-normal"><%= t("slides.form.font_size_help") %></p>
