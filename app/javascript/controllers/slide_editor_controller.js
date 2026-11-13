@@ -2,6 +2,11 @@ import { Controller } from "@hotwired/stimulus"
 
 // A countdown field's hidden marker in the page markdown (mirrors Corobook::SlideCountdown::TOKEN).
 const COUNTDOWN = /\{\{\s*countdown\s+(\d{1,2}:\d{2}|\d{1,3}m)\s*(?:\|\s*([^{}<]*?))?\s*\}\}/g
+// Block-level tags of the editable box; anything else at the top level is inline content.
+const BLOCK_TAGS = new Set(["P", "DIV", "H1", "H2", "UL", "OL"])
+// Markdown escapes (\* \_ \\) parked in private-use characters while emphasis is parsed.
+const ESCAPE_PARK = { "\\": "\uE000", "*": "\uE001", "_": "\uE002" }
+const ESCAPE_UNPARK = { "\uE000": "\\", "\uE001": "*", "\uE002": "_" }
 
 // WYSIWYG slide editor with free-form TAGS and multi-PAGE support.
 //  - Tags: chips + autocomplete; serialized to hidden tags[] inputs.
@@ -150,7 +155,7 @@ export default class extends Controller {
       `<textarea class="hidden" name="text_slide[pages][][body_markdown]">${this.esc(p)}</textarea>`).join("")
   }
   // Plain-text snippet of a page's markdown for the thumbnail.
-  plain(md) { return (md || "").replace(COUNTDOWN, "⏱").replace(/[#*_>-]/g, "").replace(/\s+/g, " ").trim() }
+  plain(md) { return (md || "").replace(COUNTDOWN, "⏱").replace(/[#*_>\\-]/g, "").replace(/\s+/g, " ").trim() }
 
   // ======================= BODY (WYSIWYG) =======================
   bold(e) { e.preventDefault(); this.exec("bold") }
@@ -399,58 +404,98 @@ export default class extends Controller {
   }
 
   // ======================= HTML <-> Markdown (supported subset) =======================
+  // Line breaks vs paragraphs (matches the projector, which renders markdown with hard breaks):
+  // lines in a row are ONE paragraph, one per line ("a\nb" = <p>a<br>b</p>), and a blank line
+  // starts a new paragraph. Each line used to become its own <p> that saved back with a blank
+  // line after it, so opening and saving a slide turned every line break into a paragraph gap.
   htmlToMd(root) {
     const lines = []
-    root.childNodes.forEach(n => this.blockToMd(n, lines))
+    // Inline content typed straight into the box (text, bold, <br>) forms a paragraph of its own.
+    let run = []
+    const flush = () => {
+      if (!run.length) return
+      const box = document.createElement("p")
+      run.forEach(n => box.appendChild(n.cloneNode(true)))
+      this.blockToMd(box, lines)
+      run = []
+    }
+    root.childNodes.forEach(n => {
+      if (n.nodeType === Node.ELEMENT_NODE && BLOCK_TAGS.has(n.tagName)) { flush(); this.blockToMd(n, lines) }
+      else run.push(n)
+    })
+    flush()
     return lines.join("\n").replace(/\n{3,}/g, "\n\n").trim()
   }
   blockToMd(node, lines) {
-    if (node.nodeType === Node.TEXT_NODE) { const t = node.textContent.trim(); if (t) lines.push(t); return }
-    if (node.nodeType !== Node.ELEMENT_NODE) return
     const tag = node.tagName
     if (tag === "H1") lines.push(`# ${this.inline(node)}`, "")
     else if (tag === "H2") lines.push(`## ${this.inline(node)}`, "")
     else if (tag === "UL") { node.querySelectorAll(":scope > li").forEach(li => lines.push(`- ${this.inline(li)}`)); lines.push("") }
     else if (tag === "OL") { let i = 1; node.querySelectorAll(":scope > li").forEach(li => lines.push(`${i++}. ${this.inline(li)}`)); lines.push("") }
-    else if (tag === "BR") lines.push("")
-    else { const md = this.inline(node); if (md.trim()) lines.push(md, "") }
+    else {
+      // A paragraph: its <br>s are the lines. Two <br>s in a row leave an empty line, i.e. a gap.
+      const md = this.inline(node).split("\n").map(l => l.trim()).join("\n")
+      if (md.trim()) lines.push(md, "")
+    }
   }
-  inline(node) {
+  // Markdown for a node's inline content. Nested calls keep their edge spaces so the markers can
+  // sit around the words and the spaces outside ("**Creo** en", not "**Creo **en" or "**Creo**en").
+  inline(node, top = true) {
     let out = ""
     node.childNodes.forEach(c => {
       // The editable box turns typed trailing spaces into non-breaking spaces; save plain ones.
-      if (c.nodeType === Node.TEXT_NODE) out += c.textContent.replace(/\u00a0/g, " ")
+      // Literal * _ \ the author typed are escaped so they show as typed instead of formatting.
+      if (c.nodeType === Node.TEXT_NODE) out += c.textContent.replace(/\u00a0/g, " ").replace(/([\\*_])/g, "\\$1")
       else if (c.nodeType === Node.ELEMENT_NODE) {
         const t = c.tagName
         if (c.classList.contains("cd-chip")) out += c.dataset.token // countdown chip -> its marker
-        else if (t === "B" || t === "STRONG") out += `**${this.inline(c)}**`
-        else if (t === "I" || t === "EM") out += `_${this.inline(c)}_`
+        else if (t === "B" || t === "STRONG") out += this.wrapMd(this.inline(c, false), "**")
+        else if (t === "I" || t === "EM") out += this.wrapMd(this.inline(c, false), "*")
         else if (t === "BR") out += "\n"
-        else out += this.inline(c)
+        else out += this.inline(c, false)
       }
     })
-    return out.trim()
+    return top ? out.trim() : out
+  }
+  // Wrap each line on its own: emphasis that spans a line break is kept on both lines, and
+  // surrounding spaces stay outside the markers (markdown ignores "** x**").
+  wrapMd(inner, mark) {
+    return inner.split("\n").map(l => {
+      const core = l.trim()
+      return core ? `${l.match(/^\s*/)[0]}${mark}${core}${mark}${l.match(/\s*$/)[0]}` : l
+    }).join("\n")
   }
   mdToHtml(md) {
     const lines = (md || "").split("\n")
     const html = []
     let inList = false
+    let para = []
     const closeList = () => { if (inList) { html.push("</ul>"); inList = false } }
+    const closePara = () => { if (para.length) { html.push(`<p>${para.map(l => this.inlineMd(l)).join("<br>")}</p>`); para = [] } }
     for (const raw of lines) {
       const line = raw.trimEnd()
-      if (/^#\s+/.test(line)) { closeList(); html.push(`<h1>${this.inlineMd(line.replace(/^#\s+/, ""))}</h1>`) }
-      else if (/^##\s+/.test(line)) { closeList(); html.push(`<h2>${this.inlineMd(line.replace(/^##\s+/, ""))}</h2>`) }
-      else if (/^[-*]\s+/.test(line)) { if (!inList) { html.push("<ul>"); inList = true } html.push(`<li>${this.inlineMd(line.replace(/^[-*]\s+/, ""))}</li>`) }
-      else if (line.trim() === "") { closeList() }
-      else { closeList(); html.push(`<p>${this.inlineMd(line)}</p>`) }
+      if (/^#\s+/.test(line)) { closePara(); closeList(); html.push(`<h1>${this.inlineMd(line.replace(/^#\s+/, ""))}</h1>`) }
+      else if (/^##\s+/.test(line)) { closePara(); closeList(); html.push(`<h2>${this.inlineMd(line.replace(/^##\s+/, ""))}</h2>`) }
+      else if (/^[-*]\s+/.test(line)) { closePara(); if (!inList) { html.push("<ul>"); inList = true } html.push(`<li>${this.inlineMd(line.replace(/^[-*]\s+/, ""))}</li>`) }
+      else if (line.trim() === "") { closePara(); closeList() }
+      else { closeList(); para.push(line) }
     }
+    closePara()
     closeList()
     return html.join("") || "<p><br></p>"
   }
+  // One line of markdown -> editor HTML: ***bold italic***, **bold**, *italic* / _italic_, and
+  // backslash escapes (\* shows a literal star). Escapes are parked in private-use characters so
+  // the emphasis rules never see them.
   inlineMd(s) {
-    return this.esc(s)
+    const parked = (s || "").replace(/\\([\\*_])/g, (_, c) => ESCAPE_PARK[c])
+    return this.esc(parked)
       .replace(COUNTDOWN, (m) => this.chipHtml(this.unesc(m))) // markers -> ⏱ chips, before bold/italic
-      .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/_([^_]+)_/g, "<em>$1</em>")
+      .replace(/\*\*\*(?=\S)([^*]+?)\*\*\*/g, "<strong><em>$1</em></strong>")
+      .replace(/\*\*(?=\S)([^*]+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(?=\S)([^*]+?)\*/g, "<em>$1</em>")
+      .replace(/(^|[^\p{L}\p{N}])_(?=\S)([^_]+?)_(?![\p{L}\p{N}])/gu, "$1<em>$2</em>")
+      .replace(/[\uE000-\uE002]/g, (c) => ESCAPE_UNPARK[c])
   }
 
   // ======================= COUNTDOWN =======================
