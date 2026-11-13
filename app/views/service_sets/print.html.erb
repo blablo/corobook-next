@@ -90,7 +90,9 @@
         <span class="sub"><%= @service_set.service_date&.strftime("%A, %B %-d, %Y") || t("services.print.no_date") %></span>
       </div>
       <div class="print-actions">
-        <%= link_to t("services.print.back"), service_set_path(@service_set) %>
+        <%# Back to the preview this was printed from, in the same key and capo. %>
+        <%= link_to t("services.print.back"), preview_service_set_path(@service_set, params.permit(:key, :semitones, :capo).to_h.compact_blank),
+              data: { role: "back-to-preview" } %>
         <button type="button" class="primary" onclick="window.print()"><%= t("services.print.print") %></button>
       </div>
     </div>

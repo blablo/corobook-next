@@ -63,7 +63,7 @@
     <div class="print-bar">
       <span class="title"><%= t("services.print_order.heading") %></span>
       <div class="print-actions">
-        <%= link_to t("services.print_order.back"), service_set_path(@service_set) %>
+        <%= link_to t("services.print_order.back"), preview_service_set_path(@service_set), data: { role: "back-to-preview" } %>
         <button type="button" class="primary" onclick="window.print()"><%= t("services.print_order.print") %></button>
       </div>
     </div>

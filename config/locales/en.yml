@@ -334,7 +334,7 @@ en:
     print:
       page_title: "%{name} — print"
       no_date: "No date set"
-      back: "← Back"
+      back: "← Back to preview"
       print: "Print"
       key: "Key %{key}"
       untitled_slide: "Untitled slide"
@@ -343,7 +343,7 @@ en:
       page_title: "%{name} — order of service"
       heading: "Order of service"
       no_date: "No date set"
-      back: "← Back"
+      back: "← Back to preview"
       print: "Print"
       untitled_slide: "Untitled slide"
       empty: "This service has no items yet."

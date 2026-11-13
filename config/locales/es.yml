@@ -337,7 +337,7 @@ es:
     print:
       page_title: "%{name} — imprimir"
       no_date: "Sin fecha"
-      back: "← Volver"
+      back: "← Volver a la vista previa"
       print: "Imprimir"
       key: "Tono %{key}"
       untitled_slide: "Diapositiva sin título"
@@ -346,7 +346,7 @@ es:
       page_title: "%{name} — orden del servicio"
       heading: "Orden del servicio"
       no_date: "Sin fecha"
-      back: "← Volver"
+      back: "← Volver a la vista previa"
       print: "Imprimir"
       untitled_slide: "Diapositiva sin título"
       empty: "Este servicio aún no tiene elementos."

@@ -130,6 +130,14 @@ class ServiceSetPreviewTest < ActionDispatch::IntegrationTest
     assert_select ".musician-chord", text: "A"
   end
 
+  test "Back on both print views returns to the preview, the chart print in the same key and capo" do
+    login(@editor)
+    get print_service_set_path(@set, semitones: 2, capo: 1)
+    assert_select "a[data-role=back-to-preview][href=?]", preview_service_set_path(@set, semitones: 2, capo: 1), text: /Back to preview/
+    get print_order_service_set_path(@set)
+    assert_select "a[data-role=back-to-preview][href=?]", preview_service_set_path(@set), text: /Back to preview/
+  end
+
   test "an admin can open the read-only print view" do
     login(@admin)
     get print_service_set_path(@set)
