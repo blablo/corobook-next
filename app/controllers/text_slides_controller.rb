@@ -92,8 +92,7 @@ class TextSlidesController < ApplicationController
 
   # Live preview: render one page's markdown to the same safe HTML the projector uses.
   def preview
-    html = Commonmarker.to_html(params[:body_markdown].to_s.encode("UTF-8"))
-    render json: { html: Corobook::SlideCountdown.render(html) }
+    render json: { html: Corobook::SlideMarkdown.render(params[:body_markdown]) }
   end
 
   private

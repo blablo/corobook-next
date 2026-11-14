@@ -522,6 +522,8 @@ es:
         heading: "Encabezado"
         bullet: "Lista con viñetas"
         bullet_label: "• Lista"
+        small: "Texto pequeño: referencias, notas"
+        small_label: "Pequeño"
         clear: "Quitar formato"
         clear_label: "Limpiar"
         advanced: "Editar el texto sin formato"

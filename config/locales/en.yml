@@ -519,6 +519,8 @@ en:
         heading: "Heading"
         bullet: "Bulleted list"
         bullet_label: "• List"
+        small: "Small text: references, footnotes"
+        small_label: "Small"
         clear: "Clear formatting"
         clear_label: "Clear"
         advanced: "Edit the raw text"

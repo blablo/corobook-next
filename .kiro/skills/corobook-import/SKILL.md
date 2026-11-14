@@ -63,7 +63,7 @@ POST /api/v1/text_slides
   - `page_layout` -> `font_size` (pt on Corobook's 540 pt canvas, from the body text size vs page height), `text_align`, `vertical_align`. Use the most common value across a slide's pages and snap the size to `Corobook::FontSize::OPTIONS`.
   - `page_md` -> the page's markdown with the PDF's own line breaks, `*italic*` / `***bold italic***` runs as in the PDF (liturgy: leader italic, congregation bold italic), the heading as a plain same-size line (NOT `# Heading`, which renders larger), verse superscripts as Unicode superscripts (⁷ ¹¹), the reference as its own paragraph, and ligature gaps repaired (`af icted`). Literal `*` is escaped.
   - Render a few pages to compare visually: `pdftoppm -f N -l N -r 20 -png` (deck text is often white on a transparent/black page; view the PNG with the file reader).
-- Corobook cannot shrink one line within a page (no per-span size), so a small grey reference or footnote shows at body size; say so rather than hiding it.
+- Small text: `~text~` shows a line or phrase small and dimmed (~0.4 of the body on the projector). Use it for lines the PDF sets much smaller than the body, like references and footnotes; `page_md` does this for you. `~~text~~` is strikethrough, and a literal tilde is `\~`.
 - `font_size` is per slide, not per page. If one page of a slide is set at a different size in the PDF (e.g. a 49 pt page in a 40 pt creed), say so in the confirmation and offer to make that page its own slide.
 - Each newline in `body_markdown` is a line break on screen; a blank line starts a new paragraph.
 

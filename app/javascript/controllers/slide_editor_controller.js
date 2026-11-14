@@ -4,9 +4,9 @@ import { Controller } from "@hotwired/stimulus"
 const COUNTDOWN = /\{\{\s*countdown\s+(\d{1,2}:\d{2}|\d{1,3}m)\s*(?:\|\s*([^{}<]*?))?\s*\}\}/g
 // Block-level tags of the editable box; anything else at the top level is inline content.
 const BLOCK_TAGS = new Set(["P", "DIV", "H1", "H2", "UL", "OL"])
-// Markdown escapes (\* \_ \\) parked in private-use characters while emphasis is parsed.
-const ESCAPE_PARK = { "\\": "\uE000", "*": "\uE001", "_": "\uE002" }
-const ESCAPE_UNPARK = { "\uE000": "\\", "\uE001": "*", "\uE002": "_" }
+// Markdown escapes (\* \_ \~ \\) parked in private-use characters while emphasis is parsed.
+const ESCAPE_PARK = { "\\": "\uE000", "*": "\uE001", "_": "\uE002", "~": "\uE003" }
+const ESCAPE_UNPARK = { "\uE000": "\\", "\uE001": "*", "\uE002": "_", "\uE003": "~" }
 
 // WYSIWYG slide editor with free-form TAGS and multi-PAGE support.
 //  - Tags: chips + autocomplete; serialized to hidden tags[] inputs.
@@ -27,7 +27,7 @@ export default class extends Controller {
   static targets = ["rich", "source", "preview", "previewLabel", "advancedBtn", "toolbar",
     "tagChips", "tagInput", "tagFields", "pageFields", "pageStrip", "seed", "previewSlide", "previewBg", "previewStage",
     "autoToggle", "autoOptions", "autoSeconds", "autoTransition", "autoLoop", "autoHint", "autoPause", "autoBar", "autoSummary",
-    "countdownDialog", "countdownMode", "countdownTo", "countdownMinutes", "countdownEnd"]
+    "countdownDialog", "countdownMode", "countdownTo", "countdownMinutes", "countdownEnd", "smallBtn"]
   static values = { url: String }
 
   connect() {
@@ -36,6 +36,8 @@ export default class extends Controller {
     this.pages = (seed.pages && seed.pages.length) ? seed.pages.slice() : [ "" ]
     this.active = 0
     this.advancedOpen = false
+    this._onSelection = () => this.updateSmallState()
+    document.addEventListener("selectionchange", this._onSelection)
     this.renderTags()
     this.loadPage()
     this.renderPageFields()
@@ -44,6 +46,7 @@ export default class extends Controller {
   }
 
   disconnect() {
+    document.removeEventListener("selectionchange", this._onSelection)
     if (this._objectUrl) URL.revokeObjectURL(this._objectUrl)
     this.stopPlay(false)
   }
@@ -155,14 +158,62 @@ export default class extends Controller {
       `<textarea class="hidden" name="text_slide[pages][][body_markdown]">${this.esc(p)}</textarea>`).join("")
   }
   // Plain-text snippet of a page's markdown for the thumbnail.
-  plain(md) { return (md || "").replace(COUNTDOWN, "⏱").replace(/[#*_>\\-]/g, "").replace(/\s+/g, " ").trim() }
+  plain(md) { return (md || "").replace(COUNTDOWN, "⏱").replace(/[#*_~>\\-]/g, "").replace(/\s+/g, " ").trim() }
 
   // ======================= BODY (WYSIWYG) =======================
   bold(e) { e.preventDefault(); this.exec("bold") }
   italic(e) { e.preventDefault(); this.exec("italic") }
   heading(e) { e.preventDefault(); this.exec("formatBlock", "H2") }
   bullet(e) { e.preventDefault(); this.exec("insertUnorderedList") }
-  clearFormat(e) { e.preventDefault(); this.exec("removeFormat"); this.exec("formatBlock", "P") }
+  clearFormat(e) {
+    e.preventDefault()
+    // removeFormat drops bold/italic but not our small spans in every browser: unwrap those too.
+    const sel = window.getSelection()
+    this.richTarget.querySelectorAll("sub").forEach(sub => { if (sel.containsNode(sub, true)) this.unwrap(sub) })
+    this.exec("removeFormat"); this.exec("formatBlock", "P")
+  }
+  // Small text (references, footnotes): wraps the selection in <sub class="slide-small">, saved as
+  // ~text~. With the caret inside small text, the same button turns it back to normal size.
+  small(e) {
+    e.preventDefault() // mousedown: keep the selection in the editor
+    const current = this.smallAt()
+    if (current) {
+      this.unwrap(current)
+    } else {
+      const sel = window.getSelection()
+      if (!sel.rangeCount || sel.isCollapsed) return
+      const range = sel.getRangeAt(0)
+      if (!this.richTarget.contains(range.commonAncestorContainer)) return
+      const sub = document.createElement("sub")
+      sub.className = "slide-small"
+      sub.appendChild(range.extractContents())
+      // Small text inside small text means nothing: flatten any nested ones.
+      sub.querySelectorAll("sub").forEach(inner => this.unwrap(inner))
+      range.insertNode(sub)
+      sel.removeAllRanges()
+      const r = document.createRange(); r.selectNodeContents(sub); sel.addRange(r)
+    }
+    this.syncFromRich()
+    this.updateSmallState()
+  }
+  smallAt() {
+    const sel = window.getSelection()
+    if (!sel.rangeCount) return null
+    let n = sel.anchorNode
+    while (n && n !== this.richTarget) { if (n.nodeType === Node.ELEMENT_NODE && n.tagName === "SUB") return n; n = n.parentNode }
+    return null
+  }
+  updateSmallState() {
+    if (!this.hasSmallBtnTarget) return
+    const inside = this.richTarget.contains(window.getSelection().anchorNode) && !!this.smallAt()
+    this.smallBtnTarget.classList.toggle("btn-active", inside)
+    this.smallBtnTarget.setAttribute("aria-pressed", inside ? "true" : "false")
+  }
+  unwrap(el) {
+    const parent = el.parentNode
+    while (el.firstChild) parent.insertBefore(el.firstChild, el)
+    parent.removeChild(el)
+  }
   exec(cmd, val = null) { this.richTarget.focus(); document.execCommand(cmd, false, val); this.syncFromRich() }
   onKeydown(e) {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "b") { e.preventDefault(); this.bold(e) }
@@ -444,13 +495,15 @@ export default class extends Controller {
     let out = ""
     node.childNodes.forEach(c => {
       // The editable box turns typed trailing spaces into non-breaking spaces; save plain ones.
-      // Literal * _ \ the author typed are escaped so they show as typed instead of formatting.
-      if (c.nodeType === Node.TEXT_NODE) out += c.textContent.replace(/\u00a0/g, " ").replace(/([\\*_])/g, "\\$1")
+      // Literal * _ ~ \ the author typed are escaped so they show as typed instead of formatting.
+      if (c.nodeType === Node.TEXT_NODE) out += c.textContent.replace(/\u00a0/g, " ").replace(/([\\*_~])/g, "\\$1")
       else if (c.nodeType === Node.ELEMENT_NODE) {
         const t = c.tagName
         if (c.classList.contains("cd-chip")) out += c.dataset.token // countdown chip -> its marker
         else if (t === "B" || t === "STRONG") out += this.wrapMd(this.inline(c, false), "**")
         else if (t === "I" || t === "EM") out += this.wrapMd(this.inline(c, false), "*")
+        else if (t === "SUB") out += this.wrapMd(this.inline(c, false), "~")
+        else if (t === "DEL" || t === "S" || t === "STRIKE") out += this.wrapMd(this.inline(c, false), "~~")
         else if (t === "BR") out += "\n"
         else out += this.inline(c, false)
       }
@@ -484,18 +537,20 @@ export default class extends Controller {
     closeList()
     return html.join("") || "<p><br></p>"
   }
-  // One line of markdown -> editor HTML: ***bold italic***, **bold**, *italic* / _italic_, and
+  // One line of markdown -> editor HTML: ~small~, ***bold italic***, **bold**, *italic* / _italic_, and
   // backslash escapes (\* shows a literal star). Escapes are parked in private-use characters so
   // the emphasis rules never see them.
   inlineMd(s) {
-    const parked = (s || "").replace(/\\([\\*_])/g, (_, c) => ESCAPE_PARK[c])
+    const parked = (s || "").replace(/\\([\\*_~])/g, (_, c) => ESCAPE_PARK[c])
     return this.esc(parked)
       .replace(COUNTDOWN, (m) => this.chipHtml(this.unesc(m))) // markers -> ⏱ chips, before bold/italic
+      .replace(/~~(?=\S)([^~]*?\S)~~/g, "<del>$1</del>")
+      .replace(/(^|[^~])~(?=\S)([^~]*?\S)~(?!~)/g, '$1<sub class="slide-small">$2</sub>')
       .replace(/\*\*\*(?=\S)([^*]+?)\*\*\*/g, "<strong><em>$1</em></strong>")
       .replace(/\*\*(?=\S)([^*]+?)\*\*/g, "<strong>$1</strong>")
       .replace(/\*(?=\S)([^*]+?)\*/g, "<em>$1</em>")
       .replace(/(^|[^\p{L}\p{N}])_(?=\S)([^_]+?)_(?![\p{L}\p{N}])/gu, "$1<em>$2</em>")
-      .replace(/[\uE000-\uE002]/g, (c) => ESCAPE_UNPARK[c])
+      .replace(/[\uE000-\uE003]/g, (c) => ESCAPE_UNPARK[c])
   }
 
   // ======================= COUNTDOWN =======================

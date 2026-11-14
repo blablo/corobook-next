@@ -196,4 +196,36 @@ class TextSlideEditorTest < ApplicationSystemTestCase
     # The browser submits form text with CRLF line endings; markdown treats them as plain newlines.
     assert_equal "#{body} Amen.", slide.reload.page_markdown(0).gsub("\r\n", "\n")
   end
+
+  test "the Small button makes the selected line small text, and toggles it back" do
+    slide = @church.text_slides.create!(title: "Ref", reusable: true,
+                                        pages: [ { "body_markdown" => "Of old you laid the foundation\n\n(Psalm 102:25)" } ])
+    visit edit_text_slide_path(slide)
+    find("[data-slide-editor-target=rich]").click
+    select_last_paragraph = <<~JS
+      const el = document.querySelector("[data-slide-editor-target=rich]")
+      const r = document.createRange(); r.selectNodeContents(el.lastElementChild)
+      const s = window.getSelection(); s.removeAllRanges(); s.addRange(r)
+    JS
+
+    page.execute_script(select_last_paragraph)
+    find("[data-role=small-button]").click
+    assert_selector "[data-slide-editor-target=rich] sub.slide-small", text: "(Psalm 102:25)"
+    assert_selector "[data-role=small-button][aria-pressed=true]"
+    click_on "Save changes"
+    assert_text "Slide updated."
+    assert_equal "Of old you laid the foundation\n\n~(Psalm 102:25)~", slide.reload.page_markdown(0).gsub("\r\n", "\n")
+
+    # Reopened: shown small (no ~ markers), and the button turns it back to normal text.
+    visit edit_text_slide_path(slide)
+    assert_selector "[data-slide-editor-target=rich] sub.slide-small", text: "(Psalm 102:25)"
+    assert_no_text "~"
+    find("[data-slide-editor-target=rich]").click
+    page.execute_script(select_last_paragraph.sub("el.lastElementChild)", "el.lastElementChild.firstChild)"))
+    find("[data-role=small-button]").click
+    assert_no_selector "[data-slide-editor-target=rich] sub"
+    click_on "Save changes"
+    assert_text "Slide updated."
+    assert_equal "Of old you laid the foundation\n\n(Psalm 102:25)", slide.reload.page_markdown(0).gsub("\r\n", "\n")
+  end
 end

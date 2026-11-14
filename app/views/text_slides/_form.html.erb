@@ -57,6 +57,9 @@
                   <button type="button" class="btn btn-ghost btn-xs italic" title="<%= t('slides.form.toolbar.italic') %>" data-action="slide-editor#italic">I</button>
                   <button type="button" class="btn btn-ghost btn-xs" title="<%= t('slides.form.toolbar.heading') %>" data-action="slide-editor#heading">H</button>
                   <button type="button" class="btn btn-ghost btn-xs" title="<%= t('slides.form.toolbar.bullet') %>" data-action="slide-editor#bullet"><%= t("slides.form.toolbar.bullet_label") %></button>
+                  <button type="button" class="btn btn-ghost btn-xs" title="<%= t('slides.form.toolbar.small') %>"
+                          data-slide-editor-target="smallBtn" data-role="small-button"
+                          data-action="mousedown->slide-editor#small"><span class="text-[0.65rem]"><%= t("slides.form.toolbar.small_label") %></span></button>
                   <button type="button" class="btn btn-ghost btn-xs" title="<%= t('slides.form.toolbar.clear') %>" data-action="slide-editor#clearFormat"><%= t("slides.form.toolbar.clear_label") %></button>
                   <button type="button" class="btn btn-ghost btn-xs" title="<%= t('slides.form.countdown.button_title') %>"
                           data-action="mousedown->slide-editor#saveSelection slide-editor#openCountdown" data-role="countdown-button"><%= t("slides.form.countdown.button") %></button>
