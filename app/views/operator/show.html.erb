@@ -23,6 +23,15 @@
       <%= link_to t("live.operator.back_to_service"), service_set_path(@session.service_set),
             class: "btn btn-ghost", data: { role: "back-to-set" } %>
       <% if @session.active? %>
+        <%# One-screen computers: this screen becomes the projector view; Esc comes back. %>
+        <button type="button" class="btn btn-ghost gap-1.5" data-role="operator-fullscreen-button"
+                title="<%= t('live.operator.fullscreen_title') %>"
+                data-controller="operator-fullscreen" data-action="operator-fullscreen#start"
+                data-operator-fullscreen-url-value="<%= projector_path(@session.projector_token) %>"
+                data-fullscreen-title="<%= t('live.operator.projector') %>">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 8.25V3.75h4.5M15.75 3.75h4.5v4.5M20.25 15.75v4.5h-4.5M8.25 20.25h-4.5v-4.5"/></svg>
+          <%= t("live.operator.fullscreen") %>
+        </button>
         <%# Ending clears the projector and musician links, so it asks first. %>
         <button type="button" class="btn btn-error btn-outline" data-role="end-service"
                 onclick="document.getElementById('end-service-modal').showModal()"><%= t("live.operator.end_service") %></button>

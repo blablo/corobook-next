@@ -669,6 +669,8 @@ en:
       live: "Live"
       ended: "Ended"
       back_to_service: "← Back to service"
+      fullscreen: "Full screen"
+      fullscreen_title: "Show the projector view full screen on this computer. The clicker and arrow keys keep working; press Esc to come back."
       back: "← Back"
       next: "Next →"
       blank: "Blank"

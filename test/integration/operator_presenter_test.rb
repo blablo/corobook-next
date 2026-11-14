@@ -29,6 +29,16 @@ class OperatorPresenterTest < ActionDispatch::IntegrationTest
     assert_select "[data-role=clock][data-controller=clock]"
   end
 
+  test "a full screen button opens this service's projector view, only while live" do
+    get operator_path(@session)
+    assert_select "[data-role=operator-fullscreen-button][data-controller=operator-fullscreen]" \
+                  "[data-operator-fullscreen-url-value='#{projector_path(@session.projector_token)}']"
+
+    @session.update!(status: "ended")
+    get operator_path(@session)
+    assert_select "[data-role=operator-fullscreen-button]", count: 0
+  end
+
   test "the next preview is static: one #live-frame and one follower controller only" do
     get operator_path(@session)
 
