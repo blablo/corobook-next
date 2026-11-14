@@ -70,6 +70,8 @@ es:
         play: "Iniciar desplazamiento automático"
         title: "Desplazamiento automático (Espacio)"
         speed: "Velocidad de desplazamiento"
+        slower: "Más lento"
+        faster: "Más rápido"
     form:
       details: "Detalles de la canción"
       title_label: "Título"

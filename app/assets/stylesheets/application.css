@@ -331,10 +331,11 @@
   border-radius: 9999px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
-.autoscroll-speed { display: flex; align-items: center; gap: 0.5rem; }
-.autoscroll-speed .range { width: 7rem; }
+.autoscroll-speed { display: flex; align-items: center; gap: 0.25rem; }
+/* − / + : at least 44px, the minimum comfortable finger target. */
+.autoscroll-step { width: 2.75rem; height: 2.75rem; min-height: 2.75rem; }
 .autoscroll-speed-label {
-  font-size: 0.8rem; font-weight: 700; min-width: 2rem; text-align: right;
+  font-size: 1.1rem; font-weight: 700; min-width: 1.5rem; text-align: center; font-variant-numeric: tabular-nums;
   color: var(--color-base-content, #16181d);
 }
 @media print { .autoscroll-dock { display: none !important; } }
