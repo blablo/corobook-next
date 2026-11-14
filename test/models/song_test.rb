@@ -55,4 +55,14 @@ class SongTest < ActiveSupport::TestCase
     song.update!(chordpro_source: "[D]Nueva letra")
     assert_equal "Nueva letra", song.plain_text
   end
+  test "two sections with the same label are rejected" do
+    song = build_song(chordpro_source: "{sov: Verse 1}\nUno\n{eov}\n{sov: Verse 1}\nDos\n{eov}")
+    assert_not song.save
+    assert_match(/more than one section labelled Verse 1/, song.errors[:chordpro_source].to_sentence)
+  end
+
+  test "a replayed chorus does not count as a duplicate label" do
+    song = build_song(chordpro_source: "{soc: Chorus}\nCoro\n{eoc}\n{sov: Verse 1}\nUno\n{eov}\n{chorus}")
+    assert song.save, song.errors.full_messages.to_sentence
+  end
 end
