@@ -120,9 +120,9 @@ class TextSlide < ApplicationRecord
     pages[index.to_i.clamp(0, page_count - 1)]["body_markdown"].to_s
   end
 
-  # Rendered HTML for one page. commonmarker escapes raw HTML, so user markdown cannot inject markup.
+  # Rendered HTML for one page (Corobook::SlideMarkdown: raw HTML is escaped, ~text~ is small text).
   def rendered_html(index = 0)
-    Corobook::SlideCountdown.render(Commonmarker.to_html(page_markdown(index).encode("UTF-8")))
+    Corobook::SlideMarkdown.render(page_markdown(index))
   end
 
   # The rendered image for one page of an imported deck (attachments are created in page order).

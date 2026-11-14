@@ -58,7 +58,8 @@ def page_md(pdf, page)
     LIG.each { |k, v| text = text.gsub(k, v) }
     gap = prev_bottom && (l[:top] - prev_bottom) > body * 0.9 && !(small && prev_small)
     out << "" if gap || small && !prev_small && out.any? && out.last != ""
-    out << text
+    # Lines set much smaller than the body (references, footnotes) become Corobook small text.
+    out << (small && !text.empty? ? "~#{text.gsub('~', '\\~')}~" : text)
     prev_bottom = l[:top] + l[:items].map { |r| r[:h] }.max
     prev_small = small
   end

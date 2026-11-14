@@ -152,6 +152,15 @@
 /* Countdown field in a slide: fixed-width digits so the line doesn't jiggle every second. */
 .slide-countdown { font-variant-numeric: tabular-nums; white-space: nowrap; }
 
+/* Small text in a slide (~text~ in the page markdown, rendered as <sub class="slide-small">):
+   references and footnotes. Sized relative to the slide's own text so it scales with the slide's
+   font size and auto-fit; kept on the line (not lowered like a real subscript) and dimmed. On the
+   projector it is ~0.4 of the body (40 pt body -> ~16 pt, like a deck's grey reference line);
+   everywhere else (editor, previews, prints), where the body is already small, 0.8 so it stays
+   readable. position: static undoes the base subscript nudge (bottom: -0.25em). */
+.slide-small { font-size: 0.8em; vertical-align: baseline; position: static; line-height: 1.2; opacity: 0.65; }
+.projector-slide-body .slide-small { font-size: 0.4em; }
+
 /* Auto-advancing slide: every page stacked in ONE grid cell inside the stage's padding, so each
    keeps full layout (its own fit controller can measure it) and only the current one is visible.
    Fade cross-fades the pages; Cut switches instantly; reduced motion always cuts. */
