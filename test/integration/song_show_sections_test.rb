@@ -49,4 +49,15 @@ class SongShowSectionsTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal [ "Intro", "Verse 1" ], labels_in(response.body)
   end
+
+  test "the auto-scroll dock sets the speed with big - / + buttons, not a slider" do
+    song = @church.songs.create!(title: "Scroll", chordpro_source: "{sov: Verse 1}\nHola\n{eov}")
+    get song_path(song)
+    assert_select "[data-role=autoscroll-dock]" do
+      assert_select "[data-role=autoscroll-slower][data-action='autoscroll#slower']"
+      assert_select "[data-role=autoscroll-faster][data-action='autoscroll#faster']"
+      assert_select "[data-role=autoscroll-speed]"
+      assert_select "input[type=range]", count: 0
+    end
+  end
 end

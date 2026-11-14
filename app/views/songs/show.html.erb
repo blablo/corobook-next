@@ -111,12 +111,17 @@
       <svg data-autoscroll-icon="play" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
       <svg data-autoscroll-icon="pause" class="w-5 h-5 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
     </button>
-    <div class="autoscroll-speed">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M5 12l4-4M5 12l4 4"/></svg>
-      <input type="range" min="1" max="10" step="1" value="3" class="range range-primary range-xs"
-             data-autoscroll-target="speed" data-action="input->autoscroll#changeSpeed"
-             aria-label="<%= t('songs.show.autoscroll.speed') %>" />
-      <span class="autoscroll-speed-label" data-autoscroll-target="speedLabel">×3</span>
+    <%# Speed: big − / + buttons (a thin slider was hard to hit with a finger). %>
+    <div class="autoscroll-speed" role="group" aria-label="<%= t('songs.show.autoscroll.speed') %>">
+      <button type="button" class="btn btn-ghost btn-circle autoscroll-step" data-autoscroll-target="slower"
+              data-action="autoscroll#slower" data-role="autoscroll-slower" aria-label="<%= t('songs.show.autoscroll.slower') %>">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" d="M5 12h14"/></svg>
+      </button>
+      <span class="autoscroll-speed-label" data-autoscroll-target="speedLabel" data-role="autoscroll-speed" aria-live="polite">5</span>
+      <button type="button" class="btn btn-ghost btn-circle autoscroll-step" data-autoscroll-target="faster"
+              data-action="autoscroll#faster" data-role="autoscroll-faster" aria-label="<%= t('songs.show.autoscroll.faster') %>">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+      </button>
     </div>
   </div>
 </div>

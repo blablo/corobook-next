@@ -67,6 +67,8 @@ en:
         play: "Play auto-scroll"
         title: "Auto-scroll (Space)"
         speed: "Scroll speed"
+        slower: "Slower"
+        faster: "Faster"
     form:
       details: "Song details"
       title_label: "Title"
