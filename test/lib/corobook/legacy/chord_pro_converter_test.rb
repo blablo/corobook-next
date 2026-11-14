@@ -130,4 +130,13 @@ class Corobook::Legacy::ChordProConverterTest < ActiveSupport::TestCase
     assert_nothing_raised { convert("G C D\n") }
     assert_nothing_raised { convert("\n\n[WEIRD]\nstuff") }
   end
+
+  test "legacy labels that differ only by a letter suffix stay distinct sections" do
+    lyric = "[VERSO 1]\nC\nUno\n\n[VERSO 1A]\nC\nDos\n\n[VERSO 2]\nC\nTres\n\n[VERSO 2A]\nC\nCuatro"
+    conv = Corobook::Legacy::ChordProConverter.new(lyric, order: "VERSO 1, VERSO 1A, VERSO 2, VERSO 2A")
+    labels = conv.convert.scan(/\{sov: ([^}]*)\}/).flatten
+
+    assert_equal [ "Verse 1", "Verse 1A", "Verse 2", "Verse 2A" ], labels
+    assert_equal labels, conv.arrangement
+  end
 end

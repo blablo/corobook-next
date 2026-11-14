@@ -83,7 +83,9 @@ module Corobook
         return nil if raw.empty?
 
         h = classify_header(raw)
-        h ? h[:label] : raw.split(/\s+/).map(&:capitalize).join(" ")
+        return raw.split(/\s+/).map(&:capitalize).join(" ") unless h
+
+        label_map.fetch(header_key(raw), h[:label])
       end
 
       private
@@ -162,16 +164,66 @@ module Corobook
       # identifier. Legacy labels are messy: `VERSO 1`, `VERSOA`, `VERSO1`, `CHOIR B`, `VERSE-A`,
       # `VERSE.2`, `PRE CORO`, `CORO FINAL`, plus trailing language tags (`COROES`, `VERSEEN`).
       def section_header(line)
-        s = line.strip
-        inner =
-          if (m = /\A\[(.+)\]\z/.match(s))
-            m[1].strip
-          elsif s == s.upcase && s.length <= 10 && /\A[A-Za-z]+\z/.match?(s)
-            s # a bare one-word header line (e.g. CORO)
-          end
+        inner = header_inner(line)
         return nil unless inner
 
-        classify_header(inner)
+        h = classify_header(inner)
+        h && h.merge(label: label_map.fetch(header_key(inner), h[:label]))
+      end
+
+      # The text inside a `[LABEL]` header line, or a bare one-word header line, else nil.
+      def header_inner(line)
+        s = line.strip
+        if (m = /\A\[(.+)\]\z/.match(s))
+          m[1].strip
+        elsif s == s.upcase && s.length <= 10 && /\A[A-Za-z]+\z/.match?(s)
+          s # a bare one-word header line (e.g. CORO)
+        end
+      end
+
+      # Raw header text normalized so the same legacy label compares equal in the lyric and in `order`.
+      def header_key(inner) = inner.upcase.gsub(/[.\-]/, " ").squeeze(" ").strip
+
+      # Raw header key => unique section label for this song. Standardizing drops letter suffixes,
+      # so `VERSO 1` and `VERSO 1A` would both become "Verse 1"; the arrangement (and the show)
+      # find sections by label, so the second would be lost. The first keeps the plain label; a
+      # later, different legacy label that collides keeps its suffix ("Verse 1A"), or gets the
+      # next free number when it has none ("Chorus 2").
+      def label_map
+        @label_map ||= build_label_map
+      end
+
+      def build_label_map
+        found = []
+        normalize(@lyric).split("\n", -1).each do |line|
+          inner = header_inner(line)
+          h = inner && classify_header(inner)
+          found << [ header_key(inner), h ] if h
+        end
+        found.uniq!(&:first)
+
+        reserved = found.to_set { |_, h| h[:label] }
+        taken = Set.new
+        found.each_with_object({}) do |(key, h), map|
+          label = h[:label]
+          label = distinct_label(h, taken, reserved) if taken.include?(label)
+          taken << label
+          map[key] = label
+        end
+      end
+
+      def distinct_label(header, taken, reserved)
+        label = header[:label]
+        suffix = header[:ident].to_s.sub(/\A\d+/, "").gsub(/[^A-Z]/, "")
+        unless suffix.empty?
+          candidate = label.match?(/\d\z/) ? "#{label}#{suffix}" : "#{label} #{suffix}"
+          return candidate unless taken.include?(candidate) || reserved.include?(candidate)
+        end
+
+        joiner = label.match?(/\d\z/) ? "." : " "
+        n = 2
+        n += 1 while taken.include?(numbered = "#{label}#{joiner}#{n}") || reserved.include?(numbered)
+        numbered
       end
 
       # Normalize the raw inner label and resolve it to a kind + numbered/lettered label.
@@ -195,7 +247,7 @@ module Corobook
         name = CANONICAL[base] || base.capitalize
         num = ident.to_s[/\d+/]
         label = num ? "#{name} #{num}" : name
-        { kind: kind, label: label }
+        { kind: kind, label: label, ident: ident }
       end
 
       # Peel a known base term off the front of a normalized label, returning [base, identifier].
