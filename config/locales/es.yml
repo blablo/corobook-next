@@ -674,6 +674,8 @@ es:
       live: "En vivo"
       ended: "Finalizado"
       back_to_service: "← Volver al servicio"
+      fullscreen: "Pantalla completa"
+      fullscreen_title: "Muestra la vista del proyector a pantalla completa en esta computadora. El control remoto y las flechas siguen funcionando; presiona Esc para volver."
       back: "← Atrás"
       next: "Siguiente →"
       blank: "Oscurecer"

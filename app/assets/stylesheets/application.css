@@ -104,6 +104,10 @@
 .projector-root.is-blanked, .projector-blank { background: #000; }
 .projector-blank { position: fixed; inset: 0; }
 
+/* Operator full screen (operator_fullscreen_controller.js): the projector view, edge to edge. */
+.operator-fullscreen { position: fixed; inset: 0; z-index: 100; background: #000; }
+.operator-fullscreen > iframe { display: block; width: 100%; height: 100%; border: 0; }
+
 /* The speaker's whiteboard (whiteboard_controller.js): a layer over the stage on the projector,
    the operator's Now preview and the speaker view. A "board" fills it with its surface colour; a
    slide drawing leaves it clear. Only the speaker view takes pointer input. */

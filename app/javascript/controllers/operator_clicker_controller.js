@@ -22,6 +22,9 @@ export default class extends Controller {
     const t = e.target
     if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return
     if (e.metaKey || e.ctrlKey || e.altKey) return
+    // In full screen the projector page (operator_fullscreen_controller) drives the service; a
+    // form submit here would reload this page and drop out of full screen.
+    if (document.fullscreenElement) return
 
     const key = e.key
     if (key === "PageDown" || key === "ArrowRight" || key === "ArrowDown" || key === " " || key === "Spacebar") {
