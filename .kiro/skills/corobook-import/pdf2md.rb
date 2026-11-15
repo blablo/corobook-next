@@ -79,7 +79,10 @@ def page_layout(pdf, page)
   valign = tops.min < doc.at_css("page")["height"].to_f * 0.1 ? "top" : "center"
   # pdftohtml zoom is 1.5 and the page is 1080 pt tall; Corobook's canvas is 540 pt.
   pt = body / 1.5 * 540 / doc.at_css("page")["height"].to_f * 1.5
-  { size_pt: pt.round, align: align, valign: valign }
+  # The body text's colour (most common among body-size runs), for the slide's text_color.
+  colors = doc.css("fontspec").to_h { |f| [f["id"], f["color"]] }
+  color = tx.map { |t| colors[t["font"]] }.compact.tally.max_by { |_, n| n }&.first
+  { size_pt: pt.round, align: align, valign: valign, text_color: color }
 end
 
 if __FILE__ == $0

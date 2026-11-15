@@ -147,4 +147,64 @@ class ApiV1ImportTest < ActionDispatch::IntegrationTest
     assert_response :not_found
     assert_equal "Theirs", other_song.reload.title
   end
+
+  test "a slide takes line spacing, projection look and auto-advance" do
+    post "/api/v1/text_slides", params: { text_slide: { title: "Look", line_height: "1.5", bg_type: "gradient", bg_color: "#112233",
+                                                         bg_color2: "#445566", bg_gradient_angle: 90, text_color: "#ffeecc",
+                                                         auto_advance_seconds: 10, auto_advance_transition: "cut", auto_advance_loop: false,
+                                                         pages: [ { body_markdown: "a" }, { body_markdown: "b" } ] } },
+                                as: :json, headers: auth
+    assert_response :created
+    slide = @church.text_slides.find(json["text_slide"]["id"])
+    assert_equal [ "1.5", "gradient", "#445566", 90, "#ffeecc", 10, "cut", false ],
+                 [ slide.line_height, slide.bg_type, slide.bg_color2, slide.bg_gradient_angle, slide.text_color,
+                   slide.auto_advance_seconds, slide.auto_advance_transition, slide.auto_advance_loop ]
+    assert_equal "1.5", json["text_slide"]["line_height"]
+  end
+
+  test "patch auto_advance false turns auto-advance off" do
+    slide = @church.text_slides.create!(title: "Auto", reusable: true, auto_advance_seconds: 8,
+                                        pages: [ { "body_markdown" => "a" }, { "body_markdown" => "b" } ])
+    patch "/api/v1/text_slides/#{slide.id}", params: { text_slide: { auto_advance: false } }, as: :json, headers: auth
+    assert_response :success
+    assert_nil slide.reload.auto_advance_seconds
+  end
+
+  test "an image background needs an uploaded image, so the API refuses it" do
+    post "/api/v1/text_slides", params: { text_slide: { title: "Img", bg_type: "image", pages: [ { body_markdown: "a" } ] } },
+                                as: :json, headers: auth
+    assert_response :unprocessable_entity
+    assert_match(/background image/, json["messages"].join)
+  end
+
+  test "a slide dry run shows each page as the projector renders it, small text included" do
+    post "/api/v1/text_slides", params: { dry_run: true, text_slide: { title: "Ref",
+                                          pages: [ { body_markdown: "*Remember*\n\n~(Psalm 25:6)~" } ] } }, as: :json, headers: auth
+    assert_response :success
+    html = json["would_create"]["pages_html"].first
+    assert_includes html, "<em>Remember</em>"
+    assert_includes html, %(<sub class="slide-small">(Psalm 25:6)</sub>)
+  end
+
+  test "a song dry run shows its sections and warns about blank lines and unknown arrangement labels" do
+    src = "{sov: Verse 1}\nHola\n{eov}\n\n{soc: Chorus}\nCoro\n{eoc}"
+    post "/api/v1/songs", params: { dry_run: true, song: { title: "Warn", chordpro_source: src, arrangement: [ "Verse 1", "Coro" ] } },
+                          as: :json, headers: auth
+    assert_response :success
+    song = json["would_create"]
+    assert_equal [ "Verse 1", nil, "Chorus" ], song["sections"].map { |sec| sec["label"] }
+    assert_equal [ "Hola" ], song["sections"].first["lines"]
+    assert(song["warnings"].any? { |w| w.include?("empty section") })
+    assert(song["warnings"].any? { |w| w.include?("Coro") })
+  end
+
+  test "a clean song has no warnings, and duplicate section labels are refused" do
+    post "/api/v1/songs", params: { dry_run: true, song: { title: "Clean", chordpro_source: "{sov: Verse 1}\nHola\n{eov}\n{soc: Chorus}\nCoro\n{eoc}",
+                                                           arrangement: [ "Verse 1", "Chorus", "Verse 1" ] } }, as: :json, headers: auth
+    assert_equal [], json["would_create"]["warnings"]
+    post "/api/v1/songs", params: { song: { title: "Dupes", chordpro_source: "{sov: Verse 1}\na\n{eov}\n{sov: Verse 1}\nb\n{eov}" } },
+                          as: :json, headers: auth
+    assert_response :unprocessable_entity
+    assert_match(/more than one section labelled Verse 1/, json["messages"].join)
+  end
 end
