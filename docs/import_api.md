@@ -51,7 +51,7 @@ All optional on create; on PATCH send only what changes.
 | Field | Values | Default |
 | --- | --- | --- |
 | `font_size` | pt on Corobook's 540 pt-tall canvas (PowerPoint scale), 10-200 | `null` = auto-fit |
-| `line_height` | `1.0`, `1.15`, `1.5`, `2.0` | `null` = the slide default |
+| `line_height` | `1.0`, `1.15`, `1.5`, `2.0`: distance from one line to the next as a multiple of the font size (CSS line-height) | `null` = the slide default (`1.15`) |
 | `text_align` | `left`, `center`, `right` | `center` |
 | `vertical_align` | `top`, `center`, `bottom` | `center` |
 | `font` | `sans`, `serif`, `condensed`, `mono` | `sans` |

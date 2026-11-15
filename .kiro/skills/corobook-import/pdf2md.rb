@@ -82,7 +82,26 @@ def page_layout(pdf, page)
   # The body text's colour (most common among body-size runs), for the slide's text_color.
   colors = doc.css("fontspec").to_h { |f| [f["id"], f["color"]] }
   color = tx.map { |t| colors[t["font"]] }.compact.tally.max_by { |_, n| n }&.first
-  { size_pt: pt.round, align: align, valign: valign, text_color: color }
+  ratio, spacing = line_spacing(tx, body)
+  { size_pt: pt.round, align: align, valign: valign, text_color: color, line_ratio: ratio, line_height: spacing }
+end
+
+# Line spacing as Corobook stores it: the distance from one line to the next as a multiple of the
+# font size (CSS line-height), the nearest of LINE_HEIGHTS. Measured from the tops of consecutive
+# body lines; gaps over 1.8x the size are paragraph breaks and are skipped. Returns [ratio, value],
+# value nil when it rounds to the default (so the slide keeps its default spacing) or when the
+# page has fewer than two lines.
+LINE_HEIGHTS = { "1.0" => 1.0, "1.15" => 1.15, "1.5" => 1.5, "2.0" => 2.0 }.freeze
+DEFAULT_LINE_HEIGHT = "1.15"
+
+def line_spacing(body_runs, body)
+  tops = body_runs.map { |t| t["top"].to_i }.uniq.sort
+  steps = tops.each_cons(2).map { |a, b| b - a }.select { |d| d.positive? && d < body * 1.8 }
+  return [nil, nil] if steps.empty?
+
+  ratio = (steps.sort[steps.size / 2].to_f / body).round(2)
+  value = LINE_HEIGHTS.min_by { |_, v| (v - ratio).abs }.first
+  [ratio, value == DEFAULT_LINE_HEIGHT ? nil : value]
 end
 
 if __FILE__ == $0
