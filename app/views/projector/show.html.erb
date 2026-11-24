@@ -4,6 +4,7 @@
      data-projector-clicker-advance-url-value="<%= projector_advance_path(@session.projector_token) %>"
      data-projector-clicker-back-url-value="<%= projector_back_path(@session.projector_token) %>"
      data-whiteboard-viewer-value="<%= @session.whiteboard_viewer_key %>"
+     data-whiteboard-report-value="true"
      data-whiteboard-labels-value="<%= whiteboard_labels %>">
   <%= render "live/projector_frame", session: @session %>
   <%# The speaker's whiteboard or slide drawing, over the frame (outside it, so a new frame

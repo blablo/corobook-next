@@ -64,6 +64,16 @@ class WhiteboardChannelTest < ActionCable::Channel::TestCase
     assert_empty @session.whiteboard_board
   end
 
+  test "the projector reports its screen size; the speaker cannot" do
+    subscribe speaker: @session.speaker_token
+    perform :screen, w: 1024, h: 768
+    assert_nil @session.reload.screen_width
+
+    subscribe viewer: @session.whiteboard_viewer_key
+    perform :screen, w: 1024, h: 768
+    assert_equal [ 1024, 768 ], [ @session.reload.screen_width, @session.screen_height ]
+  end
+
   test "the speaker's actions stop working once the service ends" do
     subscribe speaker: @session.speaker_token
     perform :start, mode: "board"

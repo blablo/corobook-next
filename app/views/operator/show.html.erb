@@ -91,8 +91,10 @@
         <% if @stop_index %><span class="ml-auto text-sm text-base-content/60 tabular-nums" data-role="now-position"><%= t("live.operator.position", n: @stop_index + 1, count: @stop_count) %></span><% end %>
       </div>
       <div class="px-5">
-        <div class="rounded-box overflow-hidden projector-preview" data-role="operator-frame">
-          <%= render "live/projector_frame", session: @session %>
+        <div class="rounded-box overflow-hidden live-stage" data-role="operator-frame" data-whiteboard-target="stage">
+          <div class="live-screen" data-whiteboard-target="screen">
+            <%= render "live/projector_frame", session: @session %>
+          </div>
           <%# What the speaker draws, so Now shows exactly what the projector shows. %>
           <div class="whiteboard-layer" hidden data-whiteboard-target="layer">
             <div class="whiteboard-surface" data-whiteboard-target="surface"></div>
