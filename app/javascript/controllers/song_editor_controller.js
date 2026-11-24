@@ -83,7 +83,7 @@ export default class extends Controller {
   // chord-only lines (a chord line not followed by lyrics).
   parseChordsOverLyrics(text) {
     const rawLines = (text || "").replace(/\r/g, "").split("\n")
-    const headerRe = /^\s*(verse|chorus|coro|estrofa|bridge|puente|pre[-\s]?chorus|intro|outro|interlude|instrumental|tag|ending|vamp|refrain|verso)\s*([0-9]+|[a-z])?\s*:?\s*$/i
+    const headerRe = /^\s*(verse|chorus|coro|estrofa|bridge|puente|pre[-\s]?chorus|intro|outro|interlude|instrumental|tag|coda|ending|vamp|refrain|verso)\s*([0-9]+|[a-z])?\s*:?\s*$/i
     const kindOf = (h) => {
       const l = h.toLowerCase()
       if (l.includes("chorus") || l.includes("coro") || l.includes("refrain")) return "chorus"
@@ -115,7 +115,8 @@ export default class extends Controller {
       const hm = line.match(headerRe)
       if (hm) {
         const num = hm[2] ? ` ${hm[2]}` : ""
-        current = { kind: kindOf(hm[1]), label: (hm[1][0].toUpperCase() + hm[1].slice(1).toLowerCase() + num).trim(), lines: [] }
+        const name = /^coda$/i.test(hm[1]) ? "Tag" : hm[1][0].toUpperCase() + hm[1].slice(1).toLowerCase()
+        current = { kind: kindOf(hm[1]), label: (name + num).trim(), lines: [] }
         sections.push(current)
         continue
       }
@@ -550,14 +551,17 @@ export default class extends Controller {
 
   // ======================= structure actions =======================
   // Add a section. A button may carry an explicit data-label (Intro, Outro, Pre-chorus, Solo,
-  // Instrumental) — those are verse-kind sections with a fixed label, numbered only if repeated
+  // Instrumental, Tag) — those are verse-kind sections with a fixed label, numbered only if repeated
   // (Intro, then "Intro 2"). Without a label, auto-number by kind (Verse 1, Chorus 1, …).
+  // data-play-last (Tag): a song with a play order gets the new section at the end of it, since
+  // the projector only shows what the play order names.
   addSection(e) {
     const kind = e.currentTarget.dataset.kind
     const label = e.currentTarget.dataset.label
       ? this.nextNamedLabel(e.currentTarget.dataset.label)
       : this.nextLabel(kind)
     this.model.push({ kind, label, lines: [{ text: "", chords: [] }] })
+    if (e.currentTarget.dataset.playLast && this.order.length) this.order.push(label)
     this.commit()
     this.focusLine(this.model.length - 1, 0)
   }

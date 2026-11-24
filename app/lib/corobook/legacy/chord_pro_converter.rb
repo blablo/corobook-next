@@ -25,7 +25,8 @@ module Corobook
         "PREESTRIBILLO" => :prechorus, "PREBRIDGE" => :prechorus,
         "INTRO" => :verse, "INSTRUMENTAL" => :verse, "SOLO" => :verse, "PUNTOS" => :verse,
         "PARTE" => :verse,
-        "OUTRO" => :verse, "END" => :verse, "FINAL" => :verse, "FIN" => :verse
+        "OUTRO" => :verse, "END" => :verse, "FINAL" => :verse, "FIN" => :verse,
+        "TAG" => :verse, "CODA" => :verse
       }.freeze
 
       SECTION_DIRECTIVE = {
@@ -42,7 +43,9 @@ module Corobook
         "PREESTRIBILLO" => "Pre-chorus", "PREBRIDGE" => "Pre-chorus",
         "INTRO" => "Intro", "INSTRUMENTAL" => "Instrumental", "SOLO" => "Solo", "PUNTOS" => "Verse",
         "PARTE" => "Verse",
-        "OUTRO" => "Outro", "END" => "Outro", "FINAL" => "Outro", "FIN" => "Outro"
+        "OUTRO" => "Outro", "END" => "Outro", "FINAL" => "Outro", "FIN" => "Outro",
+        # A tag: the closing line(s) sung again at the end of the song, written out in full.
+        "TAG" => "Tag", "CODA" => "Tag"
       }.freeze
 
       # A token that looks like a chord (root + optional accidental/quality/extension/bass).

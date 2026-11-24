@@ -143,6 +143,28 @@ class SongEditorTest < ApplicationSystemTestCase
     assert_equal [ "Verse 1", "Chorus 1" ], song.arrangement
   end
 
+  test "a Tag from the More menu is its own section and goes at the end of the play order" do
+    visit new_song_path
+    assert_text "New song"
+    fill_in "Title", with: "Con tag"
+
+    click_on "+ Verse"
+    click_on "+ Chorus"
+    find(".collapse", text: "Arrangement order").find("input[type=checkbox]", visible: :all).click
+    within("[data-song-editor-target=arrangeWrap]") do
+      click_on "+ Verse 1"
+      click_on "+ Chorus 1"
+    end
+
+    find("summary", text: "More").click
+    find("[data-role=add-tag]").click
+
+    field = find("input[data-song-editor-target=arrangeField]", visible: false).value
+    assert_equal "Verse 1\nChorus 1\nTag", field
+    source = find("input[data-song-editor-target=source]", visible: false).value
+    assert_includes source, "{sov: Tag}"
+  end
+
   test "importing pasted chords-over-lyrics builds sections with chords anchored" do
     visit new_song_path
     assert_text "New song"
