@@ -14,10 +14,10 @@ module Api
         existing = church.songs.where("lower(title) = ?", song.title.to_s.strip.downcase).first
         return render json: { error: "duplicate", existing: summary(existing) }, status: :conflict if existing && song.title.present?
         return render json: { error: "invalid", messages: song.errors.full_messages }, status: :unprocessable_entity unless song.valid?
-        return render json: { dry_run: true, would_create: summary(song).merge(chordpro_source: song.chordpro_source) } if dry_run?
+        return render json: { dry_run: true, would_create: detail(song) } if dry_run?
 
         song.save!
-        render json: { song: summary(song) }, status: :created
+        render json: { song: detail(song) }, status: :created
       end
 
       # GET /api/v1/songs/:id  — full content, to read before an update.
@@ -46,9 +46,32 @@ module Api
         { id: song.id, title: song.title, author: song.author, song_key: song.song_key, url: song.persisted? ? Rails.application.routes.url_helpers.song_url(song, host: host) : nil }
       end
 
+      # Everything settable, plus the song as the parser reads it (sections: label, kind, plain
+      # lines) and warnings for mistakes that save fine but project wrong, so a caller can check a
+      # dry run before creating.
       def detail(song)
+        sections = parsed_sections(song)
         summary(song).merge(song.slice(:subtitle, :reference, :link, :capo, :copyright_line, :ccli_song_number,
                                        :copyright_status, :chordpro_source, :arrangement).symbolize_keys)
+                     .merge(sections: sections, warnings: warnings(song, sections))
+      end
+
+      def parsed_sections(song)
+        Corobook::ChordPro::Parser.parse(song.chordpro_source.to_s).to_h["sections"].to_a.map do |sec|
+          lines = sec["lines"].to_a.map { |l| l["segments"].to_a.map { |seg| seg["text"] }.join }
+          { label: sec["label"], kind: sec["kind"], lines: lines }
+        end
+      end
+
+      def warnings(song, sections)
+        out = []
+        blank = sections.count { |sec| sec[:kind] == "none" && sec[:lines].all?(&:blank?) }
+        out << "#{blank} empty section(s): a blank line in chordpro_source becomes a blank slide; remove blank lines" if blank.positive?
+        labels = sections.filter_map { |sec| sec[:label] }
+        # The arrangement finds sections by exact label (Corobook::LivePosition.resolve_arrangement).
+        missing = song.arrangement.to_a - labels
+        out << "arrangement names no section: #{missing.join(', ')}" if missing.any?
+        out
       end
 
       def host = ENV["APP_HOST"].presence || request.host_with_port
