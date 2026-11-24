@@ -41,7 +41,8 @@ POST /api/v1/songs
 ```
 `chordpro_source` is ChordPro. Rules:
 - NO blank lines anywhere in `chordpro_source` (not between sections either): the parser turns every blank line into an empty `none` section that shows up as a blank slide and breaks `arrangement`. Join sections with a single `\n`.
-- Wrap each section: `{sov: Verse 1}` ... `{eov}`, `{soc}` ... `{eoc}` for chorus, `{sob: Bridge}` ... `{eob}` for bridge. Use English labels (Verse 1, Chorus, Bridge, Pre-chorus, Intro, Outro).
+- Wrap each section: `{sov: Verse 1}` ... `{eov}`, `{soc}` ... `{eoc}` for chorus, `{sob: Bridge}` ... `{eob}` for bridge. Use English labels (Verse 1, Chorus, Bridge, Pre-chorus, Intro, Outro, Tag).
+- A tag (the closing line or lines sung again at the end, headed Tag, Coda or similar) is `{sov: Tag}` ... `{eov}`, its own section. Write the lines out as many times as the source does; do not shorten them to `{comment: x3}`. If the song has an `arrangement`, put Tag at the end of it.
 - Chords inline before the syllable they sit over: `[G]Amazing [C]grace`. Chords-over-lyrics in the PDF: move each chord to the character column of the lyric beneath it.
 - Chords-only lines (intro/instrumental): `[G]    [C]    [D]    [G]` (pad each chord by its width + ~3 spaces).
 - A repeated block: add `{comment: x2}` after it. Do not write literal `//`.

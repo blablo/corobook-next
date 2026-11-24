@@ -99,6 +99,7 @@ en:
         solo: "+ Solo"
         instrumental: "+ Instrumental"
         outro: "+ Outro"
+        tag: "+ Tag"
       chord_hint: "Type lyrics on the line. To add a chord, click the strip just above a line. Click a chord to change or remove it."
       chordpro_source: "ChordPro source"
       copyright_ccli: "Copyright & CCLI"

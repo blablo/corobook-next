@@ -102,6 +102,7 @@ es:
         solo: "+ Solo"
         instrumental: "+ Instrumental"
         outro: "+ Final"
+        tag: "+ Tag"
       chord_hint: "Escribe la letra en la línea. Para agregar un acorde, haz clic en la franja justo encima de una línea. Haz clic en un acorde para cambiarlo o quitarlo."
       chordpro_source: "Código ChordPro"
       copyright_ccli: "Derechos de autor y CCLI"

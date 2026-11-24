@@ -94,6 +94,8 @@ class Corobook::Legacy::ChordProConverterTest < ActiveSupport::TestCase
     assert_includes convert("[PRECORO]\nG\nHOLA"), "{sob: Pre-chorus}"
     assert_includes convert("[FINAL]\nG\nHOLA"), "{sov: Outro}"
     assert_includes convert("[INTRO]\nG\nHOLA"), "{sov: Intro}"
+    assert_includes convert("[TAG]\nG\nHOLA"), "{sov: Tag}"
+    assert_includes convert("[CODA]\nG\nHOLA"), "{sov: Tag}"
     # letter / odd suffixes collapse to the number (or drop)
     assert_includes convert("[VERSO 2A]\nG\nHOLA"), "{sov: Verse 2}"
     assert_includes convert("[CORO MACABRO]\nG\nHOLA"), "{soc: Chorus}"
