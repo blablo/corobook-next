@@ -16,7 +16,7 @@
 .follower-body { margin: 0; background: #000; }
 
 .projector-root {
-  position: fixed; inset: 0;
+  position: fixed; inset: 0; container-type: size;
   background: var(--proj-bg, #000); color: var(--proj-text, #fff);
   display: flex; flex-direction: column;
   font-family: var(--proj-font, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
@@ -25,11 +25,12 @@
 
 /* The live frame is the flex stage: lyrics vertically placed per church setting, copyright
    pinned to the foot. The frame itself carries --proj-* vars so the operator-preview (which
-   renders the same frame) inherits the look too. */
+   renders the same frame) inherits the look too. Spacing is in container units (the screen, or a
+   .live-screen standing in for it), never the viewport, so a tablet lays it out like the projector. */
 :is(#live-frame, .live-frame) {
   flex: 1; display: flex; flex-direction: column;
   align-items: center; justify-content: var(--proj-valign, center);
-  padding: 6vh 6vw; text-align: center; position: relative;
+  padding: 6cqh 6cqw; text-align: center; position: relative;
   background: var(--proj-bg, #000); color: var(--proj-text, #fff);
   font-family: var(--proj-font, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
 }
@@ -64,7 +65,7 @@
 /* The real projector stage is also a size container, so a slide's fixed font size (in cqh) is a
    percentage of the screen height. Scoped to .projector-root: the musician page reuses
    #live-frame as a content-sized band, which size containment would collapse. */
-.projector-root :is(#live-frame, .live-frame) { container-type: size; }
+.projector-root :is(#live-frame, .live-frame), .live-screen > :is(#live-frame, .live-frame) { container-type: size; }
 .projector-preview :is(#live-frame, .live-frame) { position: static; inset: auto; height: 100%; padding: 4% 5%; }
 /* Slide-show previews render a .projector-slide DIRECTLY in the preview box (no #live-frame);
    center and pad it so the slide body sits in the middle and the background image fills the box. */
@@ -77,8 +78,25 @@
    preview it must stay WITHIN the preview box, not cover the whole page. */
 .projector-preview .projector-blank { position: absolute; }
 
+/* The live stage on the speaker view and the operator's Now: the projector's shape, with the frame
+   inside a .live-screen laid out at the projector's size in CSS px and scaled down to fit
+   (whiteboard_controller.js sets the size, aspect ratio and scale; 1920x1080 until a projector
+   reports). Same layout as the projector, so the speaker's drawing lands on the same words. */
+.live-stage {
+  position: relative; aspect-ratio: 16 / 9; overflow: hidden;
+  background: var(--proj-bg, #000); color: var(--proj-text, #fff);
+}
+.live-screen {
+  position: absolute; left: 0; top: 0; width: 1920px; height: 1080px;
+  transform-origin: 0 0; container-type: size;
+  display: flex; flex-direction: column;
+  background: var(--proj-bg, #000); color: var(--proj-text, #fff);
+  font-family: var(--proj-font, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
+}
+.live-screen .projector-blank { position: absolute; }
+
 .projector-copyright {
-  margin-top: 4vh; font-size: clamp(0.8rem, 1.4vw, 1.1rem);
+  margin-top: 4.5cqh; font-size: clamp(0.8rem, 1.6cqw, 1.1rem);
   color: #9aa0a6; letter-spacing: 0.02em; text-align: center; font-weight: 400;
 }
 
@@ -117,9 +135,9 @@
 .speaker-stage canvas { touch-action: none; cursor: crosshair; }
 .follower-body:has(.speaker-root) { background: var(--color-base-200); }
 /* While the speaker draws, the stage takes all the room the tablet has: as wide as fits, and no
-   taller than the screen under the header and tool bar (about 10rem), keeping 16:9. */
+   taller than the screen under the header and tool bar (about 10rem), in the projector's shape. */
 .speaker-root.is-drawing { max-width: none; }
-.speaker-root.is-drawing .speaker-stage { width: min(100%, calc((100dvh - 10rem) * 16 / 9)); margin-inline: auto; }
+.speaker-root.is-drawing .speaker-stage { width: min(100%, calc((100dvh - 10rem) * var(--screen-ratio, 1.7778))); margin-inline: auto; }
 
 /* A text slide fills the stage as a column; its body is placed with auto margins per the slide's
    alignment (top/center/bottom × left/center/right). Auto margins (not justify-content) collapse

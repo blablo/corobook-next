@@ -9,15 +9,22 @@ import { cable } from "@hotwired/turbo-rails"
 //
 // mode: null (off), "board" (a whiteboard covers the screen) or "slide" (a clear layer over the
 // current slide). Points are 0..1 of the screen; line widths follow the screen height.
+//
+// Points only line up if the speaker's stage shows the slide exactly as the projector does. So
+// the projector page (report value) sends its screen size, and the speaker view and the
+// operator's preview (stage + screen targets) lay the frame out at that size in CSS px and scale
+// it down to fit: same shape, same line breaks, same text size, just smaller.
 const MAX_POINTS = 1500
 const MIN_STEP = 0.0015
 const FLUSH_MS = 40
+const REPORT_MS = 300
+const DEFAULT_SCREEN = [ 1920, 1080 ]
 const BOARD_BG = { light: "#ffffff", dark: "#0f172a" }
 
 export default class extends Controller {
   static targets = ["layer", "canvas", "surface", "start", "tools", "stop", "status", "darkToggle",
-    "color", "tool", "banner", "bannerText", "hint", "nowLabel", "nav"]
-  static values = { speaker: String, viewer: String, labels: Object }
+    "color", "tool", "banner", "bannerText", "hint", "nowLabel", "nav", "stage", "screen"]
+  static values = { speaker: String, viewer: String, labels: Object, report: Boolean }
 
   connect() {
     this.isDisconnected = false
@@ -35,9 +42,19 @@ export default class extends Controller {
     this.live = new Map()
     this.tool = "pen"
     this.color = this.colorTargets.find(b => b.getAttribute("aria-pressed") === "true")?.dataset.color || "#2563eb"
+    this.screenSize = DEFAULT_SCREEN
 
-    this.observer = new ResizeObserver(() => this.fit())
+    this.observer = new ResizeObserver(() => { this.scaleScreen(); this.fit() })
     this.observer.observe(this.canvasTarget)
+    if (this.hasStageTarget) this.observer.observe(this.stageTarget)
+    if (this.reportValue) {
+      this.reportObserver = new ResizeObserver(() => {
+        clearTimeout(this.reportTimer)
+        this.reportTimer = setTimeout(() => this.reportScreen(), REPORT_MS)
+      })
+      this.reportObserver.observe(this.element)
+    }
+    this.applyScreen()
     if (this.speakerValue) this.wirePointer()
 
     const channel = this.speakerValue
@@ -45,12 +62,12 @@ export default class extends Controller {
       : { channel: "WhiteboardChannel", viewer: this.viewerValue }
     cable.subscribeTo(channel, {
       received: (message) => this.receive(message),
-      connected: () => { this.online = true; this.render() },
+      connected: () => { this.online = true; this.reportScreen(); this.render() },
       disconnected: () => { this.online = false; this.render() },
       rejected: () => { this.refused = true; this.render() },
     }).then((sub) => {
       if (this.isDisconnected) sub.unsubscribe()
-      else this.sub = sub
+      else { this.sub = sub; this.reportScreen() }
     })
     this.render()
   }
@@ -59,7 +76,40 @@ export default class extends Controller {
     this.isDisconnected = true
     this.sub?.unsubscribe()
     this.observer?.disconnect()
+    this.reportObserver?.disconnect()
     clearInterval(this.flushTimer)
+    clearTimeout(this.reportTimer)
+  }
+
+  // ---- screen size ----
+  // Projector page: tell the others how big this screen is (the server ignores a repeat).
+  reportScreen() {
+    if (!this.reportValue || !this.online) return
+    const w = Math.round(this.element.clientWidth), h = Math.round(this.element.clientHeight)
+    if (w && h) this.perform("screen", { w, h })
+  }
+
+  setScreen(size) {
+    if (!Array.isArray(size) || !(size[0] > 0 && size[1] > 0)) return
+    this.screenSize = size
+    this.applyScreen()
+  }
+
+  // Give the stage the projector's shape and lay the frame out at the projector's size.
+  applyScreen() {
+    if (!this.hasStageTarget || !this.hasScreenTarget) return
+    const [ w, h ] = this.screenSize
+    this.stageTarget.style.aspectRatio = `${w} / ${h}`
+    this.stageTarget.style.setProperty("--screen-ratio", String(w / h))
+    this.screenTarget.style.width = `${w}px`
+    this.screenTarget.style.height = `${h}px`
+    this.scaleScreen()
+  }
+
+  scaleScreen() {
+    if (!this.hasStageTarget || !this.hasScreenTarget) return
+    const scale = this.stageTarget.clientWidth / this.screenSize[0]
+    if (scale > 0) this.screenTarget.style.transform = `scale(${scale})`
   }
 
   // ---- messages from the server ----
@@ -69,7 +119,11 @@ export default class extends Controller {
         Object.assign(this, { mode: m.mode, dark: m.dark, blanked: m.blanked, stopKey: m.stop, board: m.board || [], slide: m.slide || [] })
         this.live.clear()
         this.showLabel(m.label)
+        this.setScreen(m.screen)
         this.render()
+        break
+      case "screen":
+        this.setScreen([ m.w, m.h ])
         break
       case "stroke":
         if (m.src === this.src) return // drawn here already

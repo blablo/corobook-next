@@ -108,6 +108,20 @@ class Corobook::WhiteboardTest < ActiveSupport::TestCase
     end
   end
 
+  test "the projector's screen size is stored, sent to the screens and part of the state" do
+    assert_nil @board.state[:screen]
+    assert_broadcast_on(stream, { type: "screen", w: 1440, h: 900 }) { @board.screen!("1440", 900) }
+    assert_equal [ 1440, 900 ], Corobook::Whiteboard.new(@session.reload).state[:screen]
+
+    assert_no_broadcasts(stream) { @board.screen!(1440, 900) }
+    assert_no_broadcasts(stream) do
+      @board.screen!(50, 900)
+      @board.screen!("wide", 900)
+      @board.screen!(nil, nil)
+    end
+    assert_equal [ 1440, 900 ], [ @session.reload.screen_width, @session.screen_height ]
+  end
+
   test "moving off a slide drops its marks, so coming back to it shows a clean slide" do
     @board.start!("slide")
     @board.add_stroke!(stroke)

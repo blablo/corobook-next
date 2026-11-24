@@ -39,8 +39,12 @@
     <button type="button" class="btn btn-sm btn-ghost" hidden data-whiteboard-target="darkToggle" data-action="whiteboard#toggleDark">◐ <%= t("live.whiteboard.background") %></button>
   </div>
 
-  <div class="speaker-stage projector-preview rounded-box overflow-hidden" data-role="speaker-stage">
-    <%= render "live/projector_frame", session: @session %>
+  <%# The frame is laid out at the projector's own size and scaled down (whiteboard#applyScreen),
+      so the drawing lands on the same words on the projector. %>
+  <div class="speaker-stage live-stage rounded-box overflow-hidden" data-role="speaker-stage" data-whiteboard-target="stage">
+    <div class="live-screen" data-whiteboard-target="screen">
+      <%= render "live/projector_frame", session: @session %>
+    </div>
     <div class="whiteboard-layer" hidden data-whiteboard-target="layer" data-role="whiteboard-layer">
       <div class="whiteboard-surface" data-whiteboard-target="surface"></div>
       <canvas data-whiteboard-target="canvas" data-role="whiteboard-canvas"></canvas>

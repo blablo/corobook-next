@@ -20,6 +20,7 @@ module Corobook
     MAX_LIVE_POINTS = 200      # per in-progress message
     MAX_LAYER_POINTS = 60_000  # per layer (roughly 1 MB of JSON)
     MAX_ID_LENGTH = 64         # client and stroke ids, echoed back to the screens
+    SCREEN_PX = 200..10_000    # a reported projector width or height
 
     attr_reader :session
 
@@ -67,7 +68,26 @@ module Corobook
     # Everything a screen needs to draw the whiteboard; sent on subscribe and after each change.
     def state
       { type: "state", mode: session.whiteboard_mode, dark: session.whiteboard_dark, blanked: session.blanked,
-        stop: stop_key, label: stop_label, board: session.whiteboard_board, slide: slide_strokes }
+        stop: stop_key, label: stop_label, board: session.whiteboard_board, slide: slide_strokes,
+        screen: screen_size }
+    end
+
+    # The projector's screen in CSS px, or nil before a projector has reported it. Points are 0..1
+    # of the screen, so the speaker's stage has to have the same shape and lay the slide out at the
+    # same size, or a circle around a word lands somewhere else on the projector.
+    def screen_size
+      [ session.screen_width, session.screen_height ] if session.screen_width && session.screen_height
+    end
+
+    # The projector page reports its size on connect and when its window changes.
+    def screen!(width, height)
+      w = Integer(width, exception: false)
+      h = Integer(height, exception: false)
+      return unless w && h && SCREEN_PX.cover?(w) && SCREEN_PX.cover?(h)
+      return if screen_size == [ w, h ]
+
+      locked { session.update_columns(screen_width: w, screen_height: h) }
+      broadcast({ type: "screen", w:, h: })
     end
 
     # Put the whiteboard (or slide drawing) on the projector. Bumps position_version and

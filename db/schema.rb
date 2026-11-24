@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_13_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_24_150000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -128,6 +128,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_150000) do
     t.jsonb "whiteboard_board", default: [], null: false
     t.jsonb "whiteboard_slide", default: [], null: false
     t.string "whiteboard_slide_stop"
+    t.integer "screen_width"
+    t.integer "screen_height"
     t.index ["church_id"], name: "index_live_sessions_on_church_id"
     t.index ["church_id"], name: "index_one_active_live_session_per_church", unique: true, where: "((status)::text = 'active'::text)"
     t.index ["current_set_item_id"], name: "index_live_sessions_on_current_set_item_id"

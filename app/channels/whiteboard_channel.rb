@@ -3,7 +3,7 @@
 # Two kinds of subscriber:
 # - the speaker view, with `speaker: <speaker_token>`: may draw, undo, clear, start and stop.
 # - a screen that only shows it (projector, operator), with `viewer: <signed session id>` from
-#   LiveSession#whiteboard_viewer_key.
+#   LiveSession#whiteboard_viewer_key. The projector page also reports its screen size this way.
 # Every action looks the session up by the speaker token again, so the link stops working the
 # moment the service ends.
 class WhiteboardChannel < ActionCable::Channel::Base
@@ -28,6 +28,12 @@ class WhiteboardChannel < ActionCable::Channel::Base
   def undo(_data = nil) = as_speaker(&:undo!)
   def clear(_data = nil) = as_speaker(&:clear!)
   def dark(data) = as_speaker { |board| board.dark!(data["dark"]) }
+
+  # The projector page's screen size (only a viewer sends it; the operator's preview doesn't).
+  def screen(data)
+    session = viewer_session
+    Corobook::Whiteboard.new(session).screen!(data["w"], data["h"]) if session
+  end
 
   private
 
